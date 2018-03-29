@@ -11,7 +11,8 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (CONF_NAME)
 from homeassistant.util import Throttle
 
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 from datetime import timedelta
 import json
 import argparse
@@ -38,12 +39,18 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
-    """Set up date afval sensor."""
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     url = ("http://json.mijnafvalwijzer.nl/?"
        "method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging=&platform=phone&langs=nl&").format(postcode,huisnummer)
-    response = urlopen(url)
+
+    try:
+        response = urlopen(url)
+    except HTTPError as e:
+        print('Error code: ', e.code)
+    except URLError as e:
+        print('Reason: ', e.reason)
+
     string = response.read().decode('utf-8')
     json_obj = json.loads(string)
     json_data = json_obj['data']['ophaaldagen']['data']
@@ -52,7 +59,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     countType = 1
     trashType = {}
     trashTotal = []
-    
+
     # Collect trash items
     for item in json_data or json_data_next:
         name = item["nameType"]
