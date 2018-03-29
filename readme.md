@@ -1,5 +1,8 @@
 Readme.md to use with the Home Assistant custom component (custom_components).
 
+The custom components dynamically creates sensor.trash_* items. For me the items are gft, restafval, papier, pmd and kerstbomen.
+Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
+
 ###### NOTIFY TRASH - SENSOR
 ```yaml
 - platform: mijnafvalwijzer
