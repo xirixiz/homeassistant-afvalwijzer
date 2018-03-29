@@ -1,5 +1,5 @@
 """
-@ Author      : Bram van Dartel
+@ Authors     : Bram van Dartel & Daniel Palstra
 @ Date        : 28/03/2018
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 @ Notes:        Copy this file and place it in your
