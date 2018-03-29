@@ -1,4 +1,5 @@
 Thanks to the input of https://github.com/RolfKoenders/smarthome
+
 Can be used with - mijnafvalwijzer_standalone_json.py
 
 ###### NOTIFY TRASH - SENSOR
