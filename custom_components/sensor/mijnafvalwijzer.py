@@ -22,14 +22,10 @@ import voluptuous as vol
 
 _LOGGER = logging.getLogger(__name__)
 
-ICON = 'mdi:delete-empty'
-
-TRASH_TYPES = [{1: "gft"}, {2: "pmd"}, {3: "papier"}, {4: "restafval"}]
-
 SCAN_INTERVAL = timedelta(seconds=60)
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=28800)
-
 DEFAULT_NAME = 'MijnAfvalwijzer Sensor'
+ICON = 'mdi:delete-empty'
 SENSOR_PREFIX = 'trash_'
 CONST_POSTCODE = "postcode"
 CONST_HUISNUMMER = "huisnummer"
@@ -47,69 +43,78 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     huisnummer = config.get(CONST_HUISNUMMER)
     url = ("http://json.mijnafvalwijzer.nl/?"
        "method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging=&platform=phone&langs=nl&").format(postcode,huisnummer)
-    data = TrashCollectionSchedule(url, TRASH_TYPES)
+    response = urlopen(url)
+    string = response.read().decode('utf-8')
+    json_obj = json.loads(string)
+    json_data = json_obj['data']['ophaaldagen']['data']
+    json_data_next = json_obj['data']['ophaaldagenNext']['data']
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    countType = 1
+    trashType = {}
+    trashTotal = []
+    
+    # Collect trash items
+    for item in json_data or json_data_next:
+        name = item["nameType"]
+        if name not in trashType:
+                trash = {}
+                trashType[name] = item["nameType"]
+                trash[countType] = item["nameType"]
+                countType +=1
+                trashTotal.append(trash)
+
+    data = TrashCollectionSchedule(json_data, json_data_next, today, trashTotal)
 
     devices = []
-    for trash_type in TRASH_TYPES:
-        #print(trash_type.values())
+    for trash_type in trashTotal:
         for t in trash_type.values():
             devices.append(TrashCollectionSensor(t, data))
     add_devices(devices)
 
 class TrashCollectionSensor(Entity):
-    """Representation of a Sensor."""
-
     def __init__(self, name, data):
-        """Initialize the sensor."""
         self._state = None
         self._name = name
         self.data = data
 
     @property
     def name(self):
-        """Return the name of the sensor."""
         return SENSOR_PREFIX + self._name
 
     @property
     def state(self):
-        """Return the state of the sensor."""
         return self._state
 
     @property
     def icon(self):
-        """Return the icon to use in the frontend."""
         return ICON
 
     def update(self):
-        """Fetch new state data for the sensor.
-
-        This is the only method that should fetch new data for Home Assistant.
-        """
         self.data.update()
-        #print(self.data.data)
         for d in self.data.data:
             if d['name_type'] == self._name:
                 self._state = d['pickup_date']
 
-class TrashCollectionSchedule(object):
 
-    def __init__(self, url, trash_types):
-        self._url = url
-        self._trash_types = trash_types
+class TrashCollectionSchedule(object):
+    def __init__(self, json_data, json_data_next, today, trashTotal):
+        self._json_data = json_data
+        self._json_data_next = json_data_next
+        self._today = today
+        self._trashTotal = trashTotal
         self.data = None
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
-        response = urlopen(self._url)
-        string = response.read().decode('utf-8')
-        json_obj = json.loads(string)
-        json_data = json_obj['data']['ophaaldagen']['data']
-        json_data_next = json_obj['data']['ophaaldagenNext']['data']
-        today = datetime.date.today().strftime("%Y-%m-%d")
+        json_data = self._json_data
+        json_data_next = self._json_data_next
+        today = self._today
+        trashTotal = self._trashTotal
         trashType = {}
         tschedule = []
 
-        for name in TRASH_TYPES:
+        # Collect upcoming trash pickup dates
+        for name in trashTotal:
             for item in json_data or json_data_next:
                 name = item["nameType"]
                 d = datetime.datetime.strptime(item['date'], "%Y-%m-%d")
