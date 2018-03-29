@@ -11,9 +11,8 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (CONF_NAME)
 from homeassistant.util import Throttle
 
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
 from datetime import timedelta
+import requests
 import json
 import argparse
 import datetime
@@ -30,29 +29,24 @@ ICON = 'mdi:delete-empty'
 SENSOR_PREFIX = 'trash_'
 CONST_POSTCODE = "postcode"
 CONST_HUISNUMMER = "huisnummer"
+CONST_TOEVOEGING = "toevoeging"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Required(CONST_POSTCODE): cv.string,
     vol.Required(CONST_HUISNUMMER): cv.string,
+    vol.Optional(CONST_TOEVOEGING, default=""): cv.string,
 })
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
+    toevoeging = config.get(CONST_TOEVOEGING)
     url = ("http://json.mijnafvalwijzer.nl/?"
-       "method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging=&platform=phone&langs=nl&").format(postcode,huisnummer)
-
-    try:
-        response = urlopen(url)
-    except HTTPError as e:
-        print('Error code: ', e.code)
-    except URLError as e:
-        print('Reason: ', e.reason)
-
-    string = response.read().decode('utf-8')
-    json_obj = json.loads(string)
+       "method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)
+    response = requests.get(url)
+    json_obj = response.json()
     json_data = json_obj['data']['ophaaldagen']['data']
     json_data_next = json_obj['data']['ophaaldagenNext']['data']
     today = datetime.date.today().strftime("%Y-%m-%d")

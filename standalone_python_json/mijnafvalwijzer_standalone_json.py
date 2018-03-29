@@ -5,7 +5,7 @@
 @ Description : MijnAfvalwijzer to JSON
 """
 
-from urllib.request import urlopen
+import requests
 import json
 import argparse
 import datetime
@@ -29,9 +29,8 @@ postcode, huisnummer, toevoeging = get_args()
 
 url = ("http://json.mijnafvalwijzer.nl/?"
        "method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)
-response = urlopen(url)
-string = response.read().decode('utf-8')
-json_obj = json.loads(string)
+response = requests.get(url)
+json_obj = response.json()
 json_data = json_obj['data']['ophaaldagen']['data']
 json_data_next = json_obj['data']['ophaaldagenNext']['data']
 
