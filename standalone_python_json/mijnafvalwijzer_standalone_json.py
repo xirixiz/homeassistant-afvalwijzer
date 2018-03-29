@@ -27,8 +27,7 @@ def get_args():
 
 postcode, huisnummer, toevoeging = get_args()
 
-url = ("http://json.mijnafvalwijzer.nl/?"
-       "method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)
+url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)
 response = requests.get(url)
 json_obj = response.json()
 json_data = json_obj['data']['ophaaldagen']['data']
