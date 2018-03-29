@@ -71,6 +71,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             devices.append(TrashCollectionSensor(t, data))
     add_devices(devices)
 
+    
 class TrashCollectionSensor(Entity):
     def __init__(self, name, data):
         self._state = None
