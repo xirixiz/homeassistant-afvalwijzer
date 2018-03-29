@@ -35,9 +35,10 @@ json_obj = json.loads(string)
 json_data = json_obj['data']['ophaaldagen']['data']
 json_data_next = json_obj['data']['ophaaldagenNext']['data']
 today = datetime.date.today().strftime("%Y-%m-%d")
+countType = 1
+
 trashType = {}
 trashTotal = []
-countType = 1
 
 # Collect legend
 for item in json_data or json_data_next:
@@ -48,9 +49,9 @@ for item in json_data or json_data_next:
             trash[countType] = item["nameType"]
             countType +=1
             trashTotal.append(trash)
-
 print(trashTotal)
 
+# Reset values
 trashType = {}
 trashTotal = []
 
@@ -66,5 +67,4 @@ for item in json_data or json_data_next:
             trash["name_type"] = item["nameType"]
             trash["pickup_date"] = dateConvert
             trashTotal.append(trash)
-
 print(trashTotal)
