@@ -1,3 +1,5 @@
+Readme.md to use with the Home Assistant custom component (custom_components).
+
 ###### NOTIFY TRASH - GROUP
 ```yaml
 default_view:
