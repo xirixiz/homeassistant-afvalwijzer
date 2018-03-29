@@ -1,4 +1,3 @@
-
 ###### NOTIFY TRASH - GROUP
 default_view:
   icon: mdi:home
