@@ -1,4 +1,5 @@
 ###### NOTIFY TRASH - GROUP
+```yaml
 default_view:
   icon: mdi:home
   view: yes
@@ -13,9 +14,10 @@ trash_pickup:
     - sensor.trash_restafval
     - sensor.trash_papier
     - sensor.trash_pmd
-
+```
 
 ###### NOTIFY TRASH - AUTOMATION
+```yaml
 - alias: 'Trash - One day before'
   trigger:
   - platform: time
@@ -51,5 +53,4 @@ trash_pickup:
         {% if (now().strftime("%Y-%m-%d")) == (as_timestamp(strptime(states.sensor.trash_papier.state, "%Y-%m-%d")) - (1 * 86400 )) | timestamp_custom("%Y-%m-%d") %}
            Het is vandaag - {{ now().strftime("%Y-%m-%d") }}. Papier wordt opgehaald op: {{ states.sensor.trash_papier.state }}!
         {% endif %}
-
-
+```
