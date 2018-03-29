@@ -1,5 +1,12 @@
 Readme.md to use with the Home Assistant custom component (custom_components).
 
+###### NOTIFY TRASH - SENSOR
+```yaml
+- platform: mijnafvalwijzer
+  postcode: !secret afvalwijzer_postcode
+  huisnummer: !secret afvalwijzer_huisnummer
+```
+  
 ###### NOTIFY TRASH - GROUP
 ```yaml
 default_view:
