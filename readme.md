@@ -65,4 +65,7 @@ trash_pickup:
         {% if (now().strftime("%Y-%m-%d")) == (as_timestamp(strptime(states.sensor.trash_papier.state, "%Y-%m-%d")) - (1 * 86400 )) | timestamp_custom("%Y-%m-%d") %}
            Het is vandaag - {{ now().strftime("%Y-%m-%d") }}. Papier wordt opgehaald op: {{ states.sensor.trash_papier.state }}!
         {% endif %}
+        {% if (now().strftime("%Y-%m-%d")) == (as_timestamp(strptime(states.sensor.trash_kerstbomen.state, "%Y-%m-%d")) - (1 * 86400 )) | timestamp_custom("%Y-%m-%d") %}
+           Het is vandaag - {{ now().strftime("%Y-%m-%d") }}. Kerstbomen worden opgehaald op: {{ states.sensor.trash_kerstbomen.state }}!
+        {% endif %}
 ```
