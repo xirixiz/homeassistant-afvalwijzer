@@ -52,6 +52,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     countType = 1
     trashType = {}
     trashTotal = []
+    devices = []
 
     # Collect trash items
     for item in json_data or json_data_next:
@@ -64,8 +65,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                 trashTotal.append(trash)
 
     data = TrashCollectionSchedule(json_data, json_data_next, today, trashTotal)
-
-    devices = []
+    
     for trash_type in trashTotal:
         for t in trash_type.values():
             devices.append(TrashCollectionSensor(t, data))
