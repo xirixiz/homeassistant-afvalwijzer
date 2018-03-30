@@ -13,6 +13,7 @@ from homeassistant.util import Throttle
 
 from datetime import timedelta
 import requests
+import asyncio
 import json
 import argparse
 import datetime
@@ -22,8 +23,6 @@ import voluptuous as vol
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(seconds=60)
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=28800)
 DEFAULT_NAME = 'MijnAfvalwijzer Sensor'
 ICON = 'mdi:delete-empty'
 SENSOR_PREFIX = 'trash_'
@@ -39,11 +38,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+@asyncio.coroutine
+def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
-    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)    
+    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)
     response = requests.get(url)
     json_obj = response.json()
     json_data = json_obj['data']['ophaaldagen']['data']
@@ -65,13 +65,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                 trashTotal.append(trash)
 
     data = TrashCollectionSchedule(json_data, json_data_next, today, trashTotal)
-    
+
     for trash_type in trashTotal:
         for t in trash_type.values():
             devices.append(TrashCollectionSensor(t, data))
-    add_devices(devices)
+    async_add_devices(devices, True)
 
-    
+
 class TrashCollectionSensor(Entity):
     def __init__(self, name, data):
         self._state = None
@@ -105,7 +105,6 @@ class TrashCollectionSchedule(object):
         self._trashTotal = trashTotal
         self.data = None
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         json_data = self._json_data
         json_data_next = self._json_data_next
@@ -119,7 +118,7 @@ class TrashCollectionSchedule(object):
             for item in json_data or json_data_next:
                 name = item["nameType"]
                 d = datetime.datetime.strptime(item['date'], "%Y-%m-%d")
-                dateConvert = d.strftime("%Y-%m-%d")                
+                dateConvert = d.strftime("%Y-%m-%d")
                 if name not in trashType:
                     if item['date'] > today:
                         trash = {}
