@@ -62,23 +62,20 @@ Can be used with - mijnafvalwijzer_standalone_json.py
   initial_state: true
   hide_entity: false
   trigger:
-    platform: time
+  - platform: time
     at: '20:00:00'
   condition:
-    - condition: state
-      entity_id: input_boolean.notify_trash
-      state: 'on'
-    - condition: template
-      value_template: "{{ states('sensor.trash_tomorrow') != 'Geen' }}"
-    - condition: template
-      value_template: "{{ states.sensor.trash_tomorrow.state | trim != '' }}"
+  - condition: state
+    entity_id: input_boolean.notify_trash
+    state: 'on'
+  - condition: template
+    value_template: "{{ states('sensor.trash_tomorrow') != 'Geen' }}"
+  - condition: template
+    value_template: "{{ states.sensor.trash_tomorrow.state | trim != '' }}"
   action:
-    - service: telegram_bot.send_message
-      data_template:
-        title: 'Afvalinzameling'
-        target: !secret telegram_rolf_id
-        message: 'Morgen kan de {{ states.sensor.trash_tomorrow.state }} container aan de straat.'
-        disable_notification: false
+  - service: notify.family
+    data_template:
+      message: 'Morgen kan de {{ states.sensor.trash_tomorrow.state }} container aan de straat.'
 ```          
 
 ###### NOTIFY TRASH - CUSTOMIZATION
