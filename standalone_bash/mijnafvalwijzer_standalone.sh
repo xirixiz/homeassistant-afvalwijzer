@@ -48,9 +48,18 @@ commands_check curl jq
 curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc ".data.ophaaldagen.data" > ${OUTPUT}
 [ -s ${OUTPUT} ] || curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc ".data.ophaaldagenNext.data" > ${OUTPUT}
 
+
 ALL_TRASH_TYPES=$(cat ${OUTPUT} | jq -rc ". | unique_by(.type)[].type")
 FUTURE_TRASH_TYPES=$(cat ${OUTPUT} | jq -rc "[.[] | select(.date >= \"$(date +%Y-%m-%d)\")] | unique_by(.type)[].type")
 
 for TRASH_TYPE in ${FUTURE_TRASH_TYPES}; do
   cat ${OUTPUT} | jq -rc "[.[] | select(.date >= \"$(date +%Y-%m-%d)\" and .type == \"${TRASH_TYPE}\")][0]"
 done
+
+ 
+#ALL_TRASH_TYPES=$(curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc ".data.ophaaldagen.data | unique_by(.type)[].type")
+#FUTURE_TRASH_TYPES=$(curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc "[.data.ophaaldagen.data[] | select(.date >= \"$(date +%Y-%m-%d)\")] | unique_by(.type)[].type")
+
+#for TRASH_TYPE in ${FUTURE_TRASH_TYPES}; do
+#  curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc "[.data.ophaaldagen.data[] | select(.date >= \"$(date +%Y-%m-%d)\" and .type == \"${TRASH_TYPE}\")][0]"
+#done  
