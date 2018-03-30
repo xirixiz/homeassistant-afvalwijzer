@@ -8,6 +8,7 @@ Look in the states overview in the developer tools in Home Assistant what the se
 - platform: mijnafvalwijzer
   postcode: !secret afvalwijzer_postcode
   huisnummer: !secret afvalwijzer_huisnummer
+  toevoeging: !secret afvalwijzer_toevoeging
 ```
   
 ###### NOTIFY TRASH - GROUP
