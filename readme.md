@@ -27,6 +27,7 @@ trash_pickup:
     - sensor.trash_restafval
     - sensor.trash_papier
     - sensor.trash_pmd
+    - sensor.trash_kerstbomen
 ```
 
 ###### NOTIFY TRASH - AUTOMATION
