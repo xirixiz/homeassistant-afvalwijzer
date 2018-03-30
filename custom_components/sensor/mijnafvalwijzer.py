@@ -6,6 +6,7 @@
                 "Home Assistant Config folder\custom_components\sensor\" folder.
 """
 
+
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
