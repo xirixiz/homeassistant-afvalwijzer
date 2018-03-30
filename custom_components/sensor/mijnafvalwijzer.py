@@ -5,21 +5,22 @@
 @ Notes:        Copy this file and place it in your
                 "Home Assistant Config folder\custom_components\sensor\" folder.
 """
+
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (CONF_NAME)
 from homeassistant.util import Throttle
 
+import voluptuous as vol
 from datetime import timedelta
+
 import requests
 import asyncio
 import json
 import argparse
 import datetime
 import logging
-
-import voluptuous as vol
 
 _LOGGER = logging.getLogger(__name__)
 
