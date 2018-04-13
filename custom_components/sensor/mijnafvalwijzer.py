@@ -1,9 +1,9 @@
 """
-@ Authors     : Bram van Dartel & Daniel Palstra
-@ Date        : 28/03/2018
+@ Authors     : Bram van Dartel
+@ Date        : 11/04/2018
+@ Version     : 1.0.0
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
-@ Notes:        Copy this file and place it in your
-                "Home Assistant Config folder\custom_components\sensor\" folder.
+@ Notes:        Copy this file and place it in your 'Home Assistant Config folder\custom_components\sensor\' folder.
 """
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
