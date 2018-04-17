@@ -1,7 +1,7 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 17/04/2018
-@ Version     : 1.0.3
+@ Date        : 18/04/2018
+@ Version     : 1.0.4
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 @ Notes       : Copy this file and place it in your 'Home Assistant Config folder\custom_components\sensor\' folder.
 """
