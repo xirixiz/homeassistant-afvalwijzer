@@ -3,7 +3,6 @@
 @ Date        : 18/04/2018
 @ Version     : 1.0.4
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
-@ Notes       : Copy this file and place it in your 'Home Assistant Config folder\custom_components\sensor\' folder.
 """
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
@@ -36,10 +35,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+    """Setup the sensor platform."""
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
-    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode, huisnummer, toevoeging)
+    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck& \
+            postcode={0}&street=&huisnummer={1}&toevoeging={2}& \
+            platform=phone&langs=nl&").format(postcode, huisnummer, toevoeging)
     response = requests.get(url)
     json_obj = response.json()
     json_data = json_obj['data']['ophaaldagen']['data']
@@ -59,10 +61,11 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
                 trash = {}
                 trashType[name] = item["nameType"]
                 trash[countType] = item["nameType"]
-                countType +=1
+                countType += 1
                 trashTotal.append(trash)
 
-    data = TrashCollectionSchedule(json_data, json_data_next, today, tomorrow, trashTotal)
+    data = (TrashCollectionSchedule(json_data, json_data_next,
+            today, tomorrow, trashTotal))
 
     for trash_type in trashTotal:
         for t in trash_type.values():
@@ -71,24 +74,31 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
 
 
 class TrashCollectionSensor(Entity):
+    """Representation of a Sensor."""
+
     def __init__(self, name, data):
+        """Initialize the sensor."""
         self._state = None
         self._name = name
         self.data = data
 
     @property
     def name(self):
+        """Return the name of the sensor."""
         return SENSOR_PREFIX + self._name
 
     @property
     def state(self):
+        """Return the state of the sensor."""
         return self._state
 
     @property
     def icon(self):
+        """Set the default sensor icon."""
         return ICON
 
     def update(self):
+        """Fetch new state data for the sensor."""
         self.data.update()
         for d in self.data.data:
             if d['name_type'] == self._name:
@@ -96,7 +106,10 @@ class TrashCollectionSensor(Entity):
 
 
 class TrashCollectionSchedule(object):
+    """Fetch new state data for the sensor."""
+
     def __init__(self, json_data, json_data_next, today, tomorrow, trashTotal):
+        """Fetch vars."""
         self._json_data = json_data
         self._json_data_next = json_data_next
         self._today = today
@@ -105,6 +118,7 @@ class TrashCollectionSchedule(object):
         self.data = None
 
     def update(self):
+        """Fetch new state data for the sensor."""
         json_data = self._json_data
         json_data_next = self._json_data_next
         today = self._today
