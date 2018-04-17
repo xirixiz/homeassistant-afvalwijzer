@@ -1,20 +1,20 @@
 """
 @ Authors     : Bram van Dartel
 @ Date        : 18/04/2018
-@ Version     : 1.0.4
+@ Version     : 1.0.5
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity import Entity
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (CONF_NAME)
 
-import voluptuous as vol
 from datetime import datetime, timedelta
-
+import voluptuous as vol
 import requests
 import asyncio
 import logging
+
+from homeassistant.helpers.entity import Entity
+from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.const import (CONF_NAME)
+import homeassistant.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
