@@ -1,7 +1,7 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 11/04/2018
-@ Version     : 1.0.0
+@ Date        : 25/05/2018
+@ Version     : 1.0.2
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 @ Notes       : Copy this file and place it in your 'Home Assistant Config folder\custom_components\sensor\' folder.
 """
@@ -9,15 +9,12 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (CONF_NAME)
-from homeassistant.util import Throttle
 
 import voluptuous as vol
 from datetime import timedelta
 
 import requests
 import asyncio
-import json
-import argparse
 import datetime
 import logging
 
@@ -43,7 +40,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
-    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode,huisnummer,toevoeging)
+    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&platform=phone&langs=nl&").format(postcode, huisnummer, toevoeging)
     response = requests.get(url)
     json_obj = response.json()
     json_data = json_obj['data']['ophaaldagen']['data']
@@ -61,7 +58,7 @@ def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
                 trash = {}
                 trashType[name] = item["nameType"]
                 trash[countType] = item["nameType"]
-                countType +=1
+                countType += 1
                 trashTotal.append(trash)
 
     data = TrashCollectionSchedule(json_data, json_data_next, today, trashTotal)
@@ -86,11 +83,14 @@ class TrashCollectionSensor(Entity):
     def state(self):
         return self._state
 
+    def should_poll(self):
+        return False
+
     @property
     def icon(self):
         return ICON
 
-    def update(self):
+    async def async_update(self):
         self.data.update()
         for d in self.data.data:
             if d['name_type'] == self._name:
