@@ -1,7 +1,7 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 11/07/2018
-@ Version     : 1.1.1
+@ Date        : 14/07/2018
+@ Version     : 1.1.2
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
 
@@ -177,4 +177,13 @@ class TrashCollectionSchedule(object):
             trashTomorrow['pickup_date'] = "None"
             tschedule.append(trashTomorrow)
 
-self.data = tschedule
+        for item in json_data or json_data_next:
+            name = item["nameType"]
+            if name not in trashType:
+                trash = {}
+                trashType[name] = item["nameType"]
+                trash['name_type'] = item['nameType']
+                trash['pickup_date'] = "None"
+                tschedule.append(trash)
+
+        self.data = tschedule
