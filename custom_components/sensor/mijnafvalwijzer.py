@@ -1,7 +1,7 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 14/07/2018
-@ Version     : 1.1.2
+@ Date        : 06/09/2018
+@ Version     : 1.1.3
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
 
@@ -26,6 +26,10 @@ SENSOR_PREFIX = 'trash_'
 CONST_POSTCODE = "postcode"
 CONST_HUISNUMMER = "huisnummer"
 CONST_TOEVOEGING = "toevoeging"
+CONST_DATEFORMAT = "datumformaat"
+CONST_LABEL_TODAY = "label_vandaag"
+CONST_LABEL_TOMORROW = "label_morgen"
+CONST_LABEL_NONE = "label_geen"
 
 # Test values
 # SCAN_INTERVAL = timedelta(seconds=60)
@@ -39,6 +43,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONST_POSTCODE): cv.string,
     vol.Required(CONST_HUISNUMMER): cv.string,
     vol.Optional(CONST_TOEVOEGING, default=""): cv.string,
+    vol.Optional(CONST_DATEFORMAT, default="%Y-%m-%d"): cv.string,
+    vol.Optional(CONST_LABEL_TODAY, default="Vandaag"): cv.string,
+    vol.Optional(CONST_LABEL_TOMORROW, default="Morgen"): cv.string,
+    vol.Optional(CONST_LABEL_NONE, default="Geen"): cv.string,
 })
 
 
@@ -69,7 +77,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             countType += 1
             trashTotal.append(trash)
 
-    data = (TrashCollectionSchedule(url, trashTotal))
+    data = (TrashCollectionSchedule(url, trashTotal, config))
 
     for trash_type in trashTotal:
         for t in trash_type.values():
@@ -112,11 +120,12 @@ class TrashCollectionSensor(Entity):
 class TrashCollectionSchedule(object):
     """Fetch new state data for the sensor."""
 
-    def __init__(self, url, trashTotal):
+    def __init__(self, url, trashTotal, config):
         """Fetch vars."""
         self._url = url
         self._trashTotal = trashTotal
         self.data = None
+        self._config = config
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
@@ -134,25 +143,29 @@ class TrashCollectionSchedule(object):
         trashTomorrow = {}
         tschedule = []
 
+        labelToday = self._config.get(CONST_LABEL_TODAY)
+        labelTomorrow = self._config.get(CONST_LABEL_TOMORROW)
+        labelNone = self._config.get(CONST_LABEL_NONE)
+
         # Collect upcoming trash pickup dates
         for name in self._trashTotal:
             for item in json_data or json_data_next:
                 name = item["nameType"]
                 dateFormat = datetime.strptime(item['date'], "%Y-%m-%d")
-                dateConvert = dateFormat.strftime("%Y-%m-%d")
+                dateConvert = dateFormat.strftime(self._config.get(CONST_DATEFORMAT))
 
                 if name not in trashType:
                     if item['date'] == today:
                         trashToday = {}
-                        trashType[name] = "today"
-                        trashToday['name_type'] = "today"
+                        trashType[name] = labelToday
+                        trashToday['name_type'] = 'today'
                         trashToday['pickup_date'] = item['nameType']
                         tschedule.append(trashToday)
 
                     if item['date'] == tomorrow:
                         trashTomorrow = {}
-                        trashType[name] = "tomorrow"
-                        trashTomorrow['name_type'] = "tomorrow"
+                        trashType[name] = labelTomorrow
+                        trashTomorrow['name_type'] = 'tomorrow'
                         trashTomorrow['pickup_date'] = item['nameType']
                         tschedule.append(trashTomorrow)
 
@@ -165,16 +178,16 @@ class TrashCollectionSchedule(object):
 
         if len(trashToday) == 0:
             trashToday = {}
-            trashType[name] = "today"
-            trashToday['name_type'] = "today"
-            trashToday['pickup_date'] = "None"
+            trashType[name] = labelToday
+            trashToday['name_type'] = 'today'
+            trashToday['pickup_date'] = labelNone
             tschedule.append(trashToday)
 
         if len(trashTomorrow) == 0:
             trashTomorrow = {}
-            trashType[name] = "tomorrow"
-            trashTomorrow['name_type'] = "tomorrow"
-            trashTomorrow['pickup_date'] = "None"
+            trashType[name] = labelTomorrow
+            trashTomorrow['name_type'] = 'tomorrow'
+            trashTomorrow['pickup_date'] = labelNone
             tschedule.append(trashTomorrow)
 
         for item in json_data or json_data_next:
@@ -183,7 +196,7 @@ class TrashCollectionSchedule(object):
                 trash = {}
                 trashType[name] = item["nameType"]
                 trash['name_type'] = item['nameType']
-                trash['pickup_date'] = "None"
+                trash['pickup_date'] = labelNone
                 tschedule.append(trash)
 
         self.data = tschedule
