@@ -1,7 +1,7 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 06/09/2018
-@ Version     : 1.1.3
+@ Date        : 19/11/2018
+@ Version     : 1.1.4
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
 
@@ -55,7 +55,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
-    url = ("http://json.mijnafvalwijzer.nl/?method=postcodecheck& \
+    url = ("https://json.mijnafvalwijzer.nl/?method=postcodecheck& \
             postcode={0}&street=&huisnummer={1}&toevoeging={2}& \
             platform=phone&langs=nl&").format(postcode, huisnummer, toevoeging)
     response = requests.get(url)
