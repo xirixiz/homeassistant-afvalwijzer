@@ -4,6 +4,7 @@
 @ Version     : 1.1.4
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
+version = '1.1.4'
 
 from datetime import datetime, timedelta
 import voluptuous as vol
