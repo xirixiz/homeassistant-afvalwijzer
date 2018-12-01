@@ -45,7 +45,7 @@ if [[ -z $OUTPUT ]]; then export OUTPUT="mijnafvalwijzer.json"; fi
 
 commands_check curl jq
 
-curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc ".data.ophaaldagen.data" > ${OUTPUT}
+curl -Ssl "https://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc ".data.ophaaldagen.data" > ${OUTPUT}
 [ -s ${OUTPUT} ] || curl -Ssl "http://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode=${POSTCODE}&street=&huisnummer=${HUISNUMMER}" | jq -rc ".data.ophaaldagenNext.data" > ${OUTPUT}
 
 
