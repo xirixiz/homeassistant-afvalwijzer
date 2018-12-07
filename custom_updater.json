@@ -1,7 +1,7 @@
 {
     "sensor.mijnafvalwijzer": {
-      "updated_at": "2018-11-19",
-      "version": "1.1.4",
+      "updated_at": "2018-11-30",
+      "version": "1.1.5",
       "local_location": "/custom_components/sensor/mijnafvalwijzer.py",
       "remote_location": "https://raw.githubusercontent.com/xirixiz/home-assistant-config/master/custom_components/sensor/mijnafvalwijzer.py",
       "visit_repo": "https://github.com/xirixiz/home-assistant-config/",
