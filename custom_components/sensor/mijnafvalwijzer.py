@@ -1,9 +1,9 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 30/11/2018
+@ Date        : 15/12/2018
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
-VERSION = '1.1.5'
+VERSION = '1.1.6'
 
 from datetime import datetime, timedelta
 import voluptuous as vol
@@ -68,7 +68,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     devices = []
 
     # Collect trash items
-    for item in json_data or json_data_next:
+    for item in json_data and json_data_next:
         name = item["nameType"]
         if name not in trashType:
             trash = {}
@@ -151,7 +151,7 @@ class TrashCollectionSchedule(object):
 
         # Collect upcoming trash pickup dates
         for name in self._trashTotal:
-            for item in json_data or json_data_next:
+            for item in json_data and json_data_next:
                 name = item["nameType"]
                 dateFormat = datetime.strptime(item['date'], "%Y-%m-%d")
                 dateConvert = dateFormat.strftime(self._config.get(CONST_DATEFORMAT))
@@ -194,7 +194,7 @@ class TrashCollectionSchedule(object):
         else:
             trashTomorrow['pickup_date'] = ', '.join(multiTrashTomorrow)
 
-        for item in json_data or json_data_next:
+        for item in json_data and json_data_next:
             name = item["nameType"]
             if name not in trashType:
                 trash = {}
