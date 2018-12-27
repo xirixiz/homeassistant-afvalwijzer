@@ -1,11 +1,11 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 15/12/2018
+@ Date        : 27/12/2018
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
-VERSION = '1.1.6'
+VERSION = '1.1.7'
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import voluptuous as vol
 import requests
 import logging
@@ -27,8 +27,6 @@ CONST_POSTCODE = "postcode"
 CONST_HUISNUMMER = "huisnummer"
 CONST_TOEVOEGING = "toevoeging"
 CONST_DATEFORMAT = "datumformaat"
-CONST_LABEL_TODAY = "label_vandaag"
-CONST_LABEL_TOMORROW = "label_morgen"
 CONST_LABEL_NONE = "label_geen"
 
 # Test values
@@ -43,9 +41,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONST_POSTCODE): cv.string,
     vol.Required(CONST_HUISNUMMER): cv.string,
     vol.Optional(CONST_TOEVOEGING, default=""): cv.string,
-    vol.Optional(CONST_DATEFORMAT, default="%Y-%m-%d"): cv.string,
-    vol.Optional(CONST_LABEL_TODAY, default="Vandaag"): cv.string,
-    vol.Optional(CONST_LABEL_TOMORROW, default="Morgen"): cv.string,
     vol.Optional(CONST_LABEL_NONE, default="Geen"): cv.string,
 })
 
@@ -60,21 +55,20 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             platform=phone&langs=nl&").format(postcode, huisnummer, toevoeging)
     response = requests.get(url)
     json_obj = response.json()
-    json_data = json_obj['data']['ophaaldagen']['data']
-    json_data_next = json_obj['data']['ophaaldagenNext']['data']
-    trashTotal = [{1: 'today'}, {2: 'tomorrow'}]
-    countType = len(trashTotal) + 1
+    json_data = (json_obj['data']['ophaaldagen']['data'] + json_obj['data']['ophaaldagenNext']['data'])
+    trashTotal = [{1: 'today'}, {2: 'tomorrow'}, {2: 'days_to_next_pickup'}]
+    countIndex = len(trashTotal) + 1
     trashType = {}
     devices = []
 
     # Collect trash items
-    for item in json_data and json_data_next:
+    for item in json_data:
         name = item["nameType"]
         if name not in trashType:
             trash = {}
             trashType[name] = item["nameType"]
-            trash[countType] = item["nameType"]
-            countType += 1
+            trash[countIndex] = item["nameType"]
+            countIndex += 1
             trashTotal.append(trash)
 
     data = (TrashCollectionSchedule(url, trashTotal, config))
@@ -113,8 +107,8 @@ class TrashCollectionSensor(Entity):
         """Fetch new state data for the sensor."""
         self.data.update()
         for d in self.data.data:
-            if d['name_type'] == self._name:
-                self._state = d['pickup_date']
+            if d['key'] == self._name:
+                self._state = d['value']
 
 
 class TrashCollectionSchedule(object):
@@ -132,75 +126,86 @@ class TrashCollectionSchedule(object):
         """Fetch new state data for the sensor."""
         response = requests.get(self._url)
         json_obj = response.json()
-        json_data = json_obj['data']['ophaaldagen']['data']
-        json_data_next = json_obj['data']['ophaaldagenNext']['data']
+        json_data = (json_obj['data']['ophaaldagen']['data'] + json_obj['data']['ophaaldagenNext']['data'])
         today = datetime.today().strftime("%Y-%m-%d")
         dateConvert = datetime.strptime(today, "%Y-%m-%d") + timedelta(days=1)
         tomorrow = datetime.strftime(dateConvert, "%Y-%m-%d")
         trash = {}
         trashType = {}
+        trashInDays = {}
         trashToday = {}
         trashTomorrow = {}
         multiTrashToday = []
         multiTrashTomorrow = []
         tschedule = []
 
-        labelToday = self._config.get(CONST_LABEL_TODAY)
-        labelTomorrow = self._config.get(CONST_LABEL_TOMORROW)
         labelNone = self._config.get(CONST_LABEL_NONE)
+
+        def d(s):
+            [year, month, day] = map(int, s.split('-'))
+            return date(year, month, day)
+        def days(start, end):
+                return (d(end) - d(start)).days
 
         # Collect upcoming trash pickup dates
         for name in self._trashTotal:
-            for item in json_data and json_data_next:
+            for item in json_data:
                 name = item["nameType"]
                 dateFormat = datetime.strptime(item['date'], "%Y-%m-%d")
-                dateConvert = dateFormat.strftime(self._config.get(CONST_DATEFORMAT))
+                dateConvert = dateFormat.strftime("%Y-%m-%d")
 
                 if name not in trashType:
                     if item['date'] >= today:
                         trash = {}
                         trashType[name] = item["nameType"]
-                        trash['name_type'] = item['nameType']
-                        trash['pickup_date'] = dateConvert
+                        trash['key'] = item['nameType']
+                        trash['value'] = dateConvert
                         tschedule.append(trash)
 
+                    if item['date'] > today:
+                        if len(trashInDays) == 0:
+                            trashType[name] = "days_to_next_pickup"
+                            trashInDays['key'] = "days_to_next_pickup"
+                            trashInDays['value'] = (days(today, dateConvert))
+                            tschedule.append(trashInDays)
+
                     if item['date'] == today:
-                        trashType[name] = labelToday
-                        trashToday['name_type'] = "today"
+                        trashType[name] = "today"
+                        trashToday['key'] = "today"
                         multiTrashToday.append(item['nameType'])
                         tschedule.append(trashToday)
 
                     if item['date'] == tomorrow:
-                        trashType[name] = labelTomorrow
-                        trashTomorrow['name_type'] = "tomorrow"
+                        trashType[name] = "tomorrow"
+                        trashTomorrow['key'] = "tomorrow"
                         multiTrashTomorrow.append(item['nameType'])
                         tschedule.append(trashTomorrow)
 
         if len(multiTrashToday) == 0:
             trashToday = {}
-            trashType[name] = labelToday
-            trashToday['name_type'] = "today"
-            trashToday['pickup_date'] = labelNone
+            trashType[name] = "today"
+            trashToday['key'] = "today"
+            trashToday['value'] = labelNone
             tschedule.append(trashToday)
         else:
-            trashToday['pickup_date'] = ', '.join(multiTrashToday)
+            trashToday['value'] = ', '.join(multiTrashToday)
 
         if len(multiTrashTomorrow) == 0:
             trashTomorrow = {}
-            trashType[name] = labelTomorrow
-            trashTomorrow['name_type'] = "tomorrow"
-            trashTomorrow['pickup_date'] = labelNone
+            trashType[name] = "tomorrow"
+            trashTomorrow['key'] = "tomorrow"
+            trashTomorrow['value'] = labelNone
             tschedule.append(trashTomorrow)
         else:
-            trashTomorrow['pickup_date'] = ', '.join(multiTrashTomorrow)
+            trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
 
-        for item in json_data and json_data_next:
+        for item in json_data:
             name = item["nameType"]
             if name not in trashType:
                 trash = {}
                 trashType[name] = item["nameType"]
-                trash['name_type'] = item['nameType']
-                trash['pickup_date'] = labelNone
+                trash['key'] = item['nameType']
+                trash['value'] = labelNone
                 tschedule.append(trash)
 
         self.data = tschedule
