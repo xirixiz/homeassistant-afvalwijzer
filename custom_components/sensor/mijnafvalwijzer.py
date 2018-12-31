@@ -1,9 +1,9 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 28/12/2018
+@ Date        : 31/12/2018
 @ Description : MijnAfvalwijzer Sensor - It queries mijnafvalwijzer.nl.
 """
-VERSION = '1.1.8'
+VERSION = '1.1.9'
 
 from datetime import datetime, timedelta, date
 import voluptuous as vol
@@ -56,7 +56,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     response = requests.get(url)
     json_obj = response.json()
     json_data = (json_obj['data']['ophaaldagen']['data'] + json_obj['data']['ophaaldagenNext']['data'])
-    trashTotal = [{1: 'today'}, {2: 'tomorrow'}, {2: 'days_to_next_pickup'}]
+    trashTotal = [{1: 'today'}, {2: 'tomorrow'}, {2: 'next_in_days'}]
     countIndex = len(trashTotal) + 1
     trashType = {}
     devices = []
