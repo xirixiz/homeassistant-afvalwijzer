@@ -13,7 +13,6 @@
 VERSION = '2.0.0'
 
 from datetime import datetime, timedelta, date
-from requests.exceptions import ConnectionError
 import voluptuous as vol
 import requests
 import sys
