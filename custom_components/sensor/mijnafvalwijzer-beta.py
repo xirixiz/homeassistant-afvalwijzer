@@ -51,9 +51,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 SCAN_INTERVAL = timedelta(seconds=30)
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
 
+
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the mijnafvalwijzer sensor platform."""
-    print(__name__)
+
     # Request JSON
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
@@ -115,6 +116,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
 class TrashCollectionSensor(Entity):
     """Representation of a Sensor."""
+
     def __init__(self, name, data):
         """Initialize the sensor."""
         self._state = None
