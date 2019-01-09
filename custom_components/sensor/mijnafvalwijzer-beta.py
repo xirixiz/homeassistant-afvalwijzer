@@ -48,8 +48,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONST_LABEL_NONE, default=DEFAULT_LABEL): cv.string,
 })
 
-SCAN_INTERVAL = timedelta(seconds=30)
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
+SCAN_INTERVAL = timedelta(seconds=10)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
@@ -102,17 +102,18 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         if(json_data[i]['nameType'] not in uniqueTrashNames):
              if json_data[i]['date'] >= today:
                uniqueTrashNames.append(json_data[i]['nameType'])
-               _LOGGER.debug("uniqueTrashName succesfully added: %s", json_data[i]['nameType'])
                trashSchedule.append(json_data[i])
-               _LOGGER.debug("JSON object succesfully added: %s", json_data[i])
+
+    _LOGGER.debug("uniqueTrashNames succesfully added: %s", uniqueTrashNames)
+    _LOGGER.debug("trashSchedule succesfully added: %s", trashSchedule)
 
     data = (TrashCollectionSchedule(config, json_data, trashSchedule, today, tomorrow))
 
     for item in uniqueTrashNames:
         devices.append(TrashCollectionSensor(item, data))
-        _LOGGER.debug("JSON object succesfully added: %s", devices)
     add_devices(devices)
 
+    _LOGGER.debug("JSON object succesfully added: %s", devices)
 
 class TrashCollectionSensor(Entity):
     """Representation of a Sensor."""
@@ -167,7 +168,7 @@ class TrashCollectionSchedule(object):
         trashToday = {}
         multiTrashToday = []
         today_out = [x for x in self._trashSchedule if x['date'] == self._today]
-
+        _LOGGER.debug("Trash Today: %s", today_out)
         if len(today_out) == 0:
             trashToday['nameType'] = 'today'
             trashToday['date'] = 'None'
@@ -179,14 +180,13 @@ class TrashCollectionSchedule(object):
                 multiTrashToday.append(x['nameType'])
             self._trashSchedule.append(trashToday)
             trashToday['date'] = ', '.join(multiTrashToday)
-            _LOGGER.debug("Today data succesfully added")
-
+            _LOGGER.debug("Today data succesfully added %s", trashToday)
 
         # Append Tomorrow data
         trashTomorrow = {}
         multiTrashTomorrow = []
         tomorrow_out = [x for x in self._trashSchedule if x['date'] == self._tomorrow]
-
+        _LOGGER.debug("Trash Tomorrow: %s", tomorrow_out)
         if len(tomorrow_out) == 0:
             trashTomorrow['nameType'] = 'tomorrow'
             trashTomorrow['date'] = 'None'
@@ -198,13 +198,12 @@ class TrashCollectionSchedule(object):
                 multiTrashTomorrow.append(x['nameType'])
             self._trashSchedule.append(trashTomorrow)
             trashTomorrow['date'] = ', '.join(multiTrashTomorrow)
-            _LOGGER.debug("Tomorrow data succesfully added")
-
+            _LOGGER.debug("Tomorrow data succesfully added %s", trashTomorrow)
 
         # Append next pickup in days
         trashNext = {}
         next_out = [x for x in self._trashSchedule if x['date'] > self._today]
-
+        _LOGGER.debug("Trash Next: %s", next_out)
         def d(s):
             [year, month, day] = map(int, s.split('-'))
             return date(year, month, day)
@@ -223,6 +222,7 @@ class TrashCollectionSchedule(object):
                 trashNext['nameType'] = 'next'
                 trashNext['date'] = (days(self._today, dateConvert))
                 self._trashSchedule.append(trashNext)
-                _LOGGER.debug("Next data succesfully added")
+                _LOGGER.debug("Next data succesfully added %s", trashNext)
 
+        _LOGGER.debug("trashSchedule content %s", self._trashSchedule)
         self._data = self._trashSchedule
