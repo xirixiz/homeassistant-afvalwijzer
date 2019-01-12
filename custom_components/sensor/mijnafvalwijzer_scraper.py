@@ -3,7 +3,7 @@
 @ Date        : 12/01/2019
 @ Description : MijnAfvalwijzer Scrape Sensor - It queries mijnafvalwijzer.nl.
 """
-VERSION = '2.0.2'
+VERSION = '2.0.3'
 
 import itertools
 import logging
@@ -123,8 +123,10 @@ class TrashCollectionSchedule(object):
         response = requests.get(self.url)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         today = datetime.today().strftime("%d-%m-%Y")
+        today_date = datetime.strptime(today, "%d-%m-%Y")
         dateConvert = datetime.strptime(today, "%d-%m-%Y") + timedelta(days=1)
         tomorrow = datetime.strftime(dateConvert, "%d-%m-%Y")
+        tomorrow_date = datetime.strptime(tomorrow, "%d-%m-%Y")
         labelNone = self.config.get(CONST_LABEL_NONE)
 
         # Convert month to month number function
@@ -196,21 +198,31 @@ class TrashCollectionSchedule(object):
 
 
         # Append first upcoming unique trash item with pickup date
-        size=len(json_data)
         uniqueTrashNames = []
         uniqueTrashNames.extend(self.defaultTrashNames)
+        for item in json_data:
+            key = item['key']
+            description = item['description']
+            value = item['value']
+            value_date = datetime.strptime(item['value'], "%d-%m-%Y")
+            if value_date >= today_date:
+                if key not in uniqueTrashNames:
+                    trash = {}
+                    trash['key'] = key
+                    trash['description'] = description
+                    trash['value'] = value
+                    uniqueTrashNames.append(key)
+                    trashSchedule.append(trash)
 
-        for i in range(0,size,1):
-            if(json_data[i]['key'] not in uniqueTrashNames):
-                if json_data[i]['value'] >= today:
-                    uniqueTrashNames.append(json_data[i]['key'])
-                    trashSchedule.append(json_data[i])
 
+        # Collect data
+        today_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == today_date and x['key']]
+        tomorrow_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == tomorrow_date]
+        next_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") > today_date and x['key']]
 
         # Append Today data
         trashToday = {}
         multiTrashToday = []
-        today_out = [x for x in trashSchedule if x['value'] == today and x['key'] not in self.defaultTrashNames]
         if len(today_out) == 0:
             trashToday['key'] = 'today'
             trashToday['description'] = 'Trash Today'
@@ -228,7 +240,6 @@ class TrashCollectionSchedule(object):
         # Append Tomorrow data
         trashTomorrow = {}
         multiTrashTomorrow = []
-        tomorrow_out = [x for x in trashSchedule if x['value'] == tomorrow and x['key'] not in self.defaultTrashNames]
         if len(tomorrow_out) == 0:
             trashTomorrow['key'] = 'tomorrow'
             trashTomorrow['description'] = 'Trash Tomorrow'
@@ -245,7 +256,6 @@ class TrashCollectionSchedule(object):
 
         # Append next pickup in days
         trashNext = {}
-        next_out = [x for x in trashSchedule if x['value'] > today and x['key'] not in self.defaultTrashNames]
         ## Amount of days between two dates function
         def d(s):
             [year, month, day] = map(int, s.split('-'))
