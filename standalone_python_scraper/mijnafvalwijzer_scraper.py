@@ -16,11 +16,10 @@ def scraper(url, trash=None):
     soup = bs4.BeautifulSoup(page.text, "html.parser")
 
     today = datetime.today().strftime("%d-%m-%Y")
+    today_date = datetime.strptime(today, "%d-%m-%Y")
     dateConvert = datetime.strptime(today, "%d-%m-%Y") + timedelta(days=1)
     tomorrow = datetime.strftime(dateConvert, "%d-%m-%Y")
-
-    # print(today)
-    # print(tomorrow)
+    tomorrow_date = datetime.strptime(tomorrow, "%d-%m-%Y")
 
     # Get current year
     for item in soup.select('[class="ophaaldagen"]'):
@@ -83,30 +82,38 @@ def scraper(url, trash=None):
             trashDump = {}
             trashDump['key'] = item[2]
             trashDump['description'] = item[1]
-            trashDump['value'] = day + '-' + month + '-' + year
+            trashDump['value'] = (day + '-' + month + '-' + year)
             json_data.append(trashDump)
     except IndexError:
         return 'No matching trashname(s) found.'
 
-    size=len(json_data)
     defaultTrashNames = ['today', 'tomorrow', 'next']
     uniqueTrashNames = []
     uniqueTrashNames.extend(defaultTrashNames)
     trashSchedule = []
 
-    # Append first upcoming unique trash item with pickup date
-    for i in range(0,size,1):
-        if(json_data[i]['key'] not in uniqueTrashNames):
-            if json_data[i]['value'] >= today:
-                uniqueTrashNames.append(json_data[i]['key'])
-                trashSchedule.append(json_data[i])
+    for item in json_data:
+        key = item['key']
+        description = item['description']
+        value = item['value']
+        value_date = datetime.strptime(item['value'], "%d-%m-%Y")
+        if value_date >= today_date:
+            if key not in uniqueTrashNames:
+                trash = {}
+                trash['key'] = key
+                trash['description'] = description
+                trash['value'] = value
+                uniqueTrashNames.append(key)
+                trashSchedule.append(trash)
 
-    print (trashSchedule)
+    # Collect data
+    today_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == today_date]
+    tomorrow_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == tomorrow_date]
+    next_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") > today_date]
 
     # Append Today data
     trashToday = {}
     multiTrashToday = []
-    today_out = [x for x in trashSchedule if x['value'] == today and x['key'] not in defaultTrashNames]
     if len(today_out) == 0:
         trashToday['key'] = 'today'
         trashToday['description'] = 'Trash Today'
@@ -120,10 +127,9 @@ def scraper(url, trash=None):
         trashSchedule.append(trashToday)
         trashToday['value'] = ', '.join(multiTrashToday)
 
-    # Append Tomorrow data
+    #Append Tomorrow data
     trashTomorrow = {}
     multiTrashTomorrow = []
-    tomorrow_out = [x for x in trashSchedule if x['value'] == tomorrow and x['key'] not in defaultTrashNames]
     if len(tomorrow_out) == 0:
         trashTomorrow['key'] = 'tomorrow'
         trashTomorrow['description'] = 'Trash Tomorrow'
@@ -139,7 +145,6 @@ def scraper(url, trash=None):
 
     # Append next pickup in days
     trashNext = {}
-    next_out = [x for x in trashSchedule if x['value'] > today and x['key'] not in defaultTrashNames]
 
     def d(s):
         [year, month, day] = map(int, s.split('-'))
@@ -158,10 +163,10 @@ def scraper(url, trash=None):
             trashNext['value'] = (days(today, next_out[0]['value']))
             trashSchedule.append(trashNext)
 
-    # print(trashToday)
-    # print(trashTomorrow)
-    # print(trashNext)
-    # print(trashSchedule)
+    print(trashToday)
+    print(trashTomorrow)
+    print(trashNext)
+    print(trashSchedule)
 
 
 
@@ -218,5 +223,4 @@ def scraper(url, trash=None):
     # #print (uniqueTrashLongNames)
 
 if __name__ == '__main__':
-    # Random address picked:
     trash = scraper('https://www.mijnafvalwijzer.nl/nl/5142CA/337/A')
