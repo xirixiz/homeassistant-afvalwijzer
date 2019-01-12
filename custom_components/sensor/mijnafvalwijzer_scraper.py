@@ -156,7 +156,7 @@ class TrashCollectionSchedule(object):
             elif month == 'december':
                 return '12'
             else:
-                return None
+                return '00'
 
         # Get current year
         for item in soup.select('[class="ophaaldagen"]'):
@@ -216,9 +216,9 @@ class TrashCollectionSchedule(object):
 
 
         # Collect data
-        today_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == today_date and x['key']]
+        today_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == today_date]
         tomorrow_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == tomorrow_date]
-        next_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") > today_date and x['key']]
+        next_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") > today_date]
 
         # Append Today data
         trashToday = {}
