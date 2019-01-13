@@ -1,9 +1,9 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 12/01/2019
+@ Date        : 13/01/2019
 @ Description : MijnAfvalwijzer Scrape Sensor - It queries mijnafvalwijzer.nl.
 """
-VERSION = '2.0.3'
+VERSION = '2.0.4'
 
 import itertools
 import logging
@@ -50,8 +50,18 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
     url = ("https://www.mijnafvalwijzer.nl/nl/{0}/{1}/{2}").format(postcode, huisnummer, toevoeging)
+
     response = requests.get(url)
+    if response.status_code != requests.codes.ok:
+        _LOGGER.exception("Error doing API request")
+    else:
+        _LOGGER.debug("API request ok %d", response.status_code)
+
     soup = bs4.BeautifulSoup(response.text, "html.parser")
+    if len(soup) == 0:
+        _LOGGER.error("Respons doesn't contain data")
+    else:
+        _LOGGER.debug("Respons contains data")
 
     # Get trash shortname
     trashShortNames = []
@@ -66,13 +76,21 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             if element not in uniqueTrashShortNames:
                 uniqueTrashShortNames.append(element)
     except IndexError:
-        return 'No matching trashtype(s) found.'
+        return 'Error, empty reply.'
+
+    _LOGGER.debug("trashShortNames succesfully added: %s", trashShortNames)
+    _LOGGER.debug("uniqueTrashShortNames succesfully added: %s", uniqueTrashShortNames)
 
     data = (TrashCollectionSchedule(url, defaultTrashNames ,config))
 
-    for name in uniqueTrashShortNames:
-        sensors.append(TrashCollectionSensor(name, data, config))
-    add_devices(sensors)
+    try:
+        for name in uniqueTrashShortNames:
+            sensors.append(TrashCollectionSensor(name, data, config))
+        add_devices(sensors)
+    except IndexError:
+        return 'Error, empty reply.'
+
+    _LOGGER.debug("Object succesfully added as sensor(s): %s", sensors)
 
 
 class TrashCollectionSensor(Entity):
@@ -103,9 +121,15 @@ class TrashCollectionSensor(Entity):
         """Fetch new state data for the sensor."""
         self.data.update()
         self._state = self.config.get(CONST_LABEL_NONE)
-        for item in self.data.data:
-            if item['key'] == self._name:
-                self._state = item['value']
+
+        _LOGGER.debug("Update called for mijnafvalwijzer...")
+
+        try:
+            for item in self.data.data:
+                if item['key'] == self._name:
+                    self._state = item['value']
+        except IndexError:
+            return 'Error, empty reply.'
 
 
 class TrashCollectionSchedule(object):
@@ -121,7 +145,17 @@ class TrashCollectionSchedule(object):
     def update(self):
         """Fetch new state data for the sensor."""
         response = requests.get(self.url)
+        if response.status_code != requests.codes.ok:
+            _LOGGER.exception("Error doing API request")
+        else:
+            _LOGGER.debug("API request ok %d", response.status_code)
+
         soup = bs4.BeautifulSoup(response.text, "html.parser")
+        if len(soup) == 0:
+            _LOGGER.error("Respons doesn't contain data")
+        else:
+            _LOGGER.debug("Respons contains data")
+
         today = datetime.today().strftime("%d-%m-%Y")
         today_date = datetime.strptime(today, "%d-%m-%Y")
         dateConvert = datetime.strptime(today, "%d-%m-%Y") + timedelta(days=1)
@@ -162,8 +196,9 @@ class TrashCollectionSchedule(object):
         for item in soup.select('[class="ophaaldagen"]'):
             year_id = item["id"]
         year = re.sub('jaar-','',year_id)
+        _LOGGER.debug("Year found: %s", year)
 
-        # Get trash date
+        # Get trash dump
         trashDump = []
         trashSchedule = []
         json_data = []
@@ -175,12 +210,15 @@ class TrashCollectionSchedule(object):
                 name = data.get_text()
                 trashDump.append(name)
                 trashDump.append(x)
+                _LOGGER.debug("Trash scraped from website: %s", trashDump)
         except IndexError:
             return 'Error, empty reply.'
 
+        # Get trash dates and generate dictionairy
         uniqueTrashDates = [i.split('\n', 1) for i in trashDump]
         uniqueTrashDates = list(itertools.chain.from_iterable(uniqueTrashDates))
         uniqueTrashDates = [uniqueTrashDates[i:i+3]for i in range(0,len(uniqueTrashDates),3)]
+        _LOGGER.debug("Trash dates conversion output from scraped website data: %s", uniqueTrashDates)
 
         try:
             for item in uniqueTrashDates:
@@ -188,11 +226,13 @@ class TrashCollectionSchedule(object):
                 day = split_date[1]
                 month_name = split_date[2]
                 month = _get_month_number(month_name)
+                _LOGGER.debug("Converting month name: %s to month number %s", month_name, month)
                 trashDump = {}
                 trashDump['key'] = item[2]
                 trashDump['description'] = item[1]
                 trashDump['value'] = day + '-' + month + '-' + year
                 json_data.append(trashDump)
+                _LOGGER.debug("New generated dictionairy with converted dates: %s", json_data)
         except IndexError:
             return 'Error, empty reply.'
 
@@ -200,25 +240,32 @@ class TrashCollectionSchedule(object):
         # Append first upcoming unique trash item with pickup date
         uniqueTrashNames = []
         uniqueTrashNames.extend(self.defaultTrashNames)
-        for item in json_data:
-            key = item['key']
-            description = item['description']
-            value = item['value']
-            value_date = datetime.strptime(item['value'], "%d-%m-%Y")
-            if value_date >= today_date:
-                if key not in uniqueTrashNames:
-                    trash = {}
-                    trash['key'] = key
-                    trash['description'] = description
-                    trash['value'] = value
-                    uniqueTrashNames.append(key)
-                    trashSchedule.append(trash)
+        try:
+            for item in json_data:
+                key = item['key']
+                description = item['description']
+                value = item['value']
+                value_date = datetime.strptime(item['value'], "%d-%m-%Y")
+                if value_date >= today_date:
+                    if key not in uniqueTrashNames:
+                        trash = {}
+                        trash['key'] = key
+                        trash['description'] = description
+                        trash['value'] = value
+                        uniqueTrashNames.append(key)
+                        trashSchedule.append(trash)
+                        _LOGGER.debug("New dictionairy with update data: %s", trashSchedule)
+        except IndexError:
+            return 'Error, empty reply.'
 
 
         # Collect data
         today_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == today_date]
+        _LOGGER.debug("Trash Today: %s", today_out)
         tomorrow_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == tomorrow_date]
+        _LOGGER.debug("Trash Tomorrow: %s", tomorrow_out)
         next_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") > today_date]
+        _LOGGER.debug("Trash Next Pickup Day: %s", next_out)
 
         # Append Today data
         trashToday = {}
@@ -228,13 +275,18 @@ class TrashCollectionSchedule(object):
             trashToday['description'] = 'Trash Today'
             trashToday['value'] = labelNone
             trashSchedule.append(trashToday)
+            _LOGGER.debug("Today contains no data, skipping...")
         else:
-            for x in today_out:
-                trashToday['key'] = 'today'
-                trashToday['description'] = 'Trash Today'
-                multiTrashToday.append(x['key'])
-            trashSchedule.append(trashToday)
-            trashToday['value'] = ', '.join(multiTrashToday)
+            try:
+                for x in today_out:
+                    trashToday['key'] = 'today'
+                    trashToday['description'] = 'Trash Today'
+                    multiTrashToday.append(x['key'])
+                trashSchedule.append(trashToday)
+                trashToday['value'] = ', '.join(multiTrashToday)
+                _LOGGER.debug("Today data succesfully added %s", trashToday)
+            except IndexError:
+                return 'Error, empty reply.'
 
 
         # Append Tomorrow data
@@ -245,13 +297,18 @@ class TrashCollectionSchedule(object):
             trashTomorrow['description'] = 'Trash Tomorrow'
             trashTomorrow['value'] = labelNone
             trashSchedule.append(trashTomorrow)
+            _LOGGER.debug("Tomorrow contains no data, skipping...")
         else:
-            for x in tomorrow_out:
-                trashTomorrow['key'] = 'tomorrow'
-                trashTomorrow['description'] = 'Trash Tomorrow'
-                multiTrashTomorrow.append(x['key'])
-            trashSchedule.append(trashTomorrow)
-            trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
+            try:
+                for x in tomorrow_out:
+                    trashTomorrow['key'] = 'tomorrow'
+                    trashTomorrow['description'] = 'Trash Tomorrow'
+                    multiTrashTomorrow.append(x['key'])
+                trashSchedule.append(trashTomorrow)
+                trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
+                _LOGGER.debug("Today data succesfully added %s", trashTomorrow)
+            except IndexError:
+                return 'Error, empty reply.'
 
 
         # Append next pickup in days
@@ -267,10 +324,15 @@ class TrashCollectionSchedule(object):
             trashNext['key'] = 'next'
             trashNext['value'] = labelNone
             trashSchedule.append(trashNext)
+            _LOGGER.debug("Next contains no data, skipping...")
         else:
             if len(trashNext) == 0:
                 trashNext['key'] = 'next'
                 trashNext['value'] = (days(today, next_out[0]['value']))
                 trashSchedule.append(trashNext)
+                _LOGGER.debug("Next data succesfully added %s", trashNext)
 
+
+        # Return collected data
+        _LOGGER.debug("trashSchedule content %s", trashSchedule)
         self.data = trashSchedule
