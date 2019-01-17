@@ -17,9 +17,10 @@ custom_updater:
 ###### NOTIFY TRASH - SENSOR
 ```yaml
 - platform: mijnafvalwijzer
-  postcode: !secret afvalwijzer_postcode
-  huisnummer: !secret afvalwijzer_huisnummer
-  toevoeging: !secret afvalwijzer_toevoeging
+  postcode: '1111AA'
+  huisnummer: '1'
+  toevoeging: 'A'
+  label_geen: 'Geen'
 ```
   
 ###### NOTIFY TRASH - GROUP
@@ -34,6 +35,9 @@ trash_pickup:
   name: "Trash Pickup"
   control: hidden
   entities:
+    - sensor.trash_next
+    - sensor.trash_today
+    - sensor.trash_tomorrow
     - sensor.trash_gft
     - sensor.trash_restafval
     - sensor.trash_papier
