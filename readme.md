@@ -23,66 +23,70 @@ custom_updater:
   label_geen: 'Geen'
 ```
   
-###### NOTIFY TRASH - GROUP
+###### NOTIFY TRASH - INPUT BOOLEAN
 ```yaml
-default_view:
-  icon: mdi:home
-  view: yes
-  entities:
-    - group.trash_pickup
-
-trash_pickup:
-  name: "Trash Pickup"
-  control: hidden
-  entities:
-    - sensor.trash_next
-    - sensor.trash_today
-    - sensor.trash_tomorrow
-    - sensor.trash_gft
-    - sensor.trash_restafval
-    - sensor.trash_papier
-    - sensor.trash_pmd
-    - sensor.trash_kerstbomen
+input_boolean:
+  trash_moved:
+    name: Trash has been moved
+    initial: 'off'
+    icon: mdi:delete-empty
+  trash_reminder:
+    name: Trash reminder enabled
+    initial: 'on'
 ```
 
 ###### NOTIFY TRASH - AUTOMATION
 ```yaml
-- alias: 'Trash - One day before'
-  trigger:
-  - platform: time
-    hours: 20
-    minutes: 0
-    seconds: 0
-  condition:
-    - condition: or
+automation:
+  - alias: Reset trash notification
+    trigger:
+      platform: state
+      entity_id: input_boolean.trash_moved
+      to: 'on'
+      for:
+        hours: 12
+    action:
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.trash_moved
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.trash_reminder
+
+  - alias: Mark trash as moved from notification
+    trigger:
+      platform: event
+      event_type: ios.notification_action_fired
+      event_data:
+        actionName: MARK_TRASH_MOVED
+    action:
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.trash_moved
+
+  - alias: Trash has not been moved
+    trigger:
+      platform: time
+      minutes: '/30'
+      seconds: 00
+    condition:
+      condition: and
       conditions:
-      - condition: template
-        value_template: '{{- (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_gft.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") -}}'
-      - condition: template
-        value_template: '{{- (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_restafval.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") -}}'
-      - condition: template
-        value_template: '{{- (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_pmd.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") -}}'
-      - condition: template
-        value_template: '{{- (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_papier.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") -}}'
-      - condition: template
-        value_template: '{{- (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_kerstbomen.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") -}}'
-  action:
-  - service: notify.family
-    data_template:
-      message: >-
-        {% if (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_gft.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") %}
-           Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. De groene bak wordt geleegd op: {{ states.sensor.trash_gft.state }}!
-        {% endif %}
-        {% if (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_restafval.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") %}
-           Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. De grijze bak wordt geleegd op: {{ states.sensor.restafval.state }}!
-        {% endif %}
-        {% if (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_pmd.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") %}
-           Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Plastic wordt opgehaald op: {{ states.sensor.trash_pmd.state }}!
-        {% endif %}
-        {% if (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_papier.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") %}
-           Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Papier wordt opgehaald op: {{ states.sensor.trash_papier.state }}!
-        {% endif %}
-        {% if (now().strftime("%d-%m-%Y")) == (as_timestamp(strptime(states.sensor.trash_kerstbomen.state, "%d-%m-%Y")) - (1 * 86400 )) | timestamp_custom("%d-%m-%Y") %}
-           Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Kerstbomen worden opgehaald op: {{ states.sensor.trash_kerstbomen.state }}!
-        {% endif %}
-```
+        - condition: state
+          entity_id: input_boolean.trash_moved
+          state: 'off'
+        - condition: state
+          entity_id: input_boolean.trash_reminder
+          state: 'on'
+        - condition: time
+          after: '18:00:00'
+          before: '23:00:00'
+        - condition: template
+          value_template: "{{ states('sensor.trash_tomorrow') != 'Geen' }}"
+    action:
+      - service: notify.family
+        data:
+          title: "Afval"
+          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.trash_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
+          data:
+            push:
+              badge: 0
+              category: 'afval'
+
