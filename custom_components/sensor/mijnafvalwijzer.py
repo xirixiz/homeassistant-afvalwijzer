@@ -1,6 +1,6 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 17/01/2019
+@ Date        : 04/02/2019
 @ Description : MijnAfvalwijzer Scrape Sensor - It queries mijnafvalwijzer.nl.
 
 sensor:
@@ -11,7 +11,7 @@ sensor:
     label_geen: 'Geen'
 """
 
-VERSION = '2.0.5'
+VERSION = '2.0.6'
 
 import itertools
 import logging
@@ -73,7 +73,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     # Get trash shortname
     trashShortNames = []
     uniqueTrashShortNames = []
-    defaultTrashNames = ['today', 'tomorrow', 'next']
+    defaultTrashNames = ['firstdate', 'firstwastetype', 'today', 'tomorrow', 'next']
     uniqueTrashShortNames.extend(defaultTrashNames)
     sensors = []
     try:
@@ -245,7 +245,6 @@ class TrashCollectionSchedule(object):
         except IndexError:
             return 'Error, empty reply.'
 
-
         # Append first upcoming unique trash item with pickup date
         uniqueTrashNames = []
         uniqueTrashNames.extend(self.defaultTrashNames)
@@ -267,8 +266,7 @@ class TrashCollectionSchedule(object):
         except IndexError:
             return 'Error, empty reply.'
 
-
-        # Collect data
+        # Collect data for today, tomorrow and next
         today_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == today_date]
         logger.debug(f"Trash Today: {today_out}")
         tomorrow_out = [x for x in trashSchedule if datetime.strptime(x['value'], "%d-%m-%Y") == tomorrow_date]
@@ -297,7 +295,6 @@ class TrashCollectionSchedule(object):
             except IndexError:
                 return 'Error, empty reply.'
 
-
         # Append Tomorrow data
         trashTomorrow = {}
         multiTrashTomorrow = []
@@ -318,7 +315,6 @@ class TrashCollectionSchedule(object):
                 logger.debug(f"Today data succesfully added {trashTomorrow}")
             except IndexError:
                 return 'Error, empty reply.'
-
 
         # Append next pickup in days
         trashNext = {}
@@ -341,6 +337,18 @@ class TrashCollectionSchedule(object):
                 trashSchedule.append(trashNext)
                 logger.debug(f"Next data succesfully added {trashNext}")
 
+        # Append firstDate and firstWasteType
+        trashFirstDate = {}
+        trashFirstDate['key'] = 'firstdate'
+        trashFirstDate['value'] = soup.find('p', attrs={'class':'firstDate'}).text
+        trashSchedule.append(trashFirstDate)
+        logger.debug(f"firstDate data succesfully added {trashFirstDate}")
+
+        firstWasteType = {}
+        firstWasteType['key'] = 'firstwastetype'
+        firstWasteType['value'] = soup.find('p', attrs={'class':'firstWasteType'}).text
+        trashSchedule.append(firstWasteType)
+        logger.debug(f"firstDate data succesfully added {firstWasteType}")     
 
         # Return collected data
         logger.debug(f"trashSchedule content {trashSchedule}")

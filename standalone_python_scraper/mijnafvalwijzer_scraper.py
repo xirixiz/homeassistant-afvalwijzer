@@ -26,6 +26,8 @@ def scraper(url, trash=None):
         year_id = item["id"]
     year = re.sub('jaar-','',year_id)
 
+    #print("test", soup.find('div', attrs={'class':'ophaaldagen'}).text)
+
     # Get trash date
     try:
         for data in soup.select('a[href*="#waste"] p[class]'):
