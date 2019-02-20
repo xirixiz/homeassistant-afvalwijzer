@@ -1,6 +1,6 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 04/02/2019
+@ Date        : 20/02/2019
 @ Description : MijnAfvalwijzer Scrape Sensor - It queries mijnafvalwijzer.nl.
 
 sensor:
@@ -9,9 +9,11 @@ sensor:
     huisnummer: 1
     toevoeging: A
     label_geen: 'Geen'
+    
+20190220 - Bugfix: mijnafvalwijzer added a ton of spaces in the output.
 """
 
-VERSION = '2.0.6'
+VERSION = '2.0.7'
 
 import itertools
 import logging
@@ -224,11 +226,13 @@ class TrashCollectionSchedule(object):
             return 'Error, empty reply.'
 
         # Get trash dates and generate dictionairy
-        uniqueTrashDates = [i.split('\n', 1) for i in trashDump]
+        uniqueTrashDates = [x.replace('\t', '') for x in trashDump]
+        uniqueTrashDates = [x.split('\n') for x in uniqueTrashDates]
         uniqueTrashDates = list(itertools.chain.from_iterable(uniqueTrashDates))
+        uniqueTrashDates = [x for x in uniqueTrashDates if x != '']
         uniqueTrashDates = [uniqueTrashDates[i:i+3]for i in range(0,len(uniqueTrashDates),3)]
         logger.debug(f"Trash dates conversion output from scraped website data: {uniqueTrashDates}")
-
+        
         try:
             for item in uniqueTrashDates:
                 split_date = item[0].split(' ')
