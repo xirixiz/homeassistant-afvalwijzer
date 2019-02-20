@@ -90,7 +90,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     logger.debug(f"trashShortNames succesfully added: {trashShortNames}")
     logger.debug(f"uniqueTrashShortNames succesfully added: {uniqueTrashShortNames}")
 
-    data = (TrashCollectionSchedule(url, defaultTrashNames ,config))
+    data = (TrashCollectionSchedule(url, defaultTrashNames, config))
 
     try:
         for name in uniqueTrashShortNames:
