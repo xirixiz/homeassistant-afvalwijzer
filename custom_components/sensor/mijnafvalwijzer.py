@@ -13,7 +13,7 @@ sensor:
 23-02-2019 - Back to JSON release instead of scraper
 """
 
-VERSION = '3.0.0'
+VERSION = '3.0.1'
 
 import logging
 from datetime import date, datetime, timedelta
