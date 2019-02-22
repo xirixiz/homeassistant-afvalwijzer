@@ -183,7 +183,6 @@ class TrashCollectionSchedule(object):
                         trash['key'] = item['nameType']
                         trash['value'] = dateConvert
                         trashSchedule.append(trash)
-                        logger.debug(f"Data succesfully added {trash}")
 
                     if item['date'] > today:
                         if len(trashNext) == 0:
@@ -191,27 +190,22 @@ class TrashCollectionSchedule(object):
                             trashNext['key'] = "next"
                             trashNext['value'] = (days(today, item['date']))
                             trashSchedule.append(trashNext)
-                            logger.debug(f"Data succesfully added {trashNext}")
 
                     if item['date'] == today:
                         trashType[name] = "today"
                         trashToday['key'] = "today"
-                        multiTrashToday.append(item['nameType'])
                         trashSchedule.append(trashToday)
-                        logger.debug(f"Data succesfully added {trashToday}")
+                        multiTrashToday.append(item['nameType'])
+                        if len(multiTrashToday) != 0:
+                            trashToday['value'] = ', '.join(multiTrashToday)
 
                     if item['date'] == tomorrow:
                         trashType[name] = "tomorrow"
                         trashTomorrow['key'] = "tomorrow"
-                        multiTrashTomorrow.append(item['nameType'])
                         trashSchedule.append(trashTomorrow)
-                        logger.debug(f"Data succesfully added {trashTomorrow}")
-
-        if len(multiTrashToday) != 0:
-            trashToday['value'] = ', '.join(multiTrashToday)
-
-        if len(multiTrashTomorrow) != 0:
-            trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
+                        multiTrashTomorrow.append(item['nameType'])
+                        if len(multiTrashTomorrow) != 0:
+                            trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
 
         # Setup scraper request
         scraper_response = requests.get(self._scraper_url)
