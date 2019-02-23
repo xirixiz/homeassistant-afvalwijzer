@@ -12,9 +12,10 @@ sensor:
 
 23-02-2019 - Back to JSON release instead of scraper
 23-02-2019 - Move scraper url, cleanup, and some minor doc fixes
+24-02-2019 - Scraper debug log url fix
 """
 
-VERSION = '3.0.2'
+VERSION = '3.0.3'
 
 import logging
 from datetime import date, datetime, timedelta
@@ -210,7 +211,7 @@ class TrashCollectionSchedule(object):
         huisnummer = self._config.get(CONST_HUISNUMMER)
         toevoeging = self._config.get(CONST_TOEVOEGING)
         scraper_url = (f"https://www.mijnafvalwijzer.nl/nl/{postcode}/{huisnummer}/{toevoeging}")
-        logger.debug(f"Scraper request url: {url}")
+        logger.debug(f"Scraper request url: {scraper_url}")
         scraper_response = requests.get(scraper_url)
 
         if scraper_response.status_code != requests.codes.ok:
