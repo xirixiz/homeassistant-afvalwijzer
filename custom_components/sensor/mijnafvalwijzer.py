@@ -11,9 +11,10 @@ sensor:
     label_geen: 'Geen'
 
 23-02-2019 - Back to JSON release instead of scraper
+23-02-2019 - Move scraper url, cleanup, and some minor doc fixes
 """
 
-VERSION = '3.0.1'
+VERSION = '3.0.2'
 
 import logging
 from datetime import date, datetime, timedelta
@@ -54,7 +55,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the sensor platform."""
-    # Setup JSON request
+    # Setup JSON request (add sensor/devices)
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
@@ -62,10 +63,8 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     if None in (postcode, huisnummer):
         logger.error("Mijnafvalwijzer - postcode or huisnummer not set!")
 
-    scraper_url = (f"https://www.mijnafvalwijzer.nl/nl/{postcode}/{huisnummer}/{toevoeging}")
-
     url = (f"https://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={postcode}&street=&huisnummer={huisnummer}&toevoeging={toevoeging}&platform=phone&langs=nl&")
-    logger.debug(f"Request url: {url}")
+    logger.debug(f"Json request url: {url}")
     response = requests.get(url)
 
     if response.status_code != requests.codes.ok:
@@ -76,10 +75,10 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     json_obj = response.json()
     json_data = (json_obj['data']['ophaaldagen']['data'] + json_obj['data']['ophaaldagenNext']['data'])
 
-    # Get trash shortname
+    # Get unique trash shortname(s)
     uniqueTrashShortNames = []
-    defaultTrashNames = ['firstdate', 'firstwastetype', 'today', 'tomorrow', 'next']
-    uniqueTrashShortNames.extend(defaultTrashNames)
+    allTrashNames = ['firstdate', 'firstwastetype', 'today', 'tomorrow', 'next']
+    uniqueTrashShortNames.extend(allTrashNames)
     sensors = []
 
     for item in json_data:
@@ -89,7 +88,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     logger.debug(f"uniqueTrashShortNames succesfully added: {uniqueTrashShortNames}")
 
-    data = (TrashCollectionSchedule(url, scraper_url, defaultTrashNames, config))
+    data = (TrashCollectionSchedule(url, allTrashNames, config))
 
     for name in uniqueTrashShortNames:
         sensors.append(TrashCollectionSensor(name, data, config))
@@ -135,11 +134,10 @@ class TrashCollectionSensor(Entity):
 
 class TrashCollectionSchedule(object):
     """Fetch new state data for the sensor."""
-    def __init__(self, url, scraper_url, defaultTrashNames, config):
+    def __init__(self, url, allTrashNames, config):
         """Fetch vars."""
         self._url = url
-        self._scraper_url = scraper_url
-        self._defaultTrashNames = defaultTrashNames
+        self._allTrashNames = allTrashNames
         self.data = None
         self._config = config
 
@@ -162,7 +160,7 @@ class TrashCollectionSchedule(object):
         multiTrashTomorrow = []
         trashSchedule = []
 
-        # Some date format functions
+        # Some date count functions for next
         def d(s):
             [year, month, day] = map(int, s.split('-'))
             return date(year, month, day)
@@ -170,8 +168,8 @@ class TrashCollectionSchedule(object):
         def days(start, end):
             return (d(end) - d(start)).days
 
-        # Collect upcoming trash pickup dates
-        for name in self._defaultTrashNames:
+        # Collect upcoming trash pickup dates for unique trash
+        for name in self._allTrashNames:
             for item in json_data:
                 name = item["nameType"]
                 dateConvert = datetime.strptime(item['date'], '%Y-%m-%d').strftime('%d-%m-%Y')
@@ -208,7 +206,13 @@ class TrashCollectionSchedule(object):
                             trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
 
         # Setup scraper request
-        scraper_response = requests.get(self._scraper_url)
+        postcode = self._config.get(CONST_POSTCODE)
+        huisnummer = self._config.get(CONST_HUISNUMMER)
+        toevoeging = self._config.get(CONST_TOEVOEGING)
+        scraper_url = (f"https://www.mijnafvalwijzer.nl/nl/{postcode}/{huisnummer}/{toevoeging}")
+        logger.debug(f"Scraper request url: {url}")
+        scraper_response = requests.get(scraper_url)
+
         if scraper_response.status_code != requests.codes.ok:
             logger.exception("Error doing scrape request")
         else:
