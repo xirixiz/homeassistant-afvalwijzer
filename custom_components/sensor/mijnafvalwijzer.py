@@ -1,6 +1,6 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 23/02/2019
+@ Date        : 25/02/2019
 @ Description : MijnAfvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl.
 
 sensor:
@@ -13,9 +13,10 @@ sensor:
 23-02-2019 - Back to JSON release instead of scraper
 23-02-2019 - Move scraper url, cleanup, and some minor doc fixes
 24-02-2019 - Scraper debug log url fix
+25-02-2019 - Update to new custom_sensor location
 """
 
-VERSION = '3.0.3'
+VERSION = '3.0.4'
 
 import logging
 from datetime import date, datetime, timedelta
