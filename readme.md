@@ -16,7 +16,8 @@ custom_updater:
 
 ###### NOTIFY TRASH - SENSOR
 ```yaml
-- platform: mijnafvalwijzer
+- platform: afvalwijzer
+  url: 'mijnafvalwijzer.nl'
   postcode: '1111AA'
   huisnummer: '1'
   toevoeging: 'A'
