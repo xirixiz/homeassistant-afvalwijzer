@@ -8,7 +8,7 @@ sensor:
     url: mijnafvalwijzer.nl (optional, default mijnafvalwijzer.nl)
     postcode: 1111AA
     huisnummer: 1
-    toevoeging: A
+    toevoeging: A (optional)
     label_geen: 'Bla' (optional, default Geen)
 
 23-02-2019 - Back to JSON release instead of scraper
