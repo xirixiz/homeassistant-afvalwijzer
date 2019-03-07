@@ -1,22 +1,24 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 25/02/2019
-@ Description : MijnAfvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl.
+@ Date        : 07/03/2019
+@ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 
 sensor:
-  - platform: mijnafvalwijzer
+  - platform: afvalwijzer
+    url: mijnafvalwijzer.nl (optional, default mijnafvalwijzer.nl)
     postcode: 1111AA
     huisnummer: 1
     toevoeging: A
-    label_geen: 'Geen'
+    label_geen: 'Bla' (optional, default Geen)
 
 23-02-2019 - Back to JSON release instead of scraper
 23-02-2019 - Move scraper url, cleanup, and some minor doc fixes
 24-02-2019 - Scraper debug log url fix
 25-02-2019 - Update to new custom_sensor location
+07-03-2019 - Make compatible for afvalstoffendienstkalender.nl as well
 """
 
-VERSION = '3.0.4'
+VERSION = '3.0.5'
 
 import logging
 from datetime import date, datetime, timedelta
@@ -33,11 +35,12 @@ from homeassistant.util import Throttle
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_NAME = 'mijnafvalwijzer'
-DOMAIN = 'mijnafvalwijzer'
+DEFAULT_NAME = 'afvalwijzer'
+DOMAIN = 'afvalwijzer'
 ICON = 'mdi:delete-empty'
 SENSOR_PREFIX = 'trash_'
 
+CONST_URL = 'url'
 CONST_POSTCODE = 'postcode'
 CONST_HUISNUMMER = 'huisnummer'
 CONST_TOEVOEGING = 'toevoeging'
@@ -48,6 +51,7 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+    vol.Optional(CONST_URL, default="mijnafvalwijzer.nl"): cv.string,
     vol.Required(CONST_POSTCODE): cv.string,
     vol.Required(CONST_HUISNUMMER): cv.string,
     vol.Optional(CONST_TOEVOEGING, default=""): cv.string,
@@ -58,14 +62,15 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the sensor platform."""
     # Setup JSON request (add sensor/devices)
+    url = config.get(CONST_URL)
     postcode = config.get(CONST_POSTCODE)
     huisnummer = config.get(CONST_HUISNUMMER)
     toevoeging = config.get(CONST_TOEVOEGING)
 
     if None in (postcode, huisnummer):
-        logger.error("Mijnafvalwijzer - postcode or huisnummer not set!")
+        logger.error("Postcode or huisnummer not set!")
 
-    url = (f"https://json.mijnafvalwijzer.nl/?method=postcodecheck&postcode={postcode}&street=&huisnummer={huisnummer}&toevoeging={toevoeging}&platform=phone&langs=nl&")
+    url = (f"https://json.{url}/?method=postcodecheck&postcode={postcode}&street=&huisnummer={huisnummer}&toevoeging={toevoeging}&platform=phone&langs=nl&")
     logger.debug(f"Json request url: {url}")
     response = requests.get(url)
 
@@ -129,7 +134,7 @@ class TrashCollectionSensor(Entity):
         self._state = self.config.get(CONST_LABEL_NONE)
 
         for item in self.data.data:
-            logger.debug(f"Update called for mijnafvalwijzer item: {item}")
+            logger.debug(f"Update called for item: {item}")
             if item['key'] == self._name:
                 self._state = item['value']
 
@@ -208,10 +213,11 @@ class TrashCollectionSchedule(object):
                             trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
 
         # Setup scraper request
+        url = self._config.get(CONST_URL)
         postcode = self._config.get(CONST_POSTCODE)
         huisnummer = self._config.get(CONST_HUISNUMMER)
         toevoeging = self._config.get(CONST_TOEVOEGING)
-        scraper_url = (f"https://www.mijnafvalwijzer.nl/nl/{postcode}/{huisnummer}/{toevoeging}")
+        scraper_url = (f"https://www.{url}/nl/{postcode}/{huisnummer}/{toevoeging}")
         logger.debug(f"Scraper request url: {scraper_url}")
         scraper_response = requests.get(scraper_url)
 
