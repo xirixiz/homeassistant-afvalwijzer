@@ -11,7 +11,7 @@ In your configuration.yaml
  ```
 custom_updater:
  component_urls:
-   - https://raw.githubusercontent.com/xirixiz/home-assistant-config/master/custom_updater.json
+   - https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_updater.json
 ```
 
 ###### NOTIFY TRASH - SENSOR
