@@ -16,9 +16,10 @@ sensor:
 24-02-2019 - Scraper debug log url fix
 25-02-2019 - Update to new custom_sensor location
 07-03-2019 - Make compatible for afvalstoffendienstkalender.nl as well
+25-03-2019 - Remove Python 3.7.x f-strings, back to old format for beteer compatibility
 """
 
-VERSION = '3.0.5'
+VERSION = '3.0.6'
 
 import logging
 from datetime import date, datetime, timedelta
@@ -70,14 +71,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     if None in (postcode, huisnummer):
         logger.error("Postcode or huisnummer not set!")
 
-    url = (f"https://json.{url}/?method=postcodecheck&postcode={postcode}&street=&huisnummer={huisnummer}&toevoeging={toevoeging}&platform=phone&langs=nl&")
-    logger.debug(f"Json request url: {url}")
+    url = ("https://json.{0}/?method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&platform=phone&langs=nl&").format(url,postcode,huisnummer,toevoeging)
+    logger.debug("Json request url: {}".format(url))
     response = requests.get(url)
 
     if response.status_code != requests.codes.ok:
         logger.exception("Error doing API request")
     else:
-        logger.debug(f"API request ok {response.status_code}")
+        logger.debug("API request ok {}".format(response.status_code))
 
     json_obj = response.json()
     json_data = (json_obj['data']['ophaaldagen']['data'] + json_obj['data']['ophaaldagenNext']['data'])
@@ -93,7 +94,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         if element not in uniqueTrashShortNames:
             uniqueTrashShortNames.append(element)
 
-    logger.debug(f"uniqueTrashShortNames succesfully added: {uniqueTrashShortNames}")
+    logger.debug("uniqueTrashShortNames succesfully added: {}".format(uniqueTrashShortNames))
 
     data = (TrashCollectionSchedule(url, allTrashNames, config))
 
@@ -101,7 +102,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         sensors.append(TrashCollectionSensor(name, data, config))
     add_devices(sensors)
 
-    logger.debug(f"Object succesfully added as sensor(s): {sensors}")
+    logger.debug("Object succesfully added as sensor(s): {}".format(sensors))
 
 
 class TrashCollectionSensor(Entity):
@@ -134,7 +135,7 @@ class TrashCollectionSensor(Entity):
         self._state = self.config.get(CONST_LABEL_NONE)
 
         for item in self.data.data:
-            logger.debug(f"Update called for item: {item}")
+            logger.debug("Update called for item: {}".format(item))
             if item['key'] == self._name:
                 self._state = item['value']
 
@@ -217,14 +218,14 @@ class TrashCollectionSchedule(object):
         postcode = self._config.get(CONST_POSTCODE)
         huisnummer = self._config.get(CONST_HUISNUMMER)
         toevoeging = self._config.get(CONST_TOEVOEGING)
-        scraper_url = (f"https://www.{url}/nl/{postcode}/{huisnummer}/{toevoeging}")
-        logger.debug(f"Scraper request url: {scraper_url}")
+        scraper_url = ("https://www.{0}/nl/{1}/{2}/{3}").format(url, postcode, huisnummer, toevoeging)
+        logger.debug("Scraper request url: {}".format(scraper_url))
         scraper_response = requests.get(scraper_url)
 
         if scraper_response.status_code != requests.codes.ok:
             logger.exception("Error doing scrape request")
         else:
-            logger.debug(f"Scrape request ok {scraper_response.status_code}")
+            logger.debug("Scrape request ok {}".format(scraper_response.status_code))
 
         scraper_data = bs4.BeautifulSoup(scraper_response.text, "html.parser")
 
@@ -233,15 +234,15 @@ class TrashCollectionSchedule(object):
         trashFirstDate['key'] = 'firstdate'
         trashFirstDate['value'] = scraper_data.find('p', attrs={'class':'firstDate'}).text
         trashSchedule.append(trashFirstDate)
-        logger.debug(f"Data succesfully added {trashFirstDate}")
+        logger.debug("Data succesfully added {}".format(trashFirstDate))
 
         firstWasteType = {}
         firstWasteType['key'] = 'firstwastetype'
         firstWasteType['value'] = scraper_data.find('p', attrs={'class':'firstWasteType'}).text
         trashSchedule.append(firstWasteType)
-        logger.debug(f"Data succesfully added {firstWasteType}")
+        logger.debug("Data succesfully added {}".format(firstWasteType))
 
         # Return collected data
-        logger.debug(f"trashSchedule content {trashSchedule}")
+        logger.debug("trashSchedule content {}".format(trashSchedule))
 
         self.data = trashSchedule
