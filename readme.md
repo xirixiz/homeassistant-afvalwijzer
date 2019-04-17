@@ -3,6 +3,9 @@ Readme.md to use with the Home Assistant custom component (custom_components).
 The custom components dynamically creates sensor.trash_* items. For me the items are gft, restafval, papier, pmd and kerstbomen.
 Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
+###### CUSTOM COMPONENT USAGE
+https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
+
 ###### TRACK UPDATES
 This custom component can be tracked with the help of [custom-lovelace](https://github.com/ciotlosm/custom-lovelace).
 
