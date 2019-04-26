@@ -3,9 +3,9 @@
 [![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
 
-_Component to integrate with [afvalwijzer][afvalwijzer].
+_Component to integrate with [afvalwijzer][afvalwijzer]._
 
-The custom components dynamically creates sensor.trash_* items. For me the items are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary._
+This custom component dynamically creates sensor.trash_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
 **This component will set up the following platforms.**
 
