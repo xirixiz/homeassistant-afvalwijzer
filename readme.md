@@ -118,7 +118,7 @@ Platform | Description
 3. In the `custom_components` directory (folder) create a new folder called `complimentr`.
 4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
-6. Add `complimentr:` to your HA configuration.
+6. Add `afvalwijzer:` to your HA configuration.
 
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
@@ -143,7 +143,7 @@ custom_components/afvalwijzer/sensor.py
 ***
 
 [exampleimg]: afvalwijzer_lovelace.png
-[buymecoffee]: https://buymeacoff.ee/WgZaF8nlM
+[buymecoffee]: https://www.buymeacoffee.com/xirixiz
 [buymecoffeebedge]: https://camo.githubusercontent.com/cd005dca0ef55d7725912ec03a936d3a7c8de5b5/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6275792532306d6525323061253230636f666665652d646f6e6174652d79656c6c6f772e737667
 [afvalwijzer]: https://mijnafvalwijzer.nl
 [customupdater]: https://github.com/custom-components/custom_updater
