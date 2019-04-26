@@ -35,7 +35,7 @@ custom_components/afvalwijzer/const.py
 custom_components/afvalwijzer/sensor.py
 ```
 
-### TRACK UPDATES
+##### TRACK UPDATES
 This custom component can be tracked with the help of [custom-lovelace](https://github.com/ciotlosm/custom-lovelace).
 
 In your configuration.yaml
@@ -48,7 +48,7 @@ custom_updater:
 
 ## Example configuration.yaml
 
-### SENSOR
+##### SENSOR
 ```yaml
 - platform: afvalwijzer
   url: 'mijnafvalwijzer.nl'
@@ -58,7 +58,7 @@ custom_updater:
   label_geen: 'Geen'
 ```
   
-### INPUT BOOLEAN (FOR AUTOMATION)
+##### INPUT BOOLEAN (FOR AUTOMATION)
 ```yaml
 input_boolean:
   trash_moved:
@@ -70,7 +70,7 @@ input_boolean:
     initial: 'on'
 ```
 
-### AUTOMATION
+##### AUTOMATION
 ```yaml
 automation:
   - alias: Reset trash notification
