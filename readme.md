@@ -93,10 +93,10 @@ automation:
             push:
               badge: 0
               category: 'afval'
+```
 
 
-
-# complimentr
+# afvalwijzer (new style...in progress)
 
 [![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
@@ -131,7 +131,12 @@ custom_components/afvalwijzer/sensor.py
 ## Example configuration.yaml
 
 ```yaml
-afvalwijzer:
+- platform: afvalwijzer
+  url: 'mijnafvalwijzer.nl'
+  postcode: '1111AA'
+  huisnummer: '1'
+  toevoeging: 'A'
+  label_geen: 'Geen'
 ```
 
 
