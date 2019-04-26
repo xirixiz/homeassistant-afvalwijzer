@@ -1,0 +1,8 @@
+{
+  "domain": "afvalwijzer",
+  "name": "Afvalwijzer",
+  "documentation": "https://www.home-assistant.io/components/afvalwijzer",
+  "dependencies": [],
+  "codeowners": ["@xirixiz"],
+  "requirements": []
+}
