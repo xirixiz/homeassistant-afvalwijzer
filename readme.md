@@ -30,7 +30,7 @@ Using your HA configuration directory (folder) as a starting point you should no
 
 ```text
 custom_components/afvalwijzer/__init__.py
-custom_components/afvalwijzer/const.py
+custom_components/afvalwijzer/manifest.json
 custom_components/afvalwijzer/sensor.py
 ```
 
