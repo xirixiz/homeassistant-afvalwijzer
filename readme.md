@@ -1,7 +1,47 @@
-Readme.md to use with the Home Assistant custom component (custom_components).
+# afvalwijzer
 
-The custom components dynamically creates sensor.trash_* items. For me the items are gft, restafval, papier, pmd and kerstbomen.
-Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
+[![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
+[![custom_updater][customupdaterbadge]][customupdater]
+
+_Component to integrate with [afvalwijzer][afvalwijzer].
+
+The custom components dynamically creates sensor.trash_* items. For me the items are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary._
+
+**This component will set up the following platforms.**
+
+Platform | Description
+-- | --
+`sensor` | Show trash pickup dates for mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
+
+![example][exampleimg]
+
+## Installation
+
+1. Using you tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
+2. If you do not have a `custom_components` directory (folder) there, you need to create it.
+3. In the `custom_components` directory (folder) create a new folder called `complimentr`.
+4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
+5. Place the files you downloaded in the new directory (folder) you created.
+6. Add `afvalwijzer:` to your HA configuration.
+
+Using your HA configuration directory (folder) as a starting point you should now also have this:
+
+```text
+custom_components/afvalwijzer/__init__.py
+custom_components/afvalwijzer/const.py
+custom_components/afvalwijzer/sensor.py
+```
+
+## Example configuration.yaml
+
+```yaml
+- platform: afvalwijzer
+  url: 'mijnafvalwijzer.nl'
+  postcode: '1111AA'
+  huisnummer: '1'
+  toevoeging: 'A'
+  label_geen: 'Geen'
+```
 
 ###### CUSTOM COMPONENT USAGE
 https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
@@ -94,51 +134,6 @@ automation:
               badge: 0
               category: 'afval'
 ```
-
-
-# afvalwijzer (new style...in progress)
-
-[![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
-[![custom_updater][customupdaterbadge]][customupdater]
-
-_Component to integrate with [afvalwijzer][afvalwijzer]._
-
-**This component will set up the following platforms.**
-
-Platform | Description
--- | --
-`sensor` | Show trash pickup dates for mijnafvalwijzer.nl.
-
-![example][exampleimg]
-
-## Installation
-
-1. Using you tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `complimentr`.
-4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Add `afvalwijzer:` to your HA configuration.
-
-Using your HA configuration directory (folder) as a starting point you should now also have this:
-
-```text
-custom_components/afvalwijzer/__init__.py
-custom_components/afvalwijzer/const.py
-custom_components/afvalwijzer/sensor.py
-```
-
-## Example configuration.yaml
-
-```yaml
-- platform: afvalwijzer
-  url: 'mijnafvalwijzer.nl'
-  postcode: '1111AA'
-  huisnummer: '1'
-  toevoeging: 'A'
-  label_geen: 'Geen'
-```
-
 
 ***
 
