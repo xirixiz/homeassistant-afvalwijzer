@@ -1,7 +1,7 @@
 {
     "sensor.afvalwijzer": {
-      "updated_at": "2019-03-25",
-      "version": "3.0.6",
+      "updated_at": "2019-04-26",
+      "version": "3.0.7",
       "local_location": "/custom_components/afvalwijzer/sensor.py",
       "remote_location": "https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_components/afvalwijzer/sensor.py",
       "visit_repo": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/",
