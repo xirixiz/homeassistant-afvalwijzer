@@ -7,6 +7,7 @@ _Component to integrate with [afvalwijzer][afvalwijzer]._
 
 This custom component dynamically creates sensor.trash_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
+
 **This component will set up the following platforms.**
 
 Platform | Description
@@ -16,10 +17,6 @@ Platform | Description
 ![example][exampleimg]
 
 ## Installation
-
-###### CUSTOM COMPONENT USAGE
-https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
-
 1. Using you tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
 3. In the `custom_components` directory (folder) create a new folder called `complimentr`.
@@ -35,6 +32,9 @@ custom_components/afvalwijzer/const.py
 custom_components/afvalwijzer/sensor.py
 ```
 
+##### CUSTOM COMPONENT USAGE
+https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
+
 ##### TRACK UPDATES
 This custom component can be tracked with the help of [custom-lovelace](https://github.com/ciotlosm/custom-lovelace).
 
@@ -48,7 +48,7 @@ custom_updater:
 
 ## Example configuration.yaml
 
-##### SENSOR
+###### SENSOR
 ```yaml
 - platform: afvalwijzer
   url: 'mijnafvalwijzer.nl'
@@ -58,7 +58,7 @@ custom_updater:
   label_geen: 'Geen'
 ```
   
-##### INPUT BOOLEAN (FOR AUTOMATION)
+###### INPUT BOOLEAN (FOR AUTOMATION)
 ```yaml
 input_boolean:
   trash_moved:
@@ -70,7 +70,7 @@ input_boolean:
     initial: 'on'
 ```
 
-##### AUTOMATION
+###### AUTOMATION
 ```yaml
 automation:
   - alias: Reset trash notification
