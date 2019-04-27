@@ -24,7 +24,7 @@ Platform | Description
 3. In the `custom_components` directory (folder) create a new folder called `afvalwijzer`.
 4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
-6. Add `afvalwijzer:` to your HA configuration.
+6. Look at the `Example Configuration` section for further configuration.
 
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
@@ -48,7 +48,7 @@ custom_updater:
    - https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_updater.json
 ```
 
-## Example configuration.yaml
+## Example configuration
 
 ###### SENSOR
 ```yaml
