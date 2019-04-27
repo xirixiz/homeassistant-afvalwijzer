@@ -42,7 +42,7 @@ This custom component can be tracked with the help of [custom-lovelace](https://
 
 In your configuration.yaml
 
- ```
+```yaml
 custom_updater:
  component_urls:
    - https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_updater.json
