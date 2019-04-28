@@ -1,6 +1,6 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 26/04/2019
+@ Date        : 28/04/2019
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 
 sensor:
@@ -20,7 +20,7 @@ sensor:
 26-04-2019 - Make compatible with hass 0.92
 """
 
-VERSION = '3.0.8'
+VERSION = '3.0.9'
 
 import logging
 from datetime import date, datetime, timedelta
