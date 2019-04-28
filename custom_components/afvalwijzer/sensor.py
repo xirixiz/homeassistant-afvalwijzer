@@ -20,7 +20,7 @@ sensor:
 26-04-2019 - Make compatible with hass 0.92
 """
 
-VERSION = '3.0.7'
+VERSION = '3.0.8'
 
 import logging
 from datetime import date, datetime, timedelta
