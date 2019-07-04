@@ -2,6 +2,7 @@
 
 [![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
 _Component to integrate with [afvalwijzer][afvalwijzer] and [afvalstoffendienstkalender][afvalstoffendienstkalender]._
