@@ -4,5 +4,5 @@
   "documentation": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/blob/master/readme.md",
   "dependencies": [],
   "codeowners": ["@xirixiz"],
-  "requirements": []
+  "requirements": ["bs4==0.0.1"]
 }
