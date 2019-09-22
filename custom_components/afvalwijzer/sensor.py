@@ -18,9 +18,10 @@ sensor:
 07-03-2019 - Make compatible for afvalstoffendienstkalender.nl as well
 25-03-2019 - Remove Python 3.7.x f-strings, back to old format for beteer compatibility
 26-04-2019 - Make compatible with hass 0.92
+22-09-2019 - Add bs4 as a requirement in manifest.json (for hassio)
 """
 
-VERSION = '3.0.9'
+VERSION = '3.0.10'
 
 import logging
 from datetime import date, datetime, timedelta
