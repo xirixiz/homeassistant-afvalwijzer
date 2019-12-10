@@ -139,7 +139,7 @@ class TrashCollectionSensor(Entity):
         for item in self.data.data:
             logger.debug("Update called for item: {}".format(item))
             if item['key'] == self._name:
-                self._state = item['value']
+                self._state = item['value'].strip()
 
 
 class TrashCollectionSchedule(object):
