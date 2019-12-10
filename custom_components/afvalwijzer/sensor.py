@@ -140,7 +140,8 @@ class TrashCollectionSensor(Entity):
         for item in self.data.data:
             logger.debug("Update called for item: {}".format(item))
             if item['key'] == self._name:
-                self._state = item['value'].strip()
+
+                self._state = item['value']
 
 
 class TrashCollectionSchedule(object):
@@ -206,7 +207,7 @@ class TrashCollectionSchedule(object):
                         trashSchedule.append(trashToday)
                         multiTrashToday.append(item['nameType'])
                         if len(multiTrashToday) != 0:
-                            trashToday['value'] = ', '.join(multiTrashToday)
+                            trashToday['value'] = ', '.join(multiTrashToday).strip()
 
                     if item['date'] == tomorrow:
                         trashType[name] = "tomorrow"
@@ -214,7 +215,7 @@ class TrashCollectionSchedule(object):
                         trashSchedule.append(trashTomorrow)
                         multiTrashTomorrow.append(item['nameType'])
                         if len(multiTrashTomorrow) != 0:
-                            trashTomorrow['value'] = ', '.join(multiTrashTomorrow)
+                            trashTomorrow['value'] = ', '.join(multiTrashTomorrow).strip()
 
         # Setup scraper request
         url = self._config.get(CONST_URL)
