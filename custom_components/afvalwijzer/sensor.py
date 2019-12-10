@@ -1,6 +1,6 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 28/04/2019
+@ Date        : 10/12/2019
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 
 sensor:
@@ -19,9 +19,10 @@ sensor:
 25-03-2019 - Remove Python 3.7.x f-strings, back to old format for beteer compatibility
 26-04-2019 - Make compatible with hass 0.92
 22-09-2019 - Add bs4 as a requirement in manifest.json (for hassio)
+10-12-2019 - Fix whitespace bug
 """
 
-VERSION = '3.0.10'
+VERSION = '3.0.11'
 
 import logging
 from datetime import date, datetime, timedelta
