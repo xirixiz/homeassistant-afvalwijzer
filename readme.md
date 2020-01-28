@@ -58,14 +58,21 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
 
 ###### SENSOR
 ```yaml
-- platform: afvalwijzer
-  url: 'mijnafvalwijzer.nl'
-  postcode: '1111AA'
-  huisnummer: '1'
-  toevoeging: 'A'
-  label_geen: 'Geen'
+- platform: afvalwijzer # Required
+  provider: mijnafvalwijzer # Optional - mijnafvalwijzer (default) or afvalstoffendienstkalender
+  zipcode: postcode # Required
+  housenumber: huisnummer # Required
+  suffix: toevoeging # Optional
+  default_label: label # Optional - Default is 'Geen'
 ```
-  
+
+```yaml
+- platform: afvalwijzer # Required
+  provider: mijnafvalwijzer # Optional - mijnafvalwijzer (default) or afvalstoffendienstkalender
+  zipcode: 1111AA # Required
+  housenumber: 11 # Required
+```
+
 ###### INPUT BOOLEAN (FOR AUTOMATION)
 ```yaml
 input_boolean:
