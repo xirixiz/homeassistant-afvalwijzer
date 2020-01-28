@@ -6,7 +6,7 @@
 28-01-2020 - Rebuild from scratch! Use Python library! Breaking changes!
 """
 
-VERSION = '4.0.0'
+VERSION = '4.0.1'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -55,7 +55,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     # Get trash types to create sensors from
     trashTypesDefault = afvaldienst.trash_type_list
-    trashTypesAdditional = afvaldienst.trash_schedule_today_json + afvaldienst.trash_schedule_tomorrow_json + afvaldienst.trash_schedule_next_days_json
+    trashTypesAdditional = afvaldienst.trash_schedule_today_json + afvaldienst.trash_schedule_tomorrow_json + afvaldienst.trash_schedule_next_days_json + afvaldienst.trash_schedule_next_item_json
     for item in trashTypesAdditional:
         trashTypesDefault.append(item['key'])
 
@@ -74,11 +74,11 @@ class TrashSensor(Entity):
         """Initialize the sensor."""
         self._hass = hass
         self._name = name
-        self.fetch_trash_data = fetch_trash_data
+        self._fetch_trash_data = fetch_trash_data
         self._afvaldienst = afvaldienst
-        self.attributes = {}
-        self.config = config
-        self._state = self.config.get(CONST_LABEL)
+        self._attributes = {}
+        self._config = config
+        self._state = self._config.get(CONST_LABEL)
 
     @property
     def name(self):
@@ -98,24 +98,28 @@ class TrashSensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes of the sensor."""
-        return self.attributes
+        return self._attributes
 
     def update(self):
         """Fetch new state data for the sensor."""
-        self.fetch_trash_data.update()
-        self._state = self.config.get(CONST_LABEL)
+        self._fetch_trash_data.update()
+        self._state = self._config.get(CONST_LABEL)
 
-        for item in self.fetch_trash_data.trash_schedule_default:
+        for item in self._fetch_trash_data.trash_schedule_default:
             attributes = {}
             attributes['next_pickup_in_days'] = item['days_remaining']
             if item['key'] == self._name:
                 self._state = item['value']
-                self.attributes = attributes
+                self._attributes = attributes
 
-        for item in self.fetch_trash_data.trash_schedule_additional:
+        for item in self._fetch_trash_data.trash_schedule_additional:
             if item['key'] == self._name:
                 if item['value'] != 'None':
                     self._state = item['value']
+
+        for item in self._fetch_trash_data.trash_schedule_firstwastetype:
+            if item['key'] == self._name:
+                self._state = item['value']
 
 
 class TrashSchedule(object):
@@ -130,3 +134,4 @@ class TrashSchedule(object):
         """Fetch new state data for the sensor."""
         self.trash_schedule_default = self._afvaldienst.trash_schedulefull_json
         self.trash_schedule_additional = self._afvaldienst.trash_schedule_today_json + self._afvaldienst.trash_schedule_tomorrow_json + self._afvaldienst.trash_schedule_next_days_json
+        self.trash_schedule_firstwastetype = self._afvaldienst.trash_schedule_next_item_json
