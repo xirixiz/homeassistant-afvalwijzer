@@ -5,7 +5,7 @@
 30-01-2020 - Rebuild from scratch! Use Python library! Breaking changes!
 """
 
-VERSION = '4.1.0'
+VERSION = '4.1.1'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
