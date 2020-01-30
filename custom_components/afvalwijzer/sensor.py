@@ -1,12 +1,11 @@
 """
 @ Authors     : Bram van Dartel
-@ Date        : 28/01/2020
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 
-28-01-2020 - Rebuild from scratch! Use Python library! Breaking changes!
+30-01-2020 - Rebuild from scratch! Use Python library! Breaking changes!
 """
 
-VERSION = '4.0.1'
+VERSION = '4.1.0'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -55,11 +54,11 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     # Get trash types to create sensors from
     trashTypesDefault = afvaldienst.trash_type_list
-    trashTypesAdditional = afvaldienst.trash_schedule_today_json + afvaldienst.trash_schedule_tomorrow_json + afvaldienst.trash_schedule_next_days_json + afvaldienst.trash_schedule_next_item_json
+    trashTypesAdditional = afvaldienst.trash_schedule_today_json + afvaldienst.trash_schedule_tomorrow_json + afvaldienst.trash_schedule_next_days_json + afvaldienst.trash_schedule_next_item_json + afvaldienst.trash_schedule_next_date_json + afvaldienst.trash_schedule_dat_json
     for item in trashTypesAdditional:
         trashTypesDefault.append(item['key'])
 
-    fetch_trash_data = (TrashSchedule(afvaldienst, config))
+    fetch_trash_data = (TrashSchedule(config))
 
     # Setup sensors
     sensors = []
@@ -121,17 +120,27 @@ class TrashSensor(Entity):
             if item['key'] == self._name:
                 self._state = item['value']
 
+        for item in self._fetch_trash_data.trash_schedule_firstwastedate:
+            if item['key'] == self._name:
+                self._state = item['value']
+
 
 class TrashSchedule(object):
     """Fetch new state data for the sensor."""
-    def __init__(self, afvaldienst, config):
+    def __init__(self, config):
         """Fetch vars."""
-        self._afvaldienst = afvaldienst
         self._config = config
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Fetch new state data for the sensor."""
-        self.trash_schedule_default = self._afvaldienst.trash_schedulefull_json
-        self.trash_schedule_additional = self._afvaldienst.trash_schedule_today_json + self._afvaldienst.trash_schedule_tomorrow_json + self._afvaldienst.trash_schedule_next_days_json
-        self.trash_schedule_firstwastetype = self._afvaldienst.trash_schedule_next_item_json
+        provider = self._config.get(CONST_PROVIDER)
+        zipcode = self._config.get(CONST_ZIPCODE)
+        housenumber = self._config.get(CONST_HOUSENUMBER)
+        suffix = self._config.get(CONST_SUFFIX)
+        afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix)
+
+        self.trash_schedule_default = afvaldienst.trash_schedulefull_json
+        self.trash_schedule_additional = afvaldienst.trash_schedule_today_json + afvaldienst.trash_schedule_tomorrow_json + afvaldienst.trash_schedule_next_days_json + afvaldienst.trash_schedule_dat_json
+        self.trash_schedule_firstwastetype = afvaldienst.trash_schedule_next_item_json
+        self.trash_schedule_firstwastedate = afvaldienst.trash_schedule_next_date_json
