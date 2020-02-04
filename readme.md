@@ -113,8 +113,8 @@ automation:
 
   - alias: Trash has not been moved
     trigger:
-      platform: time
-      minutes: '/30'
+      platform: time_pattern
+      minutes: '/60'
       seconds: 00
     condition:
       condition: and
