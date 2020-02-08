@@ -1,11 +1,9 @@
 """
 @ Authors     : Bram van Dartel
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
-
-30-01-2020 - Rebuild from scratch! Use Python library! Breaking changes!
 """
 
-VERSION = '4.1.1'
+VERSION = '4.1.2'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -18,7 +16,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'afvalwijzer'
 DOMAIN = 'afvalwijzer'
@@ -31,8 +29,7 @@ CONST_HOUSENUMBER = 'housenumber'
 CONST_SUFFIX = 'suffix'
 CONST_LABEL = 'default_label'
 
-SCAN_INTERVAL = timedelta(seconds=5)
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
+PARALLEL_UPDATES = 1
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
@@ -43,7 +40,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONST_LABEL, default="Geen"): cv.string,
 })
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Setup the sensor platform."""
     provider = config.get(CONST_PROVIDER)
     zipcode = config.get(CONST_ZIPCODE)
@@ -64,7 +61,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     sensors = []
     for name in trashTypesDefault:
         sensors.append(TrashSensor(hass, name, fetch_trash_data, afvaldienst, config))
-    add_devices(sensors)
+    async_add_entities(sensors)
 
 
 class TrashSensor(Entity):
@@ -99,7 +96,7 @@ class TrashSensor(Entity):
         """Return the state attributes of the sensor."""
         return self._attributes
 
-    def update(self):
+    async def async_update(self):
         """Fetch new state data for the sensor."""
         self._fetch_trash_data.update()
         self._state = self._config.get(CONST_LABEL)
@@ -131,7 +128,6 @@ class TrashSchedule(object):
         """Fetch vars."""
         self._config = config
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Fetch new state data for the sensor."""
         provider = self._config.get(CONST_PROVIDER)
