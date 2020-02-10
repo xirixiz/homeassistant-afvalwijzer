@@ -52,6 +52,16 @@ custom_updater:
    - https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_updater.json
 ```
 
+In order to extend the log level, modify the following (configuration.yaml probably)
+
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.afvalwijzer: debug
+    custom_components.sensor.afvalwijzer: debug
+```
+
 ## Example configuration
 
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
