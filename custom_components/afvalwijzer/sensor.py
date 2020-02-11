@@ -153,7 +153,7 @@ class TrashSchedule(object):
         zipcode = self._config.get(CONST_ZIPCODE)
         housenumber = self._config.get(CONST_HOUSENUMBER)
         suffix = self._config.get(CONST_SUFFIX)
-        count_today = self._config.het(CONST_COUNT_TODAY)
+        count_today = self._config.get(CONST_COUNT_TODAY)
 
         try:
             afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix, count_today)
