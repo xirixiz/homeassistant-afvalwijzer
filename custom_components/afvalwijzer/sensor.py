@@ -3,7 +3,7 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = '4.1.3'
+VERSION = '4.1.4'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -28,6 +28,10 @@ CONST_ZIPCODE = 'zipcode'
 CONST_HOUSENUMBER = 'housenumber'
 CONST_SUFFIX = 'suffix'
 CONST_LABEL = 'default_label'
+
+SCAN_INTERVAL = timedelta(seconds=30)
+MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3600)
+PARALLEL_UPDATES = 1
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
@@ -139,6 +143,7 @@ class TrashSchedule(object):
         """Fetch vars."""
         self._config = config
 
+    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Fetch new state data for the sensor."""
         provider = self._config.get(CONST_PROVIDER)
