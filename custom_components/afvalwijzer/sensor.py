@@ -3,7 +3,7 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = '4.1.4'
+VERSION = '4.1.5'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -27,6 +27,7 @@ CONST_PROVIDER = 'provider'
 CONST_ZIPCODE = 'zipcode'
 CONST_HOUSENUMBER = 'housenumber'
 CONST_SUFFIX = 'suffix'
+CONST_COUNT_TODAY = 'count_today'
 CONST_LABEL = 'default_label'
 
 SCAN_INTERVAL = timedelta(seconds=30)
@@ -39,6 +40,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONST_ZIPCODE): cv.string,
     vol.Required(CONST_HOUSENUMBER): cv.string,
     vol.Optional(CONST_SUFFIX, default=""): cv.string,
+    vol.Optional(CONST_COUNT_TODAY, default="no"): cv.string,
     vol.Optional(CONST_LABEL, default="Geen"): cv.string,
 })
 
@@ -49,13 +51,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     zipcode = config.get(CONST_ZIPCODE)
     housenumber = config.get(CONST_HOUSENUMBER)
     suffix = config.get(CONST_SUFFIX)
+    count_today = config.get(CONST_COUNT_TODAY)
 
     _LOGGER.debug("Afvalwijzer provider = %s", provider)
     _LOGGER.debug("Afvalwijzer zipcode = %s", zipcode)
     _LOGGER.debug("Afvalwijzer housenumber = %s", housenumber)
 
     try:
-        afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix)
+        afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix, count_today)
     except ValueError as err:
         _LOGGER.error("Check afvaldienst platform settings %s", err.args)
         raise
@@ -150,9 +153,10 @@ class TrashSchedule(object):
         zipcode = self._config.get(CONST_ZIPCODE)
         housenumber = self._config.get(CONST_HOUSENUMBER)
         suffix = self._config.get(CONST_SUFFIX)
+        count_today = self._config.get(CONST_COUNT_TODAY)
 
         try:
-            afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix)
+            afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix, count_today)
         except ValueError as err:
             _LOGGER.error("Check afvaldienst platform settings %s", err.args)
             raise

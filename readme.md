@@ -59,7 +59,6 @@ logger:
   default: info
   logs:
     custom_components.afvalwijzer: debug
-    custom_components.sensor.afvalwijzer: debug
 ```
 
 ## Example configuration
@@ -73,14 +72,8 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
   zipcode: postcode # Required
   housenumber: huisnummer # Required
   suffix: toevoeging # Optional
+  count_today: vandaag meetellen # Optional - Default = no
   default_label: label # Optional - Default is 'Geen'
-```
-
-```yaml
-- platform: afvalwijzer # Required
-  provider: mijnafvalwijzer # Optional - mijnafvalwijzer (default) or afvalstoffendienstkalender
-  zipcode: 1111AA # Required
-  housenumber: 11 # Required
 ```
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)
