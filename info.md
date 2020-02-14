@@ -8,6 +8,6 @@
   zipcode: postcode # Required
   housenumber: huisnummer # Required
   suffix: toevoeging # Optional
-  count_today: vandaag meetellen # Optional - Default = no
+  count_today: vandaag meetellen # Optional. yes or no, not true or false - Default = no
   default_label: label # Optional - Default is 'Geen'
 ```
