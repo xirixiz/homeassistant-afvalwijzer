@@ -3,7 +3,7 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = '4.1.5'
+VERSION = '4.1.6'
 
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -40,7 +40,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONST_ZIPCODE): cv.string,
     vol.Required(CONST_HOUSENUMBER): cv.string,
     vol.Optional(CONST_SUFFIX, default=""): cv.string,
-    vol.Optional(CONST_COUNT_TODAY, default="no"): cv.string,
+    vol.Optional(CONST_COUNT_TODAY, default="false"): cv.string,
     vol.Optional(CONST_LABEL, default="Geen"): cv.string,
 })
 
