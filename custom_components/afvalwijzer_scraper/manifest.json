@@ -1,0 +1,12 @@
+{
+  "domain": "afvalwijzer",
+  "name": "Afvalwijzer_Scraper",
+  "documentation": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer",
+  "requirements": [
+    "bs4"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@xirixiz"
+  ]
+}
