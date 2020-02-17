@@ -17,7 +17,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = 'afvalwijzer'
+DEFAULT_NAME = 'afvalwijzer_scraper'
 DOMAIN = 'afvalwijzer'
 ICON = 'mdi:delete-empty'
 SENSOR_PREFIX = 'trash_'
@@ -45,12 +45,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Setup the sensor platform."""
     # Setup JSON request (add sensor/devices)
-    provider = config.get(CONST_PRO)
-    postcode = config.get(CONST_POSTCODE)
-    huisnummer = config.get(CONST_HUISNUMMER)
-    toevoeging = config.get(CONST_TOEVOEGING)
+    provider = config.get(CONST_PROVIDER)
+    zipcode = config.get(CONST_ZIPCODE)
+    housenumber = config.get(CONST_HOUSENUMBER)
+    suffix = config.get(CONST_SUFFIX)
 
-    if None in (postcode, huisnummer):
+    if None in (zipcode, housenumber):
         _LOGGER.error("Postcode or huisnummer not set!")
 
     # Get unique trash shortname(s)
@@ -59,23 +59,24 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     _LOGGER.debug("sensorNames succesfully added: %s", sensorNames)
 
-    data = (TrashCollectionSchedule(url, config))
+    fetch_trash_data = (TrashSchedule(config))
 
     for name in sensorNames:
-        sensors.append(TrashCollectionSensor(name, data, config))
+        sensors.append(TrashSensor(hass, name, fetch_trash_data, config))
     async_add_entities(sensors)
 
     _LOGGER.debug("Object succesfully added as sensor(s): %s", sensors)
 
 
-class TrashCollectionSensor(Entity):
+class TrashSensor(Entity):
     """Representation of a Sensor."""
-    def __init__(self, name, data, config):
+    def __init__(self, hass, name, fetch_trash_data, config):
         """Initialize the sensor."""
+        self._hass = hass
         self._name = name
-        self.data = data
-        self.config = config
-        self._state = self.config.get(CONST_LABEL_NONE)
+        self._fetch_trash_data = fetch_trash_data
+        self._config = config
+        self._state = self._config.get(CONST_LABEL)
 
     @property
     def name(self):
@@ -94,35 +95,30 @@ class TrashCollectionSensor(Entity):
 
     async def async_update(self):
         """Fetch new state data for the sensor."""
-        self.data.update()
-        self._state = self.config.get(CONST_LABEL_NONE)
+        self._fetch_trash_data.update()
+        self._state = self._config.get(CONST_LABEL)
 
-        for item in self.data.data:
+        for item in self._fetch_trash_data.trash_schedule_scraper:
             _LOGGER.debug("Update called for item: %s", item)
             if item['key'] == self._name:
                 self._state = item['value']
 
 
-class TrashCollectionSchedule(object):
+class TrashSchedule(object):
     """Fetch new state data for the sensor."""
-    def __init__(self, url, allTrashNames, config):
+    def __init__(self, config):
         """Fetch vars."""
-        self._url = url
-        self.data = None
         self._config = config
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Fetch new state data for the sensor."""
-
         # Setup scraper request
-        url = self._config.get(CONST_URL)
-        provider = config.get(CONST_PROVIDER)
-        zipcode = config.get(CONST_ZIPCODE)
-        housenumber = config.get(CONST_HOUSENUMBER)
-        suffix = config.get(CONST_SUFFIX)
-        count_today = config.get(CONST_COUNT_TODAY)        
-        scraper_url = ("https://www.{0}/nl/{1}/{2}/{3}").format(url, postcode, huisnummer, toevoeging)
+        provider = self._config.get(CONST_PROVIDER)
+        zipcode = self._config.get(CONST_ZIPCODE)
+        housenumber = self._config.get(CONST_HOUSENUMBER)
+        suffix = self._config.get(CONST_SUFFIX)
+        scraper_url = ("https://www.{0}/nl/{1}/{2}/{3}").format(provider, zipcode, housenumber, suffix)
         scraper_response = requests.get(scraper_url)
         trashSchedule = []
 
@@ -149,4 +145,10 @@ class TrashCollectionSchedule(object):
         # Return collected data
         _LOGGER.debug("trashSchedule content %s", trashSchedule)
 
-        self.data = trashSchedule
+        try:
+            self.trash_schedule_scraper = trashSchedule
+            _LOGGER.debug("Data trash_schedule_scraper = %s", self.trash_schedule_scraper)
+        except ValueError as err:
+            _LOGGER.error("Check trash_schedule_scraper %s", err.args)
+            self.trash_schedule_scraper = self._config.get(CONST_LABEL)
+            raise
