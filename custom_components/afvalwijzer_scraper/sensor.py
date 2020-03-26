@@ -5,6 +5,7 @@
 
 VERSION = '1.0.0'
 
+from datetime import timedelta
 import logging
 import bs4
 
