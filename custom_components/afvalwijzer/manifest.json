@@ -3,7 +3,7 @@
   "name": "Afvalwijzer",
   "documentation": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer",
   "requirements": [
-    "afvaldienst==0.6.7"
+    "afvaldienst==0.6.8"
   ],
   "dependencies": [],
   "codeowners": [
