@@ -166,7 +166,16 @@ class TrashSchedule(object):
         count_today = self._config.get(CONST_COUNT_TODAY)
 
         try:
-            afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix, count_today)
+            afvaldienst = await self.hass.async_add_executor_job(
+                    partial(
+                        Afvaldienst,
+                        provider,
+                        zipcode,
+                        housenumber,
+                        suffix,
+                        count_today
+                    )
+            )
         except ValueError as err:
             _LOGGER.error("Check afvaldienst platform settings %s", err.args)
             raise
