@@ -3,7 +3,8 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = '4.1.9'
+VERSION = '4.2.0'
+
 import asyncio
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
@@ -126,7 +127,7 @@ class TrashSensor(Entity):
 
     async def async_update(self):
         """Fetch new state data for the sensor."""
-        self._fetch_trash_data.update()
+        await self._hass.async_add_executor_job(self._fetch_trash_data.update)
         self._state = self._config.get(CONST_LABEL)
 
         for item in self._fetch_trash_data.trash_schedule_default:
@@ -166,16 +167,7 @@ class TrashSchedule(object):
         count_today = self._config.get(CONST_COUNT_TODAY)
 
         try:
-            afvaldienst = await self.hass.async_add_executor_job(
-                    partial(
-                        Afvaldienst,
-                        provider,
-                        zipcode,
-                        housenumber,
-                        suffix,
-                        count_today
-                    )
-            )
+            afvaldienst = Afvaldienst(provider, zipcode, housenumber, suffix, count_today)
         except ValueError as err:
             _LOGGER.error("Check afvaldienst platform settings %s", err.args)
             raise
