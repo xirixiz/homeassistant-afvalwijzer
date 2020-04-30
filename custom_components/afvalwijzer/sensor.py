@@ -4,7 +4,7 @@
 """
 
 VERSION = '4.1.9'
-
+import asyncio
 from Afvaldienst import Afvaldienst
 from datetime import date, datetime, timedelta
 from functools import partial
