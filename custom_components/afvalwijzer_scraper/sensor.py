@@ -14,6 +14,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
+from datetime import timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
