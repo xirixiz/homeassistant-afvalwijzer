@@ -1,5 +1,5 @@
 {
-  "domain": "afvalwijzer",
+  "domain": "afvalwijzer_scraper",
   "name": "Afvalwijzer_Scraper",
   "documentation": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer",
   "requirements": [
