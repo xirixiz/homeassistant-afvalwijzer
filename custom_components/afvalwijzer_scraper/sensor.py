@@ -20,7 +20,7 @@ from datetime import timedelta
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'afvalwijzer_scraper'
-DOMAIN = 'afvalwijzer'
+DOMAIN = 'afvalwijzer_scraper'
 ICON = 'mdi:delete-empty'
 SENSOR_PREFIX = 'trash_'
 
