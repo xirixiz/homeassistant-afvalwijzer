@@ -7,6 +7,7 @@ VERSION = '1.0.0'
 
 import logging
 import bs4
+import requests
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
