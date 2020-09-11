@@ -49,7 +49,7 @@ In your configuration.yaml
 ```yaml
 custom_updater:
  component_urls:
-   - https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_updater.json
+   - https://raw.githubusercontent.com/xirixiz/homeassistant-afvalwijzer/master/custom_updater.json
 ```
 
 In order to extend the log level, modify the following (configuration.yaml probably)
