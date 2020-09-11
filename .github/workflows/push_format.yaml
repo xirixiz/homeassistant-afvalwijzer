@@ -34,7 +34,7 @@ jobs:
         run: git pull || true
       - name: Run formatting
         run: |
-          python -m isort -v --multi-line 3 --trailing-comma --length 88 --recursive .
+          python -m isort -v --multi-line 3 --trailing-comma --line-width 88 --recursive .
           python -m black -v .
       - name: Commit files
         run: |
