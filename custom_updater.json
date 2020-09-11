@@ -1,13 +1,13 @@
 {
     "sensor.afvalwijzer": {
-        "version": "4.3.2",
+        "version": "4.3.3",
         "local_location": "/custom_components/afvalwijzer/__init__.py",
-        "remote_location": "https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_components/afvalwijzer/__init__.py",
-        "visit_repo": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/",
-        "changelog": "https://github.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/releases/latest",
+        "remote_location": "https://raw.githubusercontent.com/xirixiz/homeassistant-afvalwijzer/master/custom_components/afvalwijzer/__init__.py",
+        "visit_repo": "https://github.com/xirixiz/homeassistant-afvalwijzer/",
+        "changelog": "https://github.com/xirixiz/homeassistant-afvalwijzer/releases/latest",
         "resources": [
-            "https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_components/afvalwijzer/sensor.py",
-            "https://raw.githubusercontent.com/xirixiz/Home-Assistant-Sensor-Afvalwijzer/master/custom_components/afvalwijzer/manifest.json"
+            "https://raw.githubusercontent.com/xirixiz/homeassistant-afvalwijzer/master/custom_components/afvalwijzer/sensor.py",
+            "https://raw.githubusercontent.com/xirixiz/homeassistant-afvalwijzer/master/custom_components/afvalwijzer/manifest.json"
         ]
     }
 }
