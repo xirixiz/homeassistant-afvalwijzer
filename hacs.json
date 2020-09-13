@@ -1,3 +1,8 @@
 {
-  "name": "Afvalwijzer sensor"
+  "name": "Afvalwijzer",
+  "content_in_root": false,
+  "render_readme": true,
+  "domains": ["sensor"],
+  "country": ["NL"],
+  "homeassistant": "0.100.0"
 }
