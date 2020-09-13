@@ -3,7 +3,7 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = "4.3.4"
+VERSION = "4.4.0"
 
 import asyncio
 from Afvaldienst import Afvaldienst
