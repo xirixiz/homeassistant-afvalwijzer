@@ -65,15 +65,17 @@ logger:
 
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
 
-###### SENSOR
+###### SENSOR - CONFIGURATION.YAML
 ```yaml
-- platform: afvalwijzer # Required
-  provider: mijnafvalwijzer # Optional - mijnafvalwijzer (default) or afvalstoffendienstkalender
-  zipcode: postcode # Required
-  housenumber: huisnummer # Required
-  suffix: toevoeging # Optional
-  count_today: vandaag meetellen # Optional. true or false - Default = false
-  default_label: label # Optional - Default is 'Geen'
+  sensor:
+    - platform: afvalwijzer
+      provider: mijnafvalwijzer        (required, default = mijnafvalwijzer) either choose mijnafvalwijzer or afvalstoffendienstkalender
+      api_token: None                  (required, default = None) can only be requested/provided by the provider!
+      zipcode: 1111AA                  (required, default = 1111AA)
+      housenumber:  11                 (required, default = 11)
+      suffix: None                     (optional, default = None)
+      count_today: false               (optional, default = false) to take or not to take Today into account in the next pickup.
+      default_label: Geen              (optional, default = Geen) label if no date found
 ```
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)

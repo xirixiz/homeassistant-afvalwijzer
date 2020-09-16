@@ -3,7 +3,7 @@
   "name": "Afvalwijzer",
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
-  "dependencies": [],  
+  "dependencies": [],
   "codeowners": ["@xirixiz"],
-  "requirements": ["afvaldienst==0.8.0"]
+  "requirements": ["afvaldienst==1.0.3"]
 }

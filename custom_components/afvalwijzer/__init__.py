@@ -1,1 +1,0 @@
-"""AfvalWijzer component."""

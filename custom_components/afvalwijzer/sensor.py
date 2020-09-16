@@ -3,7 +3,7 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = "4.4.0"
+VERSION = "4.4.1"
 
 import asyncio
 from Afvaldienst import Afvaldienst
@@ -26,6 +26,7 @@ ICON = "mdi:delete-empty"
 SENSOR_PREFIX = "trash_"
 
 CONST_PROVIDER = "provider"
+CONST_API_TOKEN = "api_token"
 CONST_ZIPCODE = "zipcode"
 CONST_HOUSENUMBER = "housenumber"
 CONST_SUFFIX = "suffix"
@@ -40,6 +41,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Optional(CONST_PROVIDER, default="mijnafvalwijzer"): cv.string,
+        vol.Optional(CONST_API_TOKEN, default=""): cv.string,
         vol.Required(CONST_ZIPCODE): cv.string,
         vol.Required(CONST_HOUSENUMBER): cv.string,
         vol.Optional(CONST_SUFFIX, default=""): cv.string,
@@ -52,43 +54,35 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Setup the sensor platform."""
     provider = config.get(CONST_PROVIDER)
+    api_token = config.get(CONST_API_TOKEN)
     zipcode = config.get(CONST_ZIPCODE)
     housenumber = config.get(CONST_HOUSENUMBER)
     suffix = config.get(CONST_SUFFIX)
     count_today = config.get(CONST_COUNT_TODAY)
 
     _LOGGER.debug("Afvalwijzer provider = %s", provider)
+    _LOGGER.debug("Afvalwijzer api_token = %s", api_token)
     _LOGGER.debug("Afvalwijzer zipcode = %s", zipcode)
     _LOGGER.debug("Afvalwijzer housenumber = %s", housenumber)
 
     try:
         afvaldienst = await hass.async_add_executor_job(
-            partial(Afvaldienst, provider, zipcode, housenumber, suffix, count_today)
+            partial(Afvaldienst, provider, api_token, zipcode, housenumber, suffix, count_today)
         )
     except ValueError as err:
         _LOGGER.error("Check afvaldienst platform settings %s", err.args)
         raise
 
     # Get trash types to create sensors from
-    trashTypesDefault = afvaldienst.trash_type_list
-    trashTypesAdditional = (
-        afvaldienst.trash_schedule_today_json
-        + afvaldienst.trash_schedule_tomorrow_json
-        + afvaldienst.trash_schedule_next_days_json
-        + afvaldienst.trash_schedule_next_item_json
-        + afvaldienst.trash_schedule_next_date_json
-        + afvaldienst.trash_schedule_dat_json
-    )
-    for item in trashTypesAdditional:
-        trashTypesDefault.append(item["key"])
+    trash_types = afvaldienst.trash_types_from_schedule
+    _LOGGER.debug("Trash type list = %s", trash_types)
 
-    _LOGGER.debug("Trash type list = %s", trashTypesDefault)
-
+    # Fetch all trash data
     fetch_trash_data = TrashSchedule(config)
 
     # Setup sensors
     sensors = []
-    for name in trashTypesDefault:
+    for name in trash_types:
         sensors.append(TrashSensor(hass, name, fetch_trash_data, afvaldienst, config))
     async_add_entities(sensors)
 
@@ -133,25 +127,16 @@ class TrashSensor(Entity):
         await self._hass.async_add_executor_job(self._fetch_trash_data.update)
         self._state = self._config.get(CONST_LABEL)
 
-        for item in self._fetch_trash_data.trash_schedule_default:
+        for x in self._fetch_trash_data.trash_schedule:
             attributes = {}
-            attributes["next_pickup_in_days"] = item["days_remaining"]
-            if item["key"] == self._name:
-                self._state = item["value"]
+            attributes["next_pickup_in_days"] = x["days_remaining"]
+            if x["key"] == self._name:
+                self._state = x["value"]
                 self._attributes = attributes
 
-        for item in self._fetch_trash_data.trash_schedule_additional:
-            if item["key"] == self._name:
-                if item["value"] != "None":
-                    self._state = item["value"]
-
-        for item in self._fetch_trash_data.trash_schedule_firstwastetype:
-            if item["key"] == self._name:
-                self._state = item["value"]
-
-        for item in self._fetch_trash_data.trash_schedule_firstwastedate:
-            if item["key"] == self._name:
-                self._state = item["value"]
+        for x in self._fetch_trash_data.trash_schedule_custom:
+            if x["key"] == self._name:
+                self._state = x["value"]
 
 
 class TrashSchedule(object):
@@ -165,66 +150,30 @@ class TrashSchedule(object):
     def update(self):
         """Fetch new state data for the sensor."""
         provider = self._config.get(CONST_PROVIDER)
+        api_token = self._config.get(CONST_API_TOKEN)
         zipcode = self._config.get(CONST_ZIPCODE)
         housenumber = self._config.get(CONST_HOUSENUMBER)
         suffix = self._config.get(CONST_SUFFIX)
         count_today = self._config.get(CONST_COUNT_TODAY)
 
         try:
-            afvaldienst = Afvaldienst(
-                provider, zipcode, housenumber, suffix, count_today
-            )
+            afvaldienst = Afvaldienst(provider, api_token, zipcode, housenumber, suffix, count_today)
         except ValueError as err:
             _LOGGER.error("Check afvaldienst platform settings %s", err.args)
             raise
 
         try:
-            self.trash_schedule_default = afvaldienst.trash_schedulefull_json
-            _LOGGER.debug(
-                "Data trash_schedule_default = %s", self.trash_schedule_default
-            )
+            self.trash_schedule = afvaldienst.trash_schedule
+            _LOGGER.debug("Data trash_schedule = %s", self.trash_schedule)
         except ValueError as err:
-            _LOGGER.error("Check trash_schedule_default %s", err.args)
-            self.trash_schedule_default = self._config.get(CONST_LABEL)
+            _LOGGER.error("Check trash_schedule %s", err.args)
+            self.trash_schedule = self._config.get(CONST_LABEL)
             raise
 
         try:
-            self.trash_schedule_additional = (
-                afvaldienst.trash_schedule_today_json
-                + afvaldienst.trash_schedule_tomorrow_json
-                + afvaldienst.trash_schedule_next_days_json
-                + afvaldienst.trash_schedule_dat_json
-            )
-            _LOGGER.debug(
-                "Data trash_schedule_additional = %s", self.trash_schedule_additional
-            )
+            self.trash_schedule_custom = afvaldienst.trash_schedule_custom
+            _LOGGER.debug("Data trash_schedule_custom = %s", self.trash_schedule_custom)
         except ValueError as err:
-            _LOGGER.error("Check trash_schedule_additional %s", err.args)
-            self.trash_schedule_additional = self._config.get(CONST_LABEL)
-            raise
-
-        try:
-            self.trash_schedule_firstwastetype = (
-                afvaldienst.trash_schedule_next_item_json
-            )
-            _LOGGER.debug(
-                "Data trash_schedule_firstwastetype = %s",
-                self.trash_schedule_firstwastetype,
-            )
-        except ValueError as err:
-            _LOGGER.error("Check trash_schedule_firstwastetype %s", err.args)
-            self.trash_schedule_firstwastetype = self._config.get(CONST_LABEL)
-            raise
-
-        try:
-            self.trash_schedule_firstwastedate = (
-                afvaldienst.trash_schedule_next_date_json
-            )
-            _LOGGER.debug(
-                "Data trash_schedule_firstwastedate = %s",
-                self.trash_schedule_firstwastedate,
-            )
-        except ValueError as err:
-            _LOGGER.error("Check trash_schedule_firstwastedate %s", err.args)
-            self.trash_schedule_firstwastedate = self._config.get(CONST_LABEL)
+            _LOGGER.error("Check trash_schedule_custom %s", err.args)
+            self.trash_schedule_custom = self._config.get(CONST_LABEL)
             raise
