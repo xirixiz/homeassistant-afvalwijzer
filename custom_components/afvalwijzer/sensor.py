@@ -3,7 +3,7 @@
 @ Description : Afvalwijzer Json/Scraper Sensor - It queries mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 """
 
-VERSION = "4.4.1"
+VERSION = "4.4.2"
 
 import asyncio
 import logging
@@ -46,7 +46,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONST_HOUSENUMBER): cv.string,
         vol.Optional(CONST_SUFFIX, default=""): cv.string,
         vol.Optional(CONST_COUNT_TODAY, default="false"): cv.string,
-        vol.Optional(CONST_LABEL, default="Geen"): cv.string,
+        vol.Optional(CONST_LABEL, default="None"): cv.string,
     }
 )
 
@@ -59,6 +59,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     housenumber = config.get(CONST_HOUSENUMBER)
     suffix = config.get(CONST_SUFFIX)
     count_today = config.get(CONST_COUNT_TODAY)
+    label = config.get(CONST_LABEL)
 
     _LOGGER.debug("Afvalwijzer provider = %s", provider)
     _LOGGER.debug("Afvalwijzer api_token = %s", api_token)
@@ -75,6 +76,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 housenumber,
                 suffix,
                 count_today,
+                label,
             )
         )
     except ValueError as err:
@@ -163,10 +165,11 @@ class TrashSchedule(object):
         housenumber = self._config.get(CONST_HOUSENUMBER)
         suffix = self._config.get(CONST_SUFFIX)
         count_today = self._config.get(CONST_COUNT_TODAY)
+        label = self._config.get(CONST_LABEL)
 
         try:
             afvaldienst = Afvaldienst(
-                provider, api_token, zipcode, housenumber, suffix, count_today
+                provider, api_token, zipcode, housenumber, suffix, count_today, label
             )
         except ValueError as err:
             _LOGGER.error("Check afvaldienst platform settings %s", err.args)
