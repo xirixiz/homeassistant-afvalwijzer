@@ -6,13 +6,13 @@
 VERSION = "4.4.1"
 
 import asyncio
-from Afvaldienst import Afvaldienst
+import logging
 from datetime import date, datetime, timedelta
 from functools import partial
-import logging
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from Afvaldienst import Afvaldienst
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.entity import Entity
@@ -67,7 +67,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     try:
         afvaldienst = await hass.async_add_executor_job(
-            partial(Afvaldienst, provider, api_token, zipcode, housenumber, suffix, count_today)
+            partial(
+                Afvaldienst,
+                provider,
+                api_token,
+                zipcode,
+                housenumber,
+                suffix,
+                count_today,
+            )
         )
     except ValueError as err:
         _LOGGER.error("Check afvaldienst platform settings %s", err.args)
@@ -157,7 +165,9 @@ class TrashSchedule(object):
         count_today = self._config.get(CONST_COUNT_TODAY)
 
         try:
-            afvaldienst = Afvaldienst(provider, api_token, zipcode, housenumber, suffix, count_today)
+            afvaldienst = Afvaldienst(
+                provider, api_token, zipcode, housenumber, suffix, count_today
+            )
         except ValueError as err:
             _LOGGER.error("Check afvaldienst platform settings %s", err.args)
             raise
