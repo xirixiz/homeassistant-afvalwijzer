@@ -21,6 +21,8 @@ Platform | Description
 ![example][exampleimg]
 
 
+
+
 ## Installation
 
 1. Using you tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
