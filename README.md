@@ -72,7 +72,7 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
   sensor:
     - platform: afvalwijzer
       provider: mijnafvalwijzer        (required, default = mijnafvalwijzer) either choose mijnafvalwijzer or afvalstoffendienstkalender
-      api_token: None                  (required, default = None) can only be requested/provided by the provider!
+      api_token: None                  (required, default = None) can only be requested/provided by the provider! However they are NOT giving one!
       zipcode: 1111AA                  (required, default = 1111AA)
       housenumber:  11                 (required, default = 11)
       suffix: None                     (optional, default = None)
