@@ -5,5 +5,5 @@
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "dependencies": [],
   "codeowners": ["@xirixiz"],
-  "requirements": ["afvaldienst==1.0.7"]
+  "requirements": ["afvaldienst==1.0.7", "beautifulsoup4==4.9.0"]
 }
