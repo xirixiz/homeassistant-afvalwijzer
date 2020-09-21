@@ -1,6 +1,6 @@
 {
     "sensor.afvalwijzer": {
-        "version": "4.4.2",
+        "version": "4.4.3",
         "local_location": "/custom_components/afvalwijzer/__init__.py",
         "remote_location": "https://raw.githubusercontent.com/xirixiz/homeassistant-afvalwijzer/master/custom_components/afvalwijzer/__init__.py",
         "visit_repo": "https://github.com/xirixiz/homeassistant-afvalwijzer/",
