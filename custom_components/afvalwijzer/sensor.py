@@ -14,8 +14,7 @@ from functools import partial
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from Afvaldienst import Afvaldienst
-from Afvaldienst import AfvaldienstScraper
+from Afvaldienst import Afvaldienst, AfvaldienstScraper
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.entity import Entity
@@ -69,7 +68,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     _LOGGER.debug("Afvalwijzer zipcode = %s", zipcode)
     _LOGGER.debug("Afvalwijzer housenumber = %s", housenumber)
 
-    if data_collector == 'api':
+    if data_collector == "api":
         api_token = config.get(CONST_API_TOKEN)
         suffix = config.get(CONST_SUFFIX)
 
@@ -94,7 +93,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         trash_types = afvaldienst.trash_types_from_schedule
         _LOGGER.debug("Trash type list = %s", trash_types)
 
-    if data_collector == 'scraper':
+    if data_collector == "scraper":
         try:
             afvaldienst = await hass.async_add_executor_job(
                 partial(
@@ -192,19 +191,25 @@ class TrashSchedule(object):
         count_today = self._config.get(CONST_COUNT_TODAY)
         label = self._config.get(CONST_LABEL)
 
-        if data_collector == 'api':
+        if data_collector == "api":
             api_token = self._config.get(CONST_API_TOKEN)
             suffix = self._config.get(CONST_SUFFIX)
 
             try:
                 afvaldienst = Afvaldienst(
-                    provider, api_token, zipcode, housenumber, suffix, count_today, label
+                    provider,
+                    api_token,
+                    zipcode,
+                    housenumber,
+                    suffix,
+                    count_today,
+                    label,
                 )
             except ValueError as err:
                 _LOGGER.error("Check afvaldienst platform settings %s", err.args)
                 raise
 
-        if data_collector == 'scraper':
+        if data_collector == "scraper":
             try:
                 afvaldienst = AfvaldienstScraper(
                     provider, zipcode, housenumber, count_today, label
