@@ -5,7 +5,7 @@
 Special thanks to https://github.com/heyajohnny/afvalinfo for allowing me to use his scraper code!
 """
 
-VERSION = "4.4.5"
+VERSION = "4.4.6"
 
 import asyncio
 import logging
