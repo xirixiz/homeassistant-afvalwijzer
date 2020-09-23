@@ -5,7 +5,7 @@
 Special thanks to https://github.com/heyajohnny/afvalinfo for allowing me to use his scraper code!
 """
 
-VERSION = "4.5.0"
+VERSION = "4.5.1"
 
 import asyncio
 import logging
@@ -61,6 +61,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     provider = config.get(CONST_PROVIDER)
     zipcode = config.get(CONST_ZIPCODE)
     housenumber = config.get(CONST_HOUSENUMBER)
+    suffix = config.get(CONST_SUFFIX)
     count_today = config.get(CONST_COUNT_TODAY)
     label = config.get(CONST_LABEL)
 
@@ -70,7 +71,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     if data_collector == "api":
         api_token = config.get(CONST_API_TOKEN)
-        suffix = config.get(CONST_SUFFIX)
 
         try:
             afvaldienst = await hass.async_add_executor_job(
