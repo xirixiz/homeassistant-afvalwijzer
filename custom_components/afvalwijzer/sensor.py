@@ -5,7 +5,7 @@
 Special thanks to https://github.com/heyajohnny/afvalinfo for allowing me to use his scraper code!
 """
 
-VERSION = "4.5.2"
+VERSION = "4.5.3"
 
 import asyncio
 import logging
@@ -189,12 +189,12 @@ class TrashSchedule(object):
         provider = self._config.get(CONST_PROVIDER)
         zipcode = self._config.get(CONST_ZIPCODE)
         housenumber = self._config.get(CONST_HOUSENUMBER)
+        suffix = self._config.get(CONST_SUFFIX)
         count_today = self._config.get(CONST_COUNT_TODAY)
         label = self._config.get(CONST_LABEL)
 
         if data_collector == "api":
             api_token = self._config.get(CONST_API_TOKEN)
-            suffix = self._config.get(CONST_SUFFIX)
 
             try:
                 afvaldienst = Afvaldienst(
