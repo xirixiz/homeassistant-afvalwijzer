@@ -19,10 +19,10 @@ Platform | Description
 -- | --
 `sensor` | Show trash pickup dates for mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 
-![example][exampleimg_2]
+![example][exampleimg2]
 
 The second row sorts the trash items by date using the following lovelace code
-```
+```yaml
   - type: 'custom:auto-entities'
     card:
       type: glance
