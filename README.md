@@ -11,7 +11,7 @@ _Component to integrate with [afvalwijzer][afvalwijzer] and [afvalstoffendienstk
 
 This custom component dynamically creates sensor.trash_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
-Special thanks go out to https://github.com/heyajohnny/afvalinfo for allowing me to use his scraper code!
+Special thanks go out to https://github.com/heyajohnny/afvalinfo for allowing me to use the scraper code he created once the api solutions was disabled by the provider(s)!
 
 **This component will set up the following platforms.**
 
@@ -37,6 +37,10 @@ The second row sorts the trash items by date using the following lovelace code
       method: attribute
       numeric: true
 ```
+
+More information on the reminders (ios in this case):
+https://github.com/xirixiz/my-hass-config/blob/master/packages/trash.yaml
+https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
 
