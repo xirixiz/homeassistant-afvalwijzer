@@ -5,7 +5,7 @@
 Special thanks to https://github.com/heyajohnny/afvalinfo for allowing me to use his scraper code!
 """
 
-VERSION = "4.5.1"
+VERSION = "4.5.2"
 
 import asyncio
 import logging
@@ -213,7 +213,7 @@ class TrashSchedule(object):
         if data_collector == "scraper":
             try:
                 afvaldienst = AfvaldienstScraper(
-                    provider, zipcode, housenumber, count_today, label
+                    provider, zipcode, housenumber, suffix, count_today, label
                 )
             except ValueError as err:
                 _LOGGER.error("Check afvaldienst platform settings %s", err.args)
