@@ -39,8 +39,8 @@ The second row sorts the trash items by date using the following lovelace code
 ```
 
 More information on the reminders (ios in this case):
-https://github.com/xirixiz/my-hass-config/blob/master/packages/trash.yaml
-https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
+- https://github.com/xirixiz/my-hass-config/blob/master/packages/trash.yaml
+- https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
 
