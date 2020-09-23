@@ -5,7 +5,7 @@
 Special thanks to https://github.com/heyajohnny/afvalinfo for allowing me to use his scraper code!
 """
 
-VERSION = "4.4.9"
+VERSION = "4.5.0"
 
 import asyncio
 import logging
@@ -101,6 +101,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     provider,
                     zipcode,
                     housenumber,
+                    suffix,
                     count_today,
                     label,
                 )
