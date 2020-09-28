@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-from .const.const import (
+from .const import (
     _LOGGER,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_HIDDEN,

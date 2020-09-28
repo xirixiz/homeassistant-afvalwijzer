@@ -17,7 +17,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 from requests.exceptions import HTTPError
 
-from .const.const import (
+from .const import (
     _LOGGER,
     CONF_API_TOKEN,
     CONF_DATE_FORMAT,
