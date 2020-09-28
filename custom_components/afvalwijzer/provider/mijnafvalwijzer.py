@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError
 
-from ..const import _LOGGER, MONTH_TO_NUMBER, SENSOR_PROVIDER_TO_URL
+from ..const.const import _LOGGER, MONTH_TO_NUMBER, SENSOR_PROVIDER_TO_URL
 
 
 class MijnAfvalWijzer(object):
