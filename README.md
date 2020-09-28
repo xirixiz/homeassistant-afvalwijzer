@@ -33,7 +33,7 @@ The second row sorts the waste items by date using the following lovelace code
         - entity_id: sensor.afvalwijzer_pmd
         - entity_id: sensor.afvalwijzer_restafval
     sort:
-      attribute: next_pickup_in_days
+      attribute: days_until_collection_date
       method: attribute
       numeric: true
 ```
