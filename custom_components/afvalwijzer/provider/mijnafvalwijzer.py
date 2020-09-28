@@ -193,7 +193,7 @@ class MijnAfvalWijzer(object):
                         today_multiple_items.append(key)
                         waste_dict_custom["today"] = key
                 # waste type(s) tomorrow
-                if value == self.today:
+                if value == self.tomorrow:
                     if "tomorrow" in waste_dict_custom.keys():
                         tomorrow_multiple_items.append(key)
                         waste_dict_custom["tomorrow"] = ", ".join(
