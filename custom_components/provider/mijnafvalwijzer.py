@@ -30,7 +30,6 @@ class MijnAfvalWijzer(object):
         _providers = ("mijnafvalwijzer", "afvalstoffendienstkalender")
         if self.provider not in _providers:
             print("Invalid provider: {}, please verify".format(self.provider))
-
         # date today
         self.today = datetime.today().strftime("%Y-%m-%d")
         # date tomorrow
@@ -50,7 +49,6 @@ class MijnAfvalWijzer(object):
             self.date_selected = self.today
         else:
             self.date_selected = self.tomorrow
-
         # data collector functions
         self._waste_data_provider = self.get_waste_data_provider()
         self._waste_data_custom = self.get_waste_data_custom()
@@ -80,7 +78,6 @@ class MijnAfvalWijzer(object):
                 else:
                     # get the value of the span
                     date = date.string
-
                 day = date.split()[1]
                 month = MONTH_TO_NUMBER[date.split()[2]]
                 # the year is always this year because it's a 'jaaroverzicht'
@@ -128,14 +125,11 @@ class MijnAfvalWijzer(object):
                     if item["type"] not in waste_dict_provider.keys():
                         if item["date"] >= self.today:
                             waste_dict_provider[item["type"]] = item["date"]
-
                 for item in json_data:
                     if item["date"] <= self.today:
                         if item["type"] not in waste_dict_provider.keys():
                             waste_dict_provider[item["type"]] = self.default_label
-
                 return waste_dict_provider
-
             ########## BEGIN SCRAPER WASTE DICTIONARY ##########
             if len(self.api_token) == 0:
                 _LOGGER.debug(
@@ -161,19 +155,15 @@ class MijnAfvalWijzer(object):
                             waste_dict_provider[waste_type["class"][0]] = ""
                 except KeyError:
                     pass
-
                 for waste_type in waste_dict_provider.keys():
                     waste_dict_provider[waste_type] = self.get_date_from_waste_type(
                         jaaroverzicht, waste_type
                     )
-
                 # set value to none if no value has been found
                 for key in waste_dict_provider.keys():
                     if len(waste_dict_provider[key]) == 0:
                         waste_dict_provider[key] = self.default_label
-
                 return waste_dict_provider
-
         except HTTPError as http_err:
             _LOGGER.error("HTTP error occurred: %s", http_err)
             return False
@@ -202,7 +192,6 @@ class MijnAfvalWijzer(object):
                     else:
                         today_multiple_items.append(key)
                         waste_dict_custom["today"] = key
-
                 # waste type(s) tomorrow
                 if value == self.today:
                     if "tomorrow" in waste_dict_custom.keys():
@@ -213,7 +202,6 @@ class MijnAfvalWijzer(object):
                     else:
                         tomorrow_multiple_items.append(key)
                         waste_dict_custom["tomorrow"] = key
-
                 # waste type(s) day_after_tomorrow
                 if value == self.day_after_tomorrow:
                     if "day_after_tomorrow" in waste_dict_custom.keys():
@@ -224,7 +212,6 @@ class MijnAfvalWijzer(object):
                     else:
                         day_after_tomorrow_multiple_items.append(key)
                         waste_dict_custom["day_after_tomorrow"] = key
-
             # set value to none if no value has been found
             if "today" not in waste_dict_custom.keys():
                 waste_dict_custom["today"] = self.default_label
@@ -235,7 +222,6 @@ class MijnAfvalWijzer(object):
         except Exception as err:
             _LOGGER.error("Error occurred: %s", err)
             return False
-
         try:
             # create a temporary dictionary for the first_next_* items as the output is dependent on either to take today into account or not
             waste_dict_temp_date_selected = {
@@ -266,7 +252,6 @@ class MijnAfvalWijzer(object):
                     else:
                         first_next_item_multiple_items.append(key)
                         waste_dict_custom["first_next_item"] = key
-
             # set value to none if no value has been found
             if "first_next_date" not in waste_dict_custom.keys():
                 waste_dict_custom["first_next_date"] = self.default_label
@@ -277,7 +262,6 @@ class MijnAfvalWijzer(object):
         except Exception as err:
             _LOGGER.error("Error occurred: %s", err)
             return False
-
         try:
             # date format to Dutch standard for waste_dict_provider
             for key, value in waste_dict_provider.items():
@@ -288,7 +272,6 @@ class MijnAfvalWijzer(object):
         except Exception as err:
             _LOGGER.error("Error occurred: %s", err)
             return False
-
         return waste_dict_custom
 
     def get_waste_types_provider(self):

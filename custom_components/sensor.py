@@ -80,7 +80,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     except ValueError as err:
         _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
         raise
-
     fetch_afvalwijzer_data = AfvalwijzerData(
         provider,
         api_token,
@@ -106,7 +105,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 hass, fetch_afvalwijzer_data, waste_type, date_format, default_label
             )
         )
-
     for waste_type in waste_types_custom:
         _LOGGER.debug("Adding sensor custom: %s", waste_type)
         entities.append(
@@ -114,7 +112,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 hass, fetch_afvalwijzer_data, waste_type, default_label
             )
         )
-
     _LOGGER.debug("Entities appended = %s", entities)
     async_add_entities(entities)
 
@@ -154,7 +151,6 @@ class AfvalwijzerData(object):
         except ValueError as err:
             _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
             raise
-
         try:
             self.waste_data_provider = afvalwijzer.waste_data_provider
             _LOGGER.debug(
@@ -164,7 +160,6 @@ class AfvalwijzerData(object):
             _LOGGER.error("Check waste_data_provider %s", err.args)
             self.waste_data_provider = self.default_label
             raise
-
         try:
             self.waste_data_custom = afvalwijzer.waste_data_custom
             _LOGGER.debug("Generating waste_data_custom = %s", self.waste_data_custom)
