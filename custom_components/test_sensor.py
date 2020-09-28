@@ -10,19 +10,27 @@ MijnAfvalWijzer().get_data('waalwijk', '5146EG', '1', 'gft, pbd, restafval, papi
 python3 -m afvalwijzer.test_sensor
 
 """
-provider = 'mijnafvalwijzer'
-api_token = '5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca'
-api_token2 = ''
-postal_code = '5146EG'
-street_number = '1'
-suffix = ''
-include_date_today = 'False'
-default_label = 'Geen'
+provider = "mijnafvalwijzer"
+api_token = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
+api_token2 = ""
+postal_code = "5146EG"
+street_number = "1"
+suffix = ""
+include_date_today = "False"
+default_label = "Geen"
 
 from .provider.mijnafvalwijzer import MijnAfvalWijzer
 
 # afval1 = MijnAfvalWijzer(provider, api_token, postal_code, street_number, suffix, include_date_today, default_label)
-afval2 = MijnAfvalWijzer(provider, api_token2, postal_code, street_number, suffix, include_date_today, default_label)
+afval2 = MijnAfvalWijzer(
+    provider,
+    api_token2,
+    postal_code,
+    street_number,
+    suffix,
+    include_date_today,
+    default_label,
+)
 
 #########################################################################################################
 # print("\n")

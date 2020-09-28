@@ -6,34 +6,33 @@ Special thanks to: https://github.com/heyajohnny/afvalinfo for allowing me to co
 """
 
 import asyncio
-import voluptuous as vol
-from requests.exceptions import HTTPError
-from datetime import datetime, date, timedelta
-from functools import partial
 import re
+from datetime import date, datetime, timedelta
+from functools import partial
+
+import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
+from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle
+from requests.exceptions import HTTPError
 
 from .const.const import (
     _LOGGER,
-    MIN_TIME_BETWEEN_UPDATES,
-    PARALLEL_UPDATES,
-    CONF_PROVIDER,
     CONF_API_TOKEN,
+    CONF_DATE_FORMAT,
+    CONF_DEFAULT_LABEL,
+    CONF_INCLUDE_DATE_TODAY,
     CONF_POSTAL_CODE,
+    CONF_PROVIDER,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
-    CONF_DATE_FORMAT,
-    CONF_INCLUDE_DATE_TODAY,
-    CONF_DEFAULT_LABEL
+    MIN_TIME_BETWEEN_UPDATES,
+    PARALLEL_UPDATES,
 )
-
 from .provider.mijnafvalwijzer import MijnAfvalWijzer
-from .sensor_provider import AfvalwijzerProviderSensor
 from .sensor_custom import AfvalwijzerCustomSensor
-
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-import homeassistant.helpers.config_validation as cv
-from homeassistant.util import Throttle
-from homeassistant.helpers.entity import Entity
+from .sensor_provider import AfvalwijzerProviderSensor
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -44,7 +43,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
         vol.Optional(CONF_DATE_FORMAT, default="%d-%m-%Y"): cv.string,
         vol.Optional(CONF_INCLUDE_DATE_TODAY, default="false"): cv.string,
-        vol.Optional(CONF_DEFAULT_LABEL, default = "Geen"): cv.string,
+        vol.Optional(CONF_DEFAULT_LABEL, default="Geen"): cv.string,
     }
 )
 
@@ -82,7 +81,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
         raise
 
-    fetch_afvalwijzer_data = AfvalwijzerData(provider, api_token, postal_code, street_number, suffix, include_date_today, default_label)
+    fetch_afvalwijzer_data = AfvalwijzerData(
+        provider,
+        api_token,
+        postal_code,
+        street_number,
+        suffix,
+        include_date_today,
+        default_label,
+    )
 
     waste_types_provider = afvalwijzer.waste_types_provider
     _LOGGER.debug("Generating waste_types_provider list = %s", waste_types_provider)
@@ -94,18 +101,35 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     for waste_type in waste_types_provider:
         _LOGGER.debug("Adding sensor provider: %s", waste_type)
-        entities.append(AfvalwijzerProviderSensor(hass, fetch_afvalwijzer_data, waste_type, date_format, default_label))
+        entities.append(
+            AfvalwijzerProviderSensor(
+                hass, fetch_afvalwijzer_data, waste_type, date_format, default_label
+            )
+        )
 
     for waste_type in waste_types_custom:
         _LOGGER.debug("Adding sensor custom: %s", waste_type)
-        entities.append(AfvalwijzerCustomSensor(hass, fetch_afvalwijzer_data, waste_type, default_label))
+        entities.append(
+            AfvalwijzerCustomSensor(
+                hass, fetch_afvalwijzer_data, waste_type, default_label
+            )
+        )
 
     _LOGGER.debug("Entities appended = %s", entities)
     async_add_entities(entities)
 
 
 class AfvalwijzerData(object):
-    def __init__(self, provider, api_token, postal_code, street_number, suffix, include_date_today, default_label):
+    def __init__(
+        self,
+        provider,
+        api_token,
+        postal_code,
+        street_number,
+        suffix,
+        include_date_today,
+        default_label,
+    ):
         self.fetch_afvalwijzer_data = None
         self.provider = provider
         self.api_token = api_token
@@ -133,7 +157,9 @@ class AfvalwijzerData(object):
 
         try:
             self.waste_data_provider = afvalwijzer.waste_data_provider
-            _LOGGER.debug("Generating waste_data_provider = %s", self.waste_data_provider)
+            _LOGGER.debug(
+                "Generating waste_data_provider = %s", self.waste_data_provider
+            )
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
             self.waste_data_provider = self.default_label
