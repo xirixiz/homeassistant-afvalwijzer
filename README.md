@@ -9,7 +9,7 @@
 
 _Component to integrate with [afvalwijzer][afvalwijzer] and [afvalstoffendienstkalender][afvalstoffendienstkalender]._
 
-This custom component dynamically creates sensor.trash_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
+This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
 Special thanks go out to https://github.com/heyajohnny/afvalinfo for allowing me to copy scraper code!
 
@@ -17,21 +17,21 @@ Special thanks go out to https://github.com/heyajohnny/afvalinfo for allowing me
 
 Platform | Description
 -- | --
-`sensor` | Show trash pickup dates for mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
+`sensor` | Show waste pickup dates for mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
 
 ![example][exampleimg1]
 
-The second row sorts the trash items by date using the following lovelace code
+The second row sorts the waste items by date using the following lovelace code
 ```yaml
   - type: 'custom:auto-entities'
     card:
       type: glance
     filter:
       include:
-        - entity_id: sensor.trash_gft
-        - entity_id: sensor.trash_papier
-        - entity_id: sensor.trash_pmd
-        - entity_id: sensor.trash_restafval
+        - entity_id: sensor.afvalwijzer_gft
+        - entity_id: sensor.afvalwijzer_papier
+        - entity_id: sensor.afvalwijzer_pmd
+        - entity_id: sensor.afvalwijzer_restafval
     sort:
       attribute: next_pickup_in_days
       method: attribute
@@ -39,7 +39,7 @@ The second row sorts the trash items by date using the following lovelace code
 ```
 
 More information on the reminders (ios in this case):
-- https://github.com/xirixiz/my-hass-config/blob/master/packages/trash.yaml
+- https://github.com/xirixiz/my-hass-config/blob/master/packages/waste.yaml
 - https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
@@ -116,42 +116,42 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
 ###### INPUT BOOLEAN (FOR AUTOMATION)
 ```yaml
 input_boolean:
-  trash_moved:
-    name: Trash has been moved
+  waste_moved:
+    name: Waste has been moved
     initial: 'off'
     icon: mdi:delete-empty
-  trash_reminder:
-    name: Trash reminder enabled
+  waste_reminder:
+    name: Waste reminder enabled
     initial: 'on'
 ```
 
 ###### AUTOMATION
 ```yaml
 automation:
-  - alias: Reset trash notification
+  - alias: Reset waste notification
     trigger:
       platform: state
-      entity_id: input_boolean.trash_moved
+      entity_id: input_boolean.waste_moved
       to: 'on'
       for:
         hours: 12
     action:
       - service: input_boolean.turn_off
-        entity_id: input_boolean.trash_moved
+        entity_id: input_boolean.waste_moved
       - service: input_boolean.turn_on
-        entity_id: input_boolean.trash_reminder
+        entity_id: input_boolean.waste_reminder
 
-  - alias: Mark trash as moved from notification
+  - alias: Mark waste as moved from notification
     trigger:
       platform: event
       event_type: ios.notification_action_fired
       event_data:
-        actionName: MARK_TRASH_MOVED
+        actionName: MARK_WASTE_MOVED
     action:
       - service: input_boolean.turn_on
-        entity_id: input_boolean.trash_moved
+        entity_id: input_boolean.waste_moved
 
-  - alias: Trash has not been moved
+  - alias: Wasrte has not been moved
     trigger:
       platform: time_pattern
       minutes: '/60'
@@ -160,21 +160,21 @@ automation:
       condition: and
       conditions:
         - condition: state
-          entity_id: input_boolean.trash_moved
+          entity_id: input_boolean.waste_moved
           state: 'off'
         - condition: state
-          entity_id: input_boolean.trash_reminder
+          entity_id: input_boolean.waste_reminder
           state: 'on'
         - condition: time
           after: '18:00:00'
           before: '23:00:00'
         - condition: template
-          value_template: "{{ states('sensor.trash_tomorrow') != 'Geen' }}"
+          value_template: "{{ states('sensor.afvalwijzer_tomorrow') != 'Geen' }}"
     action:
       - service: notify.family
         data:
           title: "Afval"
-          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.trash_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
+          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
           data:
             push:
               badge: 0
