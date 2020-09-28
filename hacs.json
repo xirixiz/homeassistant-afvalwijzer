@@ -1,5 +1,5 @@
 {
-  "name": "Afvalwijzer",
+  "name": "Afvalwijzer Sensors",
   "content_in_root": false,
   "render_readme": true,
   "domains": ["sensor"],
