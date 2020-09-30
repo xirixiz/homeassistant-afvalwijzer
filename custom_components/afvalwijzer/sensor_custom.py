@@ -9,7 +9,6 @@ from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
-    ATTR_NAMED_DATE,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SENSOR_ICON,
@@ -27,7 +26,6 @@ class AfvalwijzerCustomSensor(Entity):
         self._state = None
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
-        self._named_date = None
 
     @property
     def name(self):
@@ -47,7 +45,6 @@ class AfvalwijzerCustomSensor(Entity):
             return {
                 ATTR_LAST_UPDATE: self._last_update,
                 ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
-                ATTR_NAMED_DATE: self._named_date,
             }
         else:
             return {ATTR_LAST_UPDATE: self._last_update}
@@ -74,12 +71,5 @@ class AfvalwijzerCustomSensor(Entity):
                     waste_data_custom[self.waste_type], "%d-%m-%Y"
                 ).strftime("%Y-%m-%d")
 
-                collection_date_named = datetime.strptime(
-                    waste_data_custom[self.waste_type], "%d-%m-%Y"
-                ).strftime("%a %d %b")
-
                 # Add attribute date in format "%Y-%m-%d"
                 self._year_month_day_date = collection_date_us
-
-                # Add attribute date in format "%a %d %b"
-                self._named_date = collection_date_named

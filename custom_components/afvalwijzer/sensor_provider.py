@@ -13,7 +13,6 @@ from .const.const import (
     ATTR_IS_COLLECTION_DATE_TOMORROW,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
-    ATTR_NAMED_DATE,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SENSOR_ICON,
@@ -40,7 +39,6 @@ class AfvalwijzerProviderSensor(Entity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
         self._year_month_day_date = None
-        self._named_date = None
 
     @property
     def name(self):
@@ -64,7 +62,6 @@ class AfvalwijzerProviderSensor(Entity):
             ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
             ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
             ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
-            ATTR_NAMED_DATE: self._named_date,
         }
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -102,9 +99,6 @@ class AfvalwijzerProviderSensor(Entity):
                         # Add attribute date in format "%Y-%m-%d"
                         self._year_month_day_date = str(collection_date_us)
 
-                        # Add attribute date in format "%a %d %b"
-                        self._named_date = collection_date_named
-
                         # Add attribute, is the collection date today, tomorrow and/or day_after_tomorrow?
                         self._is_collection_date_today = (
                             date.today() == collection_date_us
@@ -133,7 +127,6 @@ class AfvalwijzerProviderSensor(Entity):
             self._hidden = False
             self._days_until_collection_date = None
             self._year_month_day_date = None
-            self._named_date = None
             self._is_collection_date_today = False
             self._is_collection_date_tomorrow = False
             self._is_collection_date_day_after_tomorrow = False
