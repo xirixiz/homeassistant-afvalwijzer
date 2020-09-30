@@ -151,7 +151,7 @@ automation:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_moved
 
-  - alias: Wasrte has not been moved
+  - alias: Waste has not been moved
     trigger:
       platform: time_pattern
       minutes: '/60'
