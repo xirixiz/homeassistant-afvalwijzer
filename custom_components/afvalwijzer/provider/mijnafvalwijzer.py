@@ -123,10 +123,10 @@ class MijnAfvalWijzer(object):
                 waste_dict_provider = {}
                 for item in json_data:
                     if item["type"] not in waste_dict_provider.keys():
-                        if item["date"] >= self.today:
+                        if item["date"] >= self.date_selected:
                             waste_dict_provider[item["type"]] = item["date"]
                 for item in json_data:
-                    if item["date"] <= self.today:
+                    if item["date"] <= self.date_selected:
                         if item["type"] not in waste_dict_provider.keys():
                             waste_dict_provider[item["type"]] = self.default_label
                 return waste_dict_provider
@@ -177,7 +177,7 @@ class MijnAfvalWijzer(object):
         today_multiple_items = []
         tomorrow_multiple_items = []
         day_after_tomorrow_multiple_items = []
-        first_next_item_multiple_items = []
+        next_item_multiple_items = []
         waste_dict_temp = {
             key: value for key, value in waste_dict_provider.items() if len(value) != 0
         }
@@ -223,7 +223,7 @@ class MijnAfvalWijzer(object):
             _LOGGER.error("Error occurred: %s", err)
             return False
         try:
-            # create a temporary dictionary for the first_next_* items as the output is dependent on either to take today into account or not
+            # create a temporary dictionary for the next_* items as the output is dependent on either to take today into account or not
             waste_dict_temp_date_selected = {
                 key: value
                 for key, value in waste_dict_provider.items()
@@ -232,33 +232,33 @@ class MijnAfvalWijzer(object):
                 and value >= self.date_selected
             }
             # first upcoming pickup date of any waste type
-            waste_dict_custom["first_next_date"] = datetime.strptime(
+            waste_dict_custom["next_date"] = datetime.strptime(
                 min(waste_dict_temp_date_selected.values()), "%Y-%m-%d"
             ).strftime("%d-%m-%Y")
             # first upcoming waste type pickup in days
-            waste_dict_custom["first_next_in_days"] = self.calculate_days_between_dates(
+            waste_dict_custom["next_in_days"] = self.calculate_days_between_dates(
                 self.today, min(waste_dict_temp_date_selected.values())
             )
             # first upcoming waste type(s) pickup
-            first_upcoming_wate_date = min(waste_dict_temp_date_selected.values())
+            upcoming_wate_date = min(waste_dict_temp_date_selected.values())
 
             for key, value in waste_dict_temp_date_selected.items():
-                if value == first_upcoming_wate_date:
-                    if "first_next_item" in waste_dict_custom.keys():
-                        first_next_item_multiple_items.append(key)
-                        waste_dict_custom["first_next_item"] = ", ".join(
-                            first_next_item_multiple_items
+                if value == upcoming_wate_date:
+                    if "next_item" in waste_dict_custom.keys():
+                        next_item_multiple_items.append(key)
+                        waste_dict_custom["next_item"] = ", ".join(
+                            next_item_multiple_items
                         )
                     else:
-                        first_next_item_multiple_items.append(key)
-                        waste_dict_custom["first_next_item"] = key
+                        next_item_multiple_items.append(key)
+                        waste_dict_custom["next_item"] = key
             # set value to none if no value has been found
-            if "first_next_date" not in waste_dict_custom.keys():
-                waste_dict_custom["first_next_date"] = self.default_label
-            if "first_next_in_days" not in waste_dict_custom.keys():
-                waste_dict_custom["first_next_in_days"] = self.default_label
-            if "first_next_item" not in waste_dict_custom.keys():
-                waste_dict_custom["first_next_item"] = self.default_label
+            if "next_date" not in waste_dict_custom.keys():
+                waste_dict_custom["next_date"] = self.default_label
+            if "next_in_days" not in waste_dict_custom.keys():
+                waste_dict_custom["next_in_days"] = self.default_label
+            if "next_item" not in waste_dict_custom.keys():
+                waste_dict_custom["next_item"] = self.default_label
         except Exception as err:
             _LOGGER.error("Error occurred: %s", err)
             return False
