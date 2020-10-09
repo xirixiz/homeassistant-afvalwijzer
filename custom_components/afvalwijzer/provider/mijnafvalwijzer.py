@@ -123,10 +123,10 @@ class MijnAfvalWijzer(object):
                 waste_dict_provider = {}
                 for item in json_data:
                     if item["type"] not in waste_dict_provider.keys():
-                        if item["date"] >= self.date_selected:
+                        if item["date"] >= self.today:
                             waste_dict_provider[item["type"]] = item["date"]
                 for item in json_data:
-                    if item["date"] <= self.date_selected:
+                    if item["date"] <= self.today:
                         if item["type"] not in waste_dict_provider.keys():
                             waste_dict_provider[item["type"]] = self.default_label
                 return waste_dict_provider
