@@ -146,15 +146,19 @@ class MijnAfvalWijzer(object):
                 html = response.text
                 soup = BeautifulSoup(html, "html.parser")
                 jaaroverzicht = soup.find(id="jaaroverzicht")
-                jaaroverzicht_waste_types = jaaroverzicht.findAll("p")
+                jaaroverzicht_waste_types = jaaroverzicht.findAll("p", {"class": True})
 
                 waste_dict_provider = {}
                 try:
+                    # findAll("p", {"class": waste_type})
                     for waste_type in jaaroverzicht_waste_types:
                         if waste_type not in waste_dict_provider.keys():
                             waste_dict_provider[waste_type["class"][0]] = ""
-                except KeyError:
-                    pass
+                except Exception as err:
+                    _LOGGER.error(
+                        "Error occurred scraping jaaroverzicht_waste_types: %s", err
+                    )
+                    return False
                 for waste_type in waste_dict_provider.keys():
                     waste_dict_provider[waste_type] = self.get_date_from_waste_type(
                         jaaroverzicht, waste_type
