@@ -62,17 +62,7 @@ custom_components/afvalwijzer/sensor.py
 ##### CUSTOM COMPONENT USAGE
 https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
 
-##### TRACK UPDATES
-This custom component can be tracked with the help of [custom-lovelace](https://github.com/ciotlosm/custom-lovelace).
-
-In your configuration.yaml
-
-```yaml
-custom_updater:
- component_urls:
-   - https://raw.githubusercontent.com/xirixiz/homeassistant-afvalwijzer/master/custom_updater.json
-```
-
+##### LOGLEVEL
 In order to extend the log level, modify the following (configuration.yaml probably)
 
 ```yaml
@@ -82,7 +72,7 @@ logger:
     custom_components.afvalwijzer: debug
 ```
 
-## Example configuration
+## EXAMPLE CONFIGURATION (MY CONFIG)
 
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
 
