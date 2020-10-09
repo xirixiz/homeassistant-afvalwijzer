@@ -64,7 +64,7 @@ class MijnAfvalWijzer(object):
             _LOGGER.error("Something went wrong calculating days between dates.")
             return False
 
-    def get_date_from_waste_type(self, html, waste_type):
+    def get_date_for_waste_type(self, html, waste_type):
         try:
             results = html.findAll("p", {"class": waste_type})
 
@@ -160,7 +160,7 @@ class MijnAfvalWijzer(object):
                     )
                     return False
                 for waste_type in waste_dict_provider.keys():
-                    waste_dict_provider[waste_type] = self.get_date_from_waste_type(
+                    waste_dict_provider[waste_type] = self.get_date_for_waste_type(
                         jaaroverzicht, waste_type
                     )
                 # set value to none if no value has been found
