@@ -7,7 +7,7 @@
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
-_Component to integrate with [afvalwijzer][afvalwijzer] and [afvalstoffendienstkalender][afvalstoffendienstkalender]._
+_Component to integrate with [mijnafvalwijzer][mijnafvalwijzer], [rova][rova] and [afvalstoffendienstkalender][afvalstoffendienstkalender]._
 
 This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
@@ -17,7 +17,7 @@ Special thanks go out to https://github.com/heyajohnny/afvalinfo for allowing me
 
 Platform | Description
 -- | --
-`sensor` | Show waste pickup dates for mijnafvalwijzer.nl or afvalstoffendienstkalender.nl.
+`sensor` | Show waste pickup dates for mijnafvalwijzer.nl, rova.nl or afvalstoffendienstkalender.nl.
 
 ![example][exampleimg1]
 
@@ -81,7 +81,7 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
 ```yaml
   sensor:
     - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer or afvalstoffendienstkalender
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, rova or afvalstoffendienstkalender
       postal_code: 1111AA              # (required, default = '')
       street_number:  11               # (required, default = '')
       suffix: A                        # (optional, default = '')
@@ -94,7 +94,7 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
 ```yaml
   sensor:
     - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer or afvalstoffendienstkalender
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, rova or afvalstoffendienstkalender
       api_token: None                  # (required, default = '') KEY REQUIRED BUT CANNOT BE OBTAINED!!!
       postal_code: 1111AA              # (required, default = '')
       street_number:  11               # (required, default = '')
@@ -176,7 +176,8 @@ automation:
 [exampleimg2]: afvalwijzer_lovelace.png
 [buymecoffee]: https://www.buymeacoffee.com/xirixiz
 [buymecoffeebedge]: https://camo.githubusercontent.com/cd005dca0ef55d7725912ec03a936d3a7c8de5b5/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6275792532306d6525323061253230636f666665652d646f6e6174652d79656c6c6f772e737667
-[afvalwijzer]: https://mijnafvalwijzer.nl
-[afvalstoffendienstkalender]: http://afvalstoffendienstkalender.nl
+[mijnafvalwijzer]: https://mijnafvalwijzer.nl
+[rova]: https://rova.nl
+[afvalstoffendienstkalender]: https://afvalstoffendienstkalender.nl
 [customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg

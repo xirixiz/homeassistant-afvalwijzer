@@ -2,8 +2,9 @@ import logging
 from datetime import timedelta
 
 SENSOR_PROVIDER_TO_URL = {
-    "mijnafvalwijzer_scraper": ["https://www.{0}.nl/nl/{1}/{2}/{3}/"],
-    "mijnafvalwijzer_api": [
+    "afvalwijzer_scraper": ["https://www.{0}.nl/nl/{1}/{2}/{3}/"],
+    "afvalwijzer_scraper_rova": ["https://inzamelkalender.{0}.nl/nl/{1}/{2}/{3}/"],
+    "afvalwijzer_api": [
         "https://api.{0}.nl/webservices/appsinput/?apikey={1}&method=postcodecheck&postcode={2}&street=&huisnummer={3}&toevoeging={4}&app_name=afvalwijzer&platform=phone&afvaldata={5}&langs=nl"
     ],
 }
