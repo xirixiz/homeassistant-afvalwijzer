@@ -52,6 +52,7 @@ NUMBER_TO_MONTH = {
 }
 
 CONF_PROVIDER = "provider"
+# 5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca
 CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
@@ -59,6 +60,7 @@ CONF_SUFFIX = "suffix"
 CONF_DATE_FORMAT = "date_format"
 CONF_INCLUDE_DATE_TODAY = "include_date_today"
 CONF_DEFAULT_LABEL = "default_label"
+CONF_ID = "id"
 
 SENSOR_PREFIX = "afvalwijzer "
 SENSOR_ICON = "mdi:recycle"

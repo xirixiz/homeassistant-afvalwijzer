@@ -17,12 +17,16 @@ from .const.const import (
 
 
 class AfvalwijzerCustomSensor(Entity):
-    def __init__(self, hass, fetch_afvalwijzer_data, waste_type, default_label):
+    def __init__(
+        self, hass, fetch_afvalwijzer_data, waste_type, default_label, id_name
+    ):
         self.fetch_afvalwijzer_data = fetch_afvalwijzer_data
         self.waste_type = waste_type
         self.default_label = default_label
         self._last_update = None
-        self._name = SENSOR_PREFIX + waste_type
+        self._name = (
+            SENSOR_PREFIX + (id_name + " " if len(id_name) > 0 else "") + waste_type
+        )
         self._state = None
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
