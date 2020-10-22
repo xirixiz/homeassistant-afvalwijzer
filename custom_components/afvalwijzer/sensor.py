@@ -22,6 +22,7 @@ from .const.const import (
     CONF_API_TOKEN,
     CONF_DATE_FORMAT,
     CONF_DEFAULT_LABEL,
+    CONF_ID,
     CONF_INCLUDE_DATE_TODAY,
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
@@ -44,6 +45,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_DATE_FORMAT, default="%d-%m-%Y"): cv.string,
         vol.Optional(CONF_INCLUDE_DATE_TODAY, default="false"): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL, default="Geen"): cv.string,
+        vol.Optional(CONF_ID, default=""): cv.string,
     }
 )
 
@@ -57,8 +59,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     street_number = config.get(CONF_STREET_NUMBER).strip()
     suffix = config.get(CONF_SUFFIX).upper().strip()
     date_format = config.get(CONF_DATE_FORMAT).strip()
-    include_date_today = config.get(CONF_INCLUDE_DATE_TODAY)
-    default_label = config.get(CONF_DEFAULT_LABEL)
+    include_date_today = config.get(CONF_INCLUDE_DATE_TODAY).strip()
+    default_label = config.get(CONF_DEFAULT_LABEL).strip()
+    id_name = config.get(CONF_ID).strip()
 
     _LOGGER.debug("Afvalwijzer provider = %s", provider)
     _LOGGER.debug("Afvalwijzer zipcode = %s", postal_code)
@@ -102,14 +105,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         _LOGGER.debug("Adding sensor provider: %s", waste_type)
         entities.append(
             AfvalwijzerProviderSensor(
-                hass, fetch_afvalwijzer_data, waste_type, date_format, default_label
+                hass,
+                fetch_afvalwijzer_data,
+                waste_type,
+                date_format,
+                default_label,
+                id_name,
             )
         )
     for waste_type in waste_types_custom:
         _LOGGER.debug("Adding sensor custom: %s", waste_type)
         entities.append(
             AfvalwijzerCustomSensor(
-                hass, fetch_afvalwijzer_data, waste_type, default_label
+                hass, fetch_afvalwijzer_data, waste_type, default_label, id_name
             )
         )
     _LOGGER.debug("Entities appended = %s", entities)

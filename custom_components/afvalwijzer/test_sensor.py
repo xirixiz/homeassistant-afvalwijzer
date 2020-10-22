@@ -22,7 +22,15 @@ default_label = "Geen"
 from .provider.afvalwijzer import AfvalWijzer
 
 # afval1 = AfvalWijzer(provider, api_token, postal_code, street_number, suffix, include_date_today, default_label)
-afval2 = AfvalWijzer(provider, api_token2, postal_code, street_number, suffix, include_date_today, default_label)
+afval2 = AfvalWijzer(
+    provider,
+    api_token2,
+    postal_code,
+    street_number,
+    suffix,
+    include_date_today,
+    default_label,
+)
 
 #########################################################################################################
 # print("\n")
