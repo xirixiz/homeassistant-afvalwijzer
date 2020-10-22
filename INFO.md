@@ -5,7 +5,7 @@
 ```yaml
   sensor:
     - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer or afvalstoffendienstkalender
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, rova or afvalstoffendienstkalender
       postal_code: 1111AA              # (required, default = '')
       street_number:  11               # (required, default = '')
       suffix: A                        # (optional, default = '')
@@ -18,7 +18,7 @@
 ```yaml
   sensor:
     - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer or afvalstoffendienstkalender
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, rova or afvalstoffendienstkalender
       api_token: None                  # (required, default = '') KEY REQUIRED BUT CANNOT BE OBTAINED!!!
       postal_code: 1111AA              # (required, default = '')
       street_number:  11               # (required, default = '')

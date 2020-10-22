@@ -4,8 +4,8 @@ Sensor component for AfvalDienst
 Author: Bram van Dartel - xirixiz
 
 import afvalwijzer
-from afvalwijzer.provider.mijnafvalwijzer import MijnAfvalWijzer
-MijnAfvalWijzer().get_data('','','')
+from afvalwijzer.provider.afvalwijzer import AfvalWijzer
+AfvalWijzer().get_data('','','')
 
 python3 -m afvalwijzer.test_sensor
 
@@ -19,10 +19,10 @@ suffix = ""
 include_date_today = "False"
 default_label = "Geen"
 
-from .provider.mijnafvalwijzer import MijnAfvalWijzer
+from .provider.afvalwijzer import AfvalWijzer
 
-# afval1 = MijnAfvalWijzer(provider, api_token, postal_code, street_number, suffix, include_date_today, default_label)
-afval2 = MijnAfvalWijzer(provider, api_token2, postal_code, street_number, suffix, include_date_today, default_label)
+# afval1 = AfvalWijzer(provider, api_token, postal_code, street_number, suffix, include_date_today, default_label)
+afval2 = AfvalWijzer(provider, api_token2, postal_code, street_number, suffix, include_date_today, default_label)
 
 #########################################################################################################
 # print("\n")

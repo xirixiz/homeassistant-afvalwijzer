@@ -30,7 +30,7 @@ from .const.const import (
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
 )
-from .provider.mijnafvalwijzer import MijnAfvalWijzer
+from .provider.afvalwijzer import AfvalWijzer
 from .sensor_custom import AfvalwijzerCustomSensor
 from .sensor_provider import AfvalwijzerProviderSensor
 
@@ -67,7 +67,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     try:
         afvalwijzer = await hass.async_add_executor_job(
             partial(
-                MijnAfvalWijzer,
+                AfvalWijzer,
                 provider,
                 api_token,
                 postal_code,
@@ -139,7 +139,7 @@ class AfvalwijzerData(object):
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         try:
-            afvalwijzer = MijnAfvalWijzer(
+            afvalwijzer = AfvalWijzer(
                 self.provider,
                 self.api_token,
                 self.postal_code,
