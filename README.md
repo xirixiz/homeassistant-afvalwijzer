@@ -144,8 +144,7 @@ automation:
   - alias: Waste has not been moved
     trigger:
       platform: time_pattern
-      minutes: '/60'
-      seconds: 00
+      hours: "/1"
     condition:
       condition: and
       conditions:
