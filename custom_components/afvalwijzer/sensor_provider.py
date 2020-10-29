@@ -13,6 +13,9 @@ from .const.const import (
     ATTR_IS_COLLECTION_DATE_TOMORROW,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
+    CONF_DEFAULT_LABEL,
+    CONF_ID,
+    CONF_INCLUDE_DATE_TODAY,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SENSOR_ICON,
@@ -21,26 +24,24 @@ from .const.const import (
 
 
 class AfvalwijzerProviderSensor(Entity):
-    def __init__(
-        self,
-        hass,
-        fetch_afvalwijzer_data,
-        waste_type,
-        date_format,
-        default_label,
-        id_name,
-    ):
+    def __init__(self, hass, waste_type, fetch_afvalwijzer_data, config):
         self.hass = hass
-        self.fetch_afvalwijzer_data = fetch_afvalwijzer_data
-        self.default_label = default_label
-        self.date_format = date_format
         self.waste_type = waste_type
+        self.fetch_afvalwijzer_data = fetch_afvalwijzer_data
+        self.config = config
+
+        self._id_name = self.config.get(CONF_ID)
+        self._default_label = self.config.get(CONF_DEFAULT_LABEL)
+        self._include_date_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
+
         self._name = (
-            SENSOR_PREFIX + (id_name + " " if len(id_name) > 0 else "") + waste_type
+            SENSOR_PREFIX
+            + (self._id_name + " " if len(self._id_name) > 0 else "")
+            + self.waste_type
         )
         self._icon = SENSOR_ICON
         self._hidden = False
-        self._state = None
+        self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
         self._days_until_collection_date = None
         self._is_collection_date_today = False
@@ -75,7 +76,12 @@ class AfvalwijzerProviderSensor(Entity):
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         await self.hass.async_add_executor_job(self.fetch_afvalwijzer_data.update)
-        waste_data_provider = self.fetch_afvalwijzer_data.waste_data_provider
+
+        if self._include_date_today.casefold() in ("true", "yes"):
+            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_with_today
+        else:
+            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_without_today
+
         _LOGGER.debug(
             "Generating state via AfvalwijzerProviderSensor for = %s with value %s",
             self.waste_type,
@@ -88,7 +94,7 @@ class AfvalwijzerProviderSensor(Entity):
                     # Add attribute, set the last updated status of the sensor
                     self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
 
-                    if waste_data_provider[self.waste_type] != self.default_label:
+                    if waste_data_provider[self.waste_type] != self._default_label:
                         # Add date in Dutch and US format
                         collection_date_nl = waste_data_provider[self.waste_type]
 
@@ -99,10 +105,6 @@ class AfvalwijzerProviderSensor(Entity):
                         collection_date_us = datetime.strptime(
                             collection_date_convert, "%Y-%m-%d"
                         ).date()
-
-                        collection_date_named = datetime.strptime(
-                            waste_data_provider[self.waste_type], "%d-%m-%Y"
-                        ).strftime("%a %d %b")
 
                         # Add attribute date in format "%Y-%m-%d"
                         self._year_month_day_date = str(collection_date_us)
@@ -124,14 +126,14 @@ class AfvalwijzerProviderSensor(Entity):
 
                         self._state = collection_date_nl
                     else:
-                        self._state = self.default_label
+                        self._state = self._default_label
                 else:
                     raise (ValueError)
             else:
                 raise (ValueError)
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerProviderSensor - unable to set value!")
-            self._state = self.default_label
+            self._state = self._default_label
             self._hidden = False
             self._days_until_collection_date = None
             self._year_month_day_date = None
