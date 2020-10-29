@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import asyncio
 from datetime import date, datetime, timedelta
 
 from homeassistant.helpers.entity import Entity
