@@ -4,7 +4,6 @@ Sensor component Afvalwijzer
 Author: Bram van Dartel - xirixiz
 """
 
-import asyncio
 from datetime import date, datetime, timedelta
 from functools import partial
 
