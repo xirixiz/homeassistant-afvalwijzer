@@ -2,11 +2,8 @@ import logging
 from datetime import timedelta
 
 SENSOR_PROVIDER_TO_URL = {
-    "afvalwijzer_scraper": ["https://www.{0}.nl/nl/{1}/{2}/{3}/"],
+    "afvalwijzer_scraper_default": ["https://www.{0}.nl/nl/{1}/{2}/{3}/"],
     "afvalwijzer_scraper_rova": ["https://inzamelkalender.{0}.nl/nl/{1}/{2}/{3}/"],
-    "afvalwijzer_api": [
-        "https://api.{0}.nl/webservices/appsinput/?apikey={1}&method=postcodecheck&postcode={2}&street=&huisnummer={3}&toevoeging={4}&app_name=afvalwijzer&platform=phone&afvaldata={5}&langs=nl"
-    ],
 }
 
 MONTH_TO_NUMBER = {
@@ -52,8 +49,9 @@ NUMBER_TO_MONTH = {
 }
 
 CONF_PROVIDER = "provider"
-# 5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca
-CONF_API_TOKEN = "api_token"
+CONF_API_TOKEN = (
+    "api_token"  # 5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca
+)
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
@@ -77,3 +75,17 @@ _LOGGER = logging.getLogger(__name__)
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(hours=1)
 PARALLEL_UPDATES = 1
+SCAN_INTERVAL = timedelta(seconds=30)
+
+DOMAIN = "afvalwijzer"
+DOMAIN_DATA = "afvalwijzer_data"
+
+STARTUP_MESSAGE = """
+-------------------------------------------------------------------
+Afvalwijzer
+Version: 5.1.0
+This is a custom integration!
+If you have any issues with this you need to open an issue here:
+"https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
+-------------------------------------------------------------------
+"""
