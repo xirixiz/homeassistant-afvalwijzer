@@ -128,13 +128,11 @@ class AfvalWijzer(object):
                         )
                         if waste_date_formatted >= self.today_date:
                             if waste_item not in waste_data_with_today.keys():
-                                # Remove square brackets and quotes from list for item['class']
                                 waste_data_with_today[
                                     waste_item
                                 ] = waste_date_formatted.strftime("%d-%m-%Y")
                         if waste_date_formatted > self.today_date:
                             if waste_item not in waste_data_without_today.keys():
-                                # Remove square brackets and quotes from list for item['class']
                                 waste_data_without_today[
                                     waste_item
                                 ] = waste_date_formatted.strftime("%d-%m-%Y")
