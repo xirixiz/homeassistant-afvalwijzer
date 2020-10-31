@@ -4,6 +4,10 @@
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "dependencies": [],
-  "codeowners": ["@xirixiz"],
-  "requirements": ["beautifulsoup4==4.9.0"]
+  "codeowners": [
+    "@xirixiz"
+  ],
+  "requirements": [
+    "beautifulsoup4==4.9.3"
+  ]
 }
