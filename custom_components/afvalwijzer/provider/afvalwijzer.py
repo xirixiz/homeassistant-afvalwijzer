@@ -119,18 +119,20 @@ class AfvalWijzer(object):
                         waste_date = item.find(
                             "span", {"class": "span-line-break"}
                         ).string.strip()
-                        # Convert month to month number by splitting the waste_date value
+                        # convert month to month number by splitting the waste_date value
                         split_waste_date = waste_date.split(" ")
                         day = split_waste_date[1]
                         month = MONTH_TO_NUMBER[split_waste_date[2]]
                         waste_date_formatted = datetime.strptime(
                             day + "-" + month + "-" + jaartal, "%d-%m-%Y"
                         )
+                        # create waste data with today
                         if waste_date_formatted >= self.today_date:
                             if waste_item not in waste_data_with_today.keys():
                                 waste_data_with_today[
                                     waste_item
                                 ] = waste_date_formatted.strftime("%d-%m-%Y")
+                        # create waste data without today
                         if waste_date_formatted > self.today_date:
                             if waste_item not in waste_data_without_today.keys():
                                 waste_data_without_today[
