@@ -11,16 +11,24 @@ python3 -m afvalwijzer.test_sensor
 
 """
 
-# provider = "mijnafvalwijzer"
+provider = "mijnafvalwijzer"
 # provider = "afvalstoffendienstkalender"
 # api_token = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
 
-# postal_code = "6691XX"
-# street_number = "22"
+# Afvalstoffendienstkalender
 # postal_code = "5391KE"
 # street_number = "1"
-# postal_code = "5146EG"
-# street_number = "1"
+
+# Afvalwijzer
+postal_code = "5146EG"
+street_number = "1"
+
+# postal_code = "5473VD"
+# street_number = "7"
+
+# postal_code = "6691XX"
+# street_number = "22"
+
 suffix = ""
 include_date_today = "False"
 default_label = "Geen"
