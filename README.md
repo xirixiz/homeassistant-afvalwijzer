@@ -44,7 +44,7 @@ More information on the reminders (ios in this case):
 
 ## Installation
 
-1. Using you tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
+1. Using your tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
 3. In the `custom_components` directory (folder) create a new folder called `afvalwijzer`.
 4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
