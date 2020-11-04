@@ -105,7 +105,7 @@ class AfvalWijzer(object):
             jaaroverzicht = soup.select('a[href*="#waste"] p[class]')
             jaartal = soup.find("div", {"class": "ophaaldagen"})["id"].strip("jaar-")
 
-            #_LOGGER.debug("Jaaroverzicht %s", jaaroverzicht)
+            # _LOGGER.debug("Jaaroverzicht %s", jaaroverzicht)
             _LOGGER.debug("Year %s", jaartal)
 
             waste_data_with_today = {}
@@ -116,9 +116,7 @@ class AfvalWijzer(object):
                 for item in jaaroverzicht:
                     for x in item["class"]:
                         waste_item = x
-                        waste_date = item.find(
-                            "span", {"class": "span-line-break"}
-                        )
+                        waste_date = item.find("span", {"class": "span-line-break"})
                         # when there is no span with class span-line-break, just use date
                         if waste_date is None:
                             waste_date = str(item).split(">")[1]
@@ -177,9 +175,9 @@ class AfvalWijzer(object):
 
         # start counting wihth Today's date or with Tomorrow"s date
         if self.include_date_today.casefold() in ("true", "yes"):
-            date_selected = self.today_date
+            date_selected = self.today
         else:
-            date_selected = self.tomorrow_date
+            date_selected = self.tomorrow
 
         waste_data_provider = self._waste_data_with_today
         waste_data_custom = {}
@@ -250,14 +248,12 @@ class AfvalWijzer(object):
                 for key, value in waste_data_provider.items()
                 if len(value) != 0
                 and value != self.default_label
-                and datetime.strptime(value, "%d-%m-%Y") >= date_selected
+                and value >= date_selected
             }
             _LOGGER.debug("waste_data_temp for next_ %s", waste_data_temp)
 
             # first upcoming pickup date of any waste type
-            waste_data_custom["next_date"] = datetime.strptime(
-                min(waste_data_temp.values()), "%d-%m-%Y"
-            ).strftime("%d-%m-%Y")
+            waste_data_custom["next_date"] = min(waste_data_temp.values())
 
             # first upcoming waste type pickup in days
             waste_data_custom["next_in_days"] = self.calculate_days_between_dates(
