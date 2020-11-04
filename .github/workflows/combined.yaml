@@ -1,7 +1,7 @@
 name: "Validation And Formatting"
 on:
   push:
-  pull_request:
+    branches: [stable]
   schedule:
     - cron: '0 0 * * *'
 jobs:
