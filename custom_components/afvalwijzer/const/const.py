@@ -83,7 +83,7 @@ DOMAIN_DATA = "afvalwijzer_data"
 STARTUP_MESSAGE = """
 -------------------------------------------------------------------
 Afvalwijzer
-Version: 5.1.1
+Version: 5.1.2
 This is a custom integration!
 If you have any issues with this you need to open an issue here:
 "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
