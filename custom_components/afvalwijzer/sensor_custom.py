@@ -51,7 +51,7 @@ class AfvalwijzerCustomSensor(Entity):
 
     @property
     def device_state_attributes(self):
-        if self.waste_type == "first_next_date":
+        if self.waste_type == "next_date":
             return {
                 ATTR_LAST_UPDATE: self._last_update,
                 ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
@@ -76,8 +76,8 @@ class AfvalwijzerCustomSensor(Entity):
         self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
         self._state = waste_data_custom[self.waste_type]
 
-        if self.waste_type == "first_next_date":
-            if waste_data_custom["first_next_date"] != self._default_label:
+        if self.waste_type == "next_date":
+            if waste_data_custom["next_date"] != self._default_label:
                 # Add date in different formats
                 collection_date_us = datetime.strptime(
                     waste_data_custom[self.waste_type], "%d-%m-%Y"
