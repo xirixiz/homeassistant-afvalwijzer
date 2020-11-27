@@ -2,56 +2,14 @@ import logging
 from datetime import timedelta
 
 SENSOR_PROVIDER_TO_URL = {
-    "afvalwijzer_scraper_default": ["https://www.{0}.nl/nl/{1}/{2}/{3}/"],
-    "afvalwijzer_scraper_rova": ["https://inzamelkalender.{0}.nl/nl/{1}/{2}/{3}/"],
-}
-
-MONTH_TO_NUMBER = {
-    "jan": "01",
-    "feb": "02",
-    "mrt": "03",
-    "apr": "04",
-    "mei": "05",
-    "jun": "06",
-    "jul": "07",
-    "aug": "08",
-    "sep": "09",
-    "okt": "10",
-    "nov": "11",
-    "dec": "12",
-    "januari": "01",
-    "februari": "02",
-    "maart": "03",
-    "april": "04",
-    "mei": "05",
-    "juni": "06",
-    "juli": "07",
-    "augustus": "08",
-    "september": "09",
-    "oktober": "10",
-    "november": "11",
-    "december": "12",
-}
-
-NUMBER_TO_MONTH = {
-    1: "januari",
-    2: "februari",
-    3: "maart",
-    4: "april",
-    5: "mei",
-    6: "juni",
-    7: "juli",
-    8: "augustus",
-    9: "september",
-    10: "oktober",
-    11: "november",
-    12: "december",
+    "afvalwijzer_scraper_default_api": [
+        "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging{3}=&app_name=afvalwijzer&platform=phone&afvaldata={4}&langs=nl"
+    ],
 }
 
 CONF_PROVIDER = "provider"
-CONF_API_TOKEN = (
-    "api_token"  # 5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca
-)
+CONF_API_TOKEN = "api_token"
+# 5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
@@ -83,7 +41,7 @@ DOMAIN_DATA = "afvalwijzer_data"
 STARTUP_MESSAGE = """
 -------------------------------------------------------------------
 Afvalwijzer
-Version: 5.1.3
+Version: 5.1.4
 This is a custom integration!
 If you have any issues with this you need to open an issue here:
 "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"

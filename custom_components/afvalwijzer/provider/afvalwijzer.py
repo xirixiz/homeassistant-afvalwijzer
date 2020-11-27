@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 
-from ..const.const import _LOGGER, MONTH_TO_NUMBER, SENSOR_PROVIDER_TO_URL
+from ..const.const import _LOGGER, SENSOR_PROVIDER_TO_URL
 
 
 class AfvalWijzer(object):
@@ -27,7 +27,7 @@ class AfvalWijzer(object):
         self.include_date_today = include_date_today
         self.default_label = default_label
 
-        _providers = ("mijnafvalwijzer", "afvalstoffendienstkalender", "rova")
+        _providers = ("mijnafvalwijzer", "afvalstoffendienstkalender")
         if self.provider not in _providers:
             print("Invalid provider: %s, please verify", self.provider)
 
@@ -75,71 +75,60 @@ class AfvalWijzer(object):
             _LOGGER.debug(
                 "Connecting to the frontend (scrape data) of: %s", self.provider
             )
-            if self.provider == "rova":
-                url = SENSOR_PROVIDER_TO_URL["afvalwijzer_scraper_rova"][0].format(
-                    self.provider, self.postal_code, self.street_number, self.suffix
-                )
-            else:
-                url = SENSOR_PROVIDER_TO_URL["afvalwijzer_scraper_default"][0].format(
-                    self.provider, self.postal_code, self.street_number, self.suffix
-                )
+
+            url = SENSOR_PROVIDER_TO_URL["afvalwijzer_scraper_default_api"][0].format(
+                self.provider,
+                self.postal_code,
+                self.street_number,
+                self.suffix,
+                datetime.today().strftime("%Y-%m-%d"),
+            )
+
             _LOGGER.debug("URL parsed: %s", url)
 
-            # get scraper data
-            response = requests.get(url)
-            response.raise_for_status()
-            html = response.text
-            soup = BeautifulSoup(html, "html.parser")
-            jaaroverzicht = soup.select('a[href*="#waste"] p[class]')
-            jaartal = soup.find("div", {"class": "ophaaldagen"})["id"].strip("jaar-")
+            try:
+                raw_response = requests.get(url)
+            except requests.exceptions.RequestException as err:
+                raise ValueError(err)
 
-            # _LOGGER.debug("Jaaroverzicht %s", jaaroverzicht)
-            _LOGGER.debug("Year %s", jaartal)
+            try:
+                json_response = raw_response.json()
+            except ValueError:
+                raise ValueError("No JSON data received from " + url)
+
+            try:
+                json_data = (
+                    json_response["ophaaldagen"]["data"]
+                    + json_response["ophaaldagenNext"]["data"]
+                )
+                # return json_data
+            except ValueError:
+                raise ValueError("Invalid JSON data received from " + url)
 
             waste_data_with_today = {}
             waste_data_without_today = {}
 
-            # get waste data from provider
-            try:
-                for item in jaaroverzicht:
-                    for x in item["class"]:
-                        waste_item = x
-                        waste_date = item.find("span", {"class": "span-line-break"})
-                        # when there is no span with class span-line-break, just use date
-                        if waste_date is None:
-                            waste_date = str(item).split(">")[1]
-                            waste_date = waste_date.split("<")[0]
-                        else:
-                            waste_date = waste_date.string.strip()
+            for item in json_data:
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
+                item_name = item["type"]
+                if item_name not in waste_data_with_today:
+                    if item_date >= self.today_date:
+                        waste_data_with_today[item_name] = item_date
 
-                        # convert month to month number by splitting the waste_date value
-                        split_waste_date = waste_date.split(" ")
-                        day = split_waste_date[1]
-                        month = MONTH_TO_NUMBER[split_waste_date[2]]
-                        waste_date_formatted = datetime.strptime(
-                            day + "-" + month + "-" + jaartal, "%d-%m-%Y"
-                        )
-                        # create waste data with today
-                        if waste_date_formatted >= self.today_date:
-                            if waste_item not in waste_data_with_today.keys():
-                                waste_data_with_today[waste_item] = waste_date_formatted
-                        # create waste data without today
-                        if waste_date_formatted > self.today_date:
-                            if waste_item not in waste_data_without_today.keys():
-                                waste_data_without_today[
-                                    waste_item
-                                ] = waste_date_formatted
-            except Exception as err:
-                _LOGGER.error("Other error occurred: %s", err)
+            for item in json_data:
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
+                item_name = item["type"]
+                if item_name not in waste_data_without_today:
+                    if item_date > self.today_date:
+                        waste_data_without_today[item_name] = item_date
 
             try:
-                for item in jaaroverzicht:
-                    for x in item["class"]:
-                        waste_item = x
-                        if waste_item not in waste_data_with_today.keys():
-                            waste_data_with_today[waste_item] = self.default_label
-                        if waste_item not in waste_data_without_today.keys():
-                            waste_data_without_today[waste_item] = self.default_label
+                for item in json_data:
+                    item_name = item["type"]
+                    if item_name not in waste_data_with_today.keys():
+                        waste_data_with_today[item_name] = self.default_label
+                    if item_name not in waste_data_without_today.keys():
+                        waste_data_without_today[item_name] = self.default_label
             except Exception as err:
                 _LOGGER.error("Other error occurred: %s", err)
 
