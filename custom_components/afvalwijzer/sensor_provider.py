@@ -82,34 +82,27 @@ class AfvalwijzerProviderSensor(Entity):
         else:
             waste_data_provider = self.fetch_afvalwijzer_data.waste_data_without_today
 
-        _LOGGER.debug(
-            "Generating state via AfvalwijzerProviderSensor for = %s with value %s",
-            self.waste_type,
-            waste_data_provider[self.waste_type],
-        )
-
         try:
             if waste_data_provider:
                 if self.waste_type in waste_data_provider:
                     # Add attribute, set the last updated status of the sensor
                     self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
 
-                    if waste_data_provider[self.waste_type] != self._default_label:
-                        # Add date in Dutch and US format
-                        collection_date_nl = waste_data_provider[self.waste_type]
-
-                        collection_date_convert = datetime.strptime(
-                            waste_data_provider[self.waste_type], "%d-%m-%Y"
-                        ).strftime("%Y-%m-%d")
-
-                        collection_date_us = datetime.strptime(
-                            collection_date_convert, "%Y-%m-%d"
-                        ).date()
-
-                        # Add attribute date in format "%Y-%m-%d"
+                    if isinstance(waste_data_provider[self.waste_type], datetime):
+                        _LOGGER.debug(
+                            "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
+                            self.waste_type,
+                            waste_data_provider[self.waste_type].date(),
+                        )
+                        # Add the US date format
+                        collection_date_us = waste_data_provider[self.waste_type].date()
                         self._year_month_day_date = str(collection_date_us)
 
-                        # Add attribute, is the collection date today, tomorrow and/or day_after_tomorrow?
+                        # Add the days until the collection date
+                        delta = collection_date_us - date.today()
+                        self._days_until_collection_date = delta.days
+
+                        # Check if the collection days are in today, tomorrow and/or the day after tomorrow
                         self._is_collection_date_today = (
                             date.today() == collection_date_us
                         )
@@ -120,13 +113,18 @@ class AfvalwijzerProviderSensor(Entity):
                             date.today() + timedelta(days=2) == collection_date_us
                         )
 
-                        # Add attribute, days until collection date
-                        delta = collection_date_us - date.today()
-                        self._days_until_collection_date = delta.days
-
-                        self._state = collection_date_nl
+                        # Add the NL date format as default state
+                        self._state = datetime.strftime(
+                            waste_data_provider[self.waste_type].date(), "%d-%m-%Y"
+                        )
                     else:
-                        self._state = self._default_label
+                        _LOGGER.debug(
+                            "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
+                            self.waste_type,
+                            waste_data_provider[self.waste_type],
+                        )
+                        # Add non-date as default state
+                        self._state = str(waste_data_provider[self.waste_type])
                 else:
                     raise (ValueError)
             else:

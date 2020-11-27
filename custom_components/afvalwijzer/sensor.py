@@ -130,9 +130,6 @@ class AfvalwijzerData(object):
         # waste data provider update - with today
         try:
             self.waste_data_with_today = afvalwijzer.waste_data_with_today
-            _LOGGER.debug(
-                "Generating waste_data_provider update = %s", self.waste_data_with_today
-            )
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
             self.waste_data_with_today = self._default_label
@@ -141,10 +138,6 @@ class AfvalwijzerData(object):
         # waste data provider update - without today
         try:
             self.waste_data_without_today = afvalwijzer.waste_data_without_today
-            _LOGGER.debug(
-                "Generating waste_data_provider update = %s",
-                self.waste_data_without_today,
-            )
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
             self.waste_data_without_today = self._default_label
@@ -153,10 +146,7 @@ class AfvalwijzerData(object):
         # waste data custom update
         try:
             self.waste_data_custom = afvalwijzer.waste_data_custom
-            _LOGGER.debug(
-                "Generating waste_data_custom update = %s", self.waste_data_custom
-            )
         except ValueError as err:
             _LOGGER.error("Check waste_data_custom %s", err.args)
-            waste_data_custom = self._default_label
+            self.waste_data_custom = self._default_label
             raise

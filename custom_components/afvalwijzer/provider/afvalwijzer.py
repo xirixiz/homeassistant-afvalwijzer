@@ -67,18 +67,6 @@ class AfvalWijzer(object):
         self._waste_types_custom = self.get_waste_types_custom()
 
     ##########################################################################
-    #  DATE CALCULATION FUNCTION
-    ##########################################################################
-
-    def calculate_days_between_dates(self, start, end):
-        try:
-            start_date = datetime.strptime(start, "%d-%m-%Y")
-            end_date = datetime.strptime(end, "%d-%m-%Y")
-            return abs((end_date - start_date).days)
-        except ValueError:
-            _LOGGER.error("Something went wrong calculating days between dates.")
-
-    ##########################################################################
     #  GET WASTE DATA FROM PROVIDER
     ##########################################################################
 
@@ -134,15 +122,13 @@ class AfvalWijzer(object):
                         # create waste data with today
                         if waste_date_formatted >= self.today_date:
                             if waste_item not in waste_data_with_today.keys():
-                                waste_data_with_today[
-                                    waste_item
-                                ] = waste_date_formatted.strftime("%d-%m-%Y")
+                                waste_data_with_today[waste_item] = waste_date_formatted
                         # create waste data without today
                         if waste_date_formatted > self.today_date:
                             if waste_item not in waste_data_without_today.keys():
                                 waste_data_without_today[
                                     waste_item
-                                ] = waste_date_formatted.strftime("%d-%m-%Y")
+                                ] = waste_date_formatted
             except Exception as err:
                 _LOGGER.error("Other error occurred: %s", err)
 
@@ -157,12 +143,6 @@ class AfvalWijzer(object):
             except Exception as err:
                 _LOGGER.error("Other error occurred: %s", err)
 
-            _LOGGER.debug(
-                "Generating waste_data_with_today = %s", waste_data_with_today
-            )
-            _LOGGER.debug(
-                "Generating waste_data_without_today = %s", waste_data_without_today
-            )
             return waste_data_with_today, waste_data_without_today
 
         except Exception as err:
@@ -175,9 +155,9 @@ class AfvalWijzer(object):
 
         # start counting wihth Today's date or with Tomorrow"s date
         if self.include_date_today.casefold() in ("true", "yes"):
-            date_selected = self.today
+            date_selected = self.today_date
         else:
-            date_selected = self.tomorrow
+            date_selected = self.tomorrow_date
 
         waste_data_provider = self._waste_data_with_today
         waste_data_custom = {}
@@ -193,12 +173,9 @@ class AfvalWijzer(object):
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()
-                if len(value) != 0
+                if isinstance(value, datetime)
             }
-            _LOGGER.debug(
-                "waste_data_temp for today, tomorrow and day after tomorrow  %s",
-                waste_data_temp,
-            )
+
             for key, value in waste_data_temp.items():
                 # waste type(s) today
                 if value == self.today:
@@ -228,6 +205,7 @@ class AfvalWijzer(object):
                     else:
                         day_after_tomorrow_multiple_items.append(key)
                         waste_data_custom["day_after_tomorrow"] = key
+
             # set value to none if no value has been found
             if "today" not in waste_data_custom.keys():
                 waste_data_custom["today"] = self.default_label
@@ -235,6 +213,7 @@ class AfvalWijzer(object):
                 waste_data_custom["tomorrow"] = self.default_label
             if "day_after_tomorrow" not in waste_data_custom.keys():
                 waste_data_custom["day_after_tomorrow"] = self.default_label
+
         except Exception as err:
             _LOGGER.error("Error occurred: %s", err)
 
@@ -246,18 +225,15 @@ class AfvalWijzer(object):
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()
-                if len(value) != 0
-                and value != self.default_label
-                and value >= date_selected
+                if isinstance(value, datetime) and value >= date_selected
             }
-            _LOGGER.debug("waste_data_temp for next_ %s", waste_data_temp)
 
             # first upcoming pickup date of any waste type
             waste_data_custom["next_date"] = min(waste_data_temp.values())
 
             # first upcoming waste type pickup in days
-            waste_data_custom["next_in_days"] = self.calculate_days_between_dates(
-                self.today, min(waste_data_temp.values())
+            waste_data_custom["next_in_days"] = abs(
+                (self.today_date - min(waste_data_temp.values())).days
             )
 
             # first upcoming waste type(s) pickup
@@ -273,6 +249,7 @@ class AfvalWijzer(object):
                     else:
                         next_item_multiple_items.append(key)
                         waste_data_custom["next_item"] = key
+
             # set value to none if no value has been found
             if "next_date" not in waste_data_custom.keys():
                 waste_data_custom["next_date"] = self.default_label
@@ -280,10 +257,9 @@ class AfvalWijzer(object):
                 waste_data_custom["next_in_days"] = self.default_label
             if "next_item" not in waste_data_custom.keys():
                 waste_data_custom["next_item"] = self.default_label
+
         except Exception as err:
             _LOGGER.error("Error occurred: %s", err)
-
-        _LOGGER.debug("Generating waste_data_custom = %s", waste_data_custom)
 
         return waste_data_custom
 
@@ -294,9 +270,6 @@ class AfvalWijzer(object):
     def get_waste_types_provider(self):
         waste_data_provider = self._waste_data_without_today
         waste_list_provider = list(waste_data_provider.keys())
-        _LOGGER.debug("Generating waste_data_provider = %s", waste_data_provider)
-        _LOGGER.debug("Generating waste_list_provider = %s", waste_list_provider)
-
         return waste_list_provider
 
     ##########################################################################
@@ -306,9 +279,6 @@ class AfvalWijzer(object):
     def get_waste_types_custom(self):
         waste_data_custom = self._waste_data_custom
         waste_list_custom = list(waste_data_custom.keys())
-        _LOGGER.debug("Generating waste_data_custom = %s", waste_data_custom)
-        _LOGGER.debug("Generating waste_list_custom = %s", waste_list_custom)
-
         return waste_list_custom
 
     ##########################################################################
