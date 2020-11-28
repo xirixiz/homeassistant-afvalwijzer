@@ -73,7 +73,7 @@ class AfvalWijzer(object):
     def get_waste_data_provider(self):
         try:
             _LOGGER.debug(
-                "Connecting to the frontend (scrape data) of: %s", self.provider
+                "Connecting to the frontend (json data) of: %s", self.provider
             )
 
             url = SENSOR_PROVIDER_TO_URL["afvalwijzer_scraper_default_api"][0].format(
@@ -101,7 +101,6 @@ class AfvalWijzer(object):
                     json_response["ophaaldagen"]["data"]
                     + json_response["ophaaldagenNext"]["data"]
                 )
-                # return json_data
             except ValueError:
                 raise ValueError("Invalid JSON data received from " + url)
 
