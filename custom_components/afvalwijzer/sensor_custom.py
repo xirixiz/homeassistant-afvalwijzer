@@ -6,9 +6,9 @@ from homeassistant.util import Throttle
 
 from .const.const import (
     _LOGGER,
+    ATTR_HIDDEN,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
-    ATTR_HIDDEN,
     CONF_DEFAULT_LABEL,
     CONF_ID,
     MIN_TIME_BETWEEN_UPDATES,
