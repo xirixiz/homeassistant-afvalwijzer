@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 import requests
-from bs4 import BeautifulSoup
 
 from ..const.const import _LOGGER, SENSOR_PROVIDER_TO_URL
 
@@ -76,7 +75,7 @@ class AfvalWijzer(object):
                 "Connecting to the frontend (json data) of: %s", self.provider
             )
 
-            url = SENSOR_PROVIDER_TO_URL["afvalwijzer_scraper_default_api"][0].format(
+            url = SENSOR_PROVIDER_TO_URL["afvalwijzer_data_default"][0].format(
                 self.provider,
                 self.postal_code,
                 self.street_number,
@@ -166,7 +165,7 @@ class AfvalWijzer(object):
 
             for key, value in waste_data_temp.items():
                 # waste type(s) today
-                if value == self.today:
+                if value == self.today_date:
                     if "today" in waste_data_custom.keys():
                         today_multiple_items.append(key)
                         waste_data_custom["today"] = ", ".join(today_multiple_items)
@@ -174,7 +173,7 @@ class AfvalWijzer(object):
                         today_multiple_items.append(key)
                         waste_data_custom["today"] = key
                 # waste type(s) tomorrow
-                if value == self.tomorrow:
+                if value == self.tomorrow_date:
                     if "tomorrow" in waste_data_custom.keys():
                         tomorrow_multiple_items.append(key)
                         waste_data_custom["tomorrow"] = ", ".join(
@@ -184,7 +183,7 @@ class AfvalWijzer(object):
                         tomorrow_multiple_items.append(key)
                         waste_data_custom["tomorrow"] = key
                 # waste type(s) day_after_tomorrow
-                if value == self.day_after_tomorrow:
+                if value == self.day_after_tomorrow_date:
                     if "day_after_tomorrow" in waste_data_custom.keys():
                         day_after_tomorrow_multiple_items.append(key)
                         waste_data_custom["day_after_tomorrow"] = ", ".join(
