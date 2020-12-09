@@ -88,7 +88,7 @@ class AfvalwijzerProviderSensor(Entity):
                     # Add attribute, set the last updated status of the sensor
                     self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
 
-                    if isinstance(waste_data_provider[self.waste_type], datetime):
+                    if isinstance(waste_data_provider[self.waste_type], date):
                         _LOGGER.debug(
                             "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
                             self.waste_type,
@@ -130,11 +130,13 @@ class AfvalwijzerProviderSensor(Entity):
             else:
                 raise (ValueError)
         except ValueError:
-            _LOGGER.debug("ValueError AfvalwijzerProviderSensor - unable to set value!")
+            _LOGGER.debug(
+                "ValueError AfvalwijzerProviderSensor - unable to determine value!"
+            )
             self._state = self._default_label
             self._hidden = False
-            self._days_until_collection_date = None
-            self._year_month_day_date = None
+            self._days_until_collection_date = self._default_label
+            self._year_month_day_date = self._default_label
             self._is_collection_date_today = False
             self._is_collection_date_tomorrow = False
             self._is_collection_date_day_after_tomorrow = False
