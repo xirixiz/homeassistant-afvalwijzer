@@ -82,7 +82,7 @@ class AfvalwijzerCustomSensor(Entity):
                     waste_data_custom[self.waste_type],
                 )
                 # Add the US date format
-                collection_date_us = waste_data_custom[self.waste_type].date()
+                collection_date_us = waste_data_custom[self.waste_type]
                 self._year_month_day_date = str(collection_date_us)
 
                 # Add the NL date format as default state
