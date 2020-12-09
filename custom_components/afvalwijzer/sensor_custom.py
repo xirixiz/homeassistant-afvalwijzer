@@ -82,7 +82,7 @@ class AfvalwijzerCustomSensor(Entity):
                     waste_data_custom[self.waste_type],
                 )
                 # Add the US date format
-                collection_date_us = waste_data_custom[self.waste_type]
+                collection_date_us = waste_data_custom[self.waste_type].date()
                 self._year_month_day_date = str(collection_date_us)
 
                 # Add the NL date format as default state
@@ -90,11 +90,15 @@ class AfvalwijzerCustomSensor(Entity):
                     waste_data_custom[self.waste_type], "%d-%m-%Y"
                 )
             else:
-                raise (ValueError)
+                _LOGGER.debug(
+                    "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
+                    self.waste_type,
+                    waste_data_custom[self.waste_type],
+                )
+                # Add non-date as default state
+                self._state = str(waste_data_custom[self.waste_type])
         except ValueError:
-            _LOGGER.debug(
-                "ValueError AfvalwijzerCustomSensor - unable to determine value!"
-            )
+            _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._state = self._default_label
             self._hidden = False
             self._year_month_day_date = self._default_label
