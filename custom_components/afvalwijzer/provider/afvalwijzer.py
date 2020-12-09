@@ -160,7 +160,7 @@ class AfvalWijzer(object):
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()
-                if isinstance(value, datetime)
+                if isinstance(value, date)
             }
 
             for key, value in waste_data_temp.items():
