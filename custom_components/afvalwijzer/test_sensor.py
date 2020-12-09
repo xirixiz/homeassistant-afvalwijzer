@@ -20,8 +20,8 @@ provider = "mijnafvalwijzer"
 # street_number = "1"
 
 # Afvalwijzer
-#postal_code = "5146EG"
-#street_number = "1"
+# postal_code = "5146EG"
+# street_number = "1"
 
 postal_code = "4707PB"
 street_number = "110"
