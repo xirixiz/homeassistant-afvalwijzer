@@ -115,7 +115,7 @@ class AfvalwijzerProviderSensor(Entity):
 
                         # Add the NL date format as default state
                         self._state = datetime.strftime(
-                            waste_data_provider[self.waste_type].date(), "%d-%m-%Y"
+                            waste_data_provider[self.waste_type], "%d-%m-%Y"
                         )
                     else:
                         _LOGGER.debug(
