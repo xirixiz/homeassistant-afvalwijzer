@@ -53,7 +53,7 @@ class AfvalwijzerCustomSensor(Entity):
 
     @property
     def device_state_attributes(self):
-        if self._year_month_day_date != self._default_label:
+        if self._year_month_day_date != None:
             return {
                 ATTR_LAST_UPDATE: self._last_update,
                 ATTR_HIDDEN: self._hidden,
@@ -75,19 +75,19 @@ class AfvalwijzerCustomSensor(Entity):
             # Add attribute, set the last updated status of the sensor
             self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
 
-            if isinstance(waste_data_custom[self.waste_type], date):
+            if isinstance(waste_data_custom[self.waste_type], datetime):
                 _LOGGER.debug(
                     "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
                     self.waste_type,
-                    waste_data_custom[self.waste_type],
+                    waste_data_custom[self.waste_type].date(),
                 )
                 # Add the US date format
-                collection_date_us = waste_data_custom[self.waste_type]
+                collection_date_us = waste_data_custom[self.waste_type].date()
                 self._year_month_day_date = str(collection_date_us)
 
                 # Add the NL date format as default state
                 self._state = datetime.strftime(
-                    waste_data_custom[self.waste_type], "%d-%m-%Y"
+                    waste_data_custom[self.waste_type].date(), "%d-%m-%Y"
                 )
             else:
                 _LOGGER.debug(
@@ -101,5 +101,5 @@ class AfvalwijzerCustomSensor(Entity):
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._state = self._default_label
             self._hidden = False
-            self._year_month_day_date = self._default_label
+            self._year_month_day_date = None
             self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")

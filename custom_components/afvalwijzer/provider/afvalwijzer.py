@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import requests
 
@@ -36,14 +36,14 @@ class AfvalWijzer(object):
 
         # today
         self.today = datetime.today().strftime("%d-%m-%Y")
-        self.today_date = datetime.strptime(self.today, "%d-%m-%Y").date()
+        self.today_date = datetime.strptime(self.today, "%d-%m-%Y")
 
         # tomorow
         self.today_to_tomorrow = datetime.strptime(self.today, "%d-%m-%Y") + timedelta(
             days=1
         )
         self.tomorrow = datetime.strftime(self.today_to_tomorrow, "%d-%m-%Y")
-        self.tomorrow_date = datetime.strptime(self.tomorrow, "%d-%m-%Y").date()
+        self.tomorrow_date = datetime.strptime(self.tomorrow, "%d-%m-%Y")
 
         # day after tomorow
         self.today_to_day_after_tomorrow = datetime.strptime(
@@ -54,7 +54,7 @@ class AfvalWijzer(object):
         )
         self.day_after_tomorrow_date = datetime.strptime(
             self.day_after_tomorrow, "%d-%m-%Y"
-        ).date()
+        )
 
         # data collect
         (
@@ -107,14 +107,14 @@ class AfvalWijzer(object):
             waste_data_without_today = {}
 
             for item in json_data:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d").date()
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
                 if item_name not in waste_data_with_today:
                     if item_date >= self.today_date:
                         waste_data_with_today[item_name] = item_date
 
             for item in json_data:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d").date()
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
                 if item_name not in waste_data_without_today:
                     if item_date > self.today_date:
@@ -160,7 +160,7 @@ class AfvalWijzer(object):
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()
-                if isinstance(value, date)
+                if isinstance(value, datetime)
             }
 
             for key, value in waste_data_temp.items():
@@ -212,7 +212,7 @@ class AfvalWijzer(object):
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()
-                if isinstance(value, date) and value >= date_selected
+                if isinstance(value, datetime) and value >= date_selected
             }
 
             # first upcoming pickup date of any waste type
