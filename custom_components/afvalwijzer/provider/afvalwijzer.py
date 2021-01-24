@@ -26,7 +26,11 @@ class AfvalWijzer(object):
         self.include_date_today = include_date_today
         self.default_label = default_label
 
-        _providers = ("mijnafvalwijzer", "afvalstoffendienstkalender")
+        _providers = (
+            "mijnafvalwijzer",
+            "afvalstoffendienstkalender",
+            "inzamelkalender.rova",
+        )
         if self.provider not in _providers:
             print("Invalid provider: %s, please verify", self.provider)
 
