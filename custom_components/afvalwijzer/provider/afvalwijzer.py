@@ -29,10 +29,13 @@ class AfvalWijzer(object):
         _providers = (
             "mijnafvalwijzer",
             "afvalstoffendienstkalender",
-            "inzamelkalender.rova",
+            "rova",
         )
         if self.provider not in _providers:
             print("Invalid provider: %s, please verify", self.provider)
+
+        if self.provider == "rova":
+            self.provider = "inzamelkalender.rova"
 
         ##########################################################################
         #  DATE CALCULATION TODAY, TOMORROW, DAY AFTER TOMORROW

@@ -21,16 +21,16 @@ provider = "mijnafvalwijzer"
 # street_number = "1"
 
 # Afvalwijzer
-postal_code = "5146EG"
-street_number = "1"
+# postal_code = "5146EG"
+# street_number = "1"
 
 # postal_code = "4707PB"
 # street_number = "110"
 
 # Rova
-# provider = "inzamelkalender.rova"
-# postal_code = "3824XB"
-# street_number = "2"
+provider = "rova"
+postal_code = "3824XB"
+street_number = "2"
 
 
 # postal_code = "4714CB"
