@@ -79,7 +79,7 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
 ```yaml
   sensor:
     - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, afvalstoffendienstkalender or inzamelkalender.rova
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, afvalstoffendienstkalender or rova
       postal_code: 1234AB              # (required, default = '')
       street_number:  5                # (required, default = '')
       suffix: ''                       # (optional, default = '')
