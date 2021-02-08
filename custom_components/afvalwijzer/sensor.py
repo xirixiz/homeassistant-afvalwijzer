@@ -22,6 +22,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_STREET_NUMBER,
+    CONF_EXCLUDE_LIST,
     CONF_SUFFIX,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
@@ -43,6 +44,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_INCLUDE_DATE_TODAY.strip(), default="false"): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL.strip(), default="Geen"): cv.string,
         vol.Optional(CONF_ID.strip().lower(), default=""): cv.string,
+        vol.Optional(CONF_EXCLUDE_LIST.strip().lower(), default=""): cv.string,
     }
 )
 
@@ -56,6 +58,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     suffix = config.get(CONF_SUFFIX)
     include_date_today = config.get(CONF_INCLUDE_DATE_TODAY)
     default_label = config.get(CONF_DEFAULT_LABEL)
+    exclude_list = config.get(CONF_EXCLUDE_LIST)
 
     _LOGGER.debug("Afvalwijzer provider = %s", provider)
     _LOGGER.debug("Afvalwijzer zipcode = %s", postal_code)
@@ -71,6 +74,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 suffix,
                 include_date_today,
                 default_label,
+                exclude_list,
             )
         )
     except ValueError as err:
@@ -113,6 +117,7 @@ class AfvalwijzerData(object):
         suffix = self.config.get(CONF_SUFFIX)
         include_date_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
         default_label = self.config.get(CONF_DEFAULT_LABEL)
+        exclude_list = self.config.get(CONF_EXCLUDE_LIST)
 
         try:
             afvalwijzer = AfvalWijzer(
@@ -122,6 +127,7 @@ class AfvalwijzerData(object):
                 suffix,
                 include_date_today,
                 default_label,
+                exclude_list,
             )
         except ValueError as err:
             _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
