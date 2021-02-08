@@ -24,13 +24,13 @@ provider = "mijnafvalwijzer"
 # postal_code = "5146EG"
 # street_number = "1"
 
-# postal_code = "4707PB"
-# street_number = "110"
+postal_code = "4707PB"
+street_number = "110"
 
 # Rova
-provider = "rova"
-postal_code = "3824XB"
-street_number = "2"
+# provider = "rova"
+# postal_code = "3824XB"
+# street_number = "2"
 
 
 # postal_code = "4714CB"
@@ -45,6 +45,7 @@ street_number = "2"
 suffix = ""
 include_date_today = "False"
 default_label = "Geen"
+exclude_list = "gft"
 
 from .provider.afvalwijzer import AfvalWijzer
 
@@ -55,6 +56,7 @@ afvalwijzer = AfvalWijzer(
     suffix,
     include_date_today,
     default_label,
+    exclude_list,
 )
 
 #########################################################################################################

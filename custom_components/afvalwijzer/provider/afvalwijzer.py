@@ -18,6 +18,7 @@ class AfvalWijzer(object):
         suffix,
         include_date_today,
         default_label,
+        exclude_list,
     ):
         self.provider = provider
         self.postal_code = postal_code
@@ -25,6 +26,7 @@ class AfvalWijzer(object):
         self.suffix = suffix
         self.include_date_today = include_date_today
         self.default_label = default_label
+        self.exclude_list = exclude_list.lower()
 
         _providers = (
             "mijnafvalwijzer",
@@ -116,24 +118,27 @@ class AfvalWijzer(object):
             for item in json_data:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
-                if item_name not in waste_data_with_today:
-                    if item_date >= self.today_date:
-                        waste_data_with_today[item_name] = item_date
+                if item_name.lower() not in self.exclude_list:
+                    if item_name not in waste_data_with_today:
+                        if item_date >= self.today_date:
+                            waste_data_with_today[item_name] = item_date
 
             for item in json_data:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
-                if item_name not in waste_data_without_today:
-                    if item_date > self.today_date:
-                        waste_data_without_today[item_name] = item_date
+                if item_name.lower() not in self.exclude_list:
+                    if item_name not in waste_data_without_today:
+                        if item_date > self.today_date:
+                            waste_data_without_today[item_name] = item_date
 
             try:
                 for item in json_data:
                     item_name = item["type"]
-                    if item_name not in waste_data_with_today.keys():
-                        waste_data_with_today[item_name] = self.default_label
-                    if item_name not in waste_data_without_today.keys():
-                        waste_data_without_today[item_name] = self.default_label
+                    if item_name.lower() not in self.exclude_list:
+                        if item_name not in waste_data_with_today.keys():
+                            waste_data_with_today[item_name] = self.default_label
+                        if item_name not in waste_data_without_today.keys():
+                            waste_data_without_today[item_name] = self.default_label
             except Exception as err:
                 _LOGGER.error("Other error occurred: %s", err)
 

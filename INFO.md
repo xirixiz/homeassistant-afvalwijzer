@@ -12,4 +12,5 @@
       include_date_today: false        # (optional, default = false) to take or not to take Today into account in the next pickup.
       default_label: Geen              # (optional, default = Geen) label if no date found
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
+      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft"
 ```

@@ -17,6 +17,7 @@ CONF_DATE_FORMAT = "date_format"
 CONF_INCLUDE_DATE_TODAY = "include_date_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_ID = "id"
+CONF_EXCLUDE_LIST = "exclude_list"
 
 SENSOR_PREFIX = "afvalwijzer "
 SENSOR_ICON = "mdi:recycle"
@@ -41,7 +42,7 @@ DOMAIN_DATA = "afvalwijzer_data"
 STARTUP_MESSAGE = """
 -------------------------------------------------------------------
 Afvalwijzer
-Version: 5.3.0
+Version: 5.3.1
 This is a custom integration!
 If you have any issues with this you need to open an issue here:
 "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
