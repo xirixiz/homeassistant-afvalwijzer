@@ -1,5 +1,5 @@
 ---
-name: Issue 🚨
+name: 🚨 Issue
 about: Create a report of an error which you're not able to resolve.
 title: ''
 labels: 'bug'
