@@ -1,6 +1,10 @@
 import logging
 from datetime import timedelta
 
+NAME = "afvalwijzer"
+VERSION = "2021.02.01"
+ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
+
 SENSOR_PROVIDER_TO_URL = {
     "afvalwijzer_data_default": [
         "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&app_name=afvalwijzer&platform=phone&afvaldata={4}&langs=nl&"
@@ -39,12 +43,12 @@ SCAN_INTERVAL = timedelta(seconds=30)
 DOMAIN = "afvalwijzer"
 DOMAIN_DATA = "afvalwijzer_data"
 
-STARTUP_MESSAGE = """
+STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
-Afvalwijzer
-Version: 2020.02.01
+{NAME}
+Version: {VERSION}
 This is a custom integration!
 If you have any issues with this you need to open an issue here:
-"https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
+{ISSUE_URL}
 -------------------------------------------------------------------
 """
