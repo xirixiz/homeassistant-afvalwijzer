@@ -1,6 +1,7 @@
 {
   "domain": "afvalwijzer",
   "name": "Afvalwijzer",
+  "version": "5.3.3",
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "dependencies": [],
