@@ -1,5 +1,6 @@
 {
   "name": "Afvalwijzer",
+  "iot_class": "Cloud Polling",
   "content_in_root": false,
   "render_readme": true,
   "domains": ["sensor"],
