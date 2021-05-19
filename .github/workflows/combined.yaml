@@ -1,7 +1,7 @@
 name: "Validation And Formatting"
 on:
   push:
-    branches: [stable]
+  pull_request:
   schedule:
     - cron: '0 0 * * *'
 jobs:
@@ -20,7 +20,7 @@ jobs:
           path: |
             ~/.cache/pip
           key: custom-component-ci
-      - uses: hacs/integration/action@main
+      - uses: hacs/action@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CATEGORY: integration
