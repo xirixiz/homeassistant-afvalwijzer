@@ -6,7 +6,6 @@ from homeassistant.util import Throttle
 
 from .const.const import (
     _LOGGER,
-    ATTR_HIDDEN,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,
@@ -36,7 +35,6 @@ class AfvalwijzerCustomSensor(Entity):
         )
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
-        self._hidden = False
         self._year_month_day_date = None
 
     @property
@@ -56,13 +54,11 @@ class AfvalwijzerCustomSensor(Entity):
         if self._year_month_day_date != None:
             return {
                 ATTR_LAST_UPDATE: self._last_update,
-                ATTR_HIDDEN: self._hidden,
                 ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
             }
         else:
             return {
                 ATTR_LAST_UPDATE: self._last_update,
-                ATTR_HIDDEN: self._hidden,
             }
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -100,6 +96,5 @@ class AfvalwijzerCustomSensor(Entity):
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._state = self._default_label
-            self._hidden = False
             self._year_month_day_date = None
             self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")

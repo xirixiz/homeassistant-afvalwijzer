@@ -13,9 +13,9 @@ This custom component dynamically creates sensor.afvalwijzer_* items. For me per
 
 **This component will set up the following platforms.**
 
-Platform | Description
--- | --
-`sensor` | Show waste pickup dates for mijnafvalwijzer.nl, afvalstoffendienstkalender.nl or rova.nl.
+| Platform | Description                                                                               |
+| -------- | ----------------------------------------------------------------------------------------- |
+| `sensor` | Show waste pickup dates for mijnafvalwijzer.nl, afvalstoffendienstkalender.nl or rova.nl. |
 
 ![example][exampleimg1]
 

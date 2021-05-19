@@ -7,7 +7,6 @@ from homeassistant.util import Throttle
 from .const.const import (
     _LOGGER,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
-    ATTR_HIDDEN,
     ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW,
     ATTR_IS_COLLECTION_DATE_TODAY,
     ATTR_IS_COLLECTION_DATE_TOMORROW,
@@ -40,7 +39,6 @@ class AfvalwijzerProviderSensor(Entity):
             + self.waste_type
         )
         self._icon = SENSOR_ICON
-        self._hidden = False
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
         self._days_until_collection_date = None
@@ -65,7 +63,6 @@ class AfvalwijzerProviderSensor(Entity):
     def device_state_attributes(self):
         return {
             ATTR_LAST_UPDATE: self._last_update,
-            ATTR_HIDDEN: self._hidden,
             ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
             ATTR_IS_COLLECTION_DATE_TODAY: self._is_collection_date_today,
             ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
@@ -132,7 +129,6 @@ class AfvalwijzerProviderSensor(Entity):
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerProviderSensor - unable to set value!")
             self._state = self._default_label
-            self._hidden = False
             self._days_until_collection_date = None
             self._year_month_day_date = None
             self._is_collection_date_today = False
