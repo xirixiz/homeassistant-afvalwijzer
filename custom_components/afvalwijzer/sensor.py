@@ -17,12 +17,12 @@ from requests.exceptions import HTTPError
 from .const.const import (
     _LOGGER,
     CONF_DEFAULT_LABEL,
+    CONF_EXCLUDE_LIST,
     CONF_ID,
     CONF_INCLUDE_DATE_TODAY,
     CONF_POSTAL_CODE,
     CONF_PROVIDER,
     CONF_STREET_NUMBER,
-    CONF_EXCLUDE_LIST,
     CONF_SUFFIX,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,

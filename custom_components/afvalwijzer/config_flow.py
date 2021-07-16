@@ -3,25 +3,24 @@ from __future__ import annotations
 
 from typing import Any
 
-from .provider.afvalwijzer import AfvalWijzer
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_ID
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from ..const.const import (
-    CONF_ID,
-    CONF_PROVIDER,
-    CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
-    CONF_SUFFIX,
-    CONF_INCLUDE_DATE_TODAY,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
+    CONF_ID,
+    CONF_INCLUDE_DATE_TODAY,
+    CONF_POSTAL_CODE,
+    CONF_PROVIDER,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
     DOMAIN,
 )
+from .provider.afvalwijzer import AfvalWijzer
 
 
 class AfvalWijzerFlowHandler(ConfigFlow, domain=DOMAIN):
