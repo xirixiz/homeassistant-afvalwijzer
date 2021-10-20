@@ -1,0 +1,24 @@
+name: 💡 Request a feature or an enhancement
+description: Request a feature or an enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is for requesting a feature or an enhancement.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Request
+      description: >-
+        Describe the feature or enhancement you like to see implemented.
+        Tell us what value it brings to the users.
+
+        Provide a clear and concise description of what you would like to request.
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        If you have any additional information, use the field below.
+        Please note, you can attach screenshots or screen recordings here, by
+        dragging and dropping files in the field below.
