@@ -1,0 +1,6 @@
+
+blank_issues_enabled: false
+contact_links:
+  - name: ❔ Ask a question in the HASS community 
+    url: https://community.home-assistant.io/t/garbage-pickup-date-mijnafvalwijzer-nl-custom-component/34631
+    about: If you are unsure where to go, then contacting the HASS community is recommended; Just ask!    
