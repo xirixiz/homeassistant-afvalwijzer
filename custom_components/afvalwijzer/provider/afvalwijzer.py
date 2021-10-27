@@ -158,7 +158,6 @@ class AfvalWijzer(object):
         else:
             date_selected = self.tomorrow_date
 
-        waste_data_provider = self._waste_data_with_today
         waste_data_custom = {}
         today_multiple_items = []
         tomorrow_multiple_items = []
@@ -169,6 +168,7 @@ class AfvalWijzer(object):
         #  GENERATE TODAY, TOMORROW, DAY AFTER TOMORROW SENSOR DATA
         ##########################################################################
         try:
+            waste_data_provider = self._waste_data_with_today
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()
@@ -221,6 +221,7 @@ class AfvalWijzer(object):
         ##########################################################################
 
         try:
+            waste_data_provider = self._waste_data_without_today
             waste_data_temp = {
                 key: value
                 for key, value in waste_data_provider.items()

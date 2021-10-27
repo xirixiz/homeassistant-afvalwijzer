@@ -3,7 +3,7 @@ from datetime import timedelta
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2021.10.01"
+VERSION = "2021.10.02"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_PROVIDER_TO_URL = {
