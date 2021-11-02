@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import hashlib
 from datetime import date, datetime, timedelta
 
 from homeassistant.helpers.entity import Entity
@@ -16,6 +16,9 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_ID,
     CONF_INCLUDE_DATE_TODAY,
+    CONF_POSTAL_CODE,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SENSOR_ICON,
@@ -47,10 +50,19 @@ class AfvalwijzerProviderSensor(Entity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
         self._year_month_day_date = None
+        self._unique_id = hashlib.sha1(
+            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     @property
     def icon(self):
