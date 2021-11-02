@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from datetime import date, datetime, timedelta
+from datetime import datetime
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
