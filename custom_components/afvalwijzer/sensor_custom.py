@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import hashlib
 from datetime import datetime
 
 from homeassistant.helpers.entity import Entity
@@ -10,6 +11,10 @@ from .const.const import (
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,
     CONF_ID,
+    CONF_INCLUDE_DATE_TODAY,
+    CONF_POSTAL_CODE,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SENSOR_ICON,
@@ -36,10 +41,19 @@ class AfvalwijzerCustomSensor(Entity):
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
+        self._unique_id = hashlib.sha1(
+            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     @property
     def icon(self):
