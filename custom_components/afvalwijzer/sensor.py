@@ -4,7 +4,6 @@ Sensor component Afvalwijzer
 Author: Bram van Dartel - xirixiz
 """
 
-from datetime import date, datetime, timedelta
 from functools import partial
 
 import homeassistant.helpers.config_validation as cv
@@ -138,7 +137,7 @@ class AfvalwijzerData(object):
             self.waste_data_with_today = afvalwijzer.waste_data_with_today
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
-            self.waste_data_with_today = self._default_label
+            self.waste_data_with_today = default_label
             raise
 
         # waste data provider update - without today
@@ -146,7 +145,7 @@ class AfvalwijzerData(object):
             self.waste_data_without_today = afvalwijzer.waste_data_without_today
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
-            self.waste_data_without_today = self._default_label
+            self.waste_data_without_today = default_label
             raise
 
         # waste data custom update
@@ -154,5 +153,5 @@ class AfvalwijzerData(object):
             self.waste_data_custom = afvalwijzer.waste_data_custom
         except ValueError as err:
             _LOGGER.error("Check waste_data_custom %s", err.args)
-            self.waste_data_custom = self._default_label
+            self.waste_data_custom = default_label
             raise
