@@ -6,12 +6,12 @@ Author: Bram van Dartel - xirixiz
 
 from functools import partial
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 from requests.exceptions import HTTPError
+import voluptuous as vol
 
 from .const.const import (
     _LOGGER,

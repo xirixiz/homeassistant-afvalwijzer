@@ -70,7 +70,7 @@ logger:
     custom_components.afvalwijzer: debug
 ```
 
-## EXAMPLE CONFIGURATION (MY CONFIG)
+## EXAMPLE CONFIGURATION
 
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
 
