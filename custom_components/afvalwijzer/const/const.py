@@ -1,5 +1,5 @@
-import logging
 from datetime import timedelta
+import logging
 
 API = "api"
 NAME = "afvalwijzer"
