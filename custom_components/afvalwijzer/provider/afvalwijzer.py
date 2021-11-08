@@ -110,7 +110,11 @@ class AfvalWijzer(object):
                     + json_response["ophaaldagenNext"]["data"]
                 )
             except ValueError:
-                raise ValueError("Invalid JSON data received from " + url)
+                raise ValueError("Invalid and/or no JSON data received from " + url)
+
+            if not json_data:
+                _LOGGER.error("No waste data found!")
+                return
 
             waste_data_with_today = {}
             waste_data_without_today = {}
