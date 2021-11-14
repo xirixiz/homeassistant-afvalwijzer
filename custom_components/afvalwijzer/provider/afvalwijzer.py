@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 
 import requests
 
@@ -26,7 +27,7 @@ class AfvalWijzer(object):
         self.suffix = suffix
         self.include_date_today = include_date_today
         self.default_label = default_label
-        self.exclude_list = exclude_list
+        self.exclude_list = exclude_list.strip().lower()
 
         _providers = (
             "mijnafvalwijzer",
@@ -67,6 +68,7 @@ class AfvalWijzer(object):
 
         # data collect
         (
+            self._waste_data_raw,
             self._waste_data_with_today,
             self._waste_data_without_today,
         ) = self.get_waste_data_provider()
@@ -105,40 +107,40 @@ class AfvalWijzer(object):
                 raise ValueError("No JSON data received from " + url)
 
             try:
-                json_data = (
+                waste_data_raw = (
                     json_response["ophaaldagen"]["data"]
                     + json_response["ophaaldagenNext"]["data"]
                 )
             except ValueError:
                 raise ValueError("Invalid and/or no JSON data received from " + url)
 
-            if not json_data:
+            if not waste_data_raw:
                 _LOGGER.error("No waste data found!")
                 return
 
             waste_data_with_today = {}
             waste_data_without_today = {}
 
-            for item in json_data:
+            for item in waste_data_raw:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"]
-                if item_name.strip().lower() not in self.exclude_list:
+                item_name = item["type"].strip().lower()
+                if item_name not in self.exclude_list:
                     if item_name not in waste_data_with_today:
                         if item_date >= self.today_date:
                             waste_data_with_today[item_name] = item_date
 
-            for item in json_data:
+            for item in waste_data_raw:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"]
-                if item_name.strip().lower() not in self.exclude_list:
+                item_name = item["type"].strip().lower()
+                if item_name not in self.exclude_list:
                     if item_name not in waste_data_without_today:
                         if item_date > self.today_date:
                             waste_data_without_today[item_name] = item_date
 
             try:
-                for item in json_data:
-                    item_name = item["type"]
-                    if item_name.strip().lower() not in self.exclude_list:
+                for item in waste_data_raw:
+                    item_name = item["type"].strip().lower()
+                    if item_name not in self.exclude_list:
                         if item_name not in waste_data_with_today.keys():
                             waste_data_with_today[item_name] = self.default_label
                         if item_name not in waste_data_without_today.keys():
@@ -146,7 +148,7 @@ class AfvalWijzer(object):
             except Exception as err:
                 _LOGGER.error("Other error occurred: %s", err)
 
-            return waste_data_with_today, waste_data_without_today
+            return waste_data_raw, waste_data_with_today, waste_data_without_today
 
         except Exception as err:
             _LOGGER.error("Other error occurred: %s", err)
@@ -156,7 +158,7 @@ class AfvalWijzer(object):
     ##########################################################################
     def get_waste_data_custom(self):
 
-        # start counting wihth Today's date or with Tomorrow"s date
+        # start counting wiht Today's date or with Tomorrow"s date
         if self.include_date_today.casefold() in ("true", "yes"):
             date_selected = self.today_date
         else:
@@ -188,6 +190,7 @@ class AfvalWijzer(object):
                     else:
                         today_multiple_items.append(key)
                         waste_data_custom["today"] = key
+
                 # waste type(s) tomorrow
                 if value == self.tomorrow_date:
                     if "tomorrow" in waste_data_custom.keys():
@@ -198,6 +201,7 @@ class AfvalWijzer(object):
                     else:
                         tomorrow_multiple_items.append(key)
                         waste_data_custom["tomorrow"] = key
+
                 # waste type(s) day_after_tomorrow
                 if value == self.day_after_tomorrow_date:
                     if "day_after_tomorrow" in waste_data_custom.keys():
@@ -225,34 +229,35 @@ class AfvalWijzer(object):
         ##########################################################################
 
         try:
-            waste_data_provider = self._waste_data_without_today
-            waste_data_temp = {
-                key: value
-                for key, value in waste_data_provider.items()
-                if isinstance(value, datetime) and value >= date_selected
-            }
+            waste_data_provider = self._waste_data_raw
+            waste_data_provider_past_removed = list(filter(lambda item: datetime.strptime(item["date"], "%Y-%m-%d") >= date_selected, waste_data_provider))
+            for item in range(len(waste_data_provider_past_removed)):
+                if waste_data_provider_past_removed[item]['type'] in self.exclude_list:
+                    del waste_data_provider_past_removed[item]
+                    break
+            # waste_data_provider_next_type = (min(waste_data_provider_past_removed, key=lambda item: min(item.values())))
+            # waste_data_provider_next_date = waste_data_provider_past_removed[0]['date']
+            waste_data_provider_next_date = datetime.strptime(waste_data_provider_past_removed[0]['date'], "%Y-%m-%d")
+
+            for item in waste_data_provider_past_removed:
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
+                item_name = item["type"].strip().lower()
+                if item_date == waste_data_provider_next_date:
+                    if "next_item" in waste_data_custom.keys():
+                        if item_name not in waste_data_custom.keys():
+                            next_item_multiple_items.append(item_name)
+                            waste_data_custom["next_item"] = ", ".join(
+                                next_item_multiple_items
+                            )
+                    else:
+                        next_item_multiple_items.append(item_name)
+                        waste_data_custom["next_item"] = item_name
 
             # first upcoming pickup date of any waste type
-            waste_data_custom["next_date"] = min(waste_data_temp.values())
+            waste_data_custom["next_date"] = waste_data_provider_next_date
 
             # first upcoming waste type pickup in days
-            waste_data_custom["next_in_days"] = abs(
-                (self.today_date - min(waste_data_temp.values())).days
-            )
-
-            # first upcoming waste type(s) pickup
-            upcoming_waste_date = min(waste_data_temp.values())
-
-            for key, value in waste_data_temp.items():
-                if value == upcoming_waste_date:
-                    if "next_item" in waste_data_custom.keys():
-                        next_item_multiple_items.append(key)
-                        waste_data_custom["next_item"] = ", ".join(
-                            next_item_multiple_items
-                        )
-                    else:
-                        next_item_multiple_items.append(key)
-                        waste_data_custom["next_item"] = key
+            waste_data_custom["next_in_days"] = abs((self.today_date - waste_data_provider_next_date).days)
 
             # set value to none if no value has been found
             if "next_date" not in waste_data_custom.keys():
