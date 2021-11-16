@@ -11,6 +11,8 @@ python3 -m afvalwijzer.test_sensor
 
 """
 
+from .provider.afvalwijzer import AfvalWijzer
+
 provider = "mijnafvalwijzer"
 
 # provider = "afvalstoffendienstkalender"
@@ -49,7 +51,6 @@ include_date_today = "False"
 default_label = "Geen"
 exclude_list = "gft"
 
-from .provider.afvalwijzer import AfvalWijzer
 
 afvalwijzer = AfvalWijzer(
     provider,

@@ -237,12 +237,23 @@ class AfvalWijzer(object):
                     waste_data_provider,
                 )
             )
+
             for item in range(len(waste_data_provider_past_removed)):
-                if waste_data_provider_past_removed[item]["type"] in self.exclude_list:
-                    del waste_data_provider_past_removed[item]
-                    break
-            # waste_data_provider_next_type = (min(waste_data_provider_past_removed, key=lambda item: min(item.values())))
-            # waste_data_provider_next_date = waste_data_provider_past_removed[0]['date']
+                real_item = len(waste_data_provider_past_removed) - item - 1
+                if (
+                    waste_data_provider_past_removed[real_item]["date"]
+                    == self.default_label
+                ):
+                    del waste_data_provider_past_removed[real_item]
+
+            for item in range(len(waste_data_provider_past_removed)):
+                real_item = len(waste_data_provider_past_removed) - item - 1
+                if (
+                    waste_data_provider_past_removed[real_item]["type"]
+                    in self.exclude_list
+                ):
+                    del waste_data_provider_past_removed[real_item]
+
             waste_data_provider_next_date = datetime.strptime(
                 waste_data_provider_past_removed[0]["date"], "%Y-%m-%d"
             )
