@@ -7,11 +7,11 @@ import afvalwijzer
 from afvalwijzer.provider.afvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
-python3 -m afvalwijzer.test_sensor
+python3 -m afvalwijzer.test_data.test_provider
 
 """
 
-from .provider.afvalwijzer import AfvalWijzer
+from ..provider.afvalwijzer import AfvalWijzer
 
 provider = "mijnafvalwijzer"
 

@@ -28,8 +28,7 @@ class AfvalWijzer(object):
         self.suffix = suffix
         self.include_date_today = include_date_today
         self.default_label = default_label
-        self.exclude_list = exclude_list.split(",")
-        self.exclude_list = list(x.strip().lower() for x in self.exclude_list)
+        self.exclude_list = list(x.strip().lower() for x in exclude_list.split(","))
 
         _providers = (
             "mijnafvalwijzer",
@@ -50,31 +49,21 @@ class AfvalWijzer(object):
         self.today = datetime.today().strftime("%d-%m-%Y")
 
         #  DEVELOPMENT MODE
-        self.development_mode = False
+        self.development_mode = True
         if self.development_mode:
-            print("##### DEVELOPMENT MODE #####")
+            print("\n##### DEVELOPMENT MODE #####")
             self.today = "17-11-2021"
         # END DEVELOPMENT MODE
 
+        # Get and format dates
         self.today_date = datetime.strptime(self.today, "%d-%m-%Y")
-
-        # Tomorow
-        self.today_to_tomorrow = datetime.strptime(self.today, "%d-%m-%Y") + timedelta(
+        self.tomorrow_date = datetime.strptime(self.today, "%d-%m-%Y") + timedelta(
             days=1
         )
-        self.tomorrow = datetime.strftime(self.today_to_tomorrow, "%d-%m-%Y")
-        self.tomorrow_date = datetime.strptime(self.tomorrow, "%d-%m-%Y")
-
         # Day after Tomorow
-        self.today_to_day_after_tomorrow = datetime.strptime(
+        self.day_after_tomorrow_date = datetime.strptime(
             self.today, "%d-%m-%Y"
         ) + timedelta(days=2)
-        self.day_after_tomorrow = datetime.strftime(
-            self.today_to_day_after_tomorrow, "%d-%m-%Y"
-        )
-        self.day_after_tomorrow_date = datetime.strptime(
-            self.day_after_tomorrow, "%d-%m-%Y"
-        )
 
         if self.include_date_today.casefold() in ("true", "yes"):
             self.date_selected = self.today_date
@@ -165,46 +154,7 @@ class AfvalWijzer(object):
                     _LOGGER.error("No waste data found!")
                     return
             else:
-                result = [
-                    {
-                        "nameType": "kerstbomen",
-                        "type": "kerstbomen",
-                        "date": "2021-01-09",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-09-24"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-09-28"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-10-08"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-10-12"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-10-15",
-                    },
-                    {"nameType": "papier", "type": "papier", "date": "2021-10-20"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-10-22"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-10-26"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-11-05"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-11-09"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-11-12",
-                    },
-                    {"nameType": "papier", "type": "papier", "date": "2021-11-17"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-11-19"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-11-19"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-12-03"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-12-07"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-12-10",
-                    },
-                    {"nameType": "papier", "type": "papier", "date": "2021-12-15"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-12-18"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-12-21"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-12-31"},
-                ]
+                result = json.load(open("afvalwijzer/test_data/dummy_data.json"))
 
             # Strip and lowercase all provider values
             result = list({k.strip().lower(): v for k, v in x.items()} for x in result)
@@ -212,6 +162,7 @@ class AfvalWijzer(object):
         except Exception as err:
             _LOGGER.error("Other error occurred _get_data_provider: %s", err)
 
+        # Returns JSON object as a dictionary
         return result
 
     ##########################################################################

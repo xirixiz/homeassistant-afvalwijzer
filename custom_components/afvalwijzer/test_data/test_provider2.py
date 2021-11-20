@@ -7,11 +7,11 @@ import afvalwijzer
 from afvalwijzer.provider.afvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
-python3 -m afvalwijzer.test_sensor
+python3 -m afvalwijzer.test_data.test_provider
 
 """
 
-from .provider.afvalwijzer2 import AfvalWijzer
+from ..provider.afvalwijzer2 import AfvalWijzer
 
 provider = "mijnafvalwijzer"
 
@@ -29,7 +29,7 @@ street_number = "1"
 suffix = ""
 include_date_today = "False"
 default_label = "Geen"
-exclude_list = "gft"
+exclude_list = "gft, papier"
 
 afvalwijzer = AfvalWijzer(
     provider,
@@ -44,7 +44,6 @@ afvalwijzer = AfvalWijzer(
 #########################################################################################################
 print("\n")
 
-# print(afvalwijzer.waste_data_raw)
 print(afvalwijzer.sensor_data_with_today)
 print(afvalwijzer.sensor_data_without_today)
 print(afvalwijzer.sensor_data_custom)
