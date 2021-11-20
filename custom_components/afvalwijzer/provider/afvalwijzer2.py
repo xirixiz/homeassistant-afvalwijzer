@@ -29,7 +29,7 @@ class AfvalWijzer(object):
         self.include_date_today = include_date_today
         self.default_label = default_label
         self.exclude_list = exclude_list.split(",")
-        self.exclude_list = [x.strip().lower() for x in self.exclude_list]
+        self.exclude_list = list(x.strip().lower() for x in self.exclude_list)
 
         _providers = (
             "mijnafvalwijzer",
@@ -50,7 +50,7 @@ class AfvalWijzer(object):
         self.today = datetime.today().strftime("%d-%m-%Y")
 
         #  DEVELOPMENT MODE
-        self.development_mode = True
+        self.development_mode = False
         if self.development_mode:
             print("##### DEVELOPMENT MODE #####")
             self.today = "17-11-2021"
@@ -85,18 +85,16 @@ class AfvalWijzer(object):
         #  GET AND GENERATE DATA
         ##########################################################################
 
-        # Get data list of dicts from provider
-        self.data_raw = self._get_waste_data_provider()
+        # Get waste data list of dicts from provider
+        self.data_raw = self._get_data_provider()
         # Generate waste types list
-        self.waste_types = self._get_waste_types()
+        self.types = self._get_types()
         # Generate waste types list, without excluded
-        self.waste_types_exluded_removed = self._get_waste_types_exluded_removed()
-        # Generate waste types custom list
-        # self.waste_types_custom = self._get_waste_types_custom()
+        self.types_included = self._get_types_included()
         # Generate waste data list of dicts, without excluded and datetime formatted
-        self.waste_data_full = self._gen_waste_list_full()
+        self.data_full = self._gen_data_full()
         # Generate waste data list of dicts using date_selected, without excluded and datetime formatted
-        self.waste_data_date_selected = self._gen_waste_list_date_selected()
+        self.data_after_date_selected = self._gen_data_after_date_selected()
         # Get next waste date
         self.next_date = self._get_next_date()
         # Get next waste type
@@ -119,19 +117,18 @@ class AfvalWijzer(object):
         self.sensor_data_without_today = self._gen_provider_sensor_data(
             self.tomorrow_date
         )
-        self.sensor_data_custom = {
-            **self._gen_next_sensor_data(),
-            **self._gen_day_sensor_data(),
-        }
-        self.sensor_list_waste_types = self.waste_types_exluded_removed
-        # self.sensor_list_waste_custom = self.waste_types_custom
+        self.sensor_data_custom = dict(
+            **self._gen_next_sensor_data(), **self._gen_day_sensor_data()
+        )
+        self.sensor_types = self.types_included
+        self.sensor_types_custom = self._get_types_custom()
 
     ##########################################################################
     #  GET DATA LISTS OF DICTS FROM PROVIDER
     ##########################################################################
 
     # Get all data in JSON format from provider
-    def _get_waste_data_provider(self):
+    def _get_data_provider(self):
         try:
             if not self.development_mode:
                 _LOGGER.debug("Connecting to: %s", self.provider)
@@ -169,107 +166,10 @@ class AfvalWijzer(object):
                     return
             else:
                 result = [
-                    {"nameType": "gft", "type": "gft", "date": "2021-01-02"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-01-05"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-01-08",
-                    },
                     {
                         "nameType": "kerstbomen",
                         "type": "kerstbomen",
                         "date": "2021-01-09",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-01-15"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-01-19"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-01-20"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-01-29"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-02-02"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-02-05",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-02-12"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-02-16"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-02-17"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-02-26"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-03-02"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-03-05",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-03-12"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-03-16"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-03-17"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-03-26"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-03-30"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-04-02",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-04-09"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-04-13"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-04-21"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-04-23"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-04-30",
-                    },
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-04-30"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-05-07"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-05-11"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-05-19"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-05-21"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-05-25"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-05-28",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-06-04"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-06-08"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-06-16"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-06-18"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-06-22"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-06-25",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-07-02"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-07-06"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-07-16"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-07-20"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-07-21"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-07-23",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-07-30"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-08-03"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-08-13"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-08-17"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-08-18"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-08-20",
-                    },
-                    {"nameType": "gft", "type": "gft", "date": "2021-08-27"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-08-31"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-09-10"},
-                    {"nameType": "pmd", "type": "pmd", "date": "2021-09-14"},
-                    {"nameType": "papier", "type": "papier", "date": "2021-09-15"},
-                    {
-                        "nameType": "restafval",
-                        "type": "restafval",
-                        "date": "2021-09-17",
                     },
                     {"nameType": "gft", "type": "gft", "date": "2021-09-24"},
                     {"nameType": "pmd", "type": "pmd", "date": "2021-09-28"},
@@ -301,15 +201,16 @@ class AfvalWijzer(object):
                         "date": "2021-12-10",
                     },
                     {"nameType": "papier", "type": "papier", "date": "2021-12-15"},
-                    {"nameType": "gft", "type": "gft", "date": "2021-12-17"},
+                    {"nameType": "gft", "type": "gft", "date": "2021-12-18"},
                     {"nameType": "pmd", "type": "pmd", "date": "2021-12-21"},
                     {"nameType": "gft", "type": "gft", "date": "2021-12-31"},
                 ]
 
-            result = [{k.strip().lower(): v for k, v in x.items()} for x in result]
+            # Strip and lowercase all provider values
+            result = list({k.strip().lower(): v for k, v in x.items()} for x in result)
 
         except Exception as err:
-            _LOGGER.error("Other error occurred _get_waste_data_provider: %s", err)
+            _LOGGER.error("Other error occurred _get_data_provider: %s", err)
 
         return result
 
@@ -318,57 +219,51 @@ class AfvalWijzer(object):
     ##########################################################################
 
     # Generate waste types list
-    def _get_waste_types(self):
+    def _get_types(self):
         try:
-            result = sorted(set([x["type"] for x in self.data_raw]))
+            result = sorted(set(list(x["type"] for x in self.data_raw)))
         except Exception as err:
-            _LOGGER.error("Other error occurred _get_waste_types: %s", err)
+            _LOGGER.error("Other error occurred _get_types: %s", err)
         return result
 
     # Generate waste types custom list
-    def _get_waste_types_custom(self):
+    def _get_types_custom(self):
         try:
-            result = list(sorted(set([x for x in self.sensor_list_waste_custom])))
+            result = list(sorted(self.sensor_data_custom.keys()))
         except Exception as err:
-            _LOGGER.error("Other error occurred _get_waste_types_custom: %s", err)
+            _LOGGER.error("Other error occurred _get_types_custom: %s", err)
         return result
 
     # Generate waste types list, without excluded
-    def _get_waste_types_exluded_removed(self):
+    def _get_types_included(self):
         try:
-            result = list(
-                sorted(
-                    set([x for x in self.waste_types if not (x in self.exclude_list)])
-                )
-            )
-            # result = list(sorted(set(self.waste_types) - set(self.exclude_list)))
-            # result = [x for x in self.waste_types if x not in self.exclude_list]
+            # result = list(sorted(set([x for x in self.types if not (x in self.exclude_list)])))
+            result = list(sorted(set(self.types) - set(self.exclude_list)))
+            # result = list(x for x in self.types if x not in self.exclude_list)
         except Exception as err:
-            _LOGGER.error(
-                "Other error occurred _get_waste_types_exluded_removed: %s", err
-            )
+            _LOGGER.error("Other error occurred _get_types_included: %s", err)
         return result
 
     # Generate waste data list of dicts after Today, without excluded and datetime formatted
-    def _gen_waste_list_full(self):
+    def _gen_data_full(self):
         try:
-            result = [
+            result = list(
                 {"type": x["type"], "date": datetime.strptime(x["date"], "%Y-%m-%d")}
                 for x in self.data_raw
-                if x["type"] in self.waste_types_exluded_removed
-            ]
+                if x["type"] in self.types_included
+            )
         except Exception as err:
-            _LOGGER.error("Other error occurred _gen_waste_list_full: %s", err)
+            _LOGGER.error("Other error occurred _gen_data_full: %s", err)
         return result
 
     # Remove history from the list of dicts before date_selected
-    def _gen_waste_list_date_selected(self):
+    def _gen_data_after_date_selected(self):
         try:
             result = list(
-                filter(lambda x: x["date"] >= self.date_selected, self.waste_data_full)
+                filter(lambda x: x["date"] >= self.date_selected, self.data_full)
             )
         except Exception as err:
-            _LOGGER.error("Other error occurred _gen_waste_list_date_selected: %s", err)
+            _LOGGER.error("Other error occurred _gen_data_after_date_selected: %s", err)
         return result
 
     ##########################################################################
@@ -379,7 +274,7 @@ class AfvalWijzer(object):
     def _gen_provider_sensor_data(self, date):
         result = dict()
         try:
-            for x in self.waste_data_full:
+            for x in self.data_full:
                 item_date = x["date"]
                 item_name = x["type"]
                 if item_date >= date:
@@ -388,7 +283,7 @@ class AfvalWijzer(object):
                             result[item_name] = item_date
                         else:
                             result[item_name] = self.default_label
-            for x in self.waste_data_full:
+            for x in self.data_full:
                 item_name = x["type"]
                 if item_name not in result.keys():
                     result[item_name] = self.default_label
@@ -403,13 +298,13 @@ class AfvalWijzer(object):
     def _get_day_sensor(self, date):
         result = list()
         try:
-            for x in self.waste_data_full:
+            for x in self.data_full:
                 item_date = x["date"]
                 item_name = x["type"]
                 if item_date == date:
                     result.append(item_name)
             if not result:
-                result = [self.default_label]
+                result.append(self.default_label)
         except Exception as err:
             _LOGGER.error("Other error occurred _get_day_sensor: %s", err)
         return result
@@ -435,24 +330,9 @@ class AfvalWijzer(object):
     def _get_next_date(self):
         result = self.default_label
         try:
-            result = self.waste_data_date_selected[0]["date"]
+            result = self.data_after_date_selected[0]["date"]
         except Exception as err:
             _LOGGER.error("Other error occurred _get_next_date: %s", err)
-        return result
-
-    # Generate sensor next_type
-    def _get_next_type(self):
-        result = list()
-        try:
-            for x in self.waste_data_date_selected:
-                item_date = x["date"]
-                item_name = x["type"]
-                if item_date == self.next_date:
-                    result.append(item_name)
-            if not result:
-                result = [self.default_label]
-        except Exception as err:
-            _LOGGER.error("Other error occurred _get_next_type: %s", err)
         return result
 
     # Generate sensor next_in_days
@@ -462,6 +342,21 @@ class AfvalWijzer(object):
             result = abs(self.today_date - self.next_date).days
         except Exception as err:
             _LOGGER.error("Other error occurred _get_next_in_days: %s", err)
+        return result
+
+    # Generate sensor next_type
+    def _get_next_type(self):
+        result = list()
+        try:
+            for x in self.data_after_date_selected:
+                item_date = x["date"]
+                item_name = x["type"]
+                if item_date == self.next_date:
+                    result.append(item_name)
+            if not result:
+                result.append(self.default_label)
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_next_type: %s", err)
         return result
 
     # Generate sensor data for custom sensors
