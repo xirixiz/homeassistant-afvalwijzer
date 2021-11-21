@@ -330,9 +330,9 @@ class AfvalWijzer(object):
     def _gen_next_sensor_data(self):
         next_sensor = dict()
         try:
-            next_sensor["next_waste_date"] = self.next_waste_date
-            next_sensor["next_waste_type"] = ", ".join(self.next_waste_type)
-            next_sensor["next_waste_in_days"] = self.next_waste_in_days
+            next_sensor["next_date"] = self.next_waste_date
+            next_sensor["next_type"] = ", ".join(self.next_waste_type)
+            next_sensor["next_in_days"] = self.next_waste_in_days
         except Exception as err:
             _LOGGER.error("Other error occurred _gen_next_sensor_data: %s", err)
         return next_sensor
