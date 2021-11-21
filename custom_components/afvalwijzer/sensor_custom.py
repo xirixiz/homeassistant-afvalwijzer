@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-from datetime import datetime
-import hashlib
-import logging
-
-_LOGGER = logging.getLogger(__name__)
-
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
-
 from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
@@ -22,6 +13,15 @@ from .const.const import (
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
+
+from datetime import datetime
+import hashlib
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
+from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle
 
 
 class AfvalwijzerCustomSensor(Entity):
@@ -67,7 +67,7 @@ class AfvalwijzerCustomSensor(Entity):
 
     @property
     def device_state_attributes(self):
-        if self._year_month_day_date != None:
+        if self._year_month_day_date is not None:
             return {
                 ATTR_LAST_UPDATE: self._last_update,
                 ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,

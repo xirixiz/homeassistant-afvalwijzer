@@ -29,7 +29,9 @@ class AfvalWijzer(object):
         self.suffix = suffix
         self.include_date_today = include_date_today
         self.default_label = default_label
-        self.exclude_list = list(x.strip().lower() for x in exclude_list.split(","))
+        self.exclude_list = list(
+            waste.strip().lower() for waste in exclude_list.split(",")
+        )
 
         _providers = (
             "mijnafvalwijzer",
@@ -159,7 +161,8 @@ class AfvalWijzer(object):
 
             # Strip and lowercase all provider values
             waste_data_raw = list(
-                {k.strip().lower(): v for k, v in x.items()} for x in waste_data_raw
+                {key.strip().lower(): value for key, value in waste.items()}
+                for waste in waste_data_raw
             )
 
         except Exception as err:
@@ -176,7 +179,7 @@ class AfvalWijzer(object):
     def _get_waste_types_provider(self):
         try:
             waste_types_provider = sorted(
-                set(list(x["type"] for x in self.waste_data_raw))
+                set(list(waste["type"] for waste in self.waste_data_raw))
             )
         except Exception as err:
             _LOGGER.error("Other error occurred _get_waste_types_provider: %s", err)
@@ -206,9 +209,12 @@ class AfvalWijzer(object):
     def _gen_waste_data_formatted(self):
         try:
             waste_data_formatted = list(
-                {"type": x["type"], "date": datetime.strptime(x["date"], "%Y-%m-%d")}
-                for x in self.waste_data_raw
-                if x["type"] in self.waste_types_provider_included
+                {
+                    "type": waste["type"],
+                    "date": datetime.strptime(waste["date"], "%Y-%m-%d"),
+                }
+                for waste in self.waste_data_raw
+                if waste["type"] in self.waste_types_provider_included
             )
         except Exception as err:
             _LOGGER.error("Other error occurred _gen_waste_data_formatted: %s", err)
@@ -219,7 +225,8 @@ class AfvalWijzer(object):
         try:
             waste_data_after_date_selected = list(
                 filter(
-                    lambda x: x["date"] >= self.date_selected, self.waste_data_formatted
+                    lambda waste: waste["date"] >= self.date_selected,
+                    self.waste_data_formatted,
                 )
             )
         except Exception as err:
@@ -236,17 +243,17 @@ class AfvalWijzer(object):
     def _gen_waste_data_provider(self, date):
         waste_data_provider = dict()
         try:
-            for x in self.waste_data_formatted:
-                item_date = x["date"]
-                item_name = x["type"]
+            for waste in self.waste_data_formatted:
+                item_date = waste["date"]
+                item_name = waste["type"]
                 if item_date >= date:
                     if item_name not in waste_data_provider.keys():
                         if isinstance(item_date, datetime):
                             waste_data_provider[item_name] = item_date
                         else:
                             waste_data_provider[item_name] = self.default_label
-            for x in self.waste_data_formatted:
-                item_name = x["type"]
+            for waste in self.waste_data_formatted:
+                item_name = waste["type"]
                 if item_name not in waste_data_provider.keys():
                     waste_data_provider[item_name] = self.default_label
         except Exception as err:
@@ -260,9 +267,9 @@ class AfvalWijzer(object):
     def _gen_day_sensor(self, date):
         day = list()
         try:
-            for x in self.waste_data_formatted:
-                item_date = x["date"]
-                item_name = x["type"]
+            for waste in self.waste_data_formatted:
+                item_date = waste["date"]
+                item_name = waste["type"]
                 if item_date == date:
                     day.append(item_name)
             if not day:
@@ -308,9 +315,9 @@ class AfvalWijzer(object):
     def _get_next_waste_type(self):
         next_waste_type = list()
         try:
-            for x in self.waste_data_after_date_selected:
-                item_date = x["date"]
-                item_name = x["type"]
+            for waste in self.waste_data_after_date_selected:
+                item_date = waste["date"]
+                item_name = waste["type"]
                 if item_date == self.next_waste_date:
                     next_waste_type.append(item_name)
             if not next_waste_type:

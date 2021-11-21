@@ -1,5 +1,4 @@
 from datetime import timedelta
-import logging
 
 API = "api"
 NAME = "afvalwijzer"
@@ -42,10 +41,10 @@ DOMAIN = "afvalwijzer"
 DOMAIN_DATA = "afvalwijzer_data"
 
 STARTUP_MESSAGE = f"""
--------------------------------------------------------------------
-Afvalwijzer
-This is a custom integration!
-If you have any issues with this you need to open an issue here:
-https://github.com/xirixiz/homeassistant-afvalwijzer/issues
--------------------------------------------------------------------
+-------------------------------------------------------------------,
+Afvalwijzer - {VERSION},
+This is a custom integration!,
+If you have any issues with this you need to open an issue here:,
+https://github.com/xirixiz/homeassistant-afvalwijzer/issues,
+-------------------------------------------------------------------,
 """

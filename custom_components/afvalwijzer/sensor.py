@@ -3,19 +3,6 @@
 Sensor component Afvalwijzer
 Author: Bram van Dartel - xirixiz
 """
-import logging
-
-_LOGGER = logging.getLogger(__name__)
-
-from functools import partial
-
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
-from requests.exceptions import HTTPError
-import voluptuous as vol
-
 from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
@@ -33,6 +20,18 @@ from .const.const import (
 from .provider.afvalwijzer import AfvalWijzer
 from .sensor_custom import AfvalwijzerCustomSensor
 from .sensor_provider import AfvalwijzerProviderSensor
+
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
+from functools import partial
+
+from homeassistant.components.sensor import PLATFORM_SCHEMA
+import homeassistant.helpers.config_validation as cv
+from homeassistant.util import Throttle
+import voluptuous as vol
+
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
