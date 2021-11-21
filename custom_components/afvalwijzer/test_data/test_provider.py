@@ -26,30 +26,10 @@ provider = "mijnafvalwijzer"
 postal_code = "5146EG"
 street_number = "1"
 
-# postal_code = "4707PB"
-# street_number = "110"
-
-# postal_code = "5142HG"
-# street_number = "4"
-
-# Rova
-# provider = "rova"
-# postal_code = "3824XB"
-# street_number = "2"
-
-# postal_code = "4714CB"
-# street_number = "57"
-
-# postal_code = "5473VD"
-# street_number = "7"
-
-# postal_code = "6691XX"
-# street_number = "22"
-
 suffix = ""
 include_date_today = "False"
 default_label = "Geen"
-exclude_list = "gft"
+exclude_list = "gft, papier"
 
 afvalwijzer = AfvalWijzer(
     provider,
@@ -64,11 +44,11 @@ afvalwijzer = AfvalWijzer(
 #########################################################################################################
 print("\n")
 
-print(afvalwijzer.waste_data_with_today)
-print(afvalwijzer.waste_data_without_today)
-print(afvalwijzer.waste_data_custom)
-print(afvalwijzer.waste_types_provider)
-print(afvalwijzer.waste_types_custom)
+print(afvalwijzer.sensor_data_with_today)
+print(afvalwijzer.sensor_data_without_today)
+print(afvalwijzer.sensor_data_custom)
+print(afvalwijzer.sensor_types)
+print(afvalwijzer.sensor_types_custom)
 
 print("\n")
 

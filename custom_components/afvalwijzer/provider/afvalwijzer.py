@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 import requests
 import logging
 
@@ -28,7 +29,7 @@ class AfvalWijzer(object):
         self.suffix = suffix
         self.include_date_today = include_date_today
         self.default_label = default_label
-        self.exclude_list = exclude_list.strip().lower()
+        self.exclude_list = list(x.strip().lower() for x in exclude_list.split(","))
 
         _providers = (
             "mijnafvalwijzer",
@@ -45,293 +46,276 @@ class AfvalWijzer(object):
         #  DATE CALCULATION TODAY, TOMORROW, DAY AFTER TOMORROW
         ##########################################################################
 
-        # today
+        # Today
         self.today = datetime.today().strftime("%d-%m-%Y")
-        self.today_date = datetime.strptime(self.today, "%d-%m-%Y")
 
-        # tomorow
-        self.today_to_tomorrow = datetime.strptime(self.today, "%d-%m-%Y") + timedelta(
+        #  DEVELOPMENT MODE
+        self.development_mode = False
+        if self.development_mode:
+            print("\n##### DEVELOPMENT MODE #####")
+            self.today = "17-11-2021"
+        # END DEVELOPMENT MODE
+
+        # Get and format dates
+        self.today_date = datetime.strptime(self.today, "%d-%m-%Y")
+        self.tomorrow_date = datetime.strptime(self.today, "%d-%m-%Y") + timedelta(
             days=1
         )
-        self.tomorrow = datetime.strftime(self.today_to_tomorrow, "%d-%m-%Y")
-        self.tomorrow_date = datetime.strptime(self.tomorrow, "%d-%m-%Y")
-
-        # day after tomorow
-        self.today_to_day_after_tomorrow = datetime.strptime(
+        # Day after Tomorow
+        self.day_after_tomorrow_date = datetime.strptime(
             self.today, "%d-%m-%Y"
         ) + timedelta(days=2)
-        self.day_after_tomorrow = datetime.strftime(
-            self.today_to_day_after_tomorrow, "%d-%m-%Y"
-        )
-        self.day_after_tomorrow_date = datetime.strptime(
-            self.day_after_tomorrow, "%d-%m-%Y"
-        )
 
-        # data collect
-        (
-            self._waste_data_raw,
-            self._waste_data_with_today,
-            self._waste_data_without_today,
-        ) = self.get_waste_data_provider()
-        self._waste_data_custom = self.get_waste_data_custom()
-        self._waste_types_provider = self.get_waste_types_provider()
-        self._waste_types_custom = self.get_waste_types_custom()
-
-    ##########################################################################
-    #  GET WASTE DATA FROM PROVIDER
-    ##########################################################################
-
-    def get_waste_data_provider(self):
-        try:
-            _LOGGER.debug(
-                "Connecting to the frontend (json data) of: %s", self.provider
-            )
-
-            url = SENSOR_PROVIDER_TO_URL["afvalwijzer_data_default"][0].format(
-                self.provider,
-                self.postal_code,
-                self.street_number,
-                self.suffix,
-                datetime.today().strftime("%Y-%m-%d"),
-            )
-
-            _LOGGER.debug("URL parsed: %s", url)
-
-            try:
-                raw_response = requests.get(url)
-            except requests.exceptions.RequestException as err:
-                raise ValueError(err)
-
-            try:
-                json_response = raw_response.json()
-            except ValueError:
-                raise ValueError("No JSON data received from " + url)
-
-            try:
-                waste_data_raw = (
-                    json_response["ophaaldagen"]["data"]
-                    + json_response["ophaaldagenNext"]["data"]
-                )
-            except ValueError:
-                raise ValueError("Invalid and/or no JSON data received from " + url)
-
-            if not waste_data_raw:
-                _LOGGER.error("No waste data found!")
-                return
-
-            waste_data_with_today = {}
-            waste_data_without_today = {}
-
-            for item in waste_data_raw:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"].strip().lower()
-                if item_name not in self.exclude_list:
-                    if item_name not in waste_data_with_today:
-                        if item_date >= self.today_date:
-                            waste_data_with_today[item_name] = item_date
-
-            for item in waste_data_raw:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"].strip().lower()
-                if item_name not in self.exclude_list:
-                    if item_name not in waste_data_without_today:
-                        if item_date > self.today_date:
-                            waste_data_without_today[item_name] = item_date
-
-            try:
-                for item in waste_data_raw:
-                    item_name = item["type"].strip().lower()
-                    if item_name not in self.exclude_list:
-                        if item_name not in waste_data_with_today.keys():
-                            waste_data_with_today[item_name] = self.default_label
-                        if item_name not in waste_data_without_today.keys():
-                            waste_data_without_today[item_name] = self.default_label
-            except Exception as err:
-                _LOGGER.error("Other error occurred: %s", err)
-
-            return waste_data_raw, waste_data_with_today, waste_data_without_today
-
-        except Exception as err:
-            _LOGGER.error("Other error occurred: %s", err)
-
-    ##########################################################################
-    #  GENERATE DATA FOR CUSTOM SENSORS
-    ##########################################################################
-    def get_waste_data_custom(self):
-
-        # start counting wiht Today's date or with Tomorrow"s date
         if self.include_date_today.casefold() in ("true", "yes"):
-            date_selected = self.today_date
+            self.date_selected = self.today_date
         else:
-            date_selected = self.tomorrow_date
-
-        waste_data_custom = {}
-        today_multiple_items = []
-        tomorrow_multiple_items = []
-        day_after_tomorrow_multiple_items = []
-        next_item_multiple_items = []
+            self.date_selected = self.tomorrow_date
 
         ##########################################################################
-        #  GENERATE TODAY, TOMORROW, DAY AFTER TOMORROW SENSOR DATA
+        #  GET AND GENERATE DATA
         ##########################################################################
+
+        # Get waste data list of dicts from provider
+        self.data_raw = self._get_data_provider()
+        # Generate waste types list
+        self.types = self._get_types()
+        # Generate waste types list, without excluded
+        self.types_included = self._get_types_included()
+        # Generate waste data list of dicts, without excluded and datetime formatted
+        self.data_full = self._gen_data_full()
+        # Generate waste data list of dicts using date_selected, without excluded and datetime formatted
+        self.data_after_date_selected = self._gen_data_after_date_selected()
+        # Get next waste date
+        self.next_date = self._get_next_date()
+        # Get next waste type
+        self.next_type = self._get_next_type()
+        # Get next waste date in days
+        self.next_in_days = self._get_next_in_days()
+        # Get Today sensor data
+        self.today_sensor_data = self._get_day_sensor(self.today_date)
+        # Get Tomorrow sensor data
+        self.tomorrow_sensor_data = self._get_day_sensor(self.tomorrow_date)
+        # Get Day after Tomorrow sensor data
+        self.day_after_tomorrow_sensor_data = self._get_day_sensor(
+            self.day_after_tomorrow_date
+        )
+
+        ##########################################################################
+        #  GENERATE SENSOR DATA
+        ##########################################################################
+        self.sensor_data_with_today = self._gen_provider_sensor_data(self.today_date)
+        self.sensor_data_without_today = self._gen_provider_sensor_data(
+            self.tomorrow_date
+        )
+        self.sensor_data_custom = dict(
+            **self._gen_next_sensor_data(), **self._gen_day_sensor_data()
+        )
+        self.sensor_types = self.types_included
+        self.sensor_types_custom = self._get_types_custom()
+
+    ##########################################################################
+    #  GET DATA LISTS OF DICTS FROM PROVIDER
+    ##########################################################################
+
+    # Get all data in JSON format from provider
+    def _get_data_provider(self):
         try:
-            waste_data_provider = self._waste_data_with_today
-            waste_data_temp = {
-                key: value
-                for key, value in waste_data_provider.items()
-                if isinstance(value, datetime)
-            }
+            if not self.development_mode:
+                _LOGGER.debug("Connecting to: %s", self.provider)
 
-            for key, value in waste_data_temp.items():
-                # waste type(s) today
-                if value == self.today_date:
-                    if "today" in waste_data_custom.keys():
-                        today_multiple_items.append(key)
-                        waste_data_custom["today"] = ", ".join(today_multiple_items)
-                    else:
-                        today_multiple_items.append(key)
-                        waste_data_custom["today"] = key
-
-                # waste type(s) tomorrow
-                if value == self.tomorrow_date:
-                    if "tomorrow" in waste_data_custom.keys():
-                        tomorrow_multiple_items.append(key)
-                        waste_data_custom["tomorrow"] = ", ".join(
-                            tomorrow_multiple_items
-                        )
-                    else:
-                        tomorrow_multiple_items.append(key)
-                        waste_data_custom["tomorrow"] = key
-
-                # waste type(s) day_after_tomorrow
-                if value == self.day_after_tomorrow_date:
-                    if "day_after_tomorrow" in waste_data_custom.keys():
-                        day_after_tomorrow_multiple_items.append(key)
-                        waste_data_custom["day_after_tomorrow"] = ", ".join(
-                            day_after_tomorrow_multiple_items
-                        )
-                    else:
-                        day_after_tomorrow_multiple_items.append(key)
-                        waste_data_custom["day_after_tomorrow"] = key
-
-            # set value to none if no value has been found
-            if "today" not in waste_data_custom.keys():
-                waste_data_custom["today"] = self.default_label
-            if "tomorrow" not in waste_data_custom.keys():
-                waste_data_custom["tomorrow"] = self.default_label
-            if "day_after_tomorrow" not in waste_data_custom.keys():
-                waste_data_custom["day_after_tomorrow"] = self.default_label
-
-        except Exception as err:
-            _LOGGER.error("Error occurred: %s", err)
-
-        ##########################################################################
-        #  GENERATE NEXT_ SENSOR DATA
-        ##########################################################################
-
-        try:
-            waste_data_provider = self._waste_data_raw
-            waste_data_provider_past_removed = list(
-                filter(
-                    lambda item: datetime.strptime(item["date"], "%Y-%m-%d")
-                    >= date_selected,
-                    waste_data_provider,
+                url = SENSOR_PROVIDER_TO_URL["afvalwijzer_data_default"][0].format(
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
+                    datetime.today().strftime("%Y-%m-%d"),
                 )
-            )
 
-            for item in range(len(waste_data_provider_past_removed)):
-                real_item = len(waste_data_provider_past_removed) - item - 1
-                if (
-                    waste_data_provider_past_removed[real_item]["date"]
-                    == self.default_label
-                ):
-                    del waste_data_provider_past_removed[real_item]
+                _LOGGER.debug("URL parsed: %s", url)
 
-            for item in range(len(waste_data_provider_past_removed)):
-                real_item = len(waste_data_provider_past_removed) - item - 1
-                if (
-                    waste_data_provider_past_removed[real_item]["type"]
-                    in self.exclude_list
-                ):
-                    del waste_data_provider_past_removed[real_item]
+                try:
+                    raw_response = requests.get(url)
+                except requests.exceptions.RequestException as err:
+                    raise ValueError(err)
 
-            waste_data_provider_next_date = datetime.strptime(
-                waste_data_provider_past_removed[0]["date"], "%Y-%m-%d"
-            )
+                try:
+                    json_response = raw_response.json()
+                except ValueError:
+                    raise ValueError("No JSON data received from " + url)
 
-            for item in waste_data_provider_past_removed:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"].strip().lower()
-                if item_date == waste_data_provider_next_date:
-                    if "next_item" in waste_data_custom.keys():
-                        if item_name not in waste_data_custom.keys():
-                            next_item_multiple_items.append(item_name)
-                            waste_data_custom["next_item"] = ", ".join(
-                                next_item_multiple_items
-                            )
-                    else:
-                        next_item_multiple_items.append(item_name)
-                        waste_data_custom["next_item"] = item_name
+                try:
+                    result = (
+                        json_response["ophaaldagen"]["data"]
+                        + json_response["ophaaldagenNext"]["data"]
+                    )
+                except ValueError:
+                    raise ValueError("Invalid and/or no JSON data received from " + url)
 
-            # first upcoming pickup date of any waste type
-            waste_data_custom["next_date"] = waste_data_provider_next_date
+                if not result:
+                    _LOGGER.error("No waste data found!")
+                    return
+            else:
+                result = json.load(open("afvalwijzer/test_data/dummy_data.json"))
 
-            # first upcoming waste type pickup in days
-            waste_data_custom["next_in_days"] = abs(
-                (self.today_date - waste_data_provider_next_date).days
-            )
-
-            # set value to none if no value has been found
-            if "next_date" not in waste_data_custom.keys():
-                waste_data_custom["next_date"] = self.default_label
-            if "next_in_days" not in waste_data_custom.keys():
-                waste_data_custom["next_in_days"] = self.default_label
-            if "next_item" not in waste_data_custom.keys():
-                waste_data_custom["next_item"] = self.default_label
+            # Strip and lowercase all provider values
+            result = list({k.strip().lower(): v for k, v in x.items()} for x in result)
 
         except Exception as err:
-            _LOGGER.error("Error occurred: %s", err)
+            _LOGGER.error("Other error occurred _get_data_provider: %s", err)
 
-        return waste_data_custom
-
-    ##########################################################################
-    #  GENERATE WASTE TYPES LIST FROM PROVIDER
-    ##########################################################################
-
-    def get_waste_types_provider(self):
-        waste_data_provider = self._waste_data_without_today
-        waste_list_provider = list(waste_data_provider.keys())
-        return waste_list_provider
+        # Returns JSON object as a dictionary
+        return result
 
     ##########################################################################
-    #  GENERATE SENSOR TYPES LIST FOR CUSTOM SENSORS
+    #  PROCESS WASTE DATA FROM PROVIDER - LISTS
     ##########################################################################
 
-    def get_waste_types_custom(self):
-        waste_data_custom = self._waste_data_custom
-        waste_list_custom = list(waste_data_custom.keys())
-        return waste_list_custom
+    # Generate waste types list
+    def _get_types(self):
+        try:
+            result = sorted(set(list(x["type"] for x in self.data_raw)))
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_types: %s", err)
+        return result
+
+    # Generate waste types custom list
+    def _get_types_custom(self):
+        try:
+            result = list(sorted(self.sensor_data_custom.keys()))
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_types_custom: %s", err)
+        return result
+
+    # Generate waste types list, without excluded
+    def _get_types_included(self):
+        try:
+            result = list(sorted(set(self.types) - set(self.exclude_list)))
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_types_included: %s", err)
+        return result
+
+    # Generate waste data list of dicts after Today, without excluded and datetime formatted
+    def _gen_data_full(self):
+        try:
+            result = list(
+                {"type": x["type"], "date": datetime.strptime(x["date"], "%Y-%m-%d")}
+                for x in self.data_raw
+                if x["type"] in self.types_included
+            )
+        except Exception as err:
+            _LOGGER.error("Other error occurred _gen_data_full: %s", err)
+        return result
+
+    # Remove history from the list of dicts before date_selected
+    def _gen_data_after_date_selected(self):
+        try:
+            result = list(
+                filter(lambda x: x["date"] >= self.date_selected, self.data_full)
+            )
+        except Exception as err:
+            _LOGGER.error("Other error occurred _gen_data_after_date_selected: %s", err)
+        return result
 
     ##########################################################################
-    #  PROPERTIES FOR EXECUTION
+    #  PROCESS WASTE DATA FROM PROVIDER - SENSOR DATA
     ##########################################################################
 
-    @property
-    def waste_data_with_today(self):
-        return self._waste_data_with_today
+    # Generate sensor data for waste types, without excluded
+    def _gen_provider_sensor_data(self, date):
+        result = dict()
+        try:
+            for x in self.data_full:
+                item_date = x["date"]
+                item_name = x["type"]
+                if item_date >= date:
+                    if item_name not in result.keys():
+                        if isinstance(item_date, datetime):
+                            result[item_name] = item_date
+                        else:
+                            result[item_name] = self.default_label
+            for x in self.data_full:
+                item_name = x["type"]
+                if item_name not in result.keys():
+                    result[item_name] = self.default_label
+        except Exception as err:
+            _LOGGER.error("Other error occurred _gen_provider_sensor_data: %s", err)
+        return result
 
-    @property
-    def waste_data_without_today(self):
-        return self._waste_data_without_today
+    ##########################################################################
+    #  TODAY, TOMORROW, DOT SENSOR(S)
+    ##########################################################################
 
-    @property
-    def waste_data_custom(self):
-        return self._waste_data_custom
+    def _get_day_sensor(self, date):
+        result = list()
+        try:
+            for x in self.data_full:
+                item_date = x["date"]
+                item_name = x["type"]
+                if item_date == date:
+                    result.append(item_name)
+            if not result:
+                result.append(self.default_label)
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_day_sensor: %s", err)
+        return result
 
-    @property
-    def waste_types_provider(self):
-        return self._waste_types_provider
+    # Generate sensor data for today, tomorrow, day after tomorrow
+    def _gen_day_sensor_data(self):
+        result = dict()
+        try:
+            result["today"] = ", ".join(self.today_sensor_data)
+            result["tomorrow"] = ", ".join(self.tomorrow_sensor_data)
+            result["day_after_tomorrow"] = ", ".join(
+                self.day_after_tomorrow_sensor_data
+            )
+        except Exception as err:
+            _LOGGER.error("Other error occurred _gen_day_sensor_data: %s", err)
+        return result
 
-    @property
-    def waste_types_custom(self):
-        return self._waste_types_custom
+    ##########################################################################
+    #  NEXT SENSOR(S)
+    ##########################################################################
+
+    # Generate sensor next_date
+    def _get_next_date(self):
+        result = self.default_label
+        try:
+            result = self.data_after_date_selected[0]["date"]
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_next_date: %s", err)
+        return result
+
+    # Generate sensor next_in_days
+    def _get_next_in_days(self):
+        result = self.default_label
+        try:
+            result = abs(self.today_date - self.next_date).days
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_next_in_days: %s", err)
+        return result
+
+    # Generate sensor next_type
+    def _get_next_type(self):
+        result = list()
+        try:
+            for x in self.data_after_date_selected:
+                item_date = x["date"]
+                item_name = x["type"]
+                if item_date == self.next_date:
+                    result.append(item_name)
+            if not result:
+                result.append(self.default_label)
+        except Exception as err:
+            _LOGGER.error("Other error occurred _get_next_type: %s", err)
+        return result
+
+    # Generate sensor data for custom sensors
+    def _gen_next_sensor_data(self):
+        result = dict()
+        try:
+            result["next_date"] = self.next_date
+            result["next_type"] = ", ".join(self.next_type)
+            result["next_in_days"] = self.next_in_days
+        except Exception as err:
+            _LOGGER.error("Other error occurred _gen_next_sensor_data: %s", err)
+        return result

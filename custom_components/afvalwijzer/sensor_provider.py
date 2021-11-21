@@ -90,24 +90,24 @@ class AfvalwijzerProviderSensor(Entity):
         await self.hass.async_add_executor_job(self.fetch_afvalwijzer_data.update)
 
         if self._include_date_today.casefold() in ("true", "yes"):
-            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_with_today
+            data_provider = self.fetch_afvalwijzer_data.data_with_today
         else:
-            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_without_today
+            data_provider = self.fetch_afvalwijzer_data.data_without_today
 
         try:
-            if waste_data_provider:
-                if self.waste_type in waste_data_provider:
+            if data_provider:
+                if self.waste_type in data_provider:
                     # Add attribute, set the last updated status of the sensor
                     self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
 
-                    if isinstance(waste_data_provider[self.waste_type], datetime):
+                    if isinstance(data_provider[self.waste_type], datetime):
                         _LOGGER.debug(
                             "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
                             self.waste_type,
-                            waste_data_provider[self.waste_type].date(),
+                            data_provider[self.waste_type].date(),
                         )
                         # Add the US date format
-                        collection_date_us = waste_data_provider[self.waste_type].date()
+                        collection_date_us = data_provider[self.waste_type].date()
                         self._year_month_day_date = str(collection_date_us)
 
                         # Add the days until the collection date
@@ -127,16 +127,16 @@ class AfvalwijzerProviderSensor(Entity):
 
                         # Add the NL date format as default state
                         self._state = datetime.strftime(
-                            waste_data_provider[self.waste_type].date(), "%d-%m-%Y"
+                            data_provider[self.waste_type].date(), "%d-%m-%Y"
                         )
                     else:
                         _LOGGER.debug(
                             "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
                             self.waste_type,
-                            waste_data_provider[self.waste_type],
+                            data_provider[self.waste_type],
                         )
                         # Add non-date as default state
-                        self._state = str(waste_data_provider[self.waste_type])
+                        self._state = str(data_provider[self.waste_type])
                 else:
                     raise (ValueError)
             else:
