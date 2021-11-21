@@ -76,7 +76,6 @@ class AfvalWijzer(object):
         ##########################################################################
         #  GET AND GENERATE DATA
         ##########################################################################
-
         # Get waste data list of dicts from provider
         self.waste_data_raw = self._get_waste_data_raw()
         # Generate waste types list
