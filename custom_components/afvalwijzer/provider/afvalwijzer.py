@@ -155,9 +155,7 @@ class AfvalWijzer(object):
                     _LOGGER.error("No waste data found!")
                     return
             else:
-                waste_data_raw = json.load(
-                    open("afvalwijzer/test_data/dummy_data.json")
-                )
+                waste_data_raw = json.load(open("afvalwijzer/testing/dummy_data.json"))
 
             # Strip and lowercase all provider values
             waste_data_raw = list(
