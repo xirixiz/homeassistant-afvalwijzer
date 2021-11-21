@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-import json
-
 import requests
+import logging
 
-from ..const.const import _LOGGER, SENSOR_PROVIDER_TO_URL
+from ..const.const import SENSOR_PROVIDER_TO_URL
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class AfvalWijzer(object):

@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 import json
-
 import requests
-from requests.api import delete
+import logging
 
-from ..const.const import _LOGGER, SENSOR_PROVIDER_TO_URL
+from ..const.const import SENSOR_PROVIDER_TO_URL
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class AfvalWijzer(object):
@@ -49,7 +50,7 @@ class AfvalWijzer(object):
         self.today = datetime.today().strftime("%d-%m-%Y")
 
         #  DEVELOPMENT MODE
-        self.development_mode = True
+        self.development_mode = False
         if self.development_mode:
             print("\n##### DEVELOPMENT MODE #####")
             self.today = "17-11-2021"
@@ -188,9 +189,7 @@ class AfvalWijzer(object):
     # Generate waste types list, without excluded
     def _get_types_included(self):
         try:
-            # result = list(sorted(set([x for x in self.types if not (x in self.exclude_list)])))
             result = list(sorted(set(self.types) - set(self.exclude_list)))
-            # result = list(x for x in self.types if x not in self.exclude_list)
         except Exception as err:
             _LOGGER.error("Other error occurred _get_types_included: %s", err)
         return result

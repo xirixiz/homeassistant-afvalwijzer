@@ -3,6 +3,9 @@
 Sensor component Afvalwijzer
 Author: Bram van Dartel - xirixiz
 """
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 from functools import partial
 
@@ -14,7 +17,6 @@ from requests.exceptions import HTTPError
 import voluptuous as vol
 
 from .const.const import (
-    _LOGGER,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_ID,

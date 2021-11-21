@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 from datetime import datetime
 import hashlib
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 from .const.const import (
-    _LOGGER,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,

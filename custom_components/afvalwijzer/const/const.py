@@ -34,8 +34,6 @@ ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW = "is_collection_date_day_after_tomor
 ATTR_DAYS_UNTIL_COLLECTION_DATE = "days_until_collection_date"
 ATTR_YEAR_MONTH_DAY_DATE = "year_month_day_date"
 
-_LOGGER = logging.getLogger(__name__)
-
 MIN_TIME_BETWEEN_UPDATES = timedelta(hours=1)
 PARALLEL_UPDATES = 1
 SCAN_INTERVAL = timedelta(seconds=30)
