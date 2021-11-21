@@ -81,34 +81,34 @@ class AfvalwijzerCustomSensor(Entity):
     async def async_update(self):
         await self.hass.async_add_executor_job(self.fetch_afvalwijzer_data.update)
 
-        data_custom = self.fetch_afvalwijzer_data.sensor_data_custom
+        waste_data_custom = self.fetch_afvalwijzer_data.waste_data_custom
 
         try:
             # Add attribute, set the last updated status of the sensor
             self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
 
-            if isinstance(data_custom[self.waste_type], datetime):
+            if isinstance(waste_data_custom[self.waste_type], datetime):
                 _LOGGER.debug(
                     "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
                     self.waste_type,
-                    data_custom[self.waste_type].date(),
+                    waste_data_custom[self.waste_type].date(),
                 )
                 # Add the US date format
-                collection_date_us = data_custom[self.waste_type].date()
+                collection_date_us = waste_data_custom[self.waste_type].date()
                 self._year_month_day_date = str(collection_date_us)
 
                 # Add the NL date format as default state
                 self._state = datetime.strftime(
-                    data_custom[self.waste_type].date(), "%d-%m-%Y"
+                    waste_data_custom[self.waste_type].date(), "%d-%m-%Y"
                 )
             else:
                 _LOGGER.debug(
                     "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
                     self.waste_type,
-                    data_custom[self.waste_type],
+                    waste_data_custom[self.waste_type],
                 )
                 # Add non-date as default state
-                self._state = str(data_custom[self.waste_type])
+                self._state = str(waste_data_custom[self.waste_type])
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._state = self._default_label

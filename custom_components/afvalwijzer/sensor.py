@@ -84,19 +84,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     fetch_afvalwijzer_data = AfvalwijzerData(config)
 
-    types_provider = afvalwijzer.sensor_types
-    _LOGGER.debug("Generating types_provider list = %s", types_provider)
-    types_custom = afvalwijzer.sensor_types_custom
-    _LOGGER.debug("Generating types_custom list = %s", types_custom)
+    waste_types_provider = afvalwijzer.waste_types_provider
+    _LOGGER.debug("Generating waste_types_provider list = %s", waste_types_provider)
+    waste_types_custom = afvalwijzer.waste_types_custom
+    _LOGGER.debug("Generating waste_types_custom list = %s", waste_types_custom)
 
     entities = list()
 
-    for waste_type in types_provider:
+    for waste_type in waste_types_provider:
         _LOGGER.debug("Adding sensor provider: %s", waste_type)
         entities.append(
             AfvalwijzerProviderSensor(hass, waste_type, fetch_afvalwijzer_data, config)
         )
-    for waste_type in types_custom:
+    for waste_type in waste_types_custom:
         _LOGGER.debug("Adding sensor custom: %s", waste_type)
         entities.append(
             AfvalwijzerCustomSensor(hass, waste_type, fetch_afvalwijzer_data, config)
@@ -136,24 +136,24 @@ class AfvalwijzerData(object):
 
         # waste data provider update - with today
         try:
-            self.data_with_today = afvalwijzer.sensor_data_with_today
+            self.waste_data_with_today = afvalwijzer.waste_data_with_today
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
-            self.data_with_today = default_label
+            self.waste_data_with_today = default_label
             raise
 
         # waste data provider update - without today
         try:
-            self.data_without_today = afvalwijzer.sensor_data_without_today
+            self.waste_data_without_today = afvalwijzer.waste_data_without_today
         except ValueError as err:
             _LOGGER.error("Check waste_data_provider %s", err.args)
-            self.data_without_today = default_label
+            self.waste_data_without_today = default_label
             raise
 
         # waste data custom update
         try:
-            self.data_custom = afvalwijzer.sensor_data_custom
+            self.waste_data_custom = afvalwijzer.waste_data_custom
         except ValueError as err:
             _LOGGER.error("Check waste_data_custom %s", err.args)
-            self.data_custom = default_label
+            self.waste_data_custom = default_label
             raise

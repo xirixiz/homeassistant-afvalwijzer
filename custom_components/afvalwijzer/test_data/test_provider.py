@@ -44,11 +44,11 @@ afvalwijzer = AfvalWijzer(
 #########################################################################################################
 print("\n")
 
-print(afvalwijzer.sensor_data_with_today)
-print(afvalwijzer.sensor_data_without_today)
-print(afvalwijzer.sensor_data_custom)
-print(afvalwijzer.sensor_types)
-print(afvalwijzer.sensor_types_custom)
+print(afvalwijzer.waste_data_with_today)
+print(afvalwijzer.waste_data_without_today)
+print(afvalwijzer.waste_data_custom)
+print(afvalwijzer.waste_types_provider)
+print(afvalwijzer.waste_types_custom)
 
 print("\n")
 
