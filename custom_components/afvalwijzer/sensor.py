@@ -84,19 +84,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     fetch_afvalwijzer_data = AfvalwijzerData(config)
 
-    waste_types_provider = afvalwijzer.waste_types_provider
+    types_provider = afvalwijzer.sensor_types
     _LOGGER.debug("Generating waste_types_provider list = %s", waste_types_provider)
-    waste_types_custom = afvalwijzer.waste_types_custom
+    types_custom = afvalwijzer.sensor_types_custom
     _LOGGER.debug("Generating waste_types_custom list = %s", waste_types_custom)
 
-    entities = []
+    entities = list()
 
-    for waste_type in waste_types_provider:
+    for waste_type in types_provider:
         _LOGGER.debug("Adding sensor provider: %s", waste_type)
         entities.append(
             AfvalwijzerProviderSensor(hass, waste_type, fetch_afvalwijzer_data, config)
         )
-    for waste_type in waste_types_custom:
+    for waste_type in types_custom:
         _LOGGER.debug("Adding sensor custom: %s", waste_type)
         entities.append(
             AfvalwijzerCustomSensor(hass, waste_type, fetch_afvalwijzer_data, config)
