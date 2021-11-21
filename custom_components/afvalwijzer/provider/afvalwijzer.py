@@ -75,7 +75,7 @@ class AfvalWijzer(object):
             self.date_selected = self.tomorrow_date
 
         ##########################################################################
-        #  GET AND GENERATE DATA
+        #  GET AND GENERATE DATA IN ORDER
         ##########################################################################
         # Get waste data list of dicts from provider
         self.waste_data_raw = self._get_waste_data_raw()
