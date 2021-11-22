@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import json
-import requests
 import logging
+
+import requests
 
 from ..const.const import SENSOR_PROVIDER_TO_URL
 
@@ -74,7 +75,7 @@ class AfvalWijzer(object):
             self.date_selected = self.tomorrow_date
 
         ##########################################################################
-        #  GET AND GENERATE DATA
+        #  GET AND GENERATE DATA IN ORDER
         ##########################################################################
         # Get waste data list of dicts from provider
         self.waste_data_raw = self._get_waste_data_raw()
@@ -154,9 +155,7 @@ class AfvalWijzer(object):
                     _LOGGER.error("No waste data found!")
                     return
             else:
-                waste_data_raw = json.load(
-                    open("afvalwijzer/test_data/dummy_data.json")
-                )
+                waste_data_raw = json.load(open("afvalwijzer/testing/dummy_data.json"))
 
             # Strip and lowercase all provider values
             waste_data_raw = list(

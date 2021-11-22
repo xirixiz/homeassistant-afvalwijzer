@@ -7,7 +7,7 @@ import afvalwijzer
 from afvalwijzer.provider.afvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
-python3 -m afvalwijzer.test_data.test_provider
+python3 -m afvalwijzer.testing.test_module
 
 """
 
@@ -25,26 +25,6 @@ provider = "mijnafvalwijzer"
 # Afvalwijzer
 postal_code = "5146EG"
 street_number = "1"
-
-# postal_code = "4707PB"
-# street_number = "110"
-
-# postal_code = "5142HG"
-# street_number = "4"
-
-# Rova
-# provider = "rova"
-# postal_code = "3824XB"
-# street_number = "2"
-
-# postal_code = "4714CB"
-# street_number = "57"
-
-# postal_code = "5473VD"
-# street_number = "7"
-
-# postal_code = "6691XX"
-# street_number = "22"
 
 suffix = ""
 include_date_today = "False"
