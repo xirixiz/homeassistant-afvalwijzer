@@ -73,7 +73,7 @@ class AfvalwijzerProviderSensor(Entity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         return {
             ATTR_LAST_UPDATE: self._last_update,
             ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,

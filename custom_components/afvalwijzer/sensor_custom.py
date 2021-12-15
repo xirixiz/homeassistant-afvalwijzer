@@ -64,7 +64,7 @@ class AfvalwijzerCustomSensor(Entity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         if self._year_month_day_date != None:
             return {
                 ATTR_LAST_UPDATE: self._last_update,
