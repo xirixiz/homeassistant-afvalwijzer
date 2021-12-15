@@ -3,7 +3,7 @@ import logging
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2021.11.03"
+VERSION = "2021.12.01"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_PROVIDER_TO_URL = {
