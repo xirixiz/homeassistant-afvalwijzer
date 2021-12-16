@@ -119,10 +119,10 @@ automation:
 
   - alias: Mark waste as moved from notification
     trigger:
-      platform: event
-      event_type: ios.notification_action_fired
-      event_data:
-        actionName: MARK_WASTE_MOVED
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "MARK_WASTE_MOVED"
     action:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_moved
@@ -146,14 +146,18 @@ automation:
         - condition: template
           value_template: "{{ states('sensor.afvalwijzer_tomorrow') != 'Geen' }}"
     action:
-      - service: notify.family
+      - service: notify.mobile_app_some_phone_or_group
         data:
-          title: "Afval"
-          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
+          title: 'Afval'
+          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow_formatted.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
           data:
-            push:
-              badge: 0
-              category: 'afval'
+            actions:
+              - action: "MARK_WASTE_MOVED"
+                title: "Afval verwerkt"
+                activationMode: "background"
+                authenticationRequired: no
+                destructive: yes
+                behavior: "default"
 ```
 
 ***
