@@ -126,6 +126,13 @@ automation:
     action:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_moved
+      - service: notify.family
+        data:
+          title: 'Afval'
+          message: 'Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow_formatted.state }} zijn aan de straat gezet.'
+          data:
+            push:
+              badge: 0        
 
   - alias: Afval - Verzend notificatie - Tomorrow
     trigger:
@@ -158,6 +165,8 @@ automation:
                 authenticationRequired: no
                 destructive: yes
                 behavior: "default"
+            push:
+              badge: 5                
 ```
 
 ***
