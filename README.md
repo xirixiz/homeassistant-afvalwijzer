@@ -104,11 +104,11 @@ input_boolean:
 ###### AUTOMATION
 ```yaml
 automation:
-  - alias: Reset waste notification
+  - alias: Afval - Herstel notificatie
     trigger:
       platform: state
       entity_id: input_boolean.waste_moved
-      to: 'on'
+      to: "on"
       for:
         hours: 12
     action:
@@ -117,7 +117,7 @@ automation:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_reminder
 
-  - alias: Mark waste as moved from notification
+  - alias: Afval - Bevestig notificatie
     trigger:
       - platform: event
         event_type: mobile_app_notification_action
@@ -127,7 +127,7 @@ automation:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_moved
 
-  - alias: Waste has not been moved
+  - alias: Afval - Verzend notificatie - Tomorrow
     trigger:
       platform: time_pattern
       hours: "/1"
@@ -136,17 +136,17 @@ automation:
       conditions:
         - condition: state
           entity_id: input_boolean.waste_moved
-          state: 'off'
+          state: "off"
         - condition: state
           entity_id: input_boolean.waste_reminder
-          state: 'on'
+          state: "on"
         - condition: time
-          after: '18:00:00'
-          before: '23:00:00'
+          after: "18:00:00"
+          before: "23:00:00"
         - condition: template
-          value_template: "{{ states('sensor.afvalwijzer_tomorrow') != 'Geen' }}"
+          value_template: "{{ states('sensor.afvalwijzer_tomorrow_formatted') != 'Geen' }}"
     action:
-      - service: notify.mobile_app_some_phone_or_group
+      - service: notify.family
         data:
           title: 'Afval'
           message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow_formatted.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
