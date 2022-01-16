@@ -1,6 +1,4 @@
-import logging
-
-_LOGGER = logging.getLogger(__name__)
+from afvalwijzer.const.const import _LOGGER
 
 
 class NextSensorData(object):
@@ -16,7 +14,8 @@ class NextSensorData(object):
         self.next_waste_date = self.__get_next_waste_date()
         self.next_waste_in_days = self.__get_next_waste_in_days()
         self.next_waste_type = self.__get_next_waste_type()
-        self.next_sensor = self._gen_next_sensor_data()
+
+        self.data = self._gen_next_sensor_data()
 
     ##########################################################################
     #  CREATE NEXT SENSOR(S)
@@ -68,4 +67,4 @@ class NextSensorData(object):
 
     @property
     def next_sensor_data(self):
-        return self.next_sensor
+        return self.data

@@ -11,7 +11,14 @@ python3 -m afvalwijzer.testing.test_module
 
 """
 
-from ..provider.afvalwijzer import AfvalWijzer
+import datetime
+
+from afvalwijzer.provider.afvalwijzer import AfvalWijzerCollector
+
+# from afvalwijzer.provider.afvalwijzer import AfvalWijzer
+from afvalwijzer.provider.ximmio import XimmioCollector
+
+# from ..provider.afvalwijzer import AfvalWijzer
 
 provider = "mijnafvalwijzer"
 
@@ -24,31 +31,50 @@ provider = "mijnafvalwijzer"
 
 # Afvalwijzer
 postal_code = "5146EG"
-street_number = "1"
+street_number = "6"
 
 suffix = ""
 include_date_today = "False"
 default_label = "Geen"
-exclude_list = "gft"
+exclude_list = ""
 
-afvalwijzer = AfvalWijzer(
+afvalwijzer = AfvalWijzerCollector(
     provider,
     postal_code,
     street_number,
     suffix,
-    include_date_today,
     default_label,
     exclude_list,
 )
 
+provider = "meerlanden"
+postal_code = "2201XZ"
+street_number = "38"
+ximmio = XimmioCollector(
+    provider,
+    postal_code,
+    street_number,
+    suffix,
+    default_label,
+    exclude_list,
+)
+
+print(afvalwijzer.waste_data_with_today)
+print(ximmio.waste_data_with_today)
+
+
+# data = XimmioCollector().get_waste_data_provider("meerlanden", postal_code2, street_number2, suffix, default_label, exclude_list)
+# data2 = AfvalWijzerCollector().get_waste_data_provider("mijnafvalwijzer", postal_code, street_number, suffix, default_label, exclude_list)
+
+
 #########################################################################################################
 print("\n")
 
-print(afvalwijzer.waste_data_with_today)
-print(afvalwijzer.waste_data_without_today)
-print(afvalwijzer.waste_data_custom)
-print(afvalwijzer.waste_types_provider)
-print(afvalwijzer.waste_types_custom)
+# print(afvalwijzer.waste_data_with_today)
+# print(afvalwijzer.waste_data_without_today)
+# print(afvalwijzer.waste_data_custom)
+# print(afvalwijzer.waste_types_provider)
+# print(afvalwijzer.waste_types_custom)
 
 print("\n")
 

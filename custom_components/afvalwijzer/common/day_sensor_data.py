@@ -1,6 +1,4 @@
-import logging
-
-_LOGGER = logging.getLogger(__name__)
+from afvalwijzer.const.const import _LOGGER
 
 
 class DaySensorData(object):
@@ -25,12 +23,14 @@ class DaySensorData(object):
         self.waste_data_today = self.__gen_day_sensor(self.today_date)
         self.waste_data_tomorrow = self.__gen_day_sensor(self.tomorrow_date)
         self.waste_data_dot = self.__gen_day_sensor(self.day_after_tomorrow_date)
-        self.day_sensor = self._gen_day_sensor_data()
+
+        self.data = self._gen_day_sensor_data()
 
     ##########################################################################
     #  CREATE TODAY, TOMORROW, DOT SENSOR(S)
     ##########################################################################
 
+    # Generate sensor data per date
     def __gen_day_sensor(self, date):
         day = list()
         try:
@@ -58,4 +58,4 @@ class DaySensorData(object):
 
     @property
     def day_sensor_data(self):
-        return self.day_sensor
+        return self.data

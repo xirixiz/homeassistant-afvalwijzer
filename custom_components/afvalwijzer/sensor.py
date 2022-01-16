@@ -5,7 +5,9 @@ Author: Bram van Dartel - xirixiz
 """
 import logging
 
-from .const.const import (
+from afvalwijzer.common.day_sensor_data import DaySensorData
+from afvalwijzer.common.next_sensor_data import NextSensorData
+from afvalwijzer.const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_ID,
@@ -19,9 +21,12 @@ from .const.const import (
     SCAN_INTERVAL,
     STARTUP_MESSAGE,
 )
-from .provider.afvalwijzer import AfvalWijzer
-from .sensor_custom import AfvalwijzerCustomSensor
-from .sensor_provider import AfvalwijzerProviderSensor
+from afvalwijzer.provider.afvalwijzer import AfvalWijzer
+from afvalwijzer.sensor_custom import AfvalwijzerCustomSensor
+from afvalwijzer.sensor_provider import AfvalwijzerProviderSensor
+
+# import afvalwijzer.const.const as const
+
 
 _LOGGER = logging.getLogger(__name__)
 
