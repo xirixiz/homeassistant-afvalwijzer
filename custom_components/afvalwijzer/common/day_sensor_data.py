@@ -1,4 +1,9 @@
-from afvalwijzer.const.const import _LOGGER
+from afvalwijzer.const.const import (
+    _LOGGER,
+    DATE_TODAY,
+    DATE_TOMORROW,
+    DATE_DOT
+)
 
 class DaySensorData(object):
 
@@ -8,15 +13,12 @@ class DaySensorData(object):
     def __init__(
         self,
         waste_data_formatted,
-        today_date,
-        tomorrow_date,
-        day_after_tomorrow_date,
         default_label,
     ):
         self.waste_data_formatted = waste_data_formatted
-        self.today_date = today_date
-        self.tomorrow_date = tomorrow_date
-        self.day_after_tomorrow_date = day_after_tomorrow_date
+        self.today_date = DATE_TODAY
+        self.tomorrow_date = DATE_TOMORROW
+        self.day_after_tomorrow_date = DATE_DOT
         self.default_label = default_label
 
         self.waste_data_today = self.__gen_day_sensor(self.today_date)
@@ -41,7 +43,7 @@ class DaySensorData(object):
             if not day:
                 day.append(self.default_label)
         except Exception as err:
-            _LOGGER.error("Other error occurred _gen_day_sensor: %s", err)
+            _LOGGER.error("Other error occurred __gen_day_sensor: %s", err)
         return day
 
     # Generate sensor data for today, tomorrow, day after tomorrow

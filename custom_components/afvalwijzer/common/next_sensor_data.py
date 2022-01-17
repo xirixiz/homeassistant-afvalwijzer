@@ -1,14 +1,19 @@
-from afvalwijzer.const.const import _LOGGER
-
+from afvalwijzer.const.const import (
+    _LOGGER,
+    DATE_TODAY,
+    DATE_TODAY_NEXT_YEAR,
+    SENSOR_COLLECTORS_XIMMIO,
+    SENSOR_COLLECTOR_TO_URL,
+)
 
 class NextSensorData(object):
 
     ##########################################################################
     #  INIT
     ##########################################################################
-    def __init__(self, waste_data_after_date_selected, today_date, default_label):
+    def __init__(self, waste_data_after_date_selected, default_label):
         self.waste_data_after_date_selected = waste_data_after_date_selected
-        self.today_date = today_date
+        self.today_date = DATE_TODAY
         self.default_label = default_label
 
         self.next_waste_date = self.__get_next_waste_date()

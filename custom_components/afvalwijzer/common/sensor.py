@@ -54,6 +54,36 @@ else:
 try:
     waste_types_provider = sorted(set(list(waste["type"] for waste in collector.waste_data_raw)))
 except Exception as err:
-    _LOGGER.error("Other error occurred _get_waste_types_provider: %s", err)
+    _LOGGER.error("Other error occurred waste_types_provider: %s", err)
 
-print(waste_data_provider)
+try:
+    waste_data_formatted = list(
+        {
+            "type": waste["type"],
+            "date": datetime.strptime(waste["date"], "%Y-%m-%d"),
+        }
+        for waste in collector.waste_data_raw
+        if (waste["type"] in waste_types_provider) and (waste["type"] not in exclude_list)
+
+    )
+except Exception as err:
+    _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
+
+try:
+    waste_data_after_date_selected = list(
+        filter(
+            lambda waste: waste["date"] >= waste_data_provider,
+            waste_data_formatted,
+        )
+    )
+except Exception as err:
+    _LOGGER.error(
+        "Other error occurred waste_data_after_date_selected: %s", err
+    )
+
+
+day_sensors = DaySensorData(waste_data_formatted, default_label)
+next_sensors = NextSensorData(waste_data_after_date_selected, default_label)
+
+print(day_sensors.day_sensor_data)
+print(next_sensors.next_sensor_data)
