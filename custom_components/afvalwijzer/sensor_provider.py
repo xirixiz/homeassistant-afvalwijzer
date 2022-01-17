@@ -37,7 +37,7 @@ class AfvalwijzerProviderSensor(Entity):
 
         self._id_name = self.config.get(CONF_ID)
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
-        self._include_date_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
+        self._exclude_pickup_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
 
         self._name = (
             SENSOR_PREFIX
@@ -89,7 +89,7 @@ class AfvalwijzerProviderSensor(Entity):
     async def async_update(self):
         await self.hass.async_add_executor_job(self.fetch_afvalwijzer_data.update)
 
-        if self._include_date_today.casefold() in ("true", "yes"):
+        if self._exclude_pickup_today.casefold() in ("false", "no"):
             waste_data_provider = self.fetch_afvalwijzer_data.waste_data_with_today
         else:
             waste_data_provider = self.fetch_afvalwijzer_data.waste_data_without_today

@@ -1,6 +1,5 @@
 from afvalwijzer.const.const import _LOGGER
 
-
 class DaySensorData(object):
 
     ##########################################################################

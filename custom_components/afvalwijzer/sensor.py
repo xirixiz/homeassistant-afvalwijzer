@@ -60,7 +60,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     postal_code = config.get(CONF_POSTAL_CODE)
     street_number = config.get(CONF_STREET_NUMBER)
     suffix = config.get(CONF_SUFFIX)
-    include_date_today = config.get(CONF_INCLUDE_DATE_TODAY)
+    exclude_pickup_today = config.get(CONF_INCLUDE_DATE_TODAY)
     default_label = config.get(CONF_DEFAULT_LABEL)
     exclude_list = config.get(CONF_EXCLUDE_LIST)
 
@@ -76,7 +76,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 postal_code,
                 street_number,
                 suffix,
-                include_date_today,
+                exclude_pickup_today,
                 default_label,
                 exclude_list,
             )
@@ -119,7 +119,7 @@ class AfvalwijzerData(object):
         postal_code = self.config.get(CONF_POSTAL_CODE)
         street_number = self.config.get(CONF_STREET_NUMBER)
         suffix = self.config.get(CONF_SUFFIX)
-        include_date_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
+        exclude_pickup_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
         default_label = self.config.get(CONF_DEFAULT_LABEL)
         exclude_list = self.config.get(CONF_EXCLUDE_LIST)
 
@@ -129,7 +129,7 @@ class AfvalwijzerData(object):
                 postal_code,
                 street_number,
                 suffix,
-                include_date_today,
+                exclude_pickup_today,
                 default_label,
                 exclude_list,
             )

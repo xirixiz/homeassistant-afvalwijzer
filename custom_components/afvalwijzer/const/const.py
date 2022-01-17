@@ -28,7 +28,9 @@ SENSOR_COLLECTOR_TO_URL = {
     ],
 }
 
-SENSOR_COLLECTOR_TO_COMPANY_CODE = {
+SENSOR_COLLECTORS_AFVALWIJZER = ["mijnafvalwijzer", "afvalstoffendienstkalender", "afvalstoffendienstkalender-s-hertogenbosch", "rova"]
+
+SENSOR_COLLECTORS_XIMMIO = {
     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
     "almere": "53d8db94-7945-42fd-9742-9bbc71dbe4c1",
     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
@@ -78,7 +80,7 @@ CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
 CONF_DATE_FORMAT = "date_format"
-CONF_INCLUDE_DATE_TODAY = "include_date_today"
+CONF_INCLUDE_DATE_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_ID = "id"
 CONF_EXCLUDE_LIST = "exclude_list"

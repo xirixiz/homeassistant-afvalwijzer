@@ -34,7 +34,7 @@ postal_code = "5146EG"
 street_number = "6"
 
 suffix = ""
-include_date_today = "False"
+exclude_pickup_today = "True"
 default_label = "Geen"
 exclude_list = ""
 
