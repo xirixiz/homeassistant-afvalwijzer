@@ -1,13 +1,11 @@
 from datetime import datetime
 
-from afvalwijzer.const.const import _LOGGER, DATE_TODAY, SENSOR_COLLECTOR_TO_URL
+from afvalwijzer.const.const import _LOGGER, DATE_TODAY, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_AFVALWIJZER
 import requests
 
 
 class AfvalWijzerCollector(object):
-    def __init__(
-        self, provider, postal_code, street_number, suffix, default_label, exclude_list
-    ):
+    def __init__(self, provider, postal_code, street_number, suffix, default_label, exclude_list):
         self.provider = provider
         self.postal_code = postal_code
         self.street_number = street_number
@@ -15,12 +13,7 @@ class AfvalWijzerCollector(object):
         self.default_label = default_label
         self.exclude_list = exclude_list.strip().lower()
 
-        collectors = (
-            "mijnafvalwijzer",
-            "afvalstoffendienstkalender",
-            "rova",
-        )
-        if self.provider not in collectors:
+        if self.provider not in SENSOR_COLLECTORS_AFVALWIJZER:
             raise ValueError("Invalid provider: %s, please verify", self.provider)
 
         if self.provider == "rova":
@@ -51,10 +44,7 @@ class AfvalWijzerCollector(object):
             raise ValueError("No JSON data received from " + url)
 
         try:
-            waste_data_raw = (
-                json_response["ophaaldagen"]["data"]
-                + json_response["ophaaldagenNext"]["data"]
-            )
+            waste_data_raw = json_response["ophaaldagen"]["data"] + json_response["ophaaldagenNext"]["data"]
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 

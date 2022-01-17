@@ -12,12 +12,8 @@ SENSOR_COLLECTOR_TO_URL = {
     "afvalwijzer_data_default": [
         "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&app_name=afvalwijzer&platform=phone&afvaldata={4}&langs=nl&"
     ],
-    "afvalstoffendienstkalender": [
-        "https://{0}.afvalstoffendienstkalender.nl/nl/{1}/{2}/"
-    ],
-    "afvalstoffendienstkalender-s-hertogenbosch": [
-        "https://afvalstoffendienstkalender.nl/nl/{0}/{1}/"
-    ],
+    "afvalstoffendienstkalender": ["https://{0}.afvalstoffendienstkalender.nl/nl/{1}/{2}/"],
+    "afvalstoffendienstkalender-s-hertogenbosch": ["https://afvalstoffendienstkalender.nl/nl/{0}/{1}/"],
     "ximmio01": [
         "https://wasteapi.ximmio.com/api/FetchAdress",
         "https://wasteapi.ximmio.com/api/GetCalendar",
@@ -28,7 +24,12 @@ SENSOR_COLLECTOR_TO_URL = {
     ],
 }
 
-SENSOR_COLLECTORS_AFVALWIJZER = ["mijnafvalwijzer", "afvalstoffendienstkalender", "afvalstoffendienstkalender-s-hertogenbosch", "rova"]
+SENSOR_COLLECTORS_AFVALWIJZER = [
+    "mijnafvalwijzer",
+    "afvalstoffendienstkalender",
+    "afvalstoffendienstkalender-s-hertogenbosch",
+    "rova",
+]
 
 SENSOR_COLLECTORS_XIMMIO = {
     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
@@ -80,7 +81,7 @@ CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
 CONF_DATE_FORMAT = "date_format"
-CONF_INCLUDE_DATE_TODAY = "exclude_pickup_today"
+CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_ID = "id"
 CONF_EXCLUDE_LIST = "exclude_list"

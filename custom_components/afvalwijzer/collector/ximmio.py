@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from afvalwijzer.const.const import (
     _LOGGER,
@@ -7,14 +7,13 @@ from afvalwijzer.const.const import (
     SENSOR_COLLECTORS_XIMMIO,
     SENSOR_COLLECTOR_TO_URL,
 )
+
 # from dateutil.relativedelta import relativedelta
 import requests
 
 
 class XimmioCollector(object):
-    def __init__(
-        self, provider, postal_code, street_number, suffix, default_label, exclude_list
-    ):
+    def __init__(self, provider, postal_code, street_number, suffix, default_label, exclude_list):
         self.provider = provider
         self.postal_code = postal_code
         self.street_number = street_number
@@ -25,17 +24,17 @@ class XimmioCollector(object):
         if self.provider not in SENSOR_COLLECTORS_XIMMIO.keys():
             raise ValueError("Invalid provider: %s, please verify", self.provider)
 
-        _providers = ("avalex", "meerlanden", "rad", "westland")
-        if self.provider in _providers:
+        collectors = ("avalex", "meerlanden", "rad", "westland")
+        if self.provider in collectors:
             self.provider_url = "ximmio02"
         else:
             self.provider_url = "ximmio01"
 
-        (   self._waste_data_raw,
+        (
+            self._waste_data_raw,
             self._waste_data_with_today,
             self._waste_data_without_today,
         ) = self.get_waste_data_provider()
-
 
     def get_waste_data_provider(self):
         ##########################################################################
@@ -88,11 +87,11 @@ class XimmioCollector(object):
             for item in waste_data_raw:
                 temp = {}
                 temp["type"] = self.__waste_type_rename(item["_pickupTypeText"].strip().lower())
-                temp["date"] = datetime.strptime(item["pickupDates"][0], "%Y-%m-%dT%H:%M:%S")
+                temp["date"] = datetime.strptime(item["pickupDates"][0], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
                 waste_data_raw_formatted.append(temp)
 
             for item in waste_data_raw_formatted:
-                item_date = item["date"]
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
                 if item_name not in self.exclude_list:
                     if item_name not in waste_data_with_today:
@@ -100,7 +99,7 @@ class XimmioCollector(object):
                             waste_data_with_today[item_name] = item_date
 
             for item in waste_data_raw_formatted:
-                item_date = item["date"]
+                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
                 if item_name not in self.exclude_list:
                     if item_name not in waste_data_without_today:

@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 from datetime import datetime
 import hashlib
-import logging
 
 from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,
     CONF_ID,
-    CONF_INCLUDE_DATE_TODAY,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -16,15 +14,14 @@ from .const.const import (
     PARALLEL_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
+    _LOGGER
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 
-class AfvalwijzerCustomSensor(Entity):
+class CustomSensor(Entity):
     def __init__(self, hass, waste_type, fetch_afvalwijzer_data, config):
         self.hass = hass
         self.waste_type = waste_type
@@ -35,11 +32,7 @@ class AfvalwijzerCustomSensor(Entity):
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
 
         self._last_update = None
-        self._name = (
-            SENSOR_PREFIX
-            + (self._id_name + " " if len(self._id_name) > 0 else "")
-            + self.waste_type
-        )
+        self._name = SENSOR_PREFIX + (self._id_name + " " if len(self._id_name) > 0 else "") + self.waste_type
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
@@ -98,9 +91,7 @@ class AfvalwijzerCustomSensor(Entity):
                 self._year_month_day_date = str(collection_date_us)
 
                 # Add the NL date format as default state
-                self._state = datetime.strftime(
-                    waste_data_custom[self.waste_type].date(), "%d-%m-%Y"
-                )
+                self._state = datetime.strftime(waste_data_custom[self.waste_type].date(), "%d-%m-%Y")
             else:
                 _LOGGER.debug(
                     "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
