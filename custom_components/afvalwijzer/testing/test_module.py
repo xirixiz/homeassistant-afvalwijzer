@@ -4,7 +4,7 @@ Sensor component for AfvalDienst
 Author: Bram van Dartel - xirixiz
 
 import afvalwijzer
-from afvalwijzer.provider.afvalwijzer import AfvalWijzer
+from afvalwijzer.collector.afvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
 python3 -m afvalwijzer.testing.test_module
@@ -13,12 +13,12 @@ python3 -m afvalwijzer.testing.test_module
 
 import datetime
 
-from afvalwijzer.provider.afvalwijzer import AfvalWijzerCollector
+from afvalwijzer.collector.afvalwijzer import AfvalWijzerCollector
 
-# from afvalwijzer.provider.afvalwijzer import AfvalWijzer
-from afvalwijzer.provider.ximmio import XimmioCollector
+# from afvalwijzer.collector.afvalwijzer import AfvalWijzer
+from afvalwijzer.collector.ximmio import XimmioCollector
 
-# from ..provider.afvalwijzer import AfvalWijzer
+# from ..collector.afvalwijzer import AfvalWijzer
 
 provider = "mijnafvalwijzer"
 

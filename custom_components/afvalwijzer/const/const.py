@@ -8,7 +8,7 @@ ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 _LOGGER = logging.getLogger(__name__)
 
-SENSOR_PROVIDER_TO_URL = {
+SENSOR_COLLECTOR_TO_URL = {
     "afvalwijzer_data_default": [
         "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&app_name=afvalwijzer&platform=phone&afvaldata={4}&langs=nl&"
     ],
@@ -28,7 +28,7 @@ SENSOR_PROVIDER_TO_URL = {
     ],
 }
 
-SENSOR_PROVIDER_TO_COMPANY_CODE = {
+SENSOR_COLLECTOR_TO_COMPANY_CODE = {
     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
     "almere": "53d8db94-7945-42fd-9742-9bbc71dbe4c1",
     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
@@ -72,7 +72,7 @@ SENSOR_PROVIDER_TO_COMPANY_CODE = {
 #     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
 # }
 
-CONF_PROVIDER = "provider"
+CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
@@ -101,6 +101,7 @@ TODAY = datetime.today().strftime("%d-%m-%Y")
 DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
 DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
 DATE_DOT = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=2)
+DATE_TODAY_NEXT_YEAR = (DATE_TODAY.date() + timedelta(days=365)).strftime("%Y-%m-%d")
 
 DOMAIN = "afvalwijzer"
 DOMAIN_DATA = "afvalwijzer_data"
