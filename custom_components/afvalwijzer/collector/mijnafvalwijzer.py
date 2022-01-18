@@ -1,6 +1,9 @@
 from datetime import datetime
+
 import requests
 
+from ..common.day_sensor_data import DaySensorData
+from ..common.next_sensor_data import NextSensorData
 from ..const.const import (
     _LOGGER,
     DATE_TODAY,
@@ -8,13 +11,18 @@ from ..const.const import (
     SENSOR_COLLECTOR_TO_URL,
     SENSOR_COLLECTORS_AFVALWIJZER,
 )
-from ..common.day_sensor_data import DaySensorData
-from ..common.next_sensor_data import NextSensorData
 
 
 class MijnAfvalWijzerCollector(object):
     def __init__(
-        self, provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
+        self,
+        provider,
+        postal_code,
+        street_number,
+        suffix,
+        exclude_pickup_today,
+        exclude_list,
+        default_label,
     ):
         self.provider = provider
         self.postal_code = postal_code
@@ -62,7 +70,10 @@ class MijnAfvalWijzerCollector(object):
             raise ValueError("No JSON data received from " + url)
 
         try:
-            waste_data_raw = json_response["ophaaldagen"]["data"] + json_response["ophaaldagenNext"]["data"]
+            waste_data_raw = (
+                json_response["ophaaldagen"]["data"]
+                + json_response["ophaaldagenNext"]["data"]
+            )
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 
@@ -114,7 +125,13 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             waste_types_provider = sorted(
-                set(list(waste["type"] for waste in self.waste_data_raw if waste["type"] not in self.exclude_list))
+                set(
+                    list(
+                        waste["type"]
+                        for waste in self.waste_data_raw
+                        if waste["type"] not in self.exclude_list
+                    )
+                )
             )
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_provider: %s", err)
@@ -135,10 +152,14 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             waste_data_after_date_selected = list(
-                filter(lambda waste: waste["date"] >= date_selected, waste_data_formatted)
+                filter(
+                    lambda waste: waste["date"] >= date_selected, waste_data_formatted
+                )
             )
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_after_date_selected: %s", err)
+            _LOGGER.error(
+                "Other error occurred waste_data_after_date_selected: %s", err
+            )
 
         next = NextSensorData(waste_data_after_date_selected, self.default_label)
 
@@ -152,7 +173,12 @@ class MijnAfvalWijzerCollector(object):
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_custom: %s", err)
 
-        return waste_data_provider, waste_types_provider, waste_data_custom, waste_types_custom
+        return (
+            waste_data_provider,
+            waste_types_provider,
+            waste_data_custom,
+            waste_types_custom,
+        )
 
     ##########################################################################
     #  PROPERTIES FOR EXECUTION

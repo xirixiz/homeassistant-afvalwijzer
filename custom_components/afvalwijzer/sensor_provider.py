@@ -2,7 +2,11 @@
 from datetime import date, datetime, timedelta
 import hashlib
 
+from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle
+
 from .const.const import (
+    _LOGGER,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW,
     ATTR_IS_COLLECTION_DATE_TODAY,
@@ -10,8 +14,8 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,
-    CONF_ID,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_ID,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -19,11 +23,7 @@ from .const.const import (
     PARALLEL_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
-    _LOGGER,
 )
-
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
 
 
 class ProviderSensor(Entity):
@@ -35,7 +35,11 @@ class ProviderSensor(Entity):
         self._id_name = self.config.get(CONF_ID)
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
-        self._name = SENSOR_PREFIX + (self._id_name + " " if len(self._id_name) > 0 else "") + self.waste_type
+        self._name = (
+            SENSOR_PREFIX
+            + (self._id_name + " " if len(self._id_name) > 0 else "")
+            + self.waste_type
+        )
         self._icon = SENSOR_ICON
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
@@ -107,14 +111,20 @@ class ProviderSensor(Entity):
                         self._days_until_collection_date = delta.days
 
                         # Check if the collection days are in today, tomorrow and/or the day after tomorrow
-                        self._is_collection_date_today = date.today() == collection_date_us
-                        self._is_collection_date_tomorrow = date.today() + timedelta(days=1) == collection_date_us
+                        self._is_collection_date_today = (
+                            date.today() == collection_date_us
+                        )
+                        self._is_collection_date_tomorrow = (
+                            date.today() + timedelta(days=1) == collection_date_us
+                        )
                         self._is_collection_date_day_after_tomorrow = (
                             date.today() + timedelta(days=2) == collection_date_us
                         )
 
                         # Add the NL date format as default state
-                        self._state = datetime.strftime(waste_data_provider[self.waste_type].date(), "%d-%m-%Y")
+                        self._state = datetime.strftime(
+                            waste_data_provider[self.waste_type].date(), "%d-%m-%Y"
+                        )
                     else:
                         _LOGGER.debug(
                             "Generating state via AfvalwijzerCustomSensor for = %s with value %s",

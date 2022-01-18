@@ -4,29 +4,6 @@ Sensor component Afvalwijzer
 Author: Bram van Dartel - xirixiz
 """
 
-from .const.const import (
-    _LOGGER,
-    CONF_DEFAULT_LABEL,
-    CONF_EXCLUDE_LIST,
-    CONF_ID,
-    CONF_EXCLUDE_PICKUP_TODAY,
-    CONF_POSTAL_CODE,
-    CONF_COLLECTOR,
-    CONF_STREET_NUMBER,
-    CONF_SUFFIX,
-    MIN_TIME_BETWEEN_UPDATES,
-    PARALLEL_UPDATES,
-    SCAN_INTERVAL,
-    STARTUP_MESSAGE,
-    SENSOR_COLLECTORS_AFVALWIJZER,
-    SENSOR_COLLECTORS_XIMMIO,
-)
-from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
-from .collector.ximmio import XimmioCollector
-
-from .sensor_custom import CustomSensor
-from .sensor_provider import ProviderSensor
-
 from functools import partial
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -34,9 +11,33 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 import voluptuous as vol
 
+from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
+from .collector.ximmio import XimmioCollector
+from .const.const import (
+    _LOGGER,
+    CONF_COLLECTOR,
+    CONF_DEFAULT_LABEL,
+    CONF_EXCLUDE_LIST,
+    CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_ID,
+    CONF_POSTAL_CODE,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
+    MIN_TIME_BETWEEN_UPDATES,
+    PARALLEL_UPDATES,
+    SCAN_INTERVAL,
+    SENSOR_COLLECTORS_AFVALWIJZER,
+    SENSOR_COLLECTORS_XIMMIO,
+    STARTUP_MESSAGE,
+)
+from .sensor_custom import CustomSensor
+from .sensor_provider import ProviderSensor
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Optional(CONF_COLLECTOR.strip().lower(), default="mijnafvalwijzer"): cv.string,
+        vol.Optional(
+            CONF_COLLECTOR.strip().lower(), default="mijnafvalwijzer"
+        ): cv.string,
         vol.Required(CONF_POSTAL_CODE.strip(), default="1234AB"): cv.string,
         vol.Required(CONF_STREET_NUMBER.strip(), default="5"): cv.string,
         vol.Optional(CONF_SUFFIX.strip(), default=""): cv.string,
@@ -135,11 +136,23 @@ class AfvalwijzerData(object):
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:
                 collector = MijnAfvalWijzerCollector(
-                    provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
                 )
             elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
                 collector = XimmioCollector(
-                    provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
                 )
         except ValueError as err:
             _LOGGER.error("Check afvalwijzer platform settings %s", err.args)

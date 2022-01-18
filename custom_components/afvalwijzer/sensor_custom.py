@@ -2,7 +2,11 @@
 from datetime import datetime
 import hashlib
 
+from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle
+
 from .const.const import (
+    _LOGGER,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,
@@ -14,11 +18,7 @@ from .const.const import (
     PARALLEL_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
-    _LOGGER,
 )
-
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
 
 
 class CustomSensor(Entity):
@@ -30,7 +30,11 @@ class CustomSensor(Entity):
         self._id_name = self.config.get(CONF_ID)
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
-        self._name = SENSOR_PREFIX + (self._id_name + " " if len(self._id_name) > 0 else "") + self.waste_type
+        self._name = (
+            SENSOR_PREFIX
+            + (self._id_name + " " if len(self._id_name) > 0 else "")
+            + self.waste_type
+        )
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
@@ -89,7 +93,9 @@ class CustomSensor(Entity):
                 self._year_month_day_date = str(collection_date_us)
 
                 # Add the NL date format as default state
-                self._state = datetime.strftime(waste_data_custom[self.waste_type].date(), "%d-%m-%Y")
+                self._state = datetime.strftime(
+                    waste_data_custom[self.waste_type].date(), "%d-%m-%Y"
+                )
             else:
                 _LOGGER.debug(
                     "Generating state via AfvalwijzerCustomSensor for = %s with value %s",

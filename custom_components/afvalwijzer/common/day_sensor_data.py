@@ -1,4 +1,4 @@
-from ..const.const import _LOGGER, DATE_TODAY, DATE_TOMORROW, DATE_DOT
+from ..const.const import _LOGGER, DATE_DOT, DATE_TODAY, DATE_TOMORROW
 
 
 class DaySensorData(object):

@@ -1,21 +1,29 @@
 from datetime import datetime
+
 import requests
 
+from ..common.day_sensor_data import DaySensorData
+from ..common.next_sensor_data import NextSensorData
 from ..const.const import (
     _LOGGER,
     DATE_TODAY,
-    DATE_TOMORROW,
     DATE_TODAY_NEXT_YEAR,
-    SENSOR_COLLECTORS_XIMMIO,
+    DATE_TOMORROW,
     SENSOR_COLLECTOR_TO_URL,
+    SENSOR_COLLECTORS_XIMMIO,
 )
-from ..common.day_sensor_data import DaySensorData
-from ..common.next_sensor_data import NextSensorData
 
 
 class XimmioCollector(object):
     def __init__(
-        self, provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
+        self,
+        provider,
+        postal_code,
+        street_number,
+        suffix,
+        exclude_pickup_today,
+        exclude_list,
+        default_label,
     ):
         self.provider = provider
         self.postal_code = postal_code
@@ -97,8 +105,12 @@ class XimmioCollector(object):
 
             for item in waste_data_raw:
                 temp = {}
-                temp["type"] = self.__waste_type_rename(item["_pickupTypeText"].strip().lower())
-                temp["date"] = datetime.strptime(item["pickupDates"][0], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
+                temp["type"] = self.__waste_type_rename(
+                    item["_pickupTypeText"].strip().lower()
+                )
+                temp["date"] = datetime.strptime(
+                    item["pickupDates"][0], "%Y-%m-%dT%H:%M:%S"
+                ).strftime("%Y-%m-%d")
                 waste_data_raw_formatted.append(temp)
 
             for item in waste_data_raw_formatted:
@@ -128,7 +140,11 @@ class XimmioCollector(object):
             except Exception as err:
                 _LOGGER.error("Other error occurred: %s", err)
 
-            return waste_data_raw_formatted, waste_data_with_today, waste_data_without_today
+            return (
+                waste_data_raw_formatted,
+                waste_data_with_today,
+                waste_data_without_today,
+            )
         except Exception as err:
             _LOGGER.error("Other error occurred: %s", err)
 
@@ -174,7 +190,13 @@ class XimmioCollector(object):
 
         try:
             waste_types_provider = sorted(
-                set(list(waste["type"] for waste in self.waste_data_raw if waste["type"] not in self.exclude_list))
+                set(
+                    list(
+                        waste["type"]
+                        for waste in self.waste_data_raw
+                        if waste["type"] not in self.exclude_list
+                    )
+                )
             )
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_provider: %s", err)
@@ -195,10 +217,14 @@ class XimmioCollector(object):
 
         try:
             waste_data_after_date_selected = list(
-                filter(lambda waste: waste["date"] >= date_selected, waste_data_formatted)
+                filter(
+                    lambda waste: waste["date"] >= date_selected, waste_data_formatted
+                )
             )
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_after_date_selected: %s", err)
+            _LOGGER.error(
+                "Other error occurred waste_data_after_date_selected: %s", err
+            )
 
         next = NextSensorData(waste_data_after_date_selected, self.default_label)
 
@@ -212,7 +238,12 @@ class XimmioCollector(object):
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_custom: %s", err)
 
-        return waste_data_provider, waste_types_provider, waste_data_custom, waste_types_custom
+        return (
+            waste_data_provider,
+            waste_types_provider,
+            waste_data_custom,
+            waste_types_custom,
+        )
 
     ##########################################################################
     #  PROPERTIES FOR EXECUTION
