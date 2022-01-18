@@ -1,17 +1,28 @@
 from datetime import datetime
-
-from afvalwijzer.const.const import _LOGGER, DATE_TODAY, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_AFVALWIJZER
 import requests
 
+from afvalwijzer.const.const import (
+    _LOGGER,
+    DATE_TODAY,
+    DATE_TOMORROW,
+    SENSOR_COLLECTOR_TO_URL,
+    SENSOR_COLLECTORS_AFVALWIJZER,
+)
+from afvalwijzer.common.day_sensor_data import DaySensorData
+from afvalwijzer.common.next_sensor_data import NextSensorData
 
-class AfvalWijzerCollector(object):
-    def __init__(self, provider, postal_code, street_number, suffix, default_label, exclude_list):
+
+class MijnAfvalWijzerCollector(object):
+    def __init__(
+        self, provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
+    ):
         self.provider = provider
         self.postal_code = postal_code
         self.street_number = street_number
         self.suffix = suffix
-        self.default_label = default_label
+        self.exclude_pickup_today = exclude_pickup_today
         self.exclude_list = exclude_list.strip().lower()
+        self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_AFVALWIJZER:
             raise ValueError("Invalid provider: %s, please verify", self.provider)
@@ -24,6 +35,13 @@ class AfvalWijzerCollector(object):
             self._waste_data_with_today,
             self._waste_data_without_today,
         ) = self.get_waste_data_provider()
+
+        (
+            self._waste_data_provider,
+            self._waste_types_provider,
+            self._waste_data_custom,
+            self._waste_types_custom,
+        ) = self.transform_waste_data()
 
     def get_waste_data_provider(self):
         try:
@@ -84,6 +102,59 @@ class AfvalWijzerCollector(object):
             _LOGGER.error("Other error occurred: %s", err)
 
     ##########################################################################
+    #  COMMON CODE
+    ##########################################################################
+    def transform_waste_data(self):
+        if self.exclude_pickup_today.casefold() in ("false", "no"):
+            date_selected = DATE_TODAY
+            waste_data_provider = self._waste_data_with_today
+        else:
+            date_selected = DATE_TOMORROW
+            waste_data_provider = self._waste_data_without_today
+
+        try:
+            waste_types_provider = sorted(
+                set(list(waste["type"] for waste in self.waste_data_raw if waste["type"] not in self.exclude_list))
+            )
+        except Exception as err:
+            _LOGGER.error("Other error occurred waste_types_provider: %s", err)
+
+        try:
+            waste_data_formatted = list(
+                {
+                    "type": waste["type"],
+                    "date": datetime.strptime(waste["date"], "%Y-%m-%d"),
+                }
+                for waste in self.waste_data_raw
+                if waste["type"] in waste_types_provider
+            )
+        except Exception as err:
+            _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
+
+        days = DaySensorData(waste_data_formatted, self.default_label)
+
+        try:
+            waste_data_after_date_selected = list(
+                filter(lambda waste: waste["date"] >= date_selected, waste_data_formatted)
+            )
+        except Exception as err:
+            _LOGGER.error("Other error occurred waste_data_after_date_selected: %s", err)
+
+        next = NextSensorData(waste_data_after_date_selected, self.default_label)
+
+        try:
+            waste_data_custom = {**next.next_sensor_data, **days.day_sensor_data}
+        except Exception as err:
+            _LOGGER.error("Other error occurred waste_data_custom: %s", err)
+
+        try:
+            waste_types_custom = list(sorted(waste_data_custom.keys()))
+        except Exception as err:
+            _LOGGER.error("Other error occurred waste_types_custom: %s", err)
+
+        return waste_data_provider, waste_types_provider, waste_data_custom, waste_types_custom
+
+    ##########################################################################
     #  PROPERTIES FOR EXECUTION
     ##########################################################################
     @property
@@ -97,3 +168,19 @@ class AfvalWijzerCollector(object):
     @property
     def waste_data_without_today(self):
         return self._waste_data_without_today
+
+    @property
+    def waste_data_provider(self):
+        return self._waste_data_provider
+
+    @property
+    def waste_types_provider(self):
+        return self._waste_types_provider
+
+    @property
+    def waste_data_custom(self):
+        return self._waste_data_custom
+
+    @property
+    def waste_types_custom(self):
+        return self._waste_types_custom

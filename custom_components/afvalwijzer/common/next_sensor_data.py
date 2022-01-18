@@ -1,10 +1,5 @@
-from afvalwijzer.const.const import (
-    _LOGGER,
-    DATE_TODAY,
-    DATE_TODAY_NEXT_YEAR,
-    SENSOR_COLLECTORS_XIMMIO,
-    SENSOR_COLLECTOR_TO_URL,
-)
+from afvalwijzer.const.const import _LOGGER, DATE_TODAY
+
 
 class NextSensorData(object):
 

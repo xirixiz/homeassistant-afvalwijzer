@@ -19,7 +19,7 @@ from .const.const import (
     PARALLEL_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
-    _LOGGER
+    _LOGGER,
 )
 
 from homeassistant.helpers.entity import Entity
@@ -27,16 +27,14 @@ from homeassistant.util import Throttle
 
 
 class ProviderSensor(Entity):
-    def __init__(self, hass, waste_type, fetch_afvalwijzer_data, config):
+    def __init__(self, hass, waste_type, fetch_data, config):
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_afvalwijzer_data = fetch_afvalwijzer_data
+        self.fetch_data = fetch_data
         self.config = config
-
         self._id_name = self.config.get(CONF_ID)
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
-
         self._name = SENSOR_PREFIX + (self._id_name + " " if len(self._id_name) > 0 else "") + self.waste_type
         self._icon = SENSOR_ICON
         self._state = self.config.get(CONF_DEFAULT_LABEL)
@@ -81,12 +79,12 @@ class ProviderSensor(Entity):
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        await self.hass.async_add_executor_job(self.fetch_afvalwijzer_data.update)
+        await self.hass.async_add_executor_job(self.fetch_data.update)
 
         if self._exclude_pickup_today.casefold() in ("false", "no"):
-            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_with_today
+            waste_data_provider = self.fetch_data.waste_data_with_today
         else:
-            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_without_today
+            waste_data_provider = self.fetch_data.waste_data_without_today
 
         try:
             if waste_data_provider:

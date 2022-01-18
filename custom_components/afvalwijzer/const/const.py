@@ -3,7 +3,7 @@ import logging
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2021.12.02"
+VERSION = "2021.12.03"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,32 +48,6 @@ SENSOR_COLLECTORS_XIMMIO = {
     "ximmio": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
 }
-
-# XIMMIO_URLS = {
-#     "avalex": "https://wasteprod2api.ximmio.com",
-#     "meerlanden": ["https://wasteprod2api.ximmio.com/api/FetchAdress", "https://wasteprod2api.ximmio.com/api/GetCalendar"]
-#     "rad": "https://wasteprod2api.ximmio.com",
-#     "westland": "https://wasteprod2api.ximmio.com",
-# }
-
-
-# XIMMIO_COLLECTOR_IDS = {
-#     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
-#     "almere": "53d8db94-7945-42fd-9742-9bbc71dbe4c1",
-#     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
-#     "avalex": "f7a74ad1-fdbf-4a43-9f91-44644f4d4222",
-#     "avri": "78cd4156-394b-413d-8936-d407e334559a",
-#     "bar": "bb58e633-de14-4b2a-9941-5bc419f1c4b0",
-#     "hellendoorn": "24434f5b-7244-412b-9306-3a2bd1e22bc1",
-#     "meerlanden": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
-#     "meppel": "b7a594c7-2490-4413-88f9-94749a3ec62a",
-#     "rad": "13a2cad9-36d0-4b01-b877-efcb421a864d",
-#     "twentemilieu": "8d97bb56-5afd-4cbc-a651-b4f7314264b4",
-#     "waardlanden": "942abcf6-3775-400d-ae5d-7380d728b23c",
-#     "westland": "6fc75608-126a-4a50-9241-a002ce8c8a6c",
-#     "ximmio": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
-#     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
-# }
 
 CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"
