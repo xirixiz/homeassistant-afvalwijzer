@@ -97,8 +97,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     if collector == "":
         raise ValueError("Invalid provider: %s, please verify", provider)
 
-    print(collector.waste_types_provider)
-
     fetch_data = AfvalwijzerData(config)
 
     waste_types_provider = collector.waste_types_provider
