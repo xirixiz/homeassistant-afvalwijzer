@@ -1,15 +1,15 @@
 from datetime import datetime
 import requests
 
-from afvalwijzer.const.const import (
+from ..const.const import (
     _LOGGER,
     DATE_TODAY,
     DATE_TOMORROW,
     SENSOR_COLLECTOR_TO_URL,
     SENSOR_COLLECTORS_AFVALWIJZER,
 )
-from afvalwijzer.common.day_sensor_data import DaySensorData
-from afvalwijzer.common.next_sensor_data import NextSensorData
+from ..common.day_sensor_data import DaySensorData
+from ..common.next_sensor_data import NextSensorData
 
 
 class MijnAfvalWijzerCollector(object):

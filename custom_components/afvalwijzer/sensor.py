@@ -4,7 +4,7 @@ Sensor component Afvalwijzer
 Author: Bram van Dartel - xirixiz
 """
 
-from afvalwijzer.const.const import (
+from .const.const import (
     _LOGGER,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
@@ -21,11 +21,11 @@ from afvalwijzer.const.const import (
     SENSOR_COLLECTORS_AFVALWIJZER,
     SENSOR_COLLECTORS_XIMMIO,
 )
-from afvalwijzer.collector.mijnafvalwijzer import MijnAfvalWijzerCollector
-from afvalwijzer.collector.ximmio import XimmioCollector
+from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
+from .collector.ximmio import XimmioCollector
 
-from afvalwijzer.sensor_custom import CustomSensor
-from afvalwijzer.sensor_provider import ProviderSensor
+from .sensor_custom import CustomSensor
+from .sensor_provider import ProviderSensor
 
 from functools import partial
 
@@ -67,17 +67,27 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         if provider in SENSOR_COLLECTORS_AFVALWIJZER:
             collector = await hass.async_add_executor_job(
                 partial(
-                    MijnAfvalWijzerCollector(
-                        provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
-                    )
+                    MijnAfvalWijzerCollector,
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
                 )
             )
         elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
             collector = await hass.async_add_executor_job(
                 partial(
-                    XimmioCollector(
-                        provider, postal_code, street_number, suffix, exclude_pickup_today, exclude_list, default_label
-                    )
+                    XimmioCollector,
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
                 )
             )
     except ValueError as err:
@@ -85,6 +95,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     if collector == "":
         raise ValueError("Invalid provider: %s, please verify", provider)
+
+    print(collector.waste_types_provider)
 
     fetch_data = AfvalwijzerData(config)
 

@@ -1,4 +1,4 @@
-from afvalwijzer.const.const import _LOGGER, DATE_TODAY
+from ..const.const import _LOGGER, DATE_TODAY
 
 
 class NextSensorData(object):

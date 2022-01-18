@@ -1,7 +1,7 @@
 from datetime import datetime
 import requests
 
-from afvalwijzer.const.const import (
+from ..const.const import (
     _LOGGER,
     DATE_TODAY,
     DATE_TOMORROW,
@@ -9,8 +9,8 @@ from afvalwijzer.const.const import (
     SENSOR_COLLECTORS_XIMMIO,
     SENSOR_COLLECTOR_TO_URL,
 )
-from afvalwijzer.common.day_sensor_data import DaySensorData
-from afvalwijzer.common.next_sensor_data import NextSensorData
+from ..common.day_sensor_data import DaySensorData
+from ..common.next_sensor_data import NextSensorData
 
 
 class XimmioCollector(object):

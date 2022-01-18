@@ -11,9 +11,9 @@ python3 -m afvalwijzer.test.test_module
 
 """
 
-from afvalwijzer.collector.mijnafvalwijzer import MijnAfvalWijzerCollector
-from afvalwijzer.collector.ximmio import XimmioCollector
-from afvalwijzer.const.const import (
+from ..collector.mijnafvalwijzer import MijnAfvalWijzerCollector
+from ..collector.ximmio import XimmioCollector
+from ..const.const import (
     SENSOR_COLLECTORS_AFVALWIJZER,
     SENSOR_COLLECTORS_XIMMIO,
 )
