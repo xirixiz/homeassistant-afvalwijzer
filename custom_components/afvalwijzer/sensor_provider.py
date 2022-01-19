@@ -14,8 +14,8 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
     CONF_DEFAULT_LABEL,
+    CONF_EXCLUDE_PICKUP_TODAY,
     CONF_ID,
-    CONF_INCLUDE_DATE_TODAY,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -26,17 +26,15 @@ from .const.const import (
 )
 
 
-class AfvalwijzerProviderSensor(Entity):
-    def __init__(self, hass, waste_type, fetch_afvalwijzer_data, config):
+class ProviderSensor(Entity):
+    def __init__(self, hass, waste_type, fetch_data, config):
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_afvalwijzer_data = fetch_afvalwijzer_data
+        self.fetch_data = fetch_data
         self.config = config
-
         self._id_name = self.config.get(CONF_ID)
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
-        self._include_date_today = self.config.get(CONF_INCLUDE_DATE_TODAY)
-
+        self._exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
         self._name = (
             SENSOR_PREFIX
             + (self._id_name + " " if len(self._id_name) > 0 else "")
@@ -85,12 +83,12 @@ class AfvalwijzerProviderSensor(Entity):
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        await self.hass.async_add_executor_job(self.fetch_afvalwijzer_data.update)
+        await self.hass.async_add_executor_job(self.fetch_data.update)
 
-        if self._include_date_today.casefold() in ("true", "yes"):
-            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_with_today
+        if self._exclude_pickup_today.casefold() in ("false", "no"):
+            waste_data_provider = self.fetch_data.waste_data_with_today
         else:
-            waste_data_provider = self.fetch_afvalwijzer_data.waste_data_without_today
+            waste_data_provider = self.fetch_data.waste_data_without_today
 
         try:
             if waste_data_provider:

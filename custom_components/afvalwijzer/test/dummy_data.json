@@ -1,0 +1,397 @@
+[
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-01-02"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-01-05"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-01-08"
+    },
+    {
+        "nameType": "kerstbomen",
+        "type": "kerstbomen",
+        "date": "2021-01-09"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-01-15"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-01-19"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-01-20"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-01-29"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-02-02"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-02-05"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-02-12"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-02-16"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-02-17"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-02-26"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-03-02"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-03-05"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-03-12"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-03-16"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-03-17"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-03-26"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-03-30"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-04-02"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-04-09"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-04-13"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-04-21"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-04-23"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-04-30"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-04-30"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-05-07"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-05-11"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-05-19"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-05-21"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-05-25"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-05-28"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-06-04"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-06-08"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-06-16"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-06-18"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-06-22"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-06-25"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-07-02"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-07-06"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-07-16"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-07-20"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-07-21"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-07-23"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-07-30"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-08-03"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-08-13"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-08-17"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-08-18"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-08-20"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-08-27"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-08-31"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-09-10"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-09-14"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-09-15"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-09-17"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-09-24"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-09-28"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-10-08"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-10-12"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-10-15"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-10-20"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-10-22"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-10-26"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-11-05"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-11-09"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-11-12"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-11-17"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-11-19"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-11-19"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-12-03"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-12-07"
+    },
+    {
+        "nameType": "restafval",
+        "type": "restafval",
+        "date": "2021-12-10"
+    },
+    {
+        "nameType": "papier",
+        "type": "papier",
+        "date": "2021-12-15"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-12-17"
+    },
+    {
+        "nameType": "pmd",
+        "type": "pmd",
+        "date": "2021-12-21"
+    },
+    {
+        "nameType": "gft",
+        "type": "gft",
+        "date": "2021-12-31"
+    }
+]

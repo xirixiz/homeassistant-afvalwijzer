@@ -5,9 +5,30 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-[![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png)](https://github.com/ellerbrock/open-source-badges/)
+[![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
-_Component to integrate with [mijnafvalwijzer][mijnafvalwijzer], [afvalstoffendienstkalender][afvalstoffendienstkalender] and [rova][rova]._
+_Component to integrate with the following collectors._
+
+| Collector                        |
+| ---------------------------------|
+| mijnafvalwijzer                  |
+| afvalstoffendienstkalender (all) |
+| rova                             |
+| acv                              |
+| almere                           |
+| areareiniging                    |
+| avalex                           |
+| avri                             |
+| bar                              |
+| hellendoorn                      |
+| meerlanden                       |
+| meppel                           |
+| rad                              |
+| twentemilieu                     |
+| waardlanden                      |
+| westland                         |
+| ximmio                           |
+| reinis                           |
 
 This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
@@ -83,7 +104,7 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
       postal_code: 1234AB              # (required, default = '')
       street_number:  5                # (required, default = '')
       suffix: ''                       # (optional, default = '')
-      include_date_today: false        # (optional, default = false) to take or not to take Today into account in the next pickup.
+      exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
       default_label: Geen              # (optional, default = Geen) label if no date found
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
       exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft"
@@ -104,11 +125,11 @@ input_boolean:
 ###### AUTOMATION
 ```yaml
 automation:
-  - alias: Afval - Herstel notificatie
+  - alias: Reset waste notification
     trigger:
       platform: state
       entity_id: input_boolean.waste_moved
-      to: "on"
+      to: 'on'
       for:
         hours: 12
     action:
@@ -117,24 +138,17 @@ automation:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_reminder
 
-  - alias: Afval - Bevestig notificatie
+  - alias: Mark waste as moved from notification
     trigger:
-      - platform: event
-        event_type: mobile_app_notification_action
-        event_data:
-          action: "MARK_WASTE_MOVED"
+      platform: event
+      event_type: ios.notification_action_fired
+      event_data:
+        actionName: MARK_WASTE_MOVED
     action:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_moved
-      - service: notify.family
-        data:
-          title: 'Afval'
-          message: 'Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow_formatted.state }} zijn aan de straat gezet.'
-          data:
-            push:
-              badge: 0        
 
-  - alias: Afval - Verzend notificatie - Tomorrow
+  - alias: Waste has not been moved
     trigger:
       platform: time_pattern
       hours: "/1"
@@ -143,30 +157,24 @@ automation:
       conditions:
         - condition: state
           entity_id: input_boolean.waste_moved
-          state: "off"
+          state: 'off'
         - condition: state
           entity_id: input_boolean.waste_reminder
-          state: "on"
+          state: 'on'
         - condition: time
-          after: "18:00:00"
-          before: "23:00:00"
+          after: '18:00:00'
+          before: '23:00:00'
         - condition: template
-          value_template: "{{ states('sensor.afvalwijzer_tomorrow_formatted') != 'Geen' }}"
+          value_template: "{{ states('sensor.afvalwijzer_tomorrow') != 'Geen' }}"
     action:
       - service: notify.family
         data:
-          title: 'Afval'
-          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow_formatted.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
+          title: "Afval"
+          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
           data:
-            actions:
-              - action: "MARK_WASTE_MOVED"
-                title: "Afval verwerkt"
-                activationMode: "background"
-                authenticationRequired: no
-                destructive: yes
-                behavior: "default"
             push:
-              badge: 5                
+              badge: 0
+              category: 'afval'
 ```
 
 ***
@@ -175,8 +183,5 @@ automation:
 [exampleimg2]: afvalwijzer_lovelace.png
 [buymecoffee]: https://www.buymeacoffee.com/xirixiz
 [buymecoffeebedge]: https://camo.githubusercontent.com/cd005dca0ef55d7725912ec03a936d3a7c8de5b5/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6275792532306d6525323061253230636f666665652d646f6e6174652d79656c6c6f772e737667
-[mijnafvalwijzer]: https://mijnafvalwijzer.nl
-[afvalstoffendienstkalender]: https://afvalstoffendienstkalender.nl
-[rova]: https://www.rova.nl
 [customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
