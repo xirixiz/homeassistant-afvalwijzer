@@ -1,4 +1,6 @@
-from ..const.const import _LOGGER, DATE_TODAY
+from datetime import datetime
+
+from ..const.const import _LOGGER
 
 
 class NextSensorData(object):
@@ -8,7 +10,9 @@ class NextSensorData(object):
     ##########################################################################
     def __init__(self, waste_data_after_date_selected, default_label):
         self.waste_data_after_date_selected = waste_data_after_date_selected
-        self.today_date = DATE_TODAY
+
+        TODAY = datetime.today().strftime("%d-%m-%Y")
+        self.today_date = datetime.strptime(TODAY, "%d-%m-%Y")
         self.default_label = default_label
 
         self.next_waste_date = self.__get_next_waste_date()

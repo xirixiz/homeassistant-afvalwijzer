@@ -1,17 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
-from ..const.const import (
-    _LOGGER,
-    DATE_TODAY,
-    DATE_TODAY_NEXT_YEAR,
-    DATE_TOMORROW,
-    SENSOR_COLLECTOR_TO_URL,
-    SENSOR_COLLECTORS_XIMMIO,
-)
+from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_XIMMIO
 
 
 class XimmioCollector(object):
@@ -41,6 +34,13 @@ class XimmioCollector(object):
             self.provider_url = "ximmio02"
         else:
             self.provider_url = "ximmio01"
+
+        TODAY = datetime.today().strftime("%d-%m-%Y")
+        self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
+        self.DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
+        self.DATE_TODAY_NEXT_YEAR = (
+            self.DATE_TODAY.date() + timedelta(days=365)
+        ).strftime("%Y-%m-%d")
 
         (
             self._waste_data_raw,
@@ -83,8 +83,8 @@ class XimmioCollector(object):
             url = SENSOR_COLLECTOR_TO_URL[self.provider_url][1]
             data = {
                 "companyCode": companyCode,
-                "startDate": DATE_TODAY.date(),
-                "endDate": DATE_TODAY_NEXT_YEAR,
+                "startDate": self.DATE_TODAY.date(),
+                "endDate": self.DATE_TODAY_NEXT_YEAR,
                 "community": community,
                 "uniqueAddressID": uniqueId,
             }
@@ -118,7 +118,7 @@ class XimmioCollector(object):
                 item_name = item["type"]
                 if item_name not in self.exclude_list:
                     if item_name not in waste_data_with_today:
-                        if item_date >= DATE_TODAY:
+                        if item_date >= self.DATE_TODAY:
                             waste_data_with_today[item_name] = item_date
 
             for item in waste_data_raw_formatted:
@@ -126,7 +126,7 @@ class XimmioCollector(object):
                 item_name = item["type"]
                 if item_name not in self.exclude_list:
                     if item_name not in waste_data_without_today:
-                        if item_date > DATE_TODAY:
+                        if item_date > self.DATE_TODAY:
                             waste_data_without_today[item_name] = item_date
 
             try:
@@ -182,10 +182,10 @@ class XimmioCollector(object):
     ##########################################################################
     def transform_waste_data(self):
         if self.exclude_pickup_today.casefold() in ("false", "no"):
-            date_selected = DATE_TODAY
+            date_selected = self.DATE_TODAY
             waste_data_provider = self._waste_data_with_today
         else:
-            date_selected = DATE_TOMORROW
+            date_selected = self.DATE_TOMORROW
             waste_data_provider = self._waste_data_without_today
 
         try:
