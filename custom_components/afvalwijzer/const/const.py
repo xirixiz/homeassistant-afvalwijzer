@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2021.12.01"
+VERSION = "2022.12.02"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,12 +77,6 @@ ATTR_YEAR_MONTH_DAY_DATE = "year_month_day_date"
 MIN_TIME_BETWEEN_UPDATES = timedelta(hours=1)
 PARALLEL_UPDATES = 1
 SCAN_INTERVAL = timedelta(seconds=30)
-
-TODAY = datetime.today().strftime("%d-%m-%Y")
-DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
-DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
-DATE_DOT = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=2)
-DATE_TODAY_NEXT_YEAR = (DATE_TODAY.date() + timedelta(days=365)).strftime("%Y-%m-%d")
 
 DOMAIN = "afvalwijzer"
 DOMAIN_DATA = "afvalwijzer_data"

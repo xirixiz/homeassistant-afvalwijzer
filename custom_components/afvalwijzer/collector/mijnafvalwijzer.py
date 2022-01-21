@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
@@ -6,8 +6,6 @@ from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
 from ..const.const import (
     _LOGGER,
-    DATE_TODAY,
-    DATE_TOMORROW,
     SENSOR_COLLECTOR_TO_URL,
     SENSOR_COLLECTORS_AFVALWIJZER,
 )
@@ -37,6 +35,10 @@ class MijnAfvalWijzerCollector(object):
 
         if self.provider == "rova":
             self.provider = "inzamelkalender.rova"
+
+        TODAY = datetime.today().strftime("%d-%m-%Y")
+        self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
+        self.DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
 
         (
             self._waste_data_raw,
@@ -70,10 +72,7 @@ class MijnAfvalWijzerCollector(object):
             raise ValueError("No JSON data received from " + url)
 
         try:
-            waste_data_raw = (
-                json_response["ophaaldagen"]["data"]
-                + json_response["ophaaldagenNext"]["data"]
-            )
+            waste_data_raw = json_response["ophaaldagen"]["data"] + json_response["ophaaldagenNext"]["data"]
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 
@@ -86,7 +85,7 @@ class MijnAfvalWijzerCollector(object):
                 item_name = item["type"].strip().lower()
                 if item_name not in self.exclude_list:
                     if item_name not in waste_data_with_today:
-                        if item_date >= DATE_TODAY:
+                        if item_date >= self.DATE_TODAY:
                             waste_data_with_today[item_name] = item_date
 
             for item in waste_data_raw:
@@ -94,7 +93,7 @@ class MijnAfvalWijzerCollector(object):
                 item_name = item["type"].strip().lower()
                 if item_name not in self.exclude_list:
                     if item_name not in waste_data_without_today:
-                        if item_date > DATE_TODAY:
+                        if item_date > self.DATE_TODAY:
                             waste_data_without_today[item_name] = item_date
 
             try:
@@ -117,21 +116,15 @@ class MijnAfvalWijzerCollector(object):
     ##########################################################################
     def transform_waste_data(self):
         if self.exclude_pickup_today.casefold() in ("false", "no"):
-            date_selected = DATE_TODAY
+            date_selected = self.DATE_TODAY
             waste_data_provider = self._waste_data_with_today
         else:
-            date_selected = DATE_TOMORROW
+            date_selected = self.DATE_TOMORROW
             waste_data_provider = self._waste_data_without_today
 
         try:
             waste_types_provider = sorted(
-                set(
-                    list(
-                        waste["type"]
-                        for waste in self.waste_data_raw
-                        if waste["type"] not in self.exclude_list
-                    )
-                )
+                set(list(waste["type"] for waste in self.waste_data_raw if waste["type"] not in self.exclude_list))
             )
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_provider: %s", err)
@@ -152,14 +145,10 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             waste_data_after_date_selected = list(
-                filter(
-                    lambda waste: waste["date"] >= date_selected, waste_data_formatted
-                )
+                filter(lambda waste: waste["date"] >= date_selected, waste_data_formatted)
             )
         except Exception as err:
-            _LOGGER.error(
-                "Other error occurred waste_data_after_date_selected: %s", err
-            )
+            _LOGGER.error("Other error occurred waste_data_after_date_selected: %s", err)
 
         next = NextSensorData(waste_data_after_date_selected, self.default_label)
 
