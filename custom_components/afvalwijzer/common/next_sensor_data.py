@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
-from ..const.const import _LOGGER, DATE_TODAY
+from datetime import datetime
+
+from ..const.const import _LOGGER
 
 
 class NextSensorData(object):

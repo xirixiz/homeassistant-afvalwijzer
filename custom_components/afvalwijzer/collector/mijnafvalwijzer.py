@@ -72,7 +72,10 @@ class MijnAfvalWijzerCollector(object):
             raise ValueError("No JSON data received from " + url)
 
         try:
-            waste_data_raw = json_response["ophaaldagen"]["data"] + json_response["ophaaldagenNext"]["data"]
+            waste_data_raw = (
+                json_response["ophaaldagen"]["data"]
+                + json_response["ophaaldagenNext"]["data"]
+            )
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 
@@ -124,7 +127,13 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             waste_types_provider = sorted(
-                set(list(waste["type"] for waste in self.waste_data_raw if waste["type"] not in self.exclude_list))
+                set(
+                    list(
+                        waste["type"]
+                        for waste in self.waste_data_raw
+                        if waste["type"] not in self.exclude_list
+                    )
+                )
             )
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_provider: %s", err)
@@ -145,10 +154,14 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             waste_data_after_date_selected = list(
-                filter(lambda waste: waste["date"] >= date_selected, waste_data_formatted)
+                filter(
+                    lambda waste: waste["date"] >= date_selected, waste_data_formatted
+                )
             )
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_after_date_selected: %s", err)
+            _LOGGER.error(
+                "Other error occurred waste_data_after_date_selected: %s", err
+            )
 
         next = NextSensorData(waste_data_after_date_selected, self.default_label)
 

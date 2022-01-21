@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from ..const.const import _LOGGER
 
 
@@ -17,7 +18,9 @@ class DaySensorData(object):
         self.waste_data_formatted = waste_data_formatted
         self.today_date = datetime.strptime(TODAY, "%d-%m-%Y")
         self.tomorrow_date = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
-        self.day_after_tomorrow_date = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=2)
+        self.day_after_tomorrow_date = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(
+            days=2
+        )
         self.default_label = default_label
 
         self.waste_data_today = self.__gen_day_sensor(self.today_date)
