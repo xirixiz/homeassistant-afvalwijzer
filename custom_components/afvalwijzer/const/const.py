@@ -3,7 +3,7 @@ import logging
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2022.12.02"
+VERSION = "2022.02.01"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 _LOGGER = logging.getLogger(__name__)
