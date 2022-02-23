@@ -24,7 +24,7 @@ from ..const.const import SENSOR_COLLECTORS_AFVALWIJZER, SENSOR_COLLECTORS_XIMMI
 
 # Common
 suffix = ""
-exclude_pickup_today = "True"
+exclude_pickup_today = "False"
 default_label = "Geen"
 exclude_list = ""
 
@@ -37,6 +37,12 @@ street_number = "6"
 # provider = "meerlanden"
 # postal_code = "2201XZ"
 # street_number = "38"
+
+# Twente
+provider = "twentemilieu"
+postal_code = "7642JH"
+street_number = "5"
+
 
 if provider in SENSOR_COLLECTORS_AFVALWIJZER:
     collector = MijnAfvalWijzerCollector(

@@ -109,9 +109,11 @@ class XimmioCollector(object):
                     item["_pickupTypeText"].strip().lower()
                 )
                 temp["date"] = datetime.strptime(
-                    item["pickupDates"][0], "%Y-%m-%dT%H:%M:%S"
+                    sorted(item["pickupDates"])[0], "%Y-%m-%dT%H:%M:%S"
                 ).strftime("%Y-%m-%d")
                 waste_data_raw_formatted.append(temp)
+
+                print (waste_data_raw_formatted)
 
             for item in waste_data_raw_formatted:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
