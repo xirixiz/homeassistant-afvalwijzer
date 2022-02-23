@@ -29,7 +29,7 @@ from ..const.const import (
 
 # Common
 suffix = ""
-exclude_pickup_today = "False"
+exclude_pickup_today = "True"
 default_label = "Geen"
 exclude_list = ""
 
