@@ -18,7 +18,7 @@ function UpdgradeHomeAssistantDev {
 
 function SetHomeAssistantVersion {
   read -rp 'Version: ' version
-  python -m pip install --upgrade homeassistant==$version
+  python -m pip install --upgrade homeassistant=="${version}"
 }
 
 function HomeAssistantConfigCheck {
