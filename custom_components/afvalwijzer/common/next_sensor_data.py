@@ -9,7 +9,9 @@ class NextSensorData(object):
     #  INIT
     ##########################################################################
     def __init__(self, waste_data_after_date_selected, default_label):
-        self.waste_data_after_date_selected = waste_data_after_date_selected
+        self.waste_data_after_date_selected = sorted(
+            waste_data_after_date_selected, key=lambda d: d["date"]
+        )
 
         TODAY = datetime.today().strftime("%d-%m-%Y")
         self.today_date = datetime.strptime(TODAY, "%d-%m-%Y")

@@ -15,7 +15,9 @@ class DaySensorData(object):
     ):
         TODAY = datetime.today().strftime("%d-%m-%Y")
 
-        self.waste_data_formatted = waste_data_formatted
+        self.waste_data_formatted = sorted(
+            waste_data_formatted, key=lambda d: d["date"]
+        )
         self.today_date = datetime.strptime(TODAY, "%d-%m-%Y")
         self.tomorrow_date = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
         self.day_after_tomorrow_date = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(

@@ -5,7 +5,7 @@ import requests
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
-from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_OPZET
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 
 
 class OpzetCollector(object):
@@ -33,9 +33,6 @@ class OpzetCollector(object):
         TODAY = datetime.today().strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
         self.DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
-        self.DATE_TODAY_NEXT_YEAR = (
-            self.DATE_TODAY.date() + timedelta(days=365)
-        ).strftime("%Y-%m-%d")
 
         (
             self._waste_data_raw,
