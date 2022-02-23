@@ -117,8 +117,6 @@ class XimmioCollector(object):
                 ).strftime("%Y-%m-%d")
                 waste_data_raw_formatted.append(temp)
 
-                print(waste_data_raw_formatted)
-
             for item in waste_data_raw_formatted:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"]
