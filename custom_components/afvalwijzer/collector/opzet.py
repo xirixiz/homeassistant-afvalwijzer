@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
+from os import system
 
 import requests
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
-from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_XIMMIO
+from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_OPZET
 
 
-class XimmioCollector(object):
+class OpzetCollector(object):
     def __init__(
         self,
         provider,
@@ -26,14 +27,8 @@ class XimmioCollector(object):
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label
 
-        if self.provider not in SENSOR_COLLECTORS_XIMMIO.keys():
+        if self.provider not in SENSOR_COLLECTORS_OPZET.keys():
             raise ValueError("Invalid provider: %s, please verify", self.provider)
-
-        collectors = ("avalex", "meerlanden", "rad", "westland")
-        if self.provider in collectors:
-            self.provider_url = "ximmio02"
-        else:
-            self.provider_url = "ximmio01"
 
         TODAY = datetime.today().strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
@@ -56,39 +51,21 @@ class XimmioCollector(object):
         ) = self.transform_waste_data()
 
     def get_waste_data_provider(self):
-        ##########################################################################
-        # First request: get uniqueId and community
-        ##########################################################################
         try:
-            url = SENSOR_COLLECTOR_TO_URL[self.provider_url][0]
-            companyCode = SENSOR_COLLECTORS_XIMMIO[self.provider]
-            data = {
-                "postCode": self.postal_code,
-                "houseNumber": self.street_number,
-                "companyCode": companyCode,
-            }
+            self.bag_id = None
+            if self.provider == "suez":
+                self._verify = False
+            else:
+                self._verify = True
 
-            raw_response = requests.post(url=url, data=data)
+            url = "{}/rest/adressen/{}-{}".format(
+                SENSOR_COLLECTORS_OPZET[self.provider],
+                self.postal_code,
+                self.street_number,
+                verify=self._verify,
+            )
 
-            uniqueId = raw_response.json()["dataList"][0]["UniqueId"]
-            community = raw_response.json()["dataList"][0]["Community"]
-
-        except requests.exceptions.RequestException as err:
-            raise ValueError(err)
-
-        ##########################################################################
-        # Second request: get the dates
-        ##########################################################################
-        try:
-            url = SENSOR_COLLECTOR_TO_URL[self.provider_url][1]
-            data = {
-                "companyCode": companyCode,
-                "startDate": self.DATE_TODAY.date(),
-                "endDate": self.DATE_TODAY_NEXT_YEAR,
-                "community": community,
-                "uniqueAddressID": uniqueId,
-            }
-            json_response = requests.post(url=url, data=data).json()
+            json_response = requests.get(url).json()
 
             if not json_response:
                 _LOGGER.error("Address not found!")
@@ -98,7 +75,23 @@ class XimmioCollector(object):
             raise ValueError("No JSON data received from " + url)
 
         try:
-            waste_data_raw = json_response["dataList"]
+            if len(json_response) > 1 and self.suffix:
+                for item in json_response:
+                    if (
+                        item["huisletter"] == self.suffix
+                        or item["huisnummerToevoeging"] == self.suffix
+                    ):
+                        self.bag_id = item["bagId"]
+                        break
+            else:
+                self.bag_id = json_response[0]["bagId"]
+
+            url = "{}/rest/adressen/{}/afvalstromen".format(
+                SENSOR_COLLECTORS_OPZET[self.provider],
+                self.bag_id,
+                verify=self._verify,
+            )
+            waste_data_raw = requests.get(url).json()
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 
@@ -109,15 +102,20 @@ class XimmioCollector(object):
 
             for item in waste_data_raw:
                 temp = {}
+                if not item["ophaaldatum"]:
+                    continue
+
+                waste_type = item["menu_title"]
+                if not waste_type:
+                    continue
+
                 temp["type"] = self.__waste_type_rename(
-                    item["_pickupTypeText"].strip().lower()
+                    item["menu_title"].strip().lower()
                 )
                 temp["date"] = datetime.strptime(
-                    sorted(item["pickupDates"])[0], "%Y-%m-%dT%H:%M:%S"
+                    item["ophaaldatum"], "%Y-%m-%d"
                 ).strftime("%Y-%m-%d")
                 waste_data_raw_formatted.append(temp)
-
-                print(waste_data_raw_formatted)
 
             for item in waste_data_raw_formatted:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
@@ -155,31 +153,43 @@ class XimmioCollector(object):
             _LOGGER.error("Other error occurred: %s", err)
 
     def __waste_type_rename(self, item_name):
-        if item_name == "branches":
+        if item_name == "snoeiafval":
             item_name = "takken"
-        if item_name == "bulklitter":
+        if item_name == "sloop":
             item_name = "grofvuil"
-        if item_name == "bulkygardenwaste":
-            item_name = "tuinafval"
-        if item_name == "glass":
+        if item_name == "glas":
             item_name = "glas"
-        if item_name == "green":
+        if item_name == "duobak":
+            item_name = "duobak"
+        if item_name == "groente":
             item_name = "gft"
-        if item_name == "grey":
-            item_name = "restafval"
+        if item_name == "groente-, fruit en tuinafval":
+            item_name = "gft"
+        if item_name == "gft":
+            item_name = "gft"
+        if item_name == "chemisch":
+            item_name = "chemisch"
         if item_name == "kca":
             item_name = "chemisch"
+        if item_name == "tariefzak restafval":
+            item_name = "restafvalzakken"
+        if item_name == "restafvalzakken":
+            item_name = "restafvalzakken"
+        if item_name == "rest":
+            item_name = "restafval"
         if item_name == "plastic":
             item_name = "plastic"
-        if item_name == "packages":
+        if item_name == "plastic, blik & drinkpakken overbetuwe":
             item_name = "pmd"
-        if item_name == "paper":
+        if item_name == "papier":
             item_name = "papier"
-        if item_name == "remainder":
-            item_name = "restwagen"
-        if item_name == "textile":
+        if item_name == "papier en karton":
+            item_name = "papier"
+        if item_name == "pmd":
+            item_name = "pmd"
+        if item_name == "textiel":
             item_name = "textiel"
-        if item_name == "tree":
+        if item_name == "kerstb":
             item_name = "kerstboom"
         return item_name
 

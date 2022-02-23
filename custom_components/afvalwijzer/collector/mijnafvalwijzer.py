@@ -71,6 +71,10 @@ class MijnAfvalWijzerCollector(object):
         except ValueError:
             raise ValueError("No JSON data received from " + url)
 
+        if not json_response:
+            _LOGGER.error("Address not found!")
+            return
+
         try:
             waste_data_raw = (
                 json_response["ophaaldagen"]["data"]

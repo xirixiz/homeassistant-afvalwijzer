@@ -12,6 +12,7 @@ from homeassistant.util import Throttle
 import voluptuous as vol
 
 from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
+from .collector.opzet import OpzetCollector
 from .collector.ximmio import XimmioCollector
 from .const.const import (
     _LOGGER,
@@ -27,6 +28,7 @@ from .const.const import (
     PARALLEL_UPDATES,
     SCAN_INTERVAL,
     SENSOR_COLLECTORS_AFVALWIJZER,
+    SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_XIMMIO,
     STARTUP_MESSAGE,
 )
@@ -78,6 +80,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     default_label,
                 )
             )
+        elif provider in SENSOR_COLLECTORS_OPZET.keys():
+            collector = await hass.async_add_executor_job(
+                partial(
+                    OpzetCollector,
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
+                )
+            )
         elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
             collector = await hass.async_add_executor_job(
                 partial(
@@ -91,6 +106,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     default_label,
                 )
             )
+        else:
+            _LOGGER.error("Unknown provider!")
+            return False
     except ValueError as err:
         _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
 
@@ -142,6 +160,16 @@ class AfvalwijzerData(object):
                     exclude_list,
                     default_label,
                 )
+            elif provider in SENSOR_COLLECTORS_OPZET.keys():
+                collector = OpzetCollector(
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
+                )
             elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
                 collector = XimmioCollector(
                     provider,
@@ -152,6 +180,9 @@ class AfvalwijzerData(object):
                     exclude_list,
                     default_label,
                 )
+            else:
+                _LOGGER.error("Unknown provider!")
+                return False
         except ValueError as err:
             _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
 
