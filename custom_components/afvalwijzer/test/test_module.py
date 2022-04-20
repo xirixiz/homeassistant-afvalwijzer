@@ -43,14 +43,19 @@ street_number = "6"
 # postal_code = "2201XZ"
 # street_number = "38"
 
-# Twente
-provider = "twentemilieu"
-postal_code = "7642JH"
-street_number = "5"
+# Ximmio
+provider = "acv"
+postal_code = "6713CG"
+street_number = "11"
 
-provider = "prezero"
-postal_code = "6665CN"
-street_number = "1"
+# Twente
+# provider = "twentemilieu"
+# postal_code = "7642JH"
+# street_number = "5"
+
+# provider = "prezero"
+# postal_code = "6665CN"
+# street_number = "1"
 
 if provider in SENSOR_COLLECTORS_AFVALWIJZER:
     collector = MijnAfvalWijzerCollector(
