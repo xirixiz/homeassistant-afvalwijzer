@@ -54,6 +54,7 @@ _Component to integrate with the following collectors._
 | voorschoten                      |
 | waalre                           |
 | zrd                              |
+| eemsdelta                        |
 
 This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
