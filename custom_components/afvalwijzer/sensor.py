@@ -11,6 +11,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 import voluptuous as vol
 
+from .collector.icalendar import IcalendarCollector
 from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
 from .collector.opzet import OpzetCollector
 from .collector.ximmio import XimmioCollector
@@ -28,6 +29,7 @@ from .const.const import (
     PARALLEL_UPDATES,
     SCAN_INTERVAL,
     SENSOR_COLLECTORS_AFVALWIJZER,
+    SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_XIMMIO,
     STARTUP_MESSAGE,
@@ -106,6 +108,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     default_label,
                 )
             )
+        elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
+            collector = await hass.async_add_executor_job(
+                partial(
+                    IcalendarCollector,
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
+                )
+            )
         else:
             _LOGGER.error("Unknown provider!")
             return False
@@ -172,6 +187,16 @@ class AfvalwijzerData(object):
                 )
             elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
                 collector = XimmioCollector(
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
+                )
+            elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
+                collector = IcalendarCollector(
                     provider,
                     postal_code,
                     street_number,

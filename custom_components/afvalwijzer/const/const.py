@@ -56,6 +56,9 @@ SENSOR_COLLECTORS_OPZET = {
     "zrd": "https://afvalkalender.zrd.nl",
 }
 
+SENSOR_COLLECTORS_ICALENDAR = {
+    "eemsdelta": "https://www.eemsdelta.nl/trash-calendar/download/{1}/{2}",
+}
 
 SENSOR_COLLECTORS_AFVALWIJZER = [
     "mijnafvalwijzer",
