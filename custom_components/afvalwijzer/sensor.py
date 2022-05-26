@@ -42,9 +42,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(
             CONF_COLLECTOR.strip().lower(), default="mijnafvalwijzer"
         ): cv.string,
-        vol.Required(CONF_POSTAL_CODE.strip(), default="1234AB"): cv.string,
+        vol.Required(CONF_POSTAL_CODE.strip().upper(), default="1234AB"): cv.string,
         vol.Required(CONF_STREET_NUMBER.strip(), default="5"): cv.string,
-        vol.Optional(CONF_SUFFIX.strip(), default=""): cv.string,
+        vol.Optional(CONF_SUFFIX.strip().upper(), default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY.strip(), default="true"): cv.string,
         vol.Optional(CONF_EXCLUDE_LIST.strip().lower(), default=""): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL.strip(), default="Geen"): cv.string,

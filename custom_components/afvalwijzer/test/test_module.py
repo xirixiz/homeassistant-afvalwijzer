@@ -46,6 +46,11 @@ exclude_list = ""
 # street_number = "38"
 
 # Ximmio
+provider = "meerlanden"
+postal_code = "2121xt"
+street_number = "38"
+
+# Ximmio
 # provider = "acv"
 # postal_code = "6713CG"
 # street_number = "11"
@@ -60,10 +65,12 @@ exclude_list = ""
 # street_number = "1"
 
 # Icalendar
-provider = "eemsdelta"
-postal_code = "9991AB"
-street_number = "2"
+# provider = "eemsdelta"
+# postal_code = "9991AB"
+# street_number = "2"
 
+
+postal_code=postal_code.strip().upper()
 
 if provider in SENSOR_COLLECTORS_AFVALWIJZER:
     collector = MijnAfvalWijzerCollector(
