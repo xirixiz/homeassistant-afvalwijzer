@@ -14,6 +14,7 @@ import voluptuous as vol
 from .collector.icalendar import IcalendarCollector
 from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
 from .collector.opzet import OpzetCollector
+from .collector.rd4 import Rd4Collector
 from .collector.ximmio import XimmioCollector
 from .const.const import (
     _LOGGER,
@@ -32,6 +33,7 @@ from .const.const import (
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_XIMMIO,
+    SENSOR_COLLECTOR_RD4,
     STARTUP_MESSAGE,
 )
 from .sensor_custom import CustomSensor
@@ -121,6 +123,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     default_label,
                 )
             )
+        elif provider == SENSOR_COLLECTOR_RD4:
+            collector = await hass.async_add_executor_job(
+                partial(
+                    Rd4Collector,
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
+                )
+            )
         else:
             _LOGGER.error("Unknown provider!")
             return False
@@ -197,6 +212,16 @@ class AfvalwijzerData(object):
                 )
             elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
                 collector = IcalendarCollector(
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                    exclude_pickup_today,
+                    exclude_list,
+                    default_label,
+                )
+            elif provider == SENSOR_COLLECTOR_RD4:
+                collector = Rd4Collector(
                     provider,
                     postal_code,
                     street_number,

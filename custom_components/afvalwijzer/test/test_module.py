@@ -14,8 +14,10 @@ python3 -m afvalwijzer.test.test_module
 from ..collector.icalendar import IcalendarCollector
 from ..collector.mijnafvalwijzer import MijnAfvalWijzerCollector
 from ..collector.opzet import OpzetCollector
+from ..collector.rd4 import Rd4Collector
 from ..collector.ximmio import XimmioCollector
 from ..const.const import (
+    SENSOR_COLLECTOR_RD4,
     SENSOR_COLLECTORS_AFVALWIJZER,
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_OPZET,
@@ -46,9 +48,9 @@ exclude_list = ""
 # street_number = "38"
 
 # Ximmio
-provider = "meerlanden"
-postal_code = "2121xt"
-street_number = "38"
+# provider = "meerlanden"
+# postal_code = "2121xt"
+# street_number = "38"
 
 # Ximmio
 # provider = "acv"
@@ -63,6 +65,12 @@ street_number = "38"
 # provider = "prezero"
 # postal_code = "6665CN"
 # street_number = "1"
+
+# RD4
+provider = "rd4"
+postal_code = "6301ET"
+street_number = "24"
+suffix = "C"
 
 # Icalendar
 # provider = "eemsdelta"
@@ -104,6 +112,16 @@ elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
     )
 elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
     collector = IcalendarCollector(
+        provider,
+        postal_code,
+        street_number,
+        suffix,
+        exclude_pickup_today,
+        exclude_list,
+        default_label,
+    )
+elif provider == SENSOR_COLLECTOR_RD4:
+    collector = Rd4Collector(
         provider,
         postal_code,
         street_number,
