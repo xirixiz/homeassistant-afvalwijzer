@@ -85,6 +85,8 @@ SENSOR_COLLECTORS_XIMMIO = {
     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
 }
 
+SENSOR_COLLECTOR_RD4 = "rd4"
+
 CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
