@@ -199,9 +199,9 @@ automation:
           title: "Afval"
           message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
           data:
-            push:
-              badge: 0
-              category: 'afval'
+            actions:
+              - action: "MARK_WASTE_MOVED" # The key you are sending for the event
+                title: "Afval buiten gezet" # The button title
 ```
 
 ***
