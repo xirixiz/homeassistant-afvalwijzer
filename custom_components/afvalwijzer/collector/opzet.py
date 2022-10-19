@@ -162,6 +162,8 @@ class OpzetCollector(object):
             item_name = "gft"
         if item_name == "groente-, fruit en tuinafval":
             item_name = "gft"
+        if item_name == "groente, fruit- en tuinafval":
+            item_name = "gft"
         if item_name == "gft":
             item_name = "gft"
         if item_name == "chemisch":
