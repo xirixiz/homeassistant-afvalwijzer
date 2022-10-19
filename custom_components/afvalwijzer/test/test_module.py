@@ -78,7 +78,7 @@ suffix = "C"
 # street_number = "2"
 
 
-postal_code=postal_code.strip().upper()
+postal_code = postal_code.strip().upper()
 
 if provider in SENSOR_COLLECTORS_AFVALWIJZER:
     collector = MijnAfvalWijzerCollector(

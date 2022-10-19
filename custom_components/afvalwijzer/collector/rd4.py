@@ -8,7 +8,8 @@ from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
 from ..const.const import _LOGGER, SENSOR_COLLECTOR_RD4
 
-RD4_API_TEMPLATE = "https://data.rd4.nl/api/v1/waste-calendar?postal_code={}&house_number={}&house_number_extension={}&year={}";
+RD4_API_TEMPLATE = "https://data.rd4.nl/api/v1/waste-calendar?postal_code={}&house_number={}&house_number_extension={}&year={}"
+
 
 class Rd4Collector(object):
     def __init__(
@@ -32,12 +33,14 @@ class Rd4Collector(object):
         if self.provider != SENSOR_COLLECTOR_RD4:
             raise ValueError("Invalid provider: %s, please verify", self.provider)
 
-        TODAY_DT =  datetime.today()
+        TODAY_DT = datetime.today()
         TODAY_STR = TODAY_DT.strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(TODAY_STR, "%d-%m-%Y")
-        self.DATE_TOMORROW = datetime.strptime(TODAY_STR, "%d-%m-%Y") + timedelta(days=1)
+        self.DATE_TOMORROW = datetime.strptime(TODAY_STR, "%d-%m-%Y") + timedelta(
+            days=1
+        )
         self.YEAR_CURRENT = TODAY_DT.year
-        self.YEAR_NEXT = TODAY_DT.year+1
+        self.YEAR_NEXT = TODAY_DT.year + 1
 
         (
             self._waste_data_raw,
@@ -54,22 +57,30 @@ class Rd4Collector(object):
 
     def get_waste_data_provider(self):
 
-        corrected_postal_code_parts = re.search(r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code)
-        corrected_postal_code = corrected_postal_code_parts.group(1) + '+' + corrected_postal_code_parts.group(2).upper()
+        corrected_postal_code_parts = re.search(
+            r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code
+        )
+        corrected_postal_code = (
+            corrected_postal_code_parts.group(1)
+            + "+"
+            + corrected_postal_code_parts.group(2).upper()
+        )
 
         try:
             url = RD4_API_TEMPLATE.format(
                 corrected_postal_code,
                 self.street_number,
                 self.suffix,
-                self.YEAR_CURRENT
+                self.YEAR_CURRENT,
             )
             waste_data_raw = requests.get(url).json()
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 
-        if(waste_data_raw["success"] != True):
-            raise ValueError("No waste data received from RD4: " + waste_data_raw["message"])
+        if waste_data_raw["success"] != True:
+            raise ValueError(
+                "No waste data received from RD4: " + waste_data_raw["message"]
+            )
 
         try:
             waste_data_with_today = {}
@@ -88,9 +99,9 @@ class Rd4Collector(object):
                     continue
 
                 temp["type"] = item["type"].strip().lower()
-                temp["date"] = datetime.strptime(
-                    item["date"], "%Y-%m-%d"
-                ).strftime("%Y-%m-%d")
+                temp["date"] = datetime.strptime(item["date"], "%Y-%m-%d").strftime(
+                    "%Y-%m-%d"
+                )
                 waste_data_raw_formatted.append(temp)
 
             # Try to get the dates of next year as well so we have a smooth transition into the next year
@@ -99,13 +110,15 @@ class Rd4Collector(object):
                     corrected_postal_code,
                     self.street_number,
                     self.suffix,
-                    self.YEAR_NEXT
+                    self.YEAR_NEXT,
                 )
                 waste_data_raw_next_year = requests.get(url).json()
             except ValueError:
                 _LOGGER.info("No calendar is ready for the year %s yet", self.YEAR_NEXT)
 
-            if (waste_data_raw_next_year is not None) and (waste_data_raw_next_year["success"] == True):
+            if (waste_data_raw_next_year is not None) and (
+                waste_data_raw_next_year["success"] == True
+            ):
                 data_raw_next_year = waste_data_raw_next_year["data"]["items"][0]
 
                 for item in data_raw_next_year:
@@ -118,9 +131,9 @@ class Rd4Collector(object):
                         continue
 
                     temp["type"] = item["type"].strip().lower()
-                    temp["date"] = datetime.strptime(
-                        item["date"], "%Y-%m-%d"
-                    ).strftime("%Y-%m-%d")
+                    temp["date"] = datetime.strptime(item["date"], "%Y-%m-%d").strftime(
+                        "%Y-%m-%d"
+                    )
                     waste_data_raw_formatted.append(temp)
 
             for item in waste_data_raw_formatted:
