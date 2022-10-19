@@ -2,6 +2,7 @@
   "domain": "afvalwijzer",
   "name": "Afvalwijzer",
   "version": "2022.06.02",
+  "iot_class": "Cloud Polling",
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer/blob/master/README.md",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "config_flow": false,
