@@ -42,6 +42,11 @@ exclude_list = ""
 # postal_code = "5146EG"
 # street_number = "6"
 
+# Afvalwijzer
+provider = "mijnafvalwijzer"
+postal_code = "9726BA"
+street_number = "11"
+
 # Ximmio
 # provider = "meerlanden"
 # postal_code = "2201XZ"
@@ -67,10 +72,10 @@ exclude_list = ""
 # street_number = "1"
 
 # RD4
-provider = "rd4"
-postal_code = "6301ET"
-street_number = "24"
-suffix = "C"
+#provider = "rd4"
+#postal_code = "6301ET"
+#street_number = "24"
+#suffix = "C"
 
 # Icalendar
 # provider = "eemsdelta"

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import requests
+import sys
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
@@ -53,6 +54,10 @@ class MijnAfvalWijzerCollector(object):
             self._waste_types_custom,
         ) = self.transform_waste_data()
 
+    def excepthook(type, value, traceback):
+        _LOGGER.error(value)
+    sys.excepthook = excepthook
+
     def get_waste_data_provider(self):
         try:
             url = SENSOR_COLLECTOR_TO_URL["afvalwijzer_data_default"][0].format(
@@ -68,8 +73,10 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             json_response = raw_response.json()
+            if json_response["response"] != "OK":
+                raise ValueError
         except ValueError:
-            raise ValueError("No JSON data received from " + url)
+            raise ValueError("Invalid and/or no JSON data received from " + url)
 
         if not json_response:
             _LOGGER.error("Address not found!")
