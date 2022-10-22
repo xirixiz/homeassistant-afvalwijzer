@@ -74,8 +74,6 @@ class MijnAfvalWijzerCollector(object):
 
         try:
             json_response = raw_response.json()
-            if json_response["response"] != "OK":
-                raise ValueError
         except ValueError:
             raise ValueError("Invalid and/or no JSON data received from " + url)
 

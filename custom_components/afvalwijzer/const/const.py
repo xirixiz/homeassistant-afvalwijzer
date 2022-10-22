@@ -1,10 +1,9 @@
 from datetime import timedelta
 import logging
-import sys
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2022.10.03"
+VERSION = "2022.10.04"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 _LOGGER = logging.getLogger(__name__)
