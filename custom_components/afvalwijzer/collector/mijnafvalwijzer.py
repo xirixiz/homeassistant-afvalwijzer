@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import sys
 
 import requests
 
@@ -11,6 +10,10 @@ from ..const.const import (
     SENSOR_COLLECTORS_AFVALWIJZER,
 )
 
+# import sys
+# def excepthook(type, value, traceback):
+#     _LOGGER.error(value)
+# sys.excepthook = excepthook
 
 class MijnAfvalWijzerCollector(object):
     def __init__(
@@ -54,11 +57,6 @@ class MijnAfvalWijzerCollector(object):
             self._waste_types_custom,
         ) = self.transform_waste_data()
 
-    def excepthook(type, value, traceback):
-        _LOGGER.error(value)
-
-    sys.excepthook = excepthook
-
     def get_waste_data_provider(self):
         try:
             url = SENSOR_COLLECTOR_TO_URL["afvalwijzer_data_default"][0].format(
@@ -86,8 +84,8 @@ class MijnAfvalWijzerCollector(object):
                 json_response["ophaaldagen"]["data"]
                 + json_response["ophaaldagenNext"]["data"]
             )
-        except ValueError:
-            raise ValueError("Invalid and/or no JSON data received from " + url)
+        except KeyError:
+            raise KeyError("Invalid and/or no JSON data received from " + url)
 
         try:
             waste_data_with_today = {}
