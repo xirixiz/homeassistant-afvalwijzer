@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_COLLECTOR_TO_URL = {
     "afvalwijzer_data_default": [
-        "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&app_name=afvalwijzer&platform=phone&afvaldata={4}&langs=nl&"
+        "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&app_name=afvalwijzer&platform=web&afvaldata={4}&langs=nl&"
     ],
     "afvalstoffendienstkalender": [
         "https://{0}.afvalstoffendienstkalender.nl/nl/{1}/{2}/"

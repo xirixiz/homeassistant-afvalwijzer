@@ -72,10 +72,10 @@ street_number = "11"
 # street_number = "1"
 
 # RD4
-#provider = "rd4"
-#postal_code = "6301ET"
-#street_number = "24"
-#suffix = "C"
+# provider = "rd4"
+# postal_code = "6301ET"
+# street_number = "24"
+# suffix = "C"
 
 # Icalendar
 # provider = "eemsdelta"

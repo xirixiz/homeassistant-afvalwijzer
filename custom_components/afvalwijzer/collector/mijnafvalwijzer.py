@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
+import sys
 
 import requests
-import sys
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
@@ -56,6 +56,7 @@ class MijnAfvalWijzerCollector(object):
 
     def excepthook(type, value, traceback):
         _LOGGER.error(value)
+
     sys.excepthook = excepthook
 
     def get_waste_data_provider(self):
