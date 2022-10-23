@@ -11,7 +11,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 import voluptuous as vol
 
-from ..collector.deafvalapp import DeAfvalappCollector
+from .collector.deafvalapp import DeAfvalappCollector
 from .collector.icalendar import IcalendarCollector
 from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
 from .collector.opzet import OpzetCollector
