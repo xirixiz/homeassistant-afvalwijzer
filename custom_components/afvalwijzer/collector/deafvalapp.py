@@ -1,22 +1,18 @@
 from datetime import datetime, timedelta
+from os import system
+import re
+import sys
 
 import requests
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
-from ..const.const import (
-    _LOGGER,
-    SENSOR_COLLECTOR_TO_URL,
-    SENSOR_COLLECTORS_AFVALWIJZER,
-)
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
 
-# import sys
-# def excepthook(type, value, traceback):
-#     _LOGGER.error(value)
-# sys.excepthook = excepthook
+DEAFVALAPP_API_TEMPLATE = "http://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={}&straatId=0&huisnr={}&huisnrtoev={}"
 
 
-class MijnAfvalWijzerCollector(object):
+class DeAfvalappCollector(object):
     def __init__(
         self,
         provider,
@@ -35,11 +31,8 @@ class MijnAfvalWijzerCollector(object):
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label
 
-        if self.provider not in SENSOR_COLLECTORS_AFVALWIJZER:
+        if self.provider != SENSOR_COLLECTORS_DEAFVALAPP:
             raise ValueError("Invalid provider: %s, please verify", self.provider)
-
-        if self.provider == "rova":
-            self.provider = "inzamelkalender.rova"
 
         TODAY = datetime.today().strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
@@ -59,34 +52,37 @@ class MijnAfvalWijzerCollector(object):
         ) = self.transform_waste_data()
 
     def get_waste_data_provider(self):
+
+        corrected_postal_code_parts = re.search(
+            r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code
+        )
+        corrected_postal_code = (
+            corrected_postal_code_parts.group(1)
+            + corrected_postal_code_parts.group(2).upper()
+        )
+
         try:
-            url = SENSOR_COLLECTOR_TO_URL["afvalwijzer_data_default"][0].format(
-                self.provider,
-                self.postal_code,
+            url = DEAFVALAPP_API_TEMPLATE.format(
+                corrected_postal_code,
                 self.street_number,
                 self.suffix,
-                datetime.today().strftime("%Y-%m-%d"),
             )
-            raw_response = requests.get(url)
-        except requests.exceptions.RequestException as err:
-            raise ValueError(err)
-
-        try:
-            json_response = raw_response.json()
+            waste_data_raw_temp = requests.get(url).text
         except ValueError:
-            raise ValueError("Invalid and/or no JSON data received from " + url)
+            raise ValueError("Invalid data received from " + url)
 
-        if not json_response:
-            _LOGGER.error("Address not found!")
-            return
+        waste_data_raw = []
 
-        try:
-            waste_data_raw = (
-                json_response["ophaaldagen"]["data"]
-                + json_response["ophaaldagenNext"]["data"]
-            )
-        except KeyError:
-            raise KeyError("Invalid and/or no JSON data received from " + url)
+        for rows in waste_data_raw_temp.strip().split("\n"):
+            for ophaaldatum in rows.split(";")[1:-1]:
+                temp = {}
+                temp["type"] = self.__waste_type_rename(
+                    rows.split(";")[0].strip().lower()
+                )
+                temp["date"] = datetime.strptime(ophaaldatum, "%d-%m-%Y").strftime(
+                    "%Y-%m-%d"
+                )
+                waste_data_raw.append(temp)
 
         try:
             waste_data_with_today = {}
@@ -122,6 +118,17 @@ class MijnAfvalWijzerCollector(object):
             return waste_data_raw, waste_data_with_today, waste_data_without_today
         except Exception as err:
             _LOGGER.error("Other error occurred: %s", err)
+
+    def __waste_type_rename(self, item_name):
+        if item_name == "gemengde plastics":
+            item_name = "plastic"
+        if item_name == "zak_blauw":
+            item_name = "restafval"
+        if item_name == "pbp":
+            item_name = "pmd"
+        if item_name == "rest":
+            item_name = "restafval"
+        return item_name
 
     ##########################################################################
     #  COMMON CODE

@@ -6,7 +6,7 @@ import requests
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
-from ..const.const import _LOGGER, SENSOR_COLLECTOR_RD4
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_RD4
 
 RD4_API_TEMPLATE = "https://data.rd4.nl/api/v1/waste-calendar?postal_code={}&house_number={}&house_number_extension={}&year={}"
 
@@ -30,7 +30,7 @@ class Rd4Collector(object):
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label
 
-        if self.provider != SENSOR_COLLECTOR_RD4:
+        if self.provider != SENSOR_COLLECTORS_RD4:
             raise ValueError("Invalid provider: %s, please verify", self.provider)
 
         TODAY_DT = datetime.today()
