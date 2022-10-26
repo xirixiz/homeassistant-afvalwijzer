@@ -24,7 +24,7 @@ class NextSensorData(object):
         self.data = self._gen_next_sensor_data()
 
     ##########################################################################
-    #  CREATE NEXT SENSOR(S)
+    #  GENERATE NEXT SENSOR(S)
     ##########################################################################
 
     # Generate sensor next_waste_date

@@ -125,7 +125,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     default_label,
                 )
             )
-        elif provider == SENSOR_COLLECTORS_DEAFVALAPP:
+        elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
             collector = await hass.async_add_executor_job(
                 partial(
                     DeAfvalappCollector,
@@ -138,7 +138,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     default_label,
                 )
             )
-        elif provider == SENSOR_COLLECTORS_RD4:
+        elif provider in SENSOR_COLLECTORS_RD4.keys():
             collector = await hass.async_add_executor_job(
                 partial(
                     Rd4Collector,
@@ -235,7 +235,7 @@ class AfvalwijzerData(object):
                     exclude_list,
                     default_label,
                 )
-            elif provider == SENSOR_COLLECTORS_DEAFVALAPP:
+            elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
                 collector = DeAfvalappCollector(
                     provider,
                     postal_code,
@@ -245,7 +245,7 @@ class AfvalwijzerData(object):
                     exclude_list,
                     default_label,
                 )
-            elif provider == SENSOR_COLLECTORS_RD4:
+            elif provider in SENSOR_COLLECTORS_RD4.keys():
                 collector = Rd4Collector(
                     provider,
                     postal_code,

@@ -3,7 +3,7 @@ import logging
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2022.10.06"
+VERSION = "2022.10.07"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 _LOGGER = logging.getLogger(__name__)
@@ -17,9 +17,6 @@ SENSOR_COLLECTOR_TO_URL = {
     ],
     "afvalstoffendienstkalender-s-hertogenbosch": [
         "https://afvalstoffendienstkalender.nl/nl/{0}/{1}/"
-    ],
-    "dataservice.deafvalapp": [
-        "{0}/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={1}&straatId=0&huisnr={2}&huisnrtoev={3}"
     ],
     "ximmio01": [
         "https://wasteapi.ximmio.com/api/FetchAdress",
@@ -88,9 +85,13 @@ SENSOR_COLLECTORS_XIMMIO = {
     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
 }
 
-SENSOR_COLLECTORS_RD4 = "rd4"
+SENSOR_COLLECTORS_RD4 = {
+    "rd4": "https://data.rd4.nl/api/v1/waste-calendar?postal_code={0}&house_number={1}&house_number_extension={2}&year={3}",
+}
 
-SENSOR_COLLECTORS_DEAFVALAPP = "deafvalapp"
+SENSOR_COLLECTORS_DEAFVALAPP = {
+    "deafvalapp": "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={0}&straatId=0&huisnr={1}&huisnrtoev={2}",
+}
 
 CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"

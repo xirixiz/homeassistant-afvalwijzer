@@ -50,9 +50,9 @@ exclude_list = ""
 # street_number = "11"
 
 # DeAfvalapp
-provider = "deafvalapp"
-postal_code = "6105CN"
-street_number = "1"
+# provider = "deafvalapp"
+# postal_code = "6105CN"
+# street_number = "1"
 
 # Ximmio
 # provider = "meerlanden"
@@ -79,16 +79,15 @@ street_number = "1"
 # street_number = "1"
 
 # RD4
-# provider = "rd4"
-# postal_code = "6301ET"
-# street_number = "24"
-# suffix = "C"
+provider = "rd4"
+postal_code = "6301ET"
+street_number = "24"
+suffix = "C"
 
 # Icalendar
 # provider = "eemsdelta"
 # postal_code = "9991AB"
 # street_number = "2"
-
 
 postal_code = postal_code.strip().upper()
 
@@ -132,7 +131,7 @@ elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
         exclude_list,
         default_label,
     )
-elif provider == SENSOR_COLLECTORS_DEAFVALAPP:
+elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
     collector = DeAfvalappCollector(
         provider,
         postal_code,
@@ -142,7 +141,7 @@ elif provider == SENSOR_COLLECTORS_DEAFVALAPP:
         exclude_list,
         default_label,
     )
-elif provider == SENSOR_COLLECTORS_RD4:
+elif provider in SENSOR_COLLECTORS_RD4.keys():
     collector = Rd4Collector(
         provider,
         postal_code,

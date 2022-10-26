@@ -2,8 +2,7 @@ from datetime import datetime, timedelta
 
 import requests
 
-from ..common.day_sensor_data import DaySensorData
-from ..common.next_sensor_data import NextSensorData
+from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_XIMMIO
 
 
@@ -42,20 +41,38 @@ class XimmioCollector(object):
             self.DATE_TODAY.date() + timedelta(days=365)
         ).strftime("%Y-%m-%d")
 
-        (
-            self._waste_data_raw,
-            self._waste_data_with_today,
-            self._waste_data_without_today,
-        ) = self.get_waste_data_provider()
+        self._get_waste_data_provider()
 
-        (
-            self._waste_data_provider,
-            self._waste_types_provider,
-            self._waste_data_custom,
-            self._waste_types_custom,
-        ) = self.transform_waste_data()
+    def __waste_type_rename(self, item_name):
+        if item_name == "branches":
+            item_name = "takken"
+        if item_name == "bulklitter":
+            item_name = "grofvuil"
+        if item_name == "bulkygardenwaste":
+            item_name = "tuinafval"
+        if item_name == "glass":
+            item_name = "glas"
+        if item_name == "green":
+            item_name = "gft"
+        if item_name == "grey":
+            item_name = "restafval"
+        if item_name == "kca":
+            item_name = "chemisch"
+        if item_name == "plastic":
+            item_name = "plastic"
+        if item_name == "packages":
+            item_name = "pmd"
+        if item_name == "paper":
+            item_name = "papier"
+        if item_name == "remainder":
+            item_name = "restwagen"
+        if item_name == "textile":
+            item_name = "textiel"
+        if item_name == "tree":
+            item_name = "kerstbomen"
+        return item_name
 
-    def get_waste_data_provider(self):
+    def _get_waste_data_provider(self):
         ##########################################################################
         # First request: get uniqueId and community
         ##########################################################################
@@ -88,174 +105,50 @@ class XimmioCollector(object):
                 "community": community,
                 "uniqueAddressID": uniqueId,
             }
-            json_response = requests.post(url=url, data=data).json()
+            raw_response = requests.post(url=url, data=data).json()
+        except requests.exceptions.RequestException as err:
+            raise ValueError(err)
 
-            if not json_response:
-                _LOGGER.error("Address not found!")
-                return
-
-        except ValueError:
-            raise ValueError("No JSON data received from " + url)
-
-        try:
-            waste_data_raw = json_response["dataList"]
-        except ValueError:
-            raise ValueError("Invalid and/or no JSON data received from " + url)
+        if not raw_response:
+            _LOGGER.error("Address not found!")
+            return
 
         try:
-            waste_data_with_today = {}
-            waste_data_without_today = {}
-            waste_data_raw_formatted = []
+            response = raw_response["dataList"]
+        except KeyError:
+            raise KeyError("Invalid and/or no data received from " + url)
 
-            for item in waste_data_raw:
-                temp = {}
-                temp["type"] = self.__waste_type_rename(
-                    item["_pickupTypeText"].strip().lower()
-                )
-                temp["date"] = datetime.strptime(
-                    sorted(item["pickupDates"])[0], "%Y-%m-%dT%H:%M:%S"
-                ).strftime("%Y-%m-%d")
-                waste_data_raw_formatted.append(temp)
+        self.waste_data_raw = []
 
-            for item in waste_data_raw_formatted:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"]
-                if item_name not in self.exclude_list:
-                    if item_name not in waste_data_with_today:
-                        if item_date >= self.DATE_TODAY:
-                            waste_data_with_today[item_name] = item_date
-
-            for item in waste_data_raw_formatted:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"]
-                if item_name not in self.exclude_list:
-                    if item_name not in waste_data_without_today:
-                        if item_date > self.DATE_TODAY:
-                            waste_data_without_today[item_name] = item_date
-
-            try:
-                for item in waste_data_raw_formatted:
-                    item_name = item["type"]
-                    if item_name not in self.exclude_list:
-                        if item_name not in waste_data_with_today.keys():
-                            waste_data_with_today[item_name] = self.default_label
-                        if item_name not in waste_data_without_today.keys():
-                            waste_data_without_today[item_name] = self.default_label
-            except Exception as err:
-                _LOGGER.error("Other error occurred: %s", err)
-
-            return (
-                waste_data_raw_formatted,
-                waste_data_with_today,
-                waste_data_without_today,
+        for item in response:
+            temp = {}
+            temp["type"] = self.__waste_type_rename(
+                item["_pickupTypeText"].strip().lower()
             )
-        except Exception as err:
-            _LOGGER.error("Other error occurred: %s", err)
+            temp["date"] = datetime.strptime(
+                sorted(item["pickupDates"])[0], "%Y-%m-%dT%H:%M:%S"
+            ).strftime("%Y-%m-%d")
+            self.waste_data_raw.append(temp)
 
-    def __waste_type_rename(self, item_name):
-        if item_name == "branches":
-            item_name = "takken"
-        if item_name == "bulklitter":
-            item_name = "grofvuil"
-        if item_name == "bulkygardenwaste":
-            item_name = "tuinafval"
-        if item_name == "glass":
-            item_name = "glas"
-        if item_name == "green":
-            item_name = "gft"
-        if item_name == "grey":
-            item_name = "restafval"
-        if item_name == "kca":
-            item_name = "chemisch"
-        if item_name == "plastic":
-            item_name = "plastic"
-        if item_name == "packages":
-            item_name = "pmd"
-        if item_name == "paper":
-            item_name = "papier"
-        if item_name == "remainder":
-            item_name = "restwagen"
-        if item_name == "textile":
-            item_name = "textiel"
-        if item_name == "tree":
-            item_name = "kerstboom"
-        return item_name
-
-    ##########################################################################
-    #  COMMON CODE
-    ##########################################################################
-    def transform_waste_data(self):
-        if self.exclude_pickup_today.casefold() in ("false", "no"):
-            date_selected = self.DATE_TODAY
-            waste_data_provider = self._waste_data_with_today
-        else:
-            date_selected = self.DATE_TOMORROW
-            waste_data_provider = self._waste_data_without_today
-
-        try:
-            waste_types_provider = sorted(
-                set(
-                    list(
-                        waste["type"]
-                        for waste in self.waste_data_raw
-                        if waste["type"] not in self.exclude_list
-                    )
-                )
-            )
-        except Exception as err:
-            _LOGGER.error("Other error occurred waste_types_provider: %s", err)
-
-        try:
-            waste_data_formatted = list(
-                {
-                    "type": waste["type"],
-                    "date": datetime.strptime(waste["date"], "%Y-%m-%d"),
-                }
-                for waste in self.waste_data_raw
-                if waste["type"] in waste_types_provider
-            )
-        except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
-
-        days = DaySensorData(waste_data_formatted, self.default_label)
-
-        try:
-            waste_data_after_date_selected = list(
-                filter(
-                    lambda waste: waste["date"] >= date_selected, waste_data_formatted
-                )
-            )
-        except Exception as err:
-            _LOGGER.error(
-                "Other error occurred waste_data_after_date_selected: %s", err
-            )
-
-        next = NextSensorData(waste_data_after_date_selected, self.default_label)
-
-        try:
-            waste_data_custom = {**next.next_sensor_data, **days.day_sensor_data}
-        except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_custom: %s", err)
-
-        try:
-            waste_types_custom = list(sorted(waste_data_custom.keys()))
-        except Exception as err:
-            _LOGGER.error("Other error occurred waste_types_custom: %s", err)
-
-        return (
-            waste_data_provider,
-            waste_types_provider,
-            waste_data_custom,
-            waste_types_custom,
+        ##########################################################################
+        #  COMMON CODE
+        ##########################################################################
+        waste_data = WasteDataTransformer(
+            self.waste_data_raw,
+            self.exclude_pickup_today,
+            self.exclude_list,
+            self.default_label,
         )
+
+        self._waste_data_with_today = waste_data.waste_data_with_today
+        self._waste_data_without_today = waste_data.waste_data_without_today
+        self._waste_data_custom = waste_data.waste_data_custom
+        self._waste_types_provider = waste_data.waste_types_provider
+        self._waste_types_custom = waste_data.waste_types_custom
 
     ##########################################################################
     #  PROPERTIES FOR EXECUTION
     ##########################################################################
-    @property
-    def waste_data_raw(self):
-        return self._waste_data_raw
-
     @property
     def waste_data_with_today(self):
         return self._waste_data_with_today

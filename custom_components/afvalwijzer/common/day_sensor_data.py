@@ -32,7 +32,7 @@ class DaySensorData(object):
         self.data = self._gen_day_sensor_data()
 
     ##########################################################################
-    #  CREATE TODAY, TOMORROW, DOT SENSOR(S)
+    #  GENERATE TODAY, TOMORROW, DOT SENSOR(S)
     ##########################################################################
 
     # Generate sensor data per date
