@@ -29,7 +29,7 @@ class Rd4Collector(object):
         if self.provider not in SENSOR_COLLECTORS_RD4.keys():
             raise ValueError("Invalid provider: %s, please verify", self.provider)
 
-        TODAY = datetime.today()
+        TODAY = datetime.now()
         self.YEAR_CURRENT = TODAY.year
 
         self._get_waste_data_provider()
@@ -53,9 +53,7 @@ class Rd4Collector(object):
             r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code
         )
         corrected_postal_code = (
-            corrected_postal_code_parts.group(1)
-            + "+"
-            + corrected_postal_code_parts.group(2).upper()
+            f"{corrected_postal_code_parts[1]}+{corrected_postal_code_parts[2].upper()}"
         )
 
         try:
@@ -67,12 +65,12 @@ class Rd4Collector(object):
             )
             raw_response = requests.get(url)
         except requests.exceptions.RequestException as err:
-            raise ValueError(err)
+            raise ValueError(err) from err
 
         try:
             response = raw_response.json()
-        except ValueError:
-            raise ValueError("Invalid and/or no data received from " + url)
+        except ValueError as e:
+            raise ValueError(f"Invalid and/or no data received from {url}") from e
 
         if not response:
             _LOGGER.error("No waste data found!")
@@ -84,13 +82,12 @@ class Rd4Collector(object):
 
         try:
             waste_data_raw_temp = response["data"]["items"][0]
-        except KeyError:
-            raise KeyError("Invalid and/or no data received from " + url)
+        except KeyError as exc:
+            raise KeyError(f"Invalid and/or no data received from {url}") from exc
 
         self.waste_data_raw = []
 
         for item in waste_data_raw_temp:
-            temp = {}
             if not item["date"]:
                 continue
 
@@ -98,7 +95,7 @@ class Rd4Collector(object):
             if not waste_type:
                 continue
 
-            temp["type"] = self.__waste_type_rename(item["type"].strip().lower())
+            temp = {"type": self.__waste_type_rename(item["type"].strip().lower())}
             temp["date"] = datetime.strptime(item["date"], "%Y-%m-%d").strftime(
                 "%Y-%m-%d"
             )
@@ -117,6 +114,7 @@ class Rd4Collector(object):
         self._waste_data_with_today = waste_data.waste_data_with_today
         self._waste_data_without_today = waste_data.waste_data_without_today
         self._waste_data_custom = waste_data.waste_data_custom
+        self._waste_data_provider = waste_data.waste_data_provider
         self._waste_types_provider = waste_data.waste_types_provider
         self._waste_types_custom = waste_data.waste_types_custom
 

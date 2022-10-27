@@ -33,23 +33,24 @@ class IcalendarCollector(object):
 
         self._get_waste_data_provider()
 
-    def _get_waste_data_provider(self):
+    def _get_waste_data_provider(self):  # sourcery skip: avoid-builtin-shadow
         try:
             url = SENSOR_COLLECTORS_ICALENDAR[self.provider].format(
                 self.provider,
                 self.postal_code,
                 self.street_number,
                 self.suffix,
-                datetime.today().strftime("%Y-%m-%d"),
+                datetime.now().strftime("%Y-%m-%d"),
             )
+
             raw_response = requests.get(url)
-        except ValueError:
-            raise ValueError("Invalid data received from " + url)
+        except requests.exceptions.RequestException as err:
+            raise ValueError(err) from err
 
         try:
             response = raw_response.text
-        except ValueError:
-            raise ValueError("Invalid and/or no data received from " + url)
+        except ValueError as exc:
+            raise ValueError(f"Invalid and/or no data received from {url}") from exc
 
         if not response:
             _LOGGER.error("No waste data found!")
@@ -69,7 +70,7 @@ class IcalendarCollector(object):
                 type = value.strip().lower()
             elif field == "DTSTART":
                 if self.DATE_PATTERN.match(value):
-                    date = f"{value[0:4]}-{value[4:6]}-{value[6:8]}"
+                    date = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
                 else:
                     _LOGGER.debug("Unsupported date format: %s", value)
             elif field == "END" and value == "VEVENT":
@@ -95,6 +96,7 @@ class IcalendarCollector(object):
         self._waste_data_with_today = waste_data.waste_data_with_today
         self._waste_data_without_today = waste_data.waste_data_without_today
         self._waste_data_custom = waste_data.waste_data_custom
+        self._waste_data_provider = waste_data.waste_data_provider
         self._waste_types_provider = waste_data.waste_types_provider
         self._waste_types_custom = waste_data.waste_types_custom
 

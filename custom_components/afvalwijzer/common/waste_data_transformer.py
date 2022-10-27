@@ -27,14 +27,14 @@ class WasteDataTransformer(object):
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label
 
-        TODAY = datetime.today().strftime("%d-%m-%Y")
+        TODAY = datetime.now().strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
         self.DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
 
         (
             self._waste_data_with_today,
             self._waste_data_without_today,
-        ) = self.__structure_waste_data()
+        ) = self.__structure_waste_data()  # type: ignore
 
         (
             self._waste_data_provider,
@@ -54,18 +54,22 @@ class WasteDataTransformer(object):
             for item in self.waste_data_raw:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"].strip().lower()
-                if item_name not in self.exclude_list:
-                    if item_name not in waste_data_with_today:
-                        if item_date >= self.DATE_TODAY:
-                            waste_data_with_today[item_name] = item_date
+                if (
+                    item_name not in self.exclude_list
+                    and item_name not in waste_data_with_today
+                    and item_date >= self.DATE_TODAY
+                ):
+                    waste_data_with_today[item_name] = item_date
 
             for item in self.waste_data_raw:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"].strip().lower()
-                if item_name not in self.exclude_list:
-                    if item_name not in waste_data_without_today:
-                        if item_date > self.DATE_TODAY:
-                            waste_data_without_today[item_name] = item_date
+                if (
+                    item_name not in self.exclude_list
+                    and item_name not in waste_data_without_today
+                    and item_date > self.DATE_TODAY
+                ):
+                    waste_data_without_today[item_name] = item_date
 
             try:
                 for item in self.waste_data_raw:
@@ -95,26 +99,26 @@ class WasteDataTransformer(object):
 
         try:
             waste_types_provider = sorted(
-                set(
-                    list(
-                        waste["type"]
-                        for waste in self.waste_data_raw
-                        if waste["type"] not in self.exclude_list
-                    )
-                )
+                {
+                    waste["type"]
+                    for waste in self.waste_data_raw
+                    if waste["type"] not in self.exclude_list
+                }
             )
+
         except Exception as err:
             _LOGGER.error("Other error occurred waste_types_provider: %s", err)
 
         try:
-            waste_data_formatted = list(
+            waste_data_formatted = [
                 {
                     "type": waste["type"],
                     "date": datetime.strptime(waste["date"], "%Y-%m-%d"),
                 }
                 for waste in self.waste_data_raw
                 if waste["type"] in waste_types_provider
-            )
+            ]
+
         except Exception as err:
             _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
 
@@ -131,10 +135,10 @@ class WasteDataTransformer(object):
                 "Other error occurred waste_data_after_date_selected: %s", err
             )
 
-        next = NextSensorData(waste_data_after_date_selected, self.default_label)
+        next_data = NextSensorData(waste_data_after_date_selected, self.default_label)
 
         try:
-            waste_data_custom = {**next.next_sensor_data, **days.day_sensor_data}
+            waste_data_custom = {**next_data.next_sensor_data, **days.day_sensor_data}
         except Exception as err:
             _LOGGER.error("Other error occurred waste_data_custom: %s", err)
 

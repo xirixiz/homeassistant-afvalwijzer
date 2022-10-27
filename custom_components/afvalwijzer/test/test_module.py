@@ -40,24 +40,14 @@ default_label = "Geen"
 exclude_list = ""
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146EG"
-# street_number = "6"
-
-# Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "9726BA"
-# street_number = "11"
+provider = "mijnafvalwijzer"
+postal_code = "5146EG"
+street_number = "1"
 
 # DeAfvalapp
 # provider = "deafvalapp"
 # postal_code = "6105CN"
 # street_number = "1"
-
-# Ximmio
-# provider = "meerlanden"
-# postal_code = "2201XZ"
-# street_number = "38"
 
 # Ximmio
 # provider = "meerlanden"
@@ -69,20 +59,16 @@ exclude_list = ""
 # postal_code = "6713CG"
 # street_number = "11"
 
-# Twente
-# provider = "twentemilieu"
-# postal_code = "7642JH"
-# street_number = "5"
-
+# Opzet
 # provider = "prezero"
 # postal_code = "6665CN"
 # street_number = "1"
 
 # RD4
-provider = "rd4"
-postal_code = "6301ET"
-street_number = "24"
-suffix = "C"
+# provider = "rd4"
+# postal_code = "6301ET"
+# street_number = "24"
+# suffix = "C"
 
 # Icalendar
 # provider = "eemsdelta"

@@ -76,11 +76,7 @@ class OpzetCollector(object):
     def _get_waste_data_provider(self):
         try:
             self.bag_id = None
-            if self.provider == "suez":
-                self._verify = False
-            else:
-                self._verify = True
-
+            self._verify = self.provider != "suez"
             url = "{}/rest/adressen/{}-{}".format(
                 SENSOR_COLLECTORS_OPZET[self.provider],
                 self.postal_code,
@@ -90,12 +86,12 @@ class OpzetCollector(object):
 
             raw_response = requests.get(url)
         except requests.exceptions.RequestException as err:
-            raise ValueError(err)
+            raise ValueError(err) from err
 
         try:
             response = raw_response.json()
-        except ValueError:
-            raise ValueError("Invalid and/or no data received from " + url)
+        except ValueError as e:
+            raise ValueError(f"Invalid and/or no data received from {url}") from e
 
         if not response:
             _LOGGER.error("No waste data found!")
@@ -123,7 +119,6 @@ class OpzetCollector(object):
             self.waste_data_raw = []
 
             for item in waste_data_raw_temp:
-                temp = {}
                 if not item["ophaaldatum"]:
                     continue
 
@@ -131,16 +126,16 @@ class OpzetCollector(object):
                 if not waste_type:
                     continue
 
-                temp["type"] = self.__waste_type_rename(
-                    item["menu_title"].strip().lower()
-                )
+                temp = {
+                    "type": self.__waste_type_rename(item["menu_title"].strip().lower())
+                }
                 temp["date"] = datetime.strptime(
                     item["ophaaldatum"], "%Y-%m-%d"
                 ).strftime("%Y-%m-%d")
                 self.waste_data_raw.append(temp)
 
-        except ValueError:
-            raise ValueError("Invalid and/or no JSON data received from " + url)
+        except ValueError as exc:
+            raise ValueError(f"Invalid and/or no data received from {url}") from exc
 
         ##########################################################################
         #  COMMON CODE
@@ -156,6 +151,7 @@ class OpzetCollector(object):
         self._waste_data_with_today = waste_data.waste_data_with_today
         self._waste_data_without_today = waste_data.waste_data_without_today
         self._waste_data_custom = waste_data.waste_data_custom
+        self._waste_data_provider = waste_data.waste_data_provider
         self._waste_types_provider = waste_data.waste_types_provider
         self._waste_types_custom = waste_data.waste_types_custom
 

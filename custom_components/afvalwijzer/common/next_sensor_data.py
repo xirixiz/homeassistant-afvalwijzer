@@ -13,7 +13,7 @@ class NextSensorData(object):
             waste_data_after_date_selected, key=lambda d: d["date"]
         )
 
-        TODAY = datetime.today().strftime("%d-%m-%Y")
+        TODAY = datetime.now().strftime("%d-%m-%Y")
         self.today_date = datetime.strptime(TODAY, "%d-%m-%Y")
         self.default_label = default_label
 
@@ -40,19 +40,19 @@ class NextSensorData(object):
     def __get_next_waste_in_days(self):
         next_waste_in_days = self.default_label
         try:
-            next_waste_in_days = abs(self.today_date - self.next_waste_date).days
+            next_waste_in_days = abs(self.today_date - self.next_waste_date).days  # type: ignore
         except Exception as err:
             _LOGGER.error("Other error occurred _get_next_waste_in_days: %s", err)
         return next_waste_in_days
 
     # Generate sensor next_waste_type
     def __get_next_waste_type(self):
-        next_waste_type = list()
+        next_waste_type = []
         try:
             for waste in self.waste_data_after_date_selected:
                 item_date = waste["date"]
-                item_name = waste["type"]
                 if item_date == self.next_waste_date:
+                    item_name = waste["type"]
                     next_waste_type.append(item_name)
             if not next_waste_type:
                 next_waste_type.append(self.default_label)
@@ -62,7 +62,7 @@ class NextSensorData(object):
 
     # Generate sensor data for custom sensors
     def _gen_next_sensor_data(self):
-        next_sensor = dict()
+        next_sensor = {}
         try:
             next_sensor["next_date"] = self.next_waste_date
             next_sensor["next_in_days"] = self.next_waste_in_days

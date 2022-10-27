@@ -29,12 +29,9 @@ class XimmioCollector(object):
             raise ValueError("Invalid provider: %s, please verify", self.provider)
 
         collectors = ("avalex", "meerlanden", "rad", "westland")
-        if self.provider in collectors:
-            self.provider_url = "ximmio02"
-        else:
-            self.provider_url = "ximmio01"
+        self.provider_url = "ximmio02" if self.provider in collectors else "ximmio01"
 
-        TODAY = datetime.today().strftime("%d-%m-%Y")
+        TODAY = datetime.now().strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
         self.DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
         self.DATE_TODAY_NEXT_YEAR = (
@@ -91,7 +88,7 @@ class XimmioCollector(object):
             community = raw_response.json()["dataList"][0]["Community"]
 
         except requests.exceptions.RequestException as err:
-            raise ValueError(err)
+            raise ValueError(err) from err
 
         ##########################################################################
         # Second request: get the dates
@@ -107,7 +104,7 @@ class XimmioCollector(object):
             }
             raw_response = requests.post(url=url, data=data).json()
         except requests.exceptions.RequestException as err:
-            raise ValueError(err)
+            raise ValueError(err) from err
 
         if not raw_response:
             _LOGGER.error("Address not found!")
@@ -115,16 +112,17 @@ class XimmioCollector(object):
 
         try:
             response = raw_response["dataList"]
-        except KeyError:
-            raise KeyError("Invalid and/or no data received from " + url)
+        except KeyError as e:
+            raise KeyError(f"Invalid and/or no data received from {url}") from e
 
         self.waste_data_raw = []
 
         for item in response:
-            temp = {}
-            temp["type"] = self.__waste_type_rename(
-                item["_pickupTypeText"].strip().lower()
-            )
+            temp = {
+                "type": self.__waste_type_rename(
+                    item["_pickupTypeText"].strip().lower()
+                )
+            }
             temp["date"] = datetime.strptime(
                 sorted(item["pickupDates"])[0], "%Y-%m-%dT%H:%M:%S"
             ).strftime("%Y-%m-%d")
@@ -143,6 +141,7 @@ class XimmioCollector(object):
         self._waste_data_with_today = waste_data.waste_data_with_today
         self._waste_data_without_today = waste_data.waste_data_without_today
         self._waste_data_custom = waste_data.waste_data_custom
+        self._waste_data_provider = waste_data.waste_data_provider
         self._waste_types_provider = waste_data.waste_types_provider
         self._waste_types_custom = waste_data.waste_types_custom
 

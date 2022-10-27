@@ -13,7 +13,7 @@ class DaySensorData(object):
         waste_data_formatted,
         default_label,
     ):
-        TODAY = datetime.today().strftime("%d-%m-%Y")
+        TODAY = datetime.now().strftime("%d-%m-%Y")
 
         self.waste_data_formatted = sorted(
             waste_data_formatted, key=lambda d: d["date"]
@@ -37,12 +37,12 @@ class DaySensorData(object):
 
     # Generate sensor data per date
     def __gen_day_sensor(self, date):
-        day = list()
+        day = []
         try:
             for waste in self.waste_data_formatted:
                 item_date = waste["date"]
-                item_name = waste["type"]
                 if item_date == date:
+                    item_name = waste["type"]
                     day.append(item_name)
             if not day:
                 day.append(self.default_label)
@@ -52,7 +52,7 @@ class DaySensorData(object):
 
     # Generate sensor data for today, tomorrow, day after tomorrow
     def _gen_day_sensor_data(self):
-        day_sensor = dict()
+        day_sensor = {}
         try:
             day_sensor["today"] = ", ".join(self.waste_data_today)
             day_sensor["tomorrow"] = ", ".join(self.waste_data_tomorrow)

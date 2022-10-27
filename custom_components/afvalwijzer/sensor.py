@@ -167,7 +167,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     waste_types_custom = collector.waste_types_custom
     _LOGGER.debug("Generating waste_types_custom list = %s", waste_types_custom)
 
-    entities = list()
+    entities = []
 
     for waste_type in waste_types_provider:
         _LOGGER.debug("Adding sensor provider: %s", waste_type)

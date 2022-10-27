@@ -50,8 +50,7 @@ class DeAfvalappCollector(object):
             r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code
         )
         corrected_postal_code = (
-            corrected_postal_code_parts.group(1)
-            + corrected_postal_code_parts.group(2).upper()
+            corrected_postal_code_parts[1] + corrected_postal_code_parts[2].upper()
         )
 
         try:
@@ -61,13 +60,13 @@ class DeAfvalappCollector(object):
                 self.suffix,
             )
             raw_response = requests.get(url)
-        except ValueError:
-            raise ValueError("Invalid data received from " + url)
+        except requests.exceptions.RequestException as err:
+            raise ValueError(err) from err
 
         try:
             response = raw_response.text
-        except ValueError:
-            raise ValueError("Invalid and/or no data received from " + url)
+        except ValueError as e:
+            raise ValueError(f"Invalid and/or no data received from {url}") from e
 
         if not response:
             _LOGGER.error("No waste data found!")
@@ -77,10 +76,9 @@ class DeAfvalappCollector(object):
 
         for rows in response.strip().split("\n"):
             for ophaaldatum in rows.split(";")[1:-1]:
-                temp = {}
-                temp["type"] = self.__waste_type_rename(
-                    rows.split(";")[0].strip().lower()
-                )
+                temp = {
+                    "type": self.__waste_type_rename(rows.split(";")[0].strip().lower())
+                }
                 temp["date"] = datetime.strptime(ophaaldatum, "%d-%m-%Y").strftime(
                     "%Y-%m-%d"
                 )
@@ -99,6 +97,7 @@ class DeAfvalappCollector(object):
         self._waste_data_with_today = waste_data.waste_data_with_today
         self._waste_data_without_today = waste_data.waste_data_without_today
         self._waste_data_custom = waste_data.waste_data_custom
+        self._waste_data_provider = waste_data.waste_data_provider
         self._waste_types_provider = waste_data.waste_types_provider
         self._waste_types_custom = waste_data.waste_types_custom
 

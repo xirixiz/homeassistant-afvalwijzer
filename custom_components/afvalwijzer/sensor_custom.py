@@ -31,10 +31,9 @@ class CustomSensor(Entity):
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
         self._name = (
-            SENSOR_PREFIX
-            + (self._id_name + " " if len(self._id_name) > 0 else "")
-            + self.waste_type
-        )
+            SENSOR_PREFIX + (f"{self._id_name} " if len(self._id_name) > 0 else "")
+        ) + self.waste_type
+
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
@@ -80,7 +79,7 @@ class CustomSensor(Entity):
 
         try:
             # Add attribute, set the last updated status of the sensor
-            self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
+            self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
 
             if isinstance(waste_data_custom[self.waste_type], datetime):
                 _LOGGER.debug(
@@ -108,4 +107,4 @@ class CustomSensor(Entity):
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._state = self._default_label
             self._year_month_day_date = None
-            self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
+            self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
