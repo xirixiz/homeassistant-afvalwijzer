@@ -83,9 +83,7 @@ class CustomSensor(Entity):
 
             if isinstance(waste_data_custom[self.waste_type], datetime):
                 _LOGGER.debug(
-                    "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
-                    self.waste_type,
-                    waste_data_custom[self.waste_type].date(),
+                    f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type].date()}"
                 )
                 # Add the US date format
                 collection_date_us = waste_data_custom[self.waste_type].date()
@@ -97,9 +95,7 @@ class CustomSensor(Entity):
                 )
             else:
                 _LOGGER.debug(
-                    "Generating state via AfvalwijzerCustomSensor for = %s with value %s",
-                    self.waste_type,
-                    waste_data_custom[self.waste_type],
+                    f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type]}"
                 )
                 # Add non-date as default state
                 self._state = str(waste_data_custom[self.waste_type])

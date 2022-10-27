@@ -60,9 +60,9 @@ street_number = "1"
 # street_number = "11"
 
 # Opzet
-# provider = "prezero"
-# postal_code = "6665CN"
-# street_number = "1"
+provider = "prezero"
+postal_code = "6665CN"
+street_number = "1"
 
 # RD4
 # provider = "rd4"

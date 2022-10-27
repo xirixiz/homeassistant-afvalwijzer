@@ -26,7 +26,7 @@ class XimmioCollector(object):
         self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_XIMMIO.keys():
-            raise ValueError("Invalid provider: %s, please verify", self.provider)
+            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
         collectors = ("avalex", "meerlanden", "rad", "westland")
         self.provider_url = "ximmio02" if self.provider in collectors else "ximmio01"

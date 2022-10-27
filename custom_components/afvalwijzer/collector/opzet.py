@@ -26,7 +26,7 @@ class OpzetCollector(object):
         self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_OPZET.keys():
-            raise ValueError("Invalid provider: %s, please verify", self.provider)
+            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
         self._get_waste_data_provider()
 
@@ -77,14 +77,9 @@ class OpzetCollector(object):
         try:
             self.bag_id = None
             self._verify = self.provider != "suez"
-            url = "{}/rest/adressen/{}-{}".format(
-                SENSOR_COLLECTORS_OPZET[self.provider],
-                self.postal_code,
-                self.street_number,
-                verify=self._verify,
-            )
+            url = f"{SENSOR_COLLECTORS_OPZET[self.provider]}/rest/adressen/{self.postal_code}-{self.street_number}"
 
-            raw_response = requests.get(url)
+            raw_response = requests.get(url, verify=self._verify)
         except requests.exceptions.RequestException as err:
             raise ValueError(err) from err
 
@@ -109,12 +104,8 @@ class OpzetCollector(object):
             else:
                 self.bag_id = response[0]["bagId"]
 
-            url = "{}/rest/adressen/{}/afvalstromen".format(
-                SENSOR_COLLECTORS_OPZET[self.provider],
-                self.bag_id,
-                verify=self._verify,
-            )
-            waste_data_raw_temp = requests.get(url).json()
+            url = f"{SENSOR_COLLECTORS_OPZET[self.provider]}/rest/adressen/{self.bag_id}/afvalstromen"
+            waste_data_raw_temp = requests.get(url, verify=self._verify).json()
 
             self.waste_data_raw = []
 

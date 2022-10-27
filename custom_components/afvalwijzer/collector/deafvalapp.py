@@ -27,7 +27,7 @@ class DeAfvalappCollector(object):
         self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-            raise ValueError("Invalid provider: %s, please verify", self.provider)
+            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
         self._get_waste_data_provider()
 

@@ -30,7 +30,7 @@ class MijnAfvalWijzerCollector(object):
         self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_AFVALWIJZER:
-            raise ValueError("Invalid provider: %s, please verify", self.provider)
+            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
         if self.provider == "rova":
             self.provider = "inzamelkalender.rova"

@@ -68,9 +68,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     exclude_list = config.get(CONF_EXCLUDE_LIST)
     default_label = config.get(CONF_DEFAULT_LABEL)
 
-    _LOGGER.debug("Afvalwijzer provider = %s", provider)
-    _LOGGER.debug("Afvalwijzer zipcode = %s", postal_code)
-    _LOGGER.debug("Afvalwijzer street_number = %s", street_number)
+    _LOGGER.debug(f"Afvalwijzer provider = {provider}")
+    _LOGGER.debug(f"Afvalwijzer zipcode = {postal_code}")
+    _LOGGER.debug(f"Afvalwijzer street_number = {street_number}")
 
     try:
         if provider in SENSOR_COLLECTORS_AFVALWIJZER:
@@ -155,28 +155,28 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             _LOGGER.error("Unknown provider!")
             return False
     except ValueError as err:
-        _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
+        _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
 
     if collector == "":
-        raise ValueError("Invalid provider: %s, please verify", provider)
+        raise ValueError(f"Invalid provider: {provider}, please verify")
 
     fetch_data = AfvalwijzerData(config)
 
     waste_types_provider = collector.waste_types_provider
-    _LOGGER.debug("Generating waste_types_provider list = %s", waste_types_provider)
+    _LOGGER.debug(f"Generating waste_types_provider list = {waste_types_provider}")
     waste_types_custom = collector.waste_types_custom
-    _LOGGER.debug("Generating waste_types_custom list = %s", waste_types_custom)
+    _LOGGER.debug(f"Generating waste_types_custom list = {waste_types_custom}")
 
     entities = []
 
     for waste_type in waste_types_provider:
-        _LOGGER.debug("Adding sensor provider: %s", waste_type)
+        _LOGGER.debug(f"Adding sensor provider: {waste_type}")
         entities.append(ProviderSensor(hass, waste_type, fetch_data, config))
     for waste_type in waste_types_custom:
-        _LOGGER.debug("Adding sensor custom: %s", waste_type)
+        _LOGGER.debug(f"Adding sensor custom: {waste_type}")
         entities.append(CustomSensor(hass, waste_type, fetch_data, config))
 
-    _LOGGER.debug("Entities appended = %s", entities)
+    _LOGGER.debug(f"Entities appended = {entities}")
     async_add_entities(entities)
 
 
@@ -259,25 +259,25 @@ class AfvalwijzerData(object):
                 _LOGGER.error("Unknown provider!")
                 return False
         except ValueError as err:
-            _LOGGER.error("Check afvalwijzer platform settings %s", err.args)
+            _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
 
         # waste data provider update - with today
         try:
             self.waste_data_with_today = collector.waste_data_with_today
         except ValueError as err:
-            _LOGGER.error("Check waste_data_provider %s", err.args)
+            _LOGGER.error(f"Check waste_data_provider {err.args}")
             self.waste_data_with_today = default_label
 
         # waste data provider update - without today
         try:
             self.waste_data_without_today = collector.waste_data_without_today
         except ValueError as err:
-            _LOGGER.error("Check waste_data_provider %s", err.args)
+            _LOGGER.error(f"Check waste_data_provider {err.args}")
             self.waste_data_without_today = default_label
 
         # waste data custom update
         try:
             self.waste_data_custom = collector.waste_data_custom
         except ValueError as err:
-            _LOGGER.error("Check waste_data_custom %s", err.args)
+            _LOGGER.error(f"Check waste_data_custom {err.args}")
             self.waste_data_custom = default_label

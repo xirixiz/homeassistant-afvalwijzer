@@ -80,11 +80,11 @@ class WasteDataTransformer(object):
                         if item_name not in waste_data_without_today.keys():
                             waste_data_without_today[item_name] = self.default_label
             except Exception as err:
-                _LOGGER.error("Other error occurred: %s", err)
+                _LOGGER.error(f"Other error occurred: {err}")
 
             return waste_data_with_today, waste_data_without_today
         except Exception as err:
-            _LOGGER.error("Other error occurred: %s", err)
+            _LOGGER.error(f"Other error occurred: {err}")
 
     ##########################################################################
     # GENERATE REQUIRED DATA FOR HASS SENSORS
@@ -107,7 +107,7 @@ class WasteDataTransformer(object):
             )
 
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_types_provider: %s", err)
+            _LOGGER.error(f"Other error occurred waste_types_provider: {err}")
 
         try:
             waste_data_formatted = [
@@ -120,7 +120,7 @@ class WasteDataTransformer(object):
             ]
 
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
+            _LOGGER.error(f"Other error occurred waste_data_formatted: {err}")
 
         days = DaySensorData(waste_data_formatted, self.default_label)
 
@@ -131,21 +131,19 @@ class WasteDataTransformer(object):
                 )
             )
         except Exception as err:
-            _LOGGER.error(
-                "Other error occurred waste_data_after_date_selected: %s", err
-            )
+            _LOGGER.error(f"Other error occurred waste_data_after_date_selected: {err}")
 
         next_data = NextSensorData(waste_data_after_date_selected, self.default_label)
 
         try:
             waste_data_custom = {**next_data.next_sensor_data, **days.day_sensor_data}
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_data_custom: %s", err)
+            _LOGGER.error(f"Other error occurred waste_data_custom: {err}")
 
         try:
             waste_types_custom = list(sorted(waste_data_custom.keys()))
         except Exception as err:
-            _LOGGER.error("Other error occurred waste_types_custom: %s", err)
+            _LOGGER.error(f"Other error occurred waste_types_custom: {err}")
 
         return (
             waste_data_provider,

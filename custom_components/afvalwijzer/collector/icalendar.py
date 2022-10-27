@@ -27,7 +27,7 @@ class IcalendarCollector(object):
         self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_ICALENDAR.keys():
-            raise ValueError("Invalid provider: %s, please verify", self.provider)
+            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
         self.DATE_PATTERN = re.compile(r"^\d{8}")
 
@@ -72,15 +72,13 @@ class IcalendarCollector(object):
                 if self.DATE_PATTERN.match(value):
                     date = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
                 else:
-                    _LOGGER.debug("Unsupported date format: %s", value)
+                    _LOGGER.debug(f"Unsupported date format: {value}")
             elif field == "END" and value == "VEVENT":
                 if date and type:
                     self.waste_data_raw.append({"type": type, "date": date})
                 else:
                     _LOGGER.debug(
-                        "No date or type extracted from event: date=%s, type=%s",
-                        date,
-                        type,
+                        f"No date or type extracted from event: date={date}, type={type}"
                     )
 
         ##########################################################################

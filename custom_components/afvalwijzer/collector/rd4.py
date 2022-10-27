@@ -27,7 +27,7 @@ class Rd4Collector(object):
         self.default_label = default_label
 
         if self.provider not in SENSOR_COLLECTORS_RD4.keys():
-            raise ValueError("Invalid provider: %s, please verify", self.provider)
+            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
         TODAY = datetime.now()
         self.YEAR_CURRENT = TODAY.year
