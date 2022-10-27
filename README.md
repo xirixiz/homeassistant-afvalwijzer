@@ -1,5 +1,4 @@
 # Afvalwijzer
-[![Github All Releases](https://img.shields.io/github/downloads/xirixiz/homeassistant-afvalwijzer/total.svg)]()
 [![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
