@@ -11,20 +11,8 @@ python3 -m afvalwijzer.test.test_module
 
 """
 
-from ..collector.deafvalapp import DeAfvalappCollector
-from ..collector.icalendar import IcalendarCollector
-from ..collector.mijnafvalwijzer import MijnAfvalWijzerCollector
-from ..collector.opzet import OpzetCollector
-from ..collector.rd4 import Rd4Collector
-from ..collector.ximmio import XimmioCollector
-from ..const.const import (
-    SENSOR_COLLECTORS_AFVALWIJZER,
-    SENSOR_COLLECTORS_DEAFVALAPP,
-    SENSOR_COLLECTORS_ICALENDAR,
-    SENSOR_COLLECTORS_OPZET,
-    SENSOR_COLLECTORS_RD4,
-    SENSOR_COLLECTORS_XIMMIO,
-)
+
+from ..collector.main_collector import MainCollector
 
 # provider = "afvalstoffendienstkalender"
 # api_token = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
@@ -41,7 +29,7 @@ exclude_list = ""
 
 # Afvalwijzer
 provider = "mijnafvalwijzer"
-postal_code = "5146EG"
+postal_code = "5146eg"
 street_number = "1"
 
 # DeAfvalapp
@@ -60,9 +48,9 @@ street_number = "1"
 # street_number = "11"
 
 # Opzet
-provider = "prezero"
-postal_code = "6665CN"
-street_number = "1"
+# provider = "prezero"
+# postal_code = "6665CN"
+# street_number = "1"
 
 # RD4
 # provider = "rd4"
@@ -75,68 +63,17 @@ street_number = "1"
 # postal_code = "9991AB"
 # street_number = "2"
 
-postal_code = postal_code.strip().upper()
+# postal_code = postal_code.strip().upper()
 
-if provider in SENSOR_COLLECTORS_AFVALWIJZER:
-    collector = MijnAfvalWijzerCollector(
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    )
-elif provider in SENSOR_COLLECTORS_OPZET.keys():
-    collector = OpzetCollector(
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    )
-elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
-    collector = XimmioCollector(
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    )
-elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
-    collector = IcalendarCollector(
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    )
-elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-    collector = DeAfvalappCollector(
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    )
-elif provider in SENSOR_COLLECTORS_RD4.keys():
-    collector = Rd4Collector(
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    )
+collector = MainCollector(
+    provider,
+    postal_code,
+    street_number,
+    suffix,
+    exclude_pickup_today,
+    exclude_list,
+    default_label,
+)
 
 # data = XimmioCollector().get_waste_data_provider("meerlanden", postal_code2, street_number2, suffix, default_label, exclude_list)
 # data2 = MijnAfvalWijzerCollector().get_waste_data_provider("mijnafvalwijzer", postal_code, street_number, suffix, default_label, exclude_list)

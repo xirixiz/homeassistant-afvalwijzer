@@ -2,7 +2,6 @@ from datetime import datetime
 
 import requests
 
-from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (
     _LOGGER,
     SENSOR_COLLECTOR_TO_URL,
@@ -35,9 +34,6 @@ class MijnAfvalWijzerCollector(object):
         if self.provider == "rova":
             self.provider = "inzamelkalender.rova"
 
-        self._get_waste_data_provider()
-
-    def _get_waste_data_provider(self):
         try:
             url = SENSOR_COLLECTOR_TO_URL["afvalwijzer_data_default"][0].format(
                 self.provider,
@@ -66,47 +62,3 @@ class MijnAfvalWijzerCollector(object):
             )
         except KeyError as exc:
             raise KeyError(f"Invalid and/or no data received from {url}") from exc
-
-        ##########################################################################
-        #  COMMON CODE
-        ##########################################################################
-        waste_data = WasteDataTransformer(
-            self.waste_data_raw,
-            self.exclude_pickup_today,
-            self.exclude_list,
-            self.default_label,
-        )
-
-        self._waste_data_with_today = waste_data.waste_data_with_today
-        self._waste_data_without_today = waste_data.waste_data_without_today
-        self._waste_data_custom = waste_data.waste_data_custom
-        self._waste_data_provider = waste_data.waste_data_provider
-        self._waste_types_provider = waste_data.waste_types_provider
-        self._waste_types_custom = waste_data.waste_types_custom
-
-    ##########################################################################
-    #  PROPERTIES FOR EXECUTION
-    ##########################################################################
-    @property
-    def waste_data_with_today(self):
-        return self._waste_data_with_today
-
-    @property
-    def waste_data_without_today(self):
-        return self._waste_data_without_today
-
-    @property
-    def waste_data_provider(self):
-        return self._waste_data_provider
-
-    @property
-    def waste_types_provider(self):
-        return self._waste_types_provider
-
-    @property
-    def waste_data_custom(self):
-        return self._waste_data_custom
-
-    @property
-    def waste_types_custom(self):
-        return self._waste_types_custom

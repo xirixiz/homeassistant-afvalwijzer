@@ -11,12 +11,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 import voluptuous as vol
 
-from .collector.deafvalapp import DeAfvalappCollector
-from .collector.icalendar import IcalendarCollector
-from .collector.mijnafvalwijzer import MijnAfvalWijzerCollector
-from .collector.opzet import OpzetCollector
-from .collector.rd4 import Rd4Collector
-from .collector.ximmio import XimmioCollector
+from .collector.main_collector import MainCollector
 from .const.const import (
     _LOGGER,
     CONF_COLLECTOR,
@@ -30,12 +25,6 @@ from .const.const import (
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SCAN_INTERVAL,
-    SENSOR_COLLECTORS_AFVALWIJZER,
-    SENSOR_COLLECTORS_DEAFVALAPP,
-    SENSOR_COLLECTORS_ICALENDAR,
-    SENSOR_COLLECTORS_OPZET,
-    SENSOR_COLLECTORS_RD4,
-    SENSOR_COLLECTORS_XIMMIO,
     STARTUP_MESSAGE,
 )
 from .sensor_custom import CustomSensor
@@ -73,92 +62,20 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     _LOGGER.debug(f"Afvalwijzer street_number = {street_number}")
 
     try:
-        if provider in SENSOR_COLLECTORS_AFVALWIJZER:
-            collector = await hass.async_add_executor_job(
-                partial(
-                    MijnAfvalWijzerCollector,
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
+        collector = await hass.async_add_executor_job(
+            partial(
+                MainCollector,
+                provider,
+                postal_code,
+                street_number,
+                suffix,
+                exclude_pickup_today,
+                exclude_list,
+                default_label,
             )
-        elif provider in SENSOR_COLLECTORS_OPZET.keys():
-            collector = await hass.async_add_executor_job(
-                partial(
-                    OpzetCollector,
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            )
-        elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
-            collector = await hass.async_add_executor_job(
-                partial(
-                    XimmioCollector,
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            )
-        elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
-            collector = await hass.async_add_executor_job(
-                partial(
-                    IcalendarCollector,
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            )
-        elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-            collector = await hass.async_add_executor_job(
-                partial(
-                    DeAfvalappCollector,
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            )
-        elif provider in SENSOR_COLLECTORS_RD4.keys():
-            collector = await hass.async_add_executor_job(
-                partial(
-                    Rd4Collector,
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            )
-        else:
-            _LOGGER.error("Unknown provider!")
-            return False
+        )
     except ValueError as err:
         _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
-
-    if collector == "":
-        raise ValueError(f"Invalid provider: {provider}, please verify")
 
     fetch_data = AfvalwijzerData(config)
 
@@ -195,69 +112,15 @@ class AfvalwijzerData(object):
         exclude_list = self.config.get(CONF_EXCLUDE_LIST)
 
         try:
-            if provider in SENSOR_COLLECTORS_AFVALWIJZER:
-                collector = MijnAfvalWijzerCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_OPZET.keys():
-                collector = OpzetCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
-                collector = XimmioCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
-                collector = IcalendarCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-                collector = DeAfvalappCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_RD4.keys():
-                collector = Rd4Collector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            else:
-                _LOGGER.error("Unknown provider!")
-                return False
+            collector = MainCollector(
+                provider,
+                postal_code,
+                street_number,
+                suffix,
+                exclude_pickup_today,
+                exclude_list,
+                default_label,
+            )
         except ValueError as err:
             _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
 
