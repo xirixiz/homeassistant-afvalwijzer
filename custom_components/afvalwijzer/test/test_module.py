@@ -27,25 +27,20 @@ exclude_pickup_today = "True"
 default_label = "Geen"
 exclude_list = ""
 
-# Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146eg"
+# DeAfvalapp
+provider = "deafvalapp"
+postal_code = "6105CN"
 street_number = "1"
 
-# DeAfvalapp
-# provider = "deafvalapp"
-# postal_code = "6105CN"
+# Icalendar
+# provider = "eemsdelta"
+# postal_code = "9991AB"
+# street_number = "2"
+
+# Afvalwijzer
+# provider = "mijnafvalwijzer"
+# postal_code = "5146eg"
 # street_number = "1"
-
-# Ximmio
-# provider = "meerlanden"
-# postal_code = "2121xt"
-# street_number = "38"
-
-# Ximmio
-# provider = "acv"
-# postal_code = "6713CG"
-# street_number = "11"
 
 # Opzet
 # provider = "prezero"
@@ -58,10 +53,15 @@ street_number = "1"
 # street_number = "24"
 # suffix = "C"
 
-# Icalendar
-# provider = "eemsdelta"
-# postal_code = "9991AB"
-# street_number = "2"
+# Ximmio
+# provider = "meerlanden"
+# postal_code = "2121xt"
+# street_number = "38"
+
+# Ximmio
+# provider = "acv"
+# postal_code = "6713CG"
+# street_number = "11"
 
 # postal_code = postal_code.strip().upper()
 
@@ -74,6 +74,17 @@ collector = MainCollector(
     exclude_list,
     default_label,
 )
+
+
+# MainCollector(
+#     provider,
+#     postal_code,
+#     street_number,
+#     suffix,
+#     exclude_pickup_today,
+#     exclude_list,
+#     default_label,
+# )
 
 # data = XimmioCollector().get_waste_data_provider("meerlanden", postal_code2, street_number2, suffix, default_label, exclude_list)
 # data2 = MijnAfvalWijzerCollector().get_waste_data_provider("mijnafvalwijzer", postal_code, street_number, suffix, default_label, exclude_list)

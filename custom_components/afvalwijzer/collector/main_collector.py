@@ -9,12 +9,11 @@ from ..const.const import (
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_XIMMIO,
 )
-from .deafvalapp import DeAfvalappCollector
-from .icalendar import IcalendarCollector
-from .mijnafvalwijzer import MijnAfvalWijzerCollector
-from .opzet import OpzetCollector
-from .rd4 import Rd4Collector
-from .ximmio import XimmioCollector
+
+try:
+    from . import deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
+except ImportError as err:
+    _LOGGER.error(f"Import error {err.args}")
 
 
 class MainCollector(object):
@@ -29,7 +28,7 @@ class MainCollector(object):
         default_label,
     ):
         self.provider = provider
-        self.postal_code = postal_code = postal_code.strip().upper()
+        self.postal_code = postal_code.strip().upper()
         self.street_number = street_number
         self.suffix = suffix
         self.exclude_pickup_today = exclude_pickup_today
@@ -38,64 +37,46 @@ class MainCollector(object):
 
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:
-                collector = MijnAfvalWijzerCollector(
+                waste_data_raw = mijnafvalwijzer.get_waste_data_raw(
                     provider,
                     postal_code,
                     street_number,
                     suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_OPZET.keys():
-                collector = OpzetCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
-                collector = XimmioCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
-                )
-            elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
-                collector = IcalendarCollector(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
                 )
             elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-                collector = DeAfvalappCollector(
+                waste_data_raw = deafvalapp.get_waste_data_raw(
                     provider,
                     postal_code,
                     street_number,
                     suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
+                )
+            elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
+                waste_data_raw = icalendar.get_waste_data_raw(
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
+                )
+            elif provider in SENSOR_COLLECTORS_OPZET.keys():
+                waste_data_raw = opzet.get_waste_data_raw(
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
                 )
             elif provider in SENSOR_COLLECTORS_RD4.keys():
-                collector = Rd4Collector(
+                waste_data_raw = rd4.get_waste_data_raw(
                     provider,
                     postal_code,
                     street_number,
                     suffix,
-                    exclude_pickup_today,
-                    exclude_list,
-                    default_label,
+                )
+            elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
+                waste_data_raw = ximmio.get_waste_data_raw(
+                    provider,
+                    postal_code,
+                    street_number,
+                    suffix,
                 )
             else:
                 _LOGGER.error(f"Unknown provider: {provider}")
@@ -103,8 +84,6 @@ class MainCollector(object):
 
         except ValueError as err:
             _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
-
-        waste_data_raw = collector.waste_data_raw
 
         ##########################################################################
         #  COMMON CODE

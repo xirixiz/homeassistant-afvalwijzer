@@ -6,76 +6,66 @@ import requests
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
 
 
-class IcalendarCollector(object):
-    def __init__(
-        self,
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    ):
-        self.provider = provider
-        self.postal_code = postal_code
-        self.street_number = street_number
-        self.suffix = suffix
-        self.exclude_pickup_today = exclude_pickup_today
-        self.exclude_list = exclude_list.strip().lower()
-        self.default_label = default_label
+def get_waste_data_raw(
+    provider,
+    postal_code,
+    street_number,
+    suffix,
+):  # sourcery skip: avoid-builtin-shadow
 
-        if self.provider not in SENSOR_COLLECTORS_ICALENDAR.keys():
-            raise ValueError(f"Invalid provider: {self.provider}, please verify")
+    if provider not in SENSOR_COLLECTORS_ICALENDAR.keys():
+        raise ValueError(f"Invalid provider: {provider}, please verify")
 
-        self.DATE_PATTERN = re.compile(r"^\d{8}")
+    DATE_PATTERN = re.compile(r"^\d{8}")
 
-        self._get_waste_data_provider()
+    try:
+        url = SENSOR_COLLECTORS_ICALENDAR[provider].format(
+            provider,
+            postal_code,
+            street_number,
+            suffix,
+            datetime.now().strftime("%Y-%m-%d"),
+        )
+        raw_response = requests.get(url)
+    except requests.exceptions.RequestException as err:
+        raise ValueError(err) from err
 
-    def _get_waste_data_provider(self):  # sourcery skip: avoid-builtin-shadow
-        try:
-            url = SENSOR_COLLECTORS_ICALENDAR[self.provider].format(
-                self.provider,
-                self.postal_code,
-                self.street_number,
-                self.suffix,
-                datetime.now().strftime("%Y-%m-%d"),
-            )
+    try:
+        response = raw_response.text
+    except ValueError as exc:
+        raise ValueError(f"Invalid and/or no data received from {url}") from exc
 
-            raw_response = requests.get(url)
-        except requests.exceptions.RequestException as err:
-            raise ValueError(err) from err
+    if not response:
+        _LOGGER.error("No waste data found!")
+        return
 
-        try:
-            response = raw_response.text
-        except ValueError as exc:
-            raise ValueError(f"Invalid and/or no data received from {url}") from exc
+    waste_data_raw = []
+    date = None
+    type = None
 
-        if not response:
-            _LOGGER.error("No waste data found!")
-            return
+    for line in response.splitlines():
+        key, value = line.split(":", 2)
+        field = key.split(";")[0]
+        if field == "BEGIN" and value == "VEVENT":
+            date = None
+            type = None
+        elif field == "SUMMARY":
+            type = value.strip().lower()
+        elif field == "DTSTART":
+            if DATE_PATTERN.match(value):
+                date = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
+            else:
+                _LOGGER.debug(f"Unsupported date format: {value}")
+        elif field == "END" and value == "VEVENT":
+            if date and type:
+                waste_data_raw.append({"type": type, "date": date})
+            else:
+                _LOGGER.debug(
+                    f"No date or type extracted from event: date={date}, type={type}"
+                )
 
-        self.waste_data_raw = []
+    return waste_data_raw
 
-        date = None
-        type = None
-        for line in response.splitlines():
-            key, value = line.split(":", 2)
-            field = key.split(";")[0]
-            if field == "BEGIN" and value == "VEVENT":
-                date = None
-                type = None
-            elif field == "SUMMARY":
-                type = value.strip().lower()
-            elif field == "DTSTART":
-                if self.DATE_PATTERN.match(value):
-                    date = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
-                else:
-                    _LOGGER.debug(f"Unsupported date format: {value}")
-            elif field == "END" and value == "VEVENT":
-                if date and type:
-                    self.waste_data_raw.append({"type": type, "date": date})
-                else:
-                    _LOGGER.debug(
-                        f"No date or type extracted from event: date={date}, type={type}"
-                    )
+
+if __name__ == "__main__":
+    print("Yell something at a mountain!")

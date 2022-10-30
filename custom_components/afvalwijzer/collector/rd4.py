@@ -6,96 +6,82 @@ import requests
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_RD4
 
 
-class Rd4Collector(object):
-    def __init__(
-        self,
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    ):
-        self.provider = provider
-        self.postal_code = postal_code
-        self.street_number = street_number
-        self.suffix = suffix
-        self.exclude_pickup_today = exclude_pickup_today
-        self.exclude_list = exclude_list.strip().lower()
-        self.default_label = default_label
+def _waste_type_rename(item_name):
+    if item_name == "pruning":
+        item_name = "takken"
+    if item_name == "residual_waste":
+        item_name = "restafval"
+    if item_name == "best_bag":
+        item_name = "best-tas"
+    if item_name == "paper":
+        item_name = "papier"
+    if item_name == "christmas_trees":
+        item_name = "kerstbomen"
+    return item_name
 
-        if self.provider not in SENSOR_COLLECTORS_RD4.keys():
-            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
-        TODAY = datetime.now()
-        self.YEAR_CURRENT = TODAY.year
+def get_waste_data_raw(
+    provider,
+    postal_code,
+    street_number,
+    suffix,
+):
+    if provider not in SENSOR_COLLECTORS_RD4.keys():
+        raise ValueError(f"Invalid provider: {provider}, please verify")
 
-        self._get_waste_data_provider()
+    TODAY = datetime.now()
+    YEAR_CURRENT = TODAY.year
 
-    def __waste_type_rename(self, item_name):
-        if item_name == "pruning":
-            item_name = "takken"
-        if item_name == "residual_waste":
-            item_name = "restafval"
-        if item_name == "best_bag":
-            item_name = "best-tas"
-        if item_name == "paper":
-            item_name = "papier"
-        if item_name == "christmas_trees":
-            item_name = "kerstbomen"
-        return item_name
+    corrected_postal_code_parts = re.search(r"(\d\d\d\d) ?([A-z][A-z])", postal_code)
+    corrected_postal_code = (
+        f"{corrected_postal_code_parts[1]}+{corrected_postal_code_parts[2].upper()}"
+    )
 
-    def _get_waste_data_provider(self):
-
-        corrected_postal_code_parts = re.search(
-            r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code
+    try:
+        url = SENSOR_COLLECTORS_RD4[provider].format(
+            corrected_postal_code,
+            street_number,
+            suffix,
+            YEAR_CURRENT,
         )
-        corrected_postal_code = (
-            f"{corrected_postal_code_parts[1]}+{corrected_postal_code_parts[2].upper()}"
-        )
+        raw_response = requests.get(url)
+    except requests.exceptions.RequestException as err:
+        raise ValueError(err) from err
 
-        try:
-            url = SENSOR_COLLECTORS_RD4[self.provider].format(
-                corrected_postal_code,
-                self.street_number,
-                self.suffix,
-                self.YEAR_CURRENT,
-            )
-            raw_response = requests.get(url)
-        except requests.exceptions.RequestException as err:
-            raise ValueError(err) from err
+    try:
+        response = raw_response.json()
+    except ValueError as e:
+        raise ValueError(f"Invalid and/or no data received from {url}") from e
 
-        try:
-            response = raw_response.json()
-        except ValueError as e:
-            raise ValueError(f"Invalid and/or no data received from {url}") from e
+    if not response:
+        _LOGGER.error("No waste data found!")
+        return
 
-        if not response:
-            _LOGGER.error("No waste data found!")
-            return
+    if not response["success"]:
+        _LOGGER.error("Address not found!")
+        return
 
-        if not response["success"]:
-            _LOGGER.error("Address not found!")
-            return
+    try:
+        waste_data_raw_temp = response["data"]["items"][0]
+    except KeyError as exc:
+        raise KeyError(f"Invalid and/or no data received from {url}") from exc
 
-        try:
-            waste_data_raw_temp = response["data"]["items"][0]
-        except KeyError as exc:
-            raise KeyError(f"Invalid and/or no data received from {url}") from exc
+    waste_data_raw = []
 
-        self.waste_data_raw = []
+    for item in waste_data_raw_temp:
+        if not item["date"]:
+            continue
 
-        for item in waste_data_raw_temp:
-            if not item["date"]:
-                continue
+        waste_type = item["type"]
+        if not waste_type:
+            continue
 
-            waste_type = item["type"]
-            if not waste_type:
-                continue
+        temp = {"type": _waste_type_rename(item["type"].strip().lower())}
+        temp["date"] = datetime.strptime(item["date"], "%Y-%m-%d").strftime("%Y-%m-%d")
+        waste_data_raw.append(temp)
 
-            temp = {"type": self.__waste_type_rename(item["type"].strip().lower())}
-            temp["date"] = datetime.strptime(item["date"], "%Y-%m-%d").strftime(
-                "%Y-%m-%d"
-            )
-            self.waste_data_raw.append(temp)
+    return waste_data_raw
+
+
+if __name__ == "__main__":
+    print("Yell something at a mountain!")

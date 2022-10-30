@@ -6,79 +6,65 @@ import requests
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
 
 
-class DeAfvalappCollector(object):
-    def __init__(
-        self,
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
-    ):
-        self.provider = provider
-        self.postal_code = postal_code
-        self.street_number = street_number
-        self.suffix = suffix
-        self.exclude_pickup_today = exclude_pickup_today
-        self.exclude_list = exclude_list.strip().lower()
-        self.default_label = default_label
+def _waste_type_rename(item_name):
+    if item_name == "gemengde plastics":
+        item_name = "plastic"
+    if item_name == "zak_blauw":
+        item_name = "restafval"
+    if item_name == "pbp":
+        item_name = "pmd"
+    if item_name == "rest":
+        item_name = "restafval"
+    if item_name == "kerstboom":
+        item_name = "kerstbomen"
+    return item_name
 
-        if self.provider not in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-            raise ValueError(f"Invalid provider: {self.provider}, please verify")
 
-        self._get_waste_data_provider()
+def get_waste_data_raw(
+    provider,
+    postal_code,
+    street_number,
+    suffix,
+):
+    if provider not in SENSOR_COLLECTORS_DEAFVALAPP.keys():
+        raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    def __waste_type_rename(self, item_name):
-        if item_name == "gemengde plastics":
-            item_name = "plastic"
-        if item_name == "zak_blauw":
-            item_name = "restafval"
-        if item_name == "pbp":
-            item_name = "pmd"
-        if item_name == "rest":
-            item_name = "restafval"
-        if item_name == "kerstboom":
-            item_name = "kerstbomen"
-        return item_name
+    corrected_postal_code_parts = re.search(r"(\d\d\d\d) ?([A-z][A-z])", postal_code)
+    corrected_postal_code = (
+        corrected_postal_code_parts[1] + corrected_postal_code_parts[2].upper()
+    )
 
-    def _get_waste_data_provider(self):
-
-        corrected_postal_code_parts = re.search(
-            r"(\d\d\d\d) ?([A-z][A-z])", self.postal_code
+    try:
+        url = SENSOR_COLLECTORS_DEAFVALAPP[provider].format(
+            corrected_postal_code,
+            street_number,
+            suffix,
         )
-        corrected_postal_code = (
-            corrected_postal_code_parts[1] + corrected_postal_code_parts[2].upper()
-        )
+        raw_response = requests.get(url)
+    except requests.exceptions.RequestException as err:
+        raise ValueError(err) from err
 
-        try:
-            url = SENSOR_COLLECTORS_DEAFVALAPP[self.provider].format(
-                corrected_postal_code,
-                self.street_number,
-                self.suffix,
+    try:
+        response = raw_response.text
+    except ValueError as e:
+        raise ValueError(f"Invalid and/or no data received from {url}") from e
+
+    if not response:
+        _LOGGER.error("No waste data found!")
+        return
+
+    waste_data_raw = []
+
+    for rows in response.strip().split("\n"):
+        for ophaaldatum in rows.split(";")[1:-1]:
+            temp = {"type": _waste_type_rename(rows.split(";")[0].strip().lower())}
+            temp["date"] = datetime.strptime(ophaaldatum, "%d-%m-%Y").strftime(
+                "%Y-%m-%d"
             )
-            raw_response = requests.get(url)
-        except requests.exceptions.RequestException as err:
-            raise ValueError(err) from err
+            waste_data_raw.append(temp)
 
-        try:
-            response = raw_response.text
-        except ValueError as e:
-            raise ValueError(f"Invalid and/or no data received from {url}") from e
+    return waste_data_raw
 
-        if not response:
-            _LOGGER.error("No waste data found!")
-            return
 
-        self.waste_data_raw = []
-
-        for rows in response.strip().split("\n"):
-            for ophaaldatum in rows.split(";")[1:-1]:
-                temp = {
-                    "type": self.__waste_type_rename(rows.split(";")[0].strip().lower())
-                }
-                temp["date"] = datetime.strptime(ophaaldatum, "%d-%m-%Y").strftime(
-                    "%Y-%m-%d"
-                )
-                self.waste_data_raw.append(temp)
+if __name__ == "__main__":
+    print("Yell something at a mountain!")
