@@ -12,8 +12,7 @@ def get_waste_data_raw(
     postal_code,
     street_number,
     suffix,
-):  # sourcery skip: avoid-builtin-shadow
-
+):
     if provider not in SENSOR_COLLECTORS_ICALENDAR.keys():
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
