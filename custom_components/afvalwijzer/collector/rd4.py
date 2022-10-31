@@ -3,21 +3,8 @@ import re
 
 import requests
 
+from ..common.main_functions import _waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_RD4
-
-
-def _waste_type_rename(item_name):
-    if item_name == "pruning":
-        item_name = "takken"
-    if item_name == "residual_waste":
-        item_name = "restafval"
-    if item_name == "best_bag":
-        item_name = "best-tas"
-    if item_name == "paper":
-        item_name = "papier"
-    if item_name == "christmas_trees":
-        item_name = "kerstbomen"
-    return item_name
 
 
 def get_waste_data_raw(

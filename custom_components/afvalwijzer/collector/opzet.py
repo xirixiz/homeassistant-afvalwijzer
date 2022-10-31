@@ -2,51 +2,8 @@ from datetime import datetime
 
 import requests
 
+from ..common.main_functions import _waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
-
-
-def _waste_type_rename(item_name):
-    if item_name == "snoeiafval":
-        item_name = "takken"
-    if item_name == "sloop":
-        item_name = "grofvuil"
-    if item_name == "glas":
-        item_name = "glas"
-    if item_name == "duobak":
-        item_name = "duobak"
-    if item_name == "groente":
-        item_name = "gft"
-    if item_name == "groente-, fruit en tuinafval":
-        item_name = "gft"
-    if item_name == "groente, fruit- en tuinafval":
-        item_name = "gft"
-    if item_name == "gft":
-        item_name = "gft"
-    if item_name == "chemisch":
-        item_name = "chemisch"
-    if item_name == "kca":
-        item_name = "chemisch"
-    if item_name == "tariefzak restafval":
-        item_name = "restafvalzakken"
-    if item_name == "restafvalzakken":
-        item_name = "restafvalzakken"
-    if item_name == "rest":
-        item_name = "restafval"
-    if item_name == "plastic":
-        item_name = "plastic"
-    if item_name == "plastic, blik & drinkpakken overbetuwe":
-        item_name = "pmd"
-    if item_name == "papier":
-        item_name = "papier"
-    if item_name == "papier en karton":
-        item_name = "papier"
-    if item_name == "pmd":
-        item_name = "pmd"
-    if item_name == "textiel":
-        item_name = "textiel"
-    if item_name == "kerstb":
-        item_name = "kerstboom"
-    return item_name
 
 
 def get_waste_data_raw(

@@ -3,21 +3,8 @@ import re
 
 import requests
 
+from ..common.main_functions import _waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
-
-
-def _waste_type_rename(item_name):
-    if item_name == "gemengde plastics":
-        item_name = "plastic"
-    if item_name == "zak_blauw":
-        item_name = "restafval"
-    if item_name == "pbp":
-        item_name = "pmd"
-    if item_name == "rest":
-        item_name = "restafval"
-    if item_name == "kerstboom":
-        item_name = "kerstbomen"
-    return item_name
 
 
 def get_waste_data_raw(

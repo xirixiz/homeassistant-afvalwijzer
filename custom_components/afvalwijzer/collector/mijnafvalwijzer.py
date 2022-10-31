@@ -2,6 +2,7 @@ from datetime import datetime
 
 import requests
 
+from ..common.main_functions import _waste_type_rename
 from ..const.const import (
     _LOGGER,
     SENSOR_COLLECTOR_TO_URL,

@@ -38,45 +38,45 @@ class MainCollector(object):
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:
                 waste_data_raw = mijnafvalwijzer.get_waste_data_raw(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
                 )
             elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
                 waste_data_raw = deafvalapp.get_waste_data_raw(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
                 )
             elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
                 waste_data_raw = icalendar.get_waste_data_raw(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
                 )
             elif provider in SENSOR_COLLECTORS_OPZET.keys():
                 waste_data_raw = opzet.get_waste_data_raw(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
                 )
             elif provider in SENSOR_COLLECTORS_RD4.keys():
                 waste_data_raw = rd4.get_waste_data_raw(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
                 )
             elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
                 waste_data_raw = ximmio.get_waste_data_raw(
-                    provider,
-                    postal_code,
-                    street_number,
-                    suffix,
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
                 )
             else:
                 _LOGGER.error(f"Unknown provider: {provider}")

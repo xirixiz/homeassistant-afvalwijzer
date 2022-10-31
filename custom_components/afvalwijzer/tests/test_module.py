@@ -7,7 +7,7 @@ import afvalwijzer
 from afvalwijzer.collector.mijnafvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
-python3 -m afvalwijzer.test.test_module
+python3 -m afvalwijzer.tests.test_module
 
 """
 
@@ -28,9 +28,9 @@ default_label = "Geen"
 exclude_list = ""
 
 # DeAfvalapp
-provider = "deafvalapp"
-postal_code = "6105CN"
-street_number = "1"
+# provider = "deafvalapp"
+# postal_code = "6105CN"
+# street_number = "1"
 
 # Icalendar
 # provider = "eemsdelta"
@@ -54,9 +54,9 @@ street_number = "1"
 # suffix = "C"
 
 # Ximmio
-# provider = "meerlanden"
-# postal_code = "2121xt"
-# street_number = "38"
+provider = "meerlanden"
+postal_code = "2121xt"
+street_number = "38"
 
 # Ximmio
 # provider = "acv"
