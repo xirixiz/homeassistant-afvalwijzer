@@ -1,7 +1,5 @@
 from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (
-    _LOGGER,
-    SENSOR_COLLECTOR_TO_URL,
     SENSOR_COLLECTORS_AFVALWIJZER,
     SENSOR_COLLECTORS_DEAFVALAPP,
     SENSOR_COLLECTORS_ICALENDAR,
@@ -9,6 +7,8 @@ from ..const.const import (
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_XIMMIO,
 )
+
+from ..const.const import _LOGGER
 
 try:
     from . import deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
@@ -27,13 +27,13 @@ class MainCollector(object):
         exclude_list,
         default_label,
     ):
-        self.provider = provider
+        self.provider = provider.strip().lower()
         self.postal_code = postal_code.strip().upper()
-        self.street_number = street_number
-        self.suffix = suffix
+        self.street_number = street_number.strip()
+        self.suffix = suffix.strip()
         self.exclude_pickup_today = exclude_pickup_today
         self.exclude_list = exclude_list.strip().lower()
-        self.default_label = default_label
+        self.default_label = default_label.strip()
 
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:

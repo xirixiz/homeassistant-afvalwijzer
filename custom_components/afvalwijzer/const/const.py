@@ -1,12 +1,12 @@
 from datetime import timedelta
 import logging
 
+_LOGGER = logging.getLogger(__name__)
+
 API = "api"
 NAME = "afvalwijzer"
 VERSION = "2022.11.02"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
-
-_LOGGER = logging.getLogger(__name__)
 
 SENSOR_COLLECTOR_TO_URL = {
     "afvalwijzer_data_default": [
