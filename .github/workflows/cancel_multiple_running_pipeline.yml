@@ -5,8 +5,7 @@ on:
   workflow_run:
     workflows:
       - 'Cron actions'
-      - 'Pull actions'
-      - 'Push actions'
+      - 'Push/Pull actions'
     types: ['requested']
   workflow_dispatch:
 
