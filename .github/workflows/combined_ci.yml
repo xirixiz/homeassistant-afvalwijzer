@@ -1,4 +1,4 @@
-name: Validation And Formatting
+name: 'Afvalwijzer: Validation And Formatting'
 
 on:
   push:
