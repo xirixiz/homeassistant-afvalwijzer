@@ -10,9 +10,9 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  validate:
+  hassfest:
     runs-on: "ubuntu-latest"
-    name: Validate
+    name: hassfest
     steps:
       - uses: "actions/checkout@v3"
 
