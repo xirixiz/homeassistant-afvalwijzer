@@ -2,8 +2,7 @@
   "name": "Afvalwijzer",
   "content_in_root": false,
   "render_readme": true,
-  "country": [
-    "NL"
-  ],
-  "homeassistant": "0.115.0"
+  "domains": "sensor",
+  "country": "NL",
+  "homeassistant": "0.118.0"
 }

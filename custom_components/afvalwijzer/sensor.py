@@ -77,7 +77,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     except ValueError as err:
         _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
 
-    fetch_data = AfvalwijzerData(config)
+    fetch_data = AfvalwijzerData(hass, config)
 
     waste_types_provider = collector.waste_types_provider
     _LOGGER.debug(f"Generating waste_types_provider list = {waste_types_provider}")
@@ -98,7 +98,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 class AfvalwijzerData(object):
-    def __init__(self, config):
+    def __init__(self, hass, config):
+        self._hass = hass
         self.config = config
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)

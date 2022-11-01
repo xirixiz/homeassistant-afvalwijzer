@@ -1,4 +1,8 @@
-.vscode
 @eaDir
 .DS_Store
 __pycache__
+pythonenv*
+venv
+.venv
+.coverage
+.idea
