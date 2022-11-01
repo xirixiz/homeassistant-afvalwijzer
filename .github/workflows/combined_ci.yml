@@ -1,4 +1,4 @@
-name: Push/Pull actions
+name: Validation And Formatting
 
 on:
   push:
@@ -6,33 +6,35 @@ on:
       - master
       - development
   pull_request:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   validate:
     runs-on: "ubuntu-latest"
     name: Validate
     steps:
-        - uses: "actions/checkout@v3"
+      - uses: "actions/checkout@v3"
 
-        - name: HACS validation
-          uses: "hacs/action@main"
-          with:
-            category: "integration"
-            ignore: brands
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+          ignore: brands
 
-        - name: Hassfest validation
-          uses: "home-assistant/actions/hassfest@master"
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@master"
 
   style:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-        - uses: "actions/checkout@v3"
-        - uses: "actions/setup-python@v4"
-          with:
-            python-version: "3.x"
-        - run: python3 -m pip install black
-        - run: black .
+      - uses: "actions/checkout@v3"
+      - uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.x"
+      - run: python3 -m pip install black
+      - run: black .
 
   tests:
     runs-on: "ubuntu-latest"
@@ -41,10 +43,10 @@ jobs:
       - name: Check out code from GitHub
         uses: "actions/checkout@v3"
       - name: Setup Python
-      - uses: actions/setup-python@v4
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-          cache: 'pip' # caching pip dependencies
+          python-version: "3.9"
+          cache: "pip" # caching pip dependencies
       - name: Install requirements
         run: python3 -m pip install -r requirements_test.txt
       - name: Run tests

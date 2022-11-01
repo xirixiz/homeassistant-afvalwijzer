@@ -4,8 +4,7 @@ name: 'Afvalwijzer: Cancelling duplicate workflow'
 on:
   workflow_run:
     workflows:
-      - 'Cron actions'
-      - 'Push/Pull actions'
+      - 'Validation And Formatting'
     types: ['requested']
   workflow_dispatch:
 
