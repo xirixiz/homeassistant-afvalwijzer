@@ -40,7 +40,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default="true"): cv.string,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
-        vol.Optional(CONF_DEFAULT_LABEL, default="Geen"): cv.string,
+        vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
         vol.Optional(CONF_ID.strip().lower(), default=""): cv.string,
     }
 )

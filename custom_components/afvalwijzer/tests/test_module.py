@@ -24,7 +24,7 @@ from ..collector.main_collector import MainCollector
 # Common
 suffix = ""
 exclude_pickup_today = "True"
-default_label = "Geen"
+default_label = "geen"
 exclude_list = ""
 
 # DeAfvalapp
@@ -42,6 +42,11 @@ exclude_list = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
+provider = "rmn"
+postal_code = "3701XK"
+street_number = "24"
+suffix = "b"
+
 # Opzet
 # provider = "prezero"
 # postal_code = "6665CN"
@@ -54,9 +59,9 @@ exclude_list = ""
 # suffix = "C"
 
 # Ximmio
-provider = "meerlanden"
-postal_code = "2121xt"
-street_number = "38"
+# provider = "meerlanden"
+# postal_code = "2121xt"
+# street_number = "38"
 
 # Ximmio
 # provider = "acv"

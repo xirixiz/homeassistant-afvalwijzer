@@ -17,6 +17,7 @@ def get_waste_data_raw(
 
     try:
         bag_id = None
+        suffix = suffix.strip().upper()
         _verify = provider != "suez"
         url = f"{SENSOR_COLLECTORS_OPZET[provider]}/rest/adressen/{postal_code}-{street_number}"
         raw_response = requests.get(url, verify=_verify)
