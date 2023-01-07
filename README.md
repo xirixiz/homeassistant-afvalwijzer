@@ -96,7 +96,9 @@ More information on the reminders (ios in this case):
 3. In the `custom_components` directory (folder) create a new folder called `afvalwijzer`.
 4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
-6. Look at the `Example Configuration` section for further configuration.
+6. Restart Home Assistant before further configuration.
+7. Look at the `Example Configuration` section for further configuration.
+8. Restart Home Assistant again when configuration is done to activate the configuration.
 
 Using your HA configuration directory (folder) as a starting point you should now also have this:
 
