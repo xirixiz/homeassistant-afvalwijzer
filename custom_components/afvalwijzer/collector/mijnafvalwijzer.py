@@ -37,12 +37,12 @@ def get_waste_data_raw(
 
     try:
         response = raw_response.json()
-    except ValueError as err:
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
-    if not response:
-        _LOGGER.error("Address not found!")
-        return
+        if not response["ophaaldagen"]:
+            _LOGGER.error("Address not found or no data available!")
+            raise KeyError
+    except KeyError as err:
+        raise KeyError(f"Invalid and/or no data received from {url}") from err
 
     try:
         waste_data_raw = (

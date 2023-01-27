@@ -60,7 +60,7 @@ exclude_list = ""
 
 provider = "rova"
 postal_code = "8021CC"
-street_number = "31"
+street_number = "1"
 
 # Ximmio
 # provider = "meerlanden"
