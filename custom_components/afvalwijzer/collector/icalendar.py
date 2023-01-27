@@ -26,14 +26,14 @@ def get_waste_data_raw(
             suffix,
             datetime.now().strftime("%Y-%m-%d"),
         )
-        raw_response = requests.get(url)
+        raw_response = requests.get(url, timeout=60)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
     try:
         response = raw_response.text
-    except ValueError as exc:
-        raise ValueError(f"Invalid and/or no data received from {url}") from exc
+    except ValueError as err:
+        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
     if not response:
         _LOGGER.error("No waste data found!")

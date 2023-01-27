@@ -31,14 +31,14 @@ def get_waste_data_raw(
             suffix,
             YEAR_CURRENT,
         )
-        raw_response = requests.get(url)
+        raw_response = requests.get(url, timeout=60)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
     try:
         response = raw_response.json()
-    except ValueError as e:
-        raise ValueError(f"Invalid and/or no data received from {url}") from e
+    except ValueError as err:
+        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
     if not response:
         _LOGGER.error("No waste data found!")
@@ -50,8 +50,8 @@ def get_waste_data_raw(
 
     try:
         waste_data_raw_temp = response["data"]["items"][0]
-    except KeyError as exc:
-        raise KeyError(f"Invalid and/or no data received from {url}") from exc
+    except KeyError as err:
+        raise KeyError(f"Invalid and/or no data received from {url}") from err
 
     waste_data_raw = []
 

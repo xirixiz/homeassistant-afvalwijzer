@@ -42,10 +42,10 @@ exclude_list = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
-provider = "rmn"
-postal_code = "3701XK"
-street_number = "24"
-suffix = "b"
+# provider = "rmn"
+# postal_code = "3701XK"
+# street_number = "24"
+# suffix = "b"
 
 # Opzet
 # provider = "prezero"
@@ -57,6 +57,10 @@ suffix = "b"
 # postal_code = "6301ET"
 # street_number = "24"
 # suffix = "C"
+
+provider = "rova"
+postal_code = "8021CC"
+street_number = "31"
 
 # Ximmio
 # provider = "meerlanden"

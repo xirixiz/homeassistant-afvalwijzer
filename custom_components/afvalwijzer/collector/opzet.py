@@ -20,14 +20,14 @@ def get_waste_data_raw(
         suffix = suffix.strip().upper()
         _verify = provider != "suez"
         url = f"{SENSOR_COLLECTORS_OPZET[provider]}/rest/adressen/{postal_code}-{street_number}"
-        raw_response = requests.get(url, verify=_verify)
+        raw_response = requests.get(url, timeout=60, verify=_verify)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
     try:
         response = raw_response.json()
-    except ValueError as e:
-        raise ValueError(f"Invalid and/or no data received from {url}") from e
+    except ValueError as err:
+        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
     if not response:
         _LOGGER.error("No waste data found!")
@@ -46,7 +46,7 @@ def get_waste_data_raw(
             bag_id = response[0]["bagId"]
 
         url = f"{SENSOR_COLLECTORS_OPZET[provider]}/rest/adressen/{bag_id}/afvalstromen"
-        waste_data_raw_temp = requests.get(url, verify=_verify).json()
+        waste_data_raw_temp = requests.get(url, timeout=60, verify=_verify).json()
         waste_data_raw = []
 
         for item in waste_data_raw_temp:
@@ -60,8 +60,8 @@ def get_waste_data_raw(
                 "%Y-%m-%d"
             )
             waste_data_raw.append(temp)
-    except ValueError as exc:
-        raise ValueError(f"Invalid and/or no data received from {url}") from exc
+    except ValueError as err:
+        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
     return waste_data_raw
 

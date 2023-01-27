@@ -36,7 +36,7 @@ def get_waste_data_raw(
             "houseNumber": street_number,
             "companyCode": companyCode,
         }
-        raw_response = requests.post(url=url, data=data)
+        raw_response = requests.post(url=url, timeout=60, data=data)
         uniqueId = raw_response.json()["dataList"][0]["UniqueId"]
         community = raw_response.json()["dataList"][0]["Community"]
     except requests.exceptions.RequestException as err:
@@ -54,7 +54,7 @@ def get_waste_data_raw(
             "community": community,
             "uniqueAddressID": uniqueId,
         }
-        raw_response = requests.post(url=url, data=data).json()
+        raw_response = requests.post(url=url, timeout=60, data=data).json()
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
@@ -64,8 +64,8 @@ def get_waste_data_raw(
 
     try:
         response = raw_response["dataList"]
-    except KeyError as e:
-        raise KeyError(f"Invalid and/or no data received from {url}") from e
+    except KeyError as err:
+        raise KeyError(f"Invalid and/or no data received from {url}") from err
 
     waste_data_raw = []
 

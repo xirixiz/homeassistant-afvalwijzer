@@ -27,14 +27,14 @@ def get_waste_data_raw(
             street_number,
             suffix,
         )
-        raw_response = requests.get(url)
+        raw_response = requests.get(url, timeout=60)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
     try:
         response = raw_response.text
-    except ValueError as e:
-        raise ValueError(f"Invalid and/or no data received from {url}") from e
+    except ValueError as err:
+        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
     if not response:
         _LOGGER.error("No waste data found!")
