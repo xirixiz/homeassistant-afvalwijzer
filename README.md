@@ -137,7 +137,7 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
       exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
       default_label: geen              # (optional, default = geen) label if no date found
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
-      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft"
+      exclude_list: ''                 # (optional, default = '') comma separated list of waste types (case ignored). F.e. "papier, gft"
 ```
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)
