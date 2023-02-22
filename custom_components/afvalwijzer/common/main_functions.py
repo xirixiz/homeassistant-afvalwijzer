@@ -11,7 +11,7 @@ def _waste_type_rename(item_name):
     if item_name == "kerstboom":
         item_name = "kerstbomen"
     if item_name == "dhm":
-        item_name = "pdm"
+        item_name = "papier en pmd"
     # OPZET
     if item_name == "snoeiafval":
         item_name = "takken"
