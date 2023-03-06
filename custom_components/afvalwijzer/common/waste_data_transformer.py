@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import hashlib
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
@@ -44,11 +43,6 @@ class WasteDataTransformer(object):
             self._waste_types_custom,
         ) = self.__gen_sensor_waste_data()
 
-        self._unique_id = hashlib.sha1(
-            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
-                "utf-8"
-            )
-        ).hexdigest()
 
     ##########################################################################
     # STRUCTURE ALL WASTE DATA IN CUSTOM FORMAT
@@ -186,7 +180,3 @@ class WasteDataTransformer(object):
     @property
     def waste_types_custom(self):
         return self._waste_types_custom
-
-    @property
-    def unique_id(self):
-        return self._unique_id

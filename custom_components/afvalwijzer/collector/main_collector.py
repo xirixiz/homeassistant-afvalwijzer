@@ -9,8 +9,6 @@ from ..const.const import (
     SENSOR_COLLECTORS_XIMMIO,
 )
 
-import hashlib
-
 try:
     from . import deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
 except ImportError as err:
@@ -35,11 +33,6 @@ class MainCollector(object):
         self.exclude_pickup_today = exclude_pickup_today.strip()
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label.strip()
-        self._unique_id = hashlib.sha1(
-            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
-                "utf-8"
-            )
-        ).hexdigest()
 
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:
@@ -127,7 +120,3 @@ class MainCollector(object):
     @property
     def waste_types_custom(self):
         return self._waste_data.waste_types_custom
-
-    @property
-    def unique_id(self):
-        return self._unique_id
