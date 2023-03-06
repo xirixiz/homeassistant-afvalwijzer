@@ -36,10 +36,8 @@ class ProviderSensor(Entity):
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
         self._name = (
-            SENSOR_PREFIX
-            + (self._id_name + " " if len(self._id_name) > 0 else "")
-            + self.waste_type
-        )
+            SENSOR_PREFIX + (f"{self._id_name} " if len(self._id_name) > 0 else "")
+        ) + self.waste_type
         self._icon = SENSOR_ICON
         self._state = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None

@@ -20,6 +20,11 @@ class NextSensorData(object):
         self.next_waste_date = self.__get_next_waste_date()
         self.next_waste_in_days = self.__get_next_waste_in_days()
         self.next_waste_type = self.__get_next_waste_type()
+        self._unique_id = hashlib.sha1(
+            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
 
         self.data = self._gen_next_sensor_data()
 
@@ -74,3 +79,7 @@ class NextSensorData(object):
     @property
     def next_sensor_data(self):
         return self.data
+
+    @property
+    def unique_id(self):
+        return self._unique_id

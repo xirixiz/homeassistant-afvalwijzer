@@ -31,6 +31,12 @@ class DaySensorData(object):
 
         self.data = self._gen_day_sensor_data()
 
+        self._unique_id = hashlib.sha1(
+            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
+
     ##########################################################################
     #  GENERATE TODAY, TOMORROW, DOT SENSOR(S)
     ##########################################################################
@@ -64,3 +70,7 @@ class DaySensorData(object):
     @property
     def day_sensor_data(self):
         return self.data
+
+    @property
+    def unique_id(self):
+        return self._unique_id

@@ -101,6 +101,15 @@ class AfvalwijzerData(object):
     def __init__(self, hass, config):
         self._hass = hass
         self.config = config
+        self._unique_id = hashlib.sha1(
+            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
