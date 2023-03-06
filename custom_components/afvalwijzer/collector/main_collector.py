@@ -9,6 +9,8 @@ from ..const.const import (
     SENSOR_COLLECTORS_XIMMIO,
 )
 
+import hashlib
+
 try:
     from . import deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
 except ImportError as err:

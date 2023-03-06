@@ -1,4 +1,5 @@
 from datetime import datetime
+import hashlib
 
 from ..const.const import _LOGGER
 

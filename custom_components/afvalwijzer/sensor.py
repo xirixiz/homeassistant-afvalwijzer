@@ -5,6 +5,7 @@ Author: Bram van Dartel - xirixiz
 """
 
 from functools import partial
+import hashlib
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv

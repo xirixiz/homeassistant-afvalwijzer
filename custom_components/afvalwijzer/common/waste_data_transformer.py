@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import hashlib
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
