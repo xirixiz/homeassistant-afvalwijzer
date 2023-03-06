@@ -1,14 +1,14 @@
 {
   "domain": "afvalwijzer",
   "name": "Afvalwijzer",
-  "version": "2023.03.01",
-  "iot_class": "cloud_polling",
-  "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer/blob/master/README.md",
-  "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
-  "config_flow": false,
-  "dependencies": [],
   "codeowners": [
     "@xirixiz"
   ],
-  "requirements": []
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer/blob/master/README.md",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
+  "requirements": [],
+  "version": "2023.03.01",
 }
