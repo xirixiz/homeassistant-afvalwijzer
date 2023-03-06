@@ -60,7 +60,7 @@ _Component to integrate with the following collectors._
 
 This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
-**This component will set up the following platforms.**
+**This component will set up the following platform(s).**
 
 | Platform | Description                                                                               |
 | -------- | ----------------------------------------------------------------------------------------- |
