@@ -1,9 +1,10 @@
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
+from ..common.main_functions import _waste_type_rename
 from datetime import datetime
 
 import requests
-
-from ..common.main_functions import _waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
+from urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_waste_data_raw(
@@ -20,7 +21,7 @@ def get_waste_data_raw(
         suffix = suffix.strip().upper()
         _verify = provider != "suez"
         url = f"{SENSOR_COLLECTORS_OPZET[provider]}/rest/adressen/{postal_code}-{street_number}"
-        raw_response = requests.get(url, timeout=60, verify=_verify)
+        raw_response = requests.get(url, timeout=60, verify=False)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
@@ -46,7 +47,7 @@ def get_waste_data_raw(
             bag_id = response[0]["bagId"]
 
         url = f"{SENSOR_COLLECTORS_OPZET[provider]}/rest/adressen/{bag_id}/afvalstromen"
-        waste_data_raw_temp = requests.get(url, timeout=60, verify=_verify).json()
+        waste_data_raw_temp = requests.get(url, timeout=60, verify=False).json()
         waste_data_raw = []
 
         for item in waste_data_raw_temp:

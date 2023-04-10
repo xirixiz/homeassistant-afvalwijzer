@@ -26,7 +26,7 @@ def get_waste_data_raw(
             suffix,
             datetime.now().strftime("%Y-%m-%d"),
         )
-        raw_response = requests.get(url, timeout=60)
+        raw_response = requests.get(url, timeout=60, verify=False)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 

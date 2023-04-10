@@ -1,4 +1,13 @@
 def _waste_type_rename(item_name):
+    # BURGERPORTAAL
+    if item_name == "rest":
+        item_name = "restafval"
+    if item_name == "opk":
+        item_name = "papier"
+    if item_name == 'pmdrest':
+        item_name = "pmd-restafval"
+    if item_name == "rest":
+        item_name = "restafval"
     # DEAFVALAPP
     if item_name == "gemengde plastics":
         item_name = "plastic"

@@ -42,6 +42,11 @@ exclude_list = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
+# Afvalstoffendienstkalender
+# provider = "afvalstoffendienstkalender"
+# postal_code = "4266NB"
+# street_number = "1"
+
 # provider = "rmn"
 # postal_code = "3701XK"
 # street_number = "24"
@@ -58,8 +63,12 @@ exclude_list = ""
 # street_number = "24"
 # suffix = "C"
 
-provider = "rova"
-postal_code = "8021CC"
+# provider = "rova"
+# postal_code = "8021CC"
+# street_number = "1"
+
+provider = "rmn"
+postal_code = "3402TA"
 street_number = "1"
 
 # Ximmio

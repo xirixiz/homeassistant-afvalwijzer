@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2023.03.05"
+VERSION = "2023.04.01"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_COLLECTOR_TO_URL = {
@@ -45,7 +45,6 @@ SENSOR_COLLECTORS_OPZET = {
     "peelenmaas": "https://afvalkalender.peelenmaas.nl",
     "prezero": "https://inzamelwijzer.prezero.nl",
     "purmerend": "https://afvalkalender.purmerend.nl",
-    "rmn": "https://inzamelschema.rmn.nl",
     "schouwen-duiveland": "https://afvalkalender.schouwen-duiveland.nl",
     "spaarnelanden": "https://afvalwijzer.spaarnelanden.nl",
     "sudwestfryslan": "https://afvalkalender.sudwestfryslan.nl",
@@ -73,7 +72,6 @@ SENSOR_COLLECTORS_XIMMIO = {
     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
     "avalex": "f7a74ad1-fdbf-4a43-9f91-44644f4d4222",
     "avri": "78cd4156-394b-413d-8936-d407e334559a",
-    "bar": "bb58e633-de14-4b2a-9941-5bc419f1c4b0",
     "hellendoorn": "24434f5b-7244-412b-9306-3a2bd1e22bc1",
     "meerlanden": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "meppel": "b7a594c7-2490-4413-88f9-94749a3ec62a",
@@ -87,6 +85,11 @@ SENSOR_COLLECTORS_XIMMIO = {
 
 SENSOR_COLLECTORS_RD4 = {
     "rd4": "https://data.rd4.nl/api/v1/waste-calendar?postal_code={0}&house_number={1}&house_number_extension={2}&year={3}",
+}
+
+SENSOR_COLLECTORS_BURGERPORTAAL = {
+    'rmn': '138204213564933597',
+    'bar': '138204213564933497',
 }
 
 SENSOR_COLLECTORS_DEAFVALAPP = {

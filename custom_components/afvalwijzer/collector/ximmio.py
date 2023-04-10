@@ -1,9 +1,10 @@
+from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_XIMMIO
+from ..common.main_functions import _waste_type_rename
 from datetime import datetime, timedelta
 
 import requests
-
-from ..common.main_functions import _waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_XIMMIO
+from urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_waste_data_raw(
@@ -30,11 +31,10 @@ def get_waste_data_raw(
     ##########################################################################
     try:
         url = SENSOR_COLLECTOR_TO_URL[provider_url][0]
-        companyCode = SENSOR_COLLECTORS_XIMMIO[provider]
         data = {
             "postCode": postal_code,
             "houseNumber": street_number,
-            "companyCode": companyCode,
+            "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
         }
         raw_response = requests.post(url=url, timeout=60, data=data)
         uniqueId = raw_response.json()["dataList"][0]["UniqueId"]
@@ -48,7 +48,7 @@ def get_waste_data_raw(
     try:
         url = SENSOR_COLLECTOR_TO_URL[provider_url][1]
         data = {
-            "companyCode": companyCode,
+            "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
             "startDate": DATE_TODAY.date(),
             "endDate": DATE_TODAY_NEXT_YEAR,
             "community": community,

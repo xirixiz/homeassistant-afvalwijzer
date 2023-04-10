@@ -1,10 +1,11 @@
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
+from ..common.main_functions import _waste_type_rename
 from datetime import datetime
 import re
 
 import requests
-
-from ..common.main_functions import _waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
+from urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_waste_data_raw(
@@ -27,7 +28,7 @@ def get_waste_data_raw(
             street_number,
             suffix,
         )
-        raw_response = requests.get(url, timeout=60)
+        raw_response = requests.get(url, timeout=60, verify=False)
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
