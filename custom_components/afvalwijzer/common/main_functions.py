@@ -40,6 +40,8 @@ def _waste_type_rename(item_name):
         item_name = "restafval"
     if item_name == "plastic, blik & drinkpakken overbetuwe":
         item_name = "pmd"
+    if item_name == "plastic, blik & drinkpakken arnhem":
+        item_name = "pmd"
     if item_name == "papier en karton":
         item_name = "papier"
     if item_name == "kerstb":

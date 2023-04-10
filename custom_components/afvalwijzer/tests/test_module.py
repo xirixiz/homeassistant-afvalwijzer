@@ -57,6 +57,10 @@ exclude_list = ""
 # postal_code = "6665CN"
 # street_number = "1"
 
+provider = "prezero"
+postal_code = "6822NG"
+street_number = "1"
+
 # RD4
 # provider = "rd4"
 # postal_code = "6301ET"
@@ -67,9 +71,9 @@ exclude_list = ""
 # postal_code = "8021CC"
 # street_number = "1"
 
-provider = "rmn"
-postal_code = "3402TA"
-street_number = "1"
+# provider = "rmn"
+# postal_code = "3402TA"
+# street_number = "1"
 
 # Ximmio
 # provider = "meerlanden"
