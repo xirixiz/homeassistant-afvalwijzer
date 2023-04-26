@@ -47,8 +47,8 @@ def _waste_type_rename(item_name):
     if item_name == "kerstb":
         item_name = "kerstboom"
     # RD4
-    if item_name == "pruning":
-        item_name = "takken"
+    if item_name == "pruning_waste":
+        item_name = "snoeiafval"
     if item_name == "residual_waste":
         item_name = "restafval"
     if item_name == "best_bag":
