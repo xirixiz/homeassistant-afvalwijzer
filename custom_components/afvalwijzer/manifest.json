@@ -10,5 +10,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "requirements": [],
-  "version": "2023.04.02"
+  "version": "2023.06.01"
 }

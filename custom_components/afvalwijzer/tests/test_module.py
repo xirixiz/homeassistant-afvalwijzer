@@ -42,6 +42,11 @@ exclude_list = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
+# Afvalwijzer
+provider = "mijnafvalwijzer"
+postal_code = "3951en"
+street_number = "1"
+
 # Afvalstoffendienstkalender
 # provider = "afvalstoffendienstkalender"
 # postal_code = "4266NB"
@@ -57,9 +62,18 @@ exclude_list = ""
 # postal_code = "6665CN"
 # street_number = "1"
 
-provider = "prezero"
-postal_code = "6822NG"
-street_number = "1"
+# provider = "prezero"
+# postal_code = "6822NG"
+# street_number = "1"
+
+# provider = "mijnafvalwijzer"
+# postal_code = "3951eb"
+# street_number = "1"
+
+# provider = "mijnafvalwijzer"
+# postal_code = "3941RK"
+# street_number = "50"
+# suffix = "B"
 
 # RD4
 # provider = "rd4"
@@ -113,6 +127,9 @@ collector = MainCollector(
 
 
 #########################################################################################################
+print("\n")
+
+print(f"Data collected from: {provider} with postcal code: {postal_code}")
 print("\n")
 
 print(collector.waste_data_with_today)
