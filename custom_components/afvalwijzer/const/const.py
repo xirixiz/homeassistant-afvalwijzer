@@ -52,7 +52,7 @@ SENSOR_COLLECTORS_OPZET = {
     "venray": "https://afvalkalender.venray.nl",
     "voorschoten": "https://afvalkalender.voorschoten.nl",
     "waalre": "https://afvalkalender.waalre.nl",
-    "zrd": "https://afvalkalender.zrd.nl",
+    "zrd": "https://www.zrd.nl",
 }
 
 SENSOR_COLLECTORS_ICALENDAR = {
