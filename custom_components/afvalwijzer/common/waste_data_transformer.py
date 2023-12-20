@@ -22,6 +22,7 @@ class WasteDataTransformer(object):
         exclude_list,
         default_label,
     ):
+        waste_data_raw.sort(key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d"))
         self.waste_data_raw = waste_data_raw
         self.exclude_pickup_today = exclude_pickup_today
         self.exclude_list = exclude_list.strip().lower()
