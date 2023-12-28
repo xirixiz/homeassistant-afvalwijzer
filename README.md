@@ -17,6 +17,7 @@ _Component to integrate with the following collectors._
 | acv                              |
 | almere                           |
 | areareiniging                    |
+| assen                            |
 | avalex                           |
 | avri                             |
 | bar                              |
