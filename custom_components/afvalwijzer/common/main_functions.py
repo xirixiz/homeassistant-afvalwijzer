@@ -76,6 +76,8 @@ def _waste_type_rename(item_name):
         item_name = "chemisch"
     if item_name == "plastic":
         item_name = "plastic"
+    if item_name == "pdb":
+        item_name = "pmd"
     if item_name == "packages":
         item_name = "pmd"
     if item_name == "paper":
