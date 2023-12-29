@@ -125,8 +125,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_tomorrow = date.today() + timedelta(days=1) == self._year_month_day_date
         self._is_collection_date_day_after_tomorrow = date.today() + timedelta(days=2) == self._year_month_day_date
 
-        self._state = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
-        # self._state = waste_data_provider[self.waste_type].date()
+        # self._state = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
+        self._state = waste_data_provider[self.waste_type].date()
 
     def _process_non_datetime_data(self, waste_data_provider):
         _LOGGER.debug(
