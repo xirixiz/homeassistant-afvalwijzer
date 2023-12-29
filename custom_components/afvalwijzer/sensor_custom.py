@@ -67,7 +67,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
     @property
     def device_class(self):
-        if self._year_month_day_date == True:
+        if "next_date" in self._name:
             return SensorDeviceClass.TIMESTAMP
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -94,8 +94,8 @@ class CustomSensor(RestoreEntity, SensorEntity):
         )
         self._year_month_day_date = waste_data_custom[self.waste_type].date()
 
-        # date_string = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
-        self._state = waste_data_custom[self.waste_type].date()
+        self._state = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
+        # self._state = waste_data_custom[self.waste_type].date()
 
     def _process_non_datetime_data(self, waste_data_custom):
         _LOGGER.debug(

@@ -24,7 +24,7 @@ class NextSensorData(object):
 
         try:
             next_waste_date = self.waste_data_after_date_selected[0]["date"]
-            next_waste_in_days = abs(self.today_date - datetime.strptime(next_waste_date, "%Y-%m-%d")).days
+            next_waste_in_days = abs(self.today_date - next_waste_date).days
 
             for waste in self.waste_data_after_date_selected:
                 item_date = waste["date"]
