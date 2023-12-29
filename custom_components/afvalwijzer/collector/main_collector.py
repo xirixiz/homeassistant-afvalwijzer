@@ -16,7 +16,7 @@ except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
 
-class MainCollector(object):
+class MainCollector:
     def __init__(
         self,
         provider,
@@ -35,50 +35,53 @@ class MainCollector(object):
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label.strip()
 
+        self._waste_data = self.get_waste_data()
+
+    def get_waste_data(self):
         try:
-            if provider in SENSOR_COLLECTORS_AFVALWIJZER:
+            if self.provider in SENSOR_COLLECTORS_AFVALWIJZER:
                 waste_data_raw = mijnafvalwijzer.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_BURGERPORTAAL.keys():
+            elif self.provider in SENSOR_COLLECTORS_BURGERPORTAAL.keys():
                 waste_data_raw = burgerportaal.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
+            elif self.provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
                 waste_data_raw = deafvalapp.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
+            elif self.provider in SENSOR_COLLECTORS_ICALENDAR.keys():
                 waste_data_raw = icalendar.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_OPZET.keys():
+            elif self.provider in SENSOR_COLLECTORS_OPZET.keys():
                 waste_data_raw = opzet.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_RD4.keys():
+            elif self.provider in SENSOR_COLLECTORS_RD4.keys():
                 waste_data_raw = rd4.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
+            elif self.provider in SENSOR_COLLECTORS_XIMMIO.keys():
                 waste_data_raw = ximmio.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
@@ -86,8 +89,7 @@ class MainCollector(object):
                     self.suffix,
                 )
             else:
-                _LOGGER.error(f"Unknown provider: {provider}")
-                return False
+                raise ValueError(f"Unknown provider: {self.provider}")
 
         except ValueError as err:
             _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
@@ -95,7 +97,7 @@ class MainCollector(object):
         ##########################################################################
         #  COMMON CODE
         ##########################################################################
-        self._waste_data = WasteDataTransformer(
+        return WasteDataTransformer(
             waste_data_raw,
             self.exclude_pickup_today,
             self.exclude_list,

@@ -4,6 +4,8 @@ import hashlib
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const.const import (
     _LOGGER,
@@ -21,24 +23,21 @@ from .const.const import (
 )
 
 
-class CustomSensor(Entity):
+class CustomSensor(RestoreEntity, SensorEntity):
     def __init__(self, hass, waste_type, fetch_data, config):
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
         self.config = config
-        self._id_name = self.config.get(CONF_ID)
-        self._default_label = self.config.get(CONF_DEFAULT_LABEL)
+        self._id_name = config.get(CONF_ID)
+        self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
-        self._name = (
-            SENSOR_PREFIX + (f"{self._id_name} " if len(self._id_name) > 0 else "")
-        ) + self.waste_type
-
-        self._state = self.config.get(CONF_DEFAULT_LABEL)
+        self._name = f"{SENSOR_PREFIX}{'{self._id_name} ' if self._id_name else ''}{self.waste_type}"
+        self._state = config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
         self._unique_id = hashlib.sha1(
-            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+            f"{self.waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX,'')}".encode(
                 "utf-8"
             )
         ).hexdigest()
@@ -61,15 +60,15 @@ class CustomSensor(Entity):
 
     @property
     def extra_state_attributes(self):
+        attributes = {ATTR_LAST_UPDATE: self._last_update}
         if self._year_month_day_date is not None:
-            return {
-                ATTR_LAST_UPDATE: self._last_update,
-                ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
-            }
-        else:
-            return {
-                ATTR_LAST_UPDATE: self._last_update,
-            }
+            attributes[ATTR_YEAR_MONTH_DAY_DATE] = self._year_month_day_date
+        return attributes
+
+    @property
+    def device_class(self):
+        if self._year_month_day_date == True:
+            return SensorDeviceClass.TIMESTAMP
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
@@ -82,23 +81,30 @@ class CustomSensor(Entity):
             self._last_update = datetime.now().replace(microsecond=0)
 
             if isinstance(waste_data_custom[self.waste_type], datetime):
-                _LOGGER.debug(
-                    f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type].date()}"
-                )
-                # Add the US date format
-                self._year_month_day_date = waste_data_custom[self.waste_type].date()
-
-                # Add the NL date format as default state
-                date_string = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
-                self._state = datetime.strptime(date_string, '%d-%m-%Y').date()
+                self._process_datetime_data(waste_data_custom)
             else:
-                _LOGGER.debug(
-                    f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type]}"
-                )
-                # Add non-date as default state
-                self._state = str(waste_data_custom[self.waste_type])
+                self._process_non_datetime_data(waste_data_custom)
+
         except ValueError:
-            _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
-            self._state = self._default_label
-            self._year_month_day_date = None
-            self._last_update = datetime.now().replace(microsecond=0)
+            self._handle_value_error()
+
+    def _process_datetime_data(self, waste_data_custom):
+        _LOGGER.debug(
+            f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type].date()}"
+        )
+        self._year_month_day_date = waste_data_custom[self.waste_type].date()
+
+        # date_string = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
+        self._state = waste_data_custom[self.waste_type].date()
+
+    def _process_non_datetime_data(self, waste_data_custom):
+        _LOGGER.debug(
+            f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type]}"
+        )
+        self._state = str(waste_data_custom[self.waste_type])
+
+    def _handle_value_error(self):
+        _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
+        self._state = self._default_label
+        self._year_month_day_date = None
+        self._last_update = datetime.now().replace(microsecond=0)
