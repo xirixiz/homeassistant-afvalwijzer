@@ -92,33 +92,31 @@ class ProviderSensor(Entity):
             if not waste_data_provider or self.waste_type not in waste_data_provider:
                 raise (ValueError)
                 # Add attribute, set the last updated status of the sensor
-            self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
+            self._last_update = datetime.now().replace(microsecond=0)
 
             if isinstance(waste_data_provider[self.waste_type], datetime):
                 _LOGGER.debug(
                     f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_provider[self.waste_type].date()}"
                 )
                 # Add the US date format
-                collection_date_us = waste_data_provider[self.waste_type].date()
-                self._year_month_day_date = str(collection_date_us)
+                self._year_month_day_date = waste_data_provider[self.waste_type].date()
 
                 # Add the days until the collection date
-                delta = collection_date_us - date.today()
+                delta = self._year_month_day_date - date.today()
                 self._days_until_collection_date = delta.days
 
                 # Check if the collection days are in today, tomorrow and/or the day after tomorrow
-                self._is_collection_date_today = date.today() == collection_date_us
+                self._is_collection_date_today = date.today() == self._year_month_day_date
                 self._is_collection_date_tomorrow = (
-                    date.today() + timedelta(days=1) == collection_date_us
+                    date.today() + timedelta(days=1) == self._year_month_day_date
                 )
                 self._is_collection_date_day_after_tomorrow = (
-                    date.today() + timedelta(days=2) == collection_date_us
+                    date.today() + timedelta(days=2) == self._year_month_day_date
                 )
 
                 # Add the NL date format as default state
-                self._state = datetime.strftime(
-                    waste_data_provider[self.waste_type].date(), "%d-%m-%Y"
-                )
+                date_string = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
+                self._state = datetime.strptime(date_string, '%d-%m-%Y').date()
             else:
                 _LOGGER.debug(
                     f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_provider[self.waste_type]}"
@@ -133,4 +131,4 @@ class ProviderSensor(Entity):
             self._is_collection_date_today = False
             self._is_collection_date_tomorrow = False
             self._is_collection_date_day_after_tomorrow = False
-            self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
+            self._last_update = datetime.now().replace(microsecond=0)
