@@ -15,6 +15,7 @@ from .const.const import (
     ATTR_IS_COLLECTION_DATE_TOMORROW,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
+    ATTR_DAY_MONTH_YEAR_DATE,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_ID,
@@ -46,6 +47,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
         self._year_month_day_date = None
+        self._day_month_year_date = None
         self._unique_id = hashlib.sha1(
             f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX,'')}".encode("utf-8")
         ).hexdigest()
@@ -75,6 +77,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
             ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
             ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
+            ATTR_DAY_MONTH_YEAR_DATE: self._day_month_year_date,
         }
 
     @property
@@ -90,7 +93,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         if not self._is_valid_waste_data():
             return
 
-        self._last_update = datetime.now().replace(microsecond=0)
+        self._last_update = datetime.now().isoformat()
         waste_data_provider = (
             self.fetch_data.waste_data_with_today
             if self._exclude_pickup_today.lower() in ("false", "no")
@@ -118,15 +121,17 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         )
 
         self._year_month_day_date = waste_data_provider[self.waste_type].date()
-        delta = self._year_month_day_date - date.today()
+        delta = waste_data_provider[self.waste_type].date() - date.today()
         self._days_until_collection_date = delta.days
 
-        self._is_collection_date_today = date.today() == self._year_month_day_date
-        self._is_collection_date_tomorrow = date.today() + timedelta(days=1) == self._year_month_day_date
-        self._is_collection_date_day_after_tomorrow = date.today() + timedelta(days=2) == self._year_month_day_date
+        self._is_collection_date_today = date.today() == waste_data_provider[self.waste_type].date()
+        self._is_collection_date_tomorrow = date.today() + timedelta(days=1) == waste_data_provider[self.waste_type].date()
+        self._is_collection_date_day_after_tomorrow = date.today() + timedelta(days=2) == waste_data_provider[self.waste_type].date()
 
-        # self._state = datetime.strftime(self._year_month_day_date, "%d-%m-%Y")
-        self._state = waste_data_provider[self.waste_type].date()
+        self._year_month_day_date = datetime.strftime(waste_data_provider[self.waste_type].date(), "%Y-%m-%d")
+        self._day_month_year_date = datetime.strftime(waste_data_provider[self.waste_type].date(), "%d-%m-%Y")
+
+        self._state = datetime.isoformat(waste_data_provider[self.waste_type])
 
     def _process_non_datetime_data(self, waste_data_provider):
         _LOGGER.debug(
@@ -139,7 +144,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._state = self._default_label
         self._days_until_collection_date = None
         self._year_month_day_date = None
+        self._day_month_year_date = None
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
-        self._last_update = datetime.now().replace(microsecond=0)
+        self._last_update = datetime.now().isoformat()
