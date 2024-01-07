@@ -11,54 +11,55 @@ _Component to integrate with the following providers._
 
 | Provider                         |
 | ---------------------------------|
-| mijnafvalwijzer                  |
-| afvalstoffendienstkalender (all) |
-| rova                             |
 | acv                              |
-| almere                           |
+| afvalstoffendienstkalender (all) |
+| alkmaar                          |
+| alphenaandenrijn                 |
 | areareiniging                    |
 | assen                            |
 | avalex                           |
 | avri                             |
 | bar                              |
-| hellendoorn                      |
-| meerlanden                       |
-| meppel                           |
-| rad                              |
-| twentemilieu                     |
-| waardlanden                      |
-| westland                         |
-| ximmio                           |
-| reinis                           |
-| alkmaar                          |
-| alphenaandenrijn                 |
 | berkelland                       |
 | blink                            |
+| circulus                         |
 | cranendonck                      |
 | cyclus                           |
 | dar                              |
+| deafvalapp                       |
 | denhaag                          |
+| eemsdelta (iCalendar)            |
 | gad                              |
+| hellendoorn                      |
 | hvc                              |
 | lingewaard                       |
-| middelburgngen                   |
+| meppel                           |
+| meerlanden                       |
+| middelburg                       |
+| mijnafvalwijzer                  |
 | montfoort                        |
 | peelenmaas                       |
 | prezero                          |
 | purmerend                        |
+| rad                              |
+| reinis                           |
+| rd4                              |
+| rova                             |
 | rmn                              |
 | schouwenand                      |
 | spaarnelanden                    |
 | sudwestfryslan                   |
 | suez                             |
+| twentemilieu                     |
 | venray                           |
 | voorschoten                      |
-| woerden                          |
 | waalre                           |
+| waardlanden                      |
+| westland                         |
+| woerden                          |
+| ximmio                           |
 | zrd                              |
-| eemsdelta (iCalendar)            |
-| rd4                              |
-| deafvalapp                       |
+| ---------------------------------|
 
 This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 

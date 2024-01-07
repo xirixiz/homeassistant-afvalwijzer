@@ -31,19 +31,14 @@ def get_waste_data_raw(
     ##########################################################################
     try:
         url = SENSOR_COLLECTOR_TO_URL[provider_url][0]
+        data = {
+            "postCode": postal_code,
+            "houseNumber": street_number,
+            "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
+        }
+
         if suffix:
-            data = {
-                "postCode": postal_code,
-                "houseNumber": street_number,
-                "HouseLetter": suffix,
-                "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
-            }
-        else:
-            data = {
-                "postCode": postal_code,
-                "houseNumber": street_number,
-                "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
-            }
+            data["HouseLetter"] = suffix
         raw_response = requests.post(url=url, timeout=60, data=data)
         uniqueId = raw_response.json()["dataList"][0]["UniqueId"]
         community = raw_response.json()["dataList"][0]["Community"]

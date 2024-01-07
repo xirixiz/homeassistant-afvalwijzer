@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2023.12.02"
+VERSION = "2024.01.01"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_COLLECTOR_TO_URL = {
@@ -86,6 +86,10 @@ SENSOR_COLLECTORS_XIMMIO = {
 
 SENSOR_COLLECTORS_RD4 = {
     "rd4": "https://data.rd4.nl/api/v1/waste-calendar?postal_code={0}&house_number={1}&house_number_extension={2}&year={3}",
+}
+
+SENSOR_COLLECTORS_CIRCULUS = {
+    "circulus": "https://mijn.circulus.nl",
 }
 
 SENSOR_COLLECTORS_BURGERPORTAAL = {
