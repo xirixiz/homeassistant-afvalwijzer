@@ -81,6 +81,7 @@ SENSOR_COLLECTORS_XIMMIO = {
     "westland": "6fc75608-126a-4a50-9241-a002ce8c8a6c",
     "ximmio": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
+    "woerden": "06856f74-6826-4c6a-aabf-69bc9d20b5a6",
 }
 
 SENSOR_COLLECTORS_RD4 = {

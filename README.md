@@ -7,9 +7,9 @@
 [![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Validation And Formatting](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml/badge.svg)](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml)
 
-_Component to integrate with the following collectors._
+_Component to integrate with the following providers._
 
-| Collector                        |
+| Provider                         |
 | ---------------------------------|
 | mijnafvalwijzer                  |
 | afvalstoffendienstkalender (all) |
@@ -53,6 +53,7 @@ _Component to integrate with the following collectors._
 | suez                             |
 | venray                           |
 | voorschoten                      |
+| woerden                          |
 | waalre                           |
 | zrd                              |
 | eemsdelta (iCalendar)            |

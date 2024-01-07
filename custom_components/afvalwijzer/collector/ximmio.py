@@ -16,7 +16,7 @@ def get_waste_data_raw(
     if provider not in SENSOR_COLLECTORS_XIMMIO.keys():
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    collectors = ("avalex", "meerlanden", "rad", "westland")
+    collectors = ("avalex", "meerlanden", "rad", "westland", "woerden")
     provider_url = "ximmio02" if provider in collectors else "ximmio01"
 
     TODAY = datetime.now().strftime("%d-%m-%Y")
@@ -31,11 +31,19 @@ def get_waste_data_raw(
     ##########################################################################
     try:
         url = SENSOR_COLLECTOR_TO_URL[provider_url][0]
-        data = {
-            "postCode": postal_code,
-            "houseNumber": street_number,
-            "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
-        }
+        if suffix:
+            data = {
+                "postCode": postal_code,
+                "houseNumber": street_number,
+                "HouseLetter": suffix,
+                "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
+            }
+        else:
+            data = {
+                "postCode": postal_code,
+                "houseNumber": street_number,
+                "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
+            }
         raw_response = requests.post(url=url, timeout=60, data=data)
         uniqueId = raw_response.json()["dataList"][0]["UniqueId"]
         community = raw_response.json()["dataList"][0]["Community"]

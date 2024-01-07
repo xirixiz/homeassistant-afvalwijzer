@@ -43,9 +43,9 @@ exclude_list = ""
 # street_number = "1"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "3951en"
-street_number = "1"
+#provider = "mijnafvalwijzer"
+#postal_code = "3951en"
+#street_number = "1"
 
 # Afvalstoffendienstkalender
 # provider = "afvalstoffendienstkalender"
@@ -90,9 +90,15 @@ street_number = "1"
 # street_number = "1"
 
 # Ximmio
-# provider = "meerlanden"
-# postal_code = "2121xt"
-# street_number = "38"
+#provider = "meerlanden"
+#postal_code = "3446GR"
+#street_number = "17"
+
+# Ximmio
+provider = "woerden"
+postal_code = "3446GL"
+street_number = "16"
+#suffix = "a"
 
 # Ximmio
 # provider = "acv"
