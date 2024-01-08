@@ -38,9 +38,9 @@ exclude_list = ""
 # street_number = "2"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
@@ -105,9 +105,9 @@ exclude_list = ""
 # street_number = "11"
 
 # Circulus
-provider = "circulus"
-postal_code = "7421AC"
-street_number = "1"
+#provider = "circulus"
+#postal_code = "7421AC"
+#street_number = "1"
 
 # postal_code = postal_code.strip().upper()
 

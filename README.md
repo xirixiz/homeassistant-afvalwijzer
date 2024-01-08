@@ -51,6 +51,7 @@ _Component to integrate with the following providers._
 | sudwestfryslan                   |
 | suez                             |
 | twentemilieu                     |
+| veldhoven                        |
 | venray                           |
 | voorschoten                      |
 | waalre                           |

@@ -5,14 +5,17 @@ def _waste_type_rename(item_name):
         "best_bag": "best-tas",
         "bulklitter": "grofvuil",
         "bulkygardenwaste": "tuinafval",
+        "chemokar": "chemisch",
         "christmas_trees": "kerstbomen",
         "gemengde plastics": "plastic",
         "glass": "glas",
         "green": "gft",
+        "groene container": "gft",
         "groente": "gft",
         "groente-, fruit en tuinafval": "gft",
         "groente, fruit- en tuinafval": "gft",
         "grey": "restafval",
+        "grijze container": "restafval",
         "kca": "chemisch",
         "kerstb": "kerstboom",
         "kerstboom": "kerstbomen",
@@ -22,11 +25,13 @@ def _waste_type_rename(item_name):
         "paper": "papier",
         "pdb": "pmd",
         "papier en karton": "papier",
+        "papierinzameling": "papier",
         "plastic": "plastic",
         "plastic, blik & drinkpakken arnhem": "pmd",
         "plastic, blik & drinkpakken overbetuwe": "pmd",
         "pmd": "pmd",
         "pmdrest": "pmd-restafval",
+        "pmd-zak": "pmd",
         "pruning_waste": "snoeiafval",
         "remainder": "restwagen",
         "residual_waste": "restafval",
@@ -41,7 +46,3 @@ def _waste_type_rename(item_name):
     }
 
     return waste_mapping.get(item_name, item_name)
-
-
-if __name__ == "__main__":
-    print("Yell something at a mountain!")

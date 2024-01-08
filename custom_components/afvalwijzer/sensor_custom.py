@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from datetime import datetime
+from datetime import date, datetime
 import hashlib
 
 from homeassistant.helpers.entity import Entity
@@ -9,6 +9,7 @@ from .const.const import (
     _LOGGER,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
+    ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_DEFAULT_LABEL,
     CONF_ID,
     CONF_POSTAL_CODE,
@@ -30,6 +31,7 @@ class CustomSensor(Entity):
         self._id_name = self.config.get(CONF_ID)
         self._default_label = self.config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
+        self._days_until_collection_date = None
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if len(self._id_name) > 0 else "")
         ) + self.waste_type
@@ -65,6 +67,7 @@ class CustomSensor(Entity):
             return {
                 ATTR_LAST_UPDATE: self._last_update,
                 ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
+                ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
             }
         else:
             return {
@@ -89,6 +92,10 @@ class CustomSensor(Entity):
                 collection_date_us = waste_data_custom[self.waste_type].date()
                 self._year_month_day_date = str(collection_date_us)
 
+                # Add the days until the collection date
+                delta = collection_date_us - date.today()
+                self._days_until_collection_date = delta.days
+
                 # Add the NL date format as default state
                 self._state = datetime.strftime(
                     waste_data_custom[self.waste_type].date(), "%d-%m-%Y"
@@ -102,5 +109,6 @@ class CustomSensor(Entity):
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._state = self._default_label
+            self._days_until_collection_date = None
             self._year_month_day_date = None
             self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")

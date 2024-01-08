@@ -18,6 +18,8 @@ def get_waste_data_raw(
 
     DATE_PATTERN = re.compile(r"^\d{8}")
 
+    TODAY = datetime.now()
+    YEAR_CURRENT = TODAY.year
     try:
         url = SENSOR_COLLECTORS_ICALENDAR[provider].format(
             provider,
@@ -25,6 +27,7 @@ def get_waste_data_raw(
             street_number,
             suffix,
             datetime.now().strftime("%Y-%m-%d"),
+            YEAR_CURRENT,
         )
         raw_response = requests.get(url, timeout=60, verify=False)
     except requests.exceptions.RequestException as err:
@@ -40,28 +43,31 @@ def get_waste_data_raw(
         return
 
     waste_data_raw = []
-    date = None
-    type = None
+    waste_date = None
+    waste_type = None
 
     for line in response.splitlines():
-        key, value = line.split(":", 2)
+        if provider == "veldhoven":
+            key, value = line.split(":", 1)
+        else:
+            key, value = line.split(":", 2)
         field = key.split(";")[0]
         if field == "BEGIN" and value == "VEVENT":
-            date = None
-            type = None
+            waste_date = None
+            waste_type = None
         elif field == "SUMMARY":
-            type = value.strip().lower()
+            waste_type = _waste_type_rename(value.strip().lower())
         elif field == "DTSTART":
             if DATE_PATTERN.match(value):
-                date = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
+                waste_date = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
             else:
-                _LOGGER.debug(f"Unsupported date format: {value}")
+                _LOGGER.debug(f"Unsupported waste_date format: {value}")
         elif field == "END" and value == "VEVENT":
-            if date and type:
-                waste_data_raw.append({"type": type, "date": date})
+            if waste_date and waste_type:
+                waste_data_raw.append({"type": waste_type, "date": waste_date})
             else:
                 _LOGGER.debug(
-                    f"No date or type extracted from event: date={date}, type={type}"
+                    f"No waste_date or waste_type extracted from event: waste_date={waste_date}, waste_type={waste_type}"
                 )
 
     return waste_data_raw
