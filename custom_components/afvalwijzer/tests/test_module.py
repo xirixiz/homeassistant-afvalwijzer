@@ -38,9 +38,14 @@ exclude_list = ""
 # street_number = "2"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146eg"
-street_number = "1"
+#provider = "mijnafvalwijzer"
+#postal_code = "5146eg"
+#street_number = "1"
+
+#iCalendar file
+provider = "veldhoven"
+postal_code = "5508SB"
+street_number = "51"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
