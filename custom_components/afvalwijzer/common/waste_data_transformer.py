@@ -44,10 +44,10 @@ class WasteDataTransformer(object):
             self._waste_types_custom,
         ) = self.__gen_sensor_waste_data()
 
-
     ##########################################################################
     # STRUCTURE ALL WASTE DATA IN CUSTOM FORMAT
     #########################################################################
+
     def __structure_waste_data(self):
         try:
             waste_data_with_today = {}

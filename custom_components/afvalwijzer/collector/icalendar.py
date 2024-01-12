@@ -1,12 +1,9 @@
 from datetime import datetime
 import re
 import requests
-import logging
 
 from ..common.main_functions import _waste_type_rename
-from ..const.const import SENSOR_COLLECTORS_ICALENDAR
-
-_LOGGER = logging.getLogger(__name__)
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
 
 
 def get_waste_data_raw(provider, postal_code, street_number, suffix):
@@ -69,5 +66,4 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
     print("Yell something at a mountain!")
