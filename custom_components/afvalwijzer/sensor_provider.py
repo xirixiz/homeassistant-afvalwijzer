@@ -76,12 +76,12 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     def state_attributes(self):
         attrs = {
             ATTR_LAST_UPDATE: self._last_update,
+            ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
+            ATTR_IS_COLLECTION_DATE_TODAY: self._is_collection_date_today,
+            ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
+            ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
         }
         if isinstance(self._state, datetime):
-            attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date,
-            attrs[ATTR_IS_COLLECTION_DATE_TODAY] = self._is_collection_date_today,
-            attrs[ATTR_IS_COLLECTION_DATE_TOMORROW] = self._is_collection_date_tomorrow,
-            attrs[ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW] = self._is_collection_date_day_after_tomorrow,
             attrs["device_class"] = DEVICE_CLASS_TIMESTAMP
         return attrs
 

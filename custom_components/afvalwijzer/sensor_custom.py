@@ -67,9 +67,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
     def state_attributes(self):
         attrs = {
             ATTR_LAST_UPDATE: self._last_update,
+            ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
         }
         if isinstance(self._state, datetime):
-            attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date,
             attrs["device_class"] = DEVICE_CLASS_TIMESTAMP
         return attrs
 
