@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+from homeassistant.const import DEVICE_CLASS_TIMESTAMP
+from homeassistant.util import Throttle
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.helpers.restore_state import RestoreEntity
 from datetime import datetime, date, timedelta
 import hashlib
-
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
 
 from .const.const import (
     _LOGGER,
@@ -12,8 +13,6 @@ from .const.const import (
     ATTR_IS_COLLECTION_DATE_TODAY,
     ATTR_IS_COLLECTION_DATE_TOMORROW,
     ATTR_LAST_UPDATE,
-    ATTR_YEAR_MONTH_DAY_DATE,
-    ATTR_ISOFORMATTED_DATE,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_ID,
@@ -27,7 +26,7 @@ from .const.const import (
 )
 
 
-class ProviderSensor(Entity):
+class ProviderSensor(RestoreEntity, SensorEntity):
     def __init__(self, hass, waste_type, fetch_data, config):
         self.hass = hass
         self.waste_type = waste_type
@@ -39,20 +38,19 @@ class ProviderSensor(Entity):
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
         ) + waste_type
-        self._icon = SENSOR_ICON
-        self._state = config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
         self._days_until_collection_date = None
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
-        self._year_month_day_date = None
-        self._isoformatted_date = None
+        self._state = config.get(CONF_DEFAULT_LABEL)
+        self._icon = SENSOR_ICON
         self._unique_id = hashlib.sha1(
             f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX,'')}".encode(
                 "utf-8"
             )
         ).hexdigest()
+        self._device_class = None
 
     @property
     def name(self):
@@ -71,16 +69,21 @@ class ProviderSensor(Entity):
         return self._state
 
     @property
-    def extra_state_attributes(self):
-        return {
+    def device_class(self):
+        return self._device_class
+
+    @property
+    def state_attributes(self):
+        attrs = {
             ATTR_LAST_UPDATE: self._last_update,
-            ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
-            ATTR_IS_COLLECTION_DATE_TODAY: self._is_collection_date_today,
-            ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
-            ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
-            ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
-            ATTR_ISOFORMATTED_DATE: self._isoformatted_date,
         }
+        if isinstance(self._state, datetime):
+            attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date,
+            attrs[ATTR_IS_COLLECTION_DATE_TODAY] = self._is_collection_date_today,
+            attrs[ATTR_IS_COLLECTION_DATE_TOMORROW] = self._is_collection_date_tomorrow,
+            attrs[ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW] = self._is_collection_date_day_after_tomorrow,
+            attrs["device_class"] = DEVICE_CLASS_TIMESTAMP
+        return attrs
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
@@ -95,33 +98,32 @@ class ProviderSensor(Entity):
         try:
             if not waste_data_provider or self.waste_type not in waste_data_provider:
                 raise ValueError
-            self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
+            self._last_update = datetime.now().isoformat()
 
             if isinstance(waste_data_provider[self.waste_type], datetime):
                 self._update_attributes_date(waste_data_provider[self.waste_type])
+                self._device_class = DEVICE_CLASS_TIMESTAMP
             else:
                 self._update_attributes_non_date(waste_data_provider[self.waste_type])
+                self._device_class = None
         except ValueError:
             self._handle_value_error()
 
     def _update_attributes_date(self, collection_date):
-        self._isoformatted_date = datetime.isoformat(collection_date)
+        collection_date_object = collection_date.date()
 
-        collection_date_us = collection_date.date()
-        self._year_month_day_date = str(collection_date_us)
-
-        delta = collection_date_us - date.today()
+        delta = collection_date_object - date.today()
         self._days_until_collection_date = delta.days
 
-        self._update_collection_date_flags(collection_date_us)
+        self._update_collection_date_flags(collection_date_object)
 
-        self._state = datetime.strftime(collection_date_us, "%d-%m-%Y")
+        self._state = collection_date_object
 
     def _update_attributes_non_date(self, value):
         self._state = str(value)
 
-    def _update_collection_date_flags(self, collection_date_us):
+    def _update_collection_date_flags(self, collection_date_object):
         today = date.today()
-        self._is_collection_date_today = collection_date_us == today
-        self._is_collection_date_tomorrow = collection_date_us == today + timedelta(days=1)
-        self._is_collection_date_day_after_tomorrow = collection_date_us == today + timedelta(days=2)
+        self._is_collection_date_today = collection_date_object == today
+        self._is_collection_date_tomorrow = collection_date_object == today + timedelta(days=1)
+        self._is_collection_date_day_after_tomorrow = collection_date_object == today + timedelta(days=2)

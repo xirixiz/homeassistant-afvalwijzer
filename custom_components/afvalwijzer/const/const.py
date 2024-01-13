@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2024.01.06"
+VERSION = "2024.XX.XX"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_COLLECTOR_TO_URL = {
@@ -122,8 +122,6 @@ ATTR_IS_COLLECTION_DATE_TODAY = "is_collection_date_today"
 ATTR_IS_COLLECTION_DATE_TOMORROW = "is_collection_date_tomorrow"
 ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW = "is_collection_date_day_after_tomorrow"
 ATTR_DAYS_UNTIL_COLLECTION_DATE = "days_until_collection_date"
-ATTR_YEAR_MONTH_DAY_DATE = "year_month_day_date"
-ATTR_ISOFORMATTED_DATE = "isoformatted_date"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(hours=1)
 PARALLEL_UPDATES = 1
