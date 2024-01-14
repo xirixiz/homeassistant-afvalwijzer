@@ -89,7 +89,7 @@ The second row sorts the waste items by date using the following lovelace code
 ```
 
 More information on the reminders (ios in this case):
-- https://github.com/xirixiz/my-hass-config/blob/master/packages/waste.yaml
+- https://github.com/xirixiz/my-hass-config/blob/main/packages/waste.yaml
 - https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
@@ -112,7 +112,7 @@ custom_components/afvalwijzer/sensor.py
 ```
 
 ##### CUSTOM COMPONENT USAGE
-https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
+https://github.com/home-assistant/example-custom-config/tree/main/custom_components/example_sensor
 
 ##### LOGLEVEL
 In order to extend the log level, modify the following (configuration.yaml probably)
@@ -213,8 +213,8 @@ automation:
 
 ***
 
-[exampleimg1]: afvalwijzer-lovelace.png
-[exampleimg2]: afvalwijzer_lovelace.png
+[exampleimg1]: images/afvalwijzer_lovelace_1.png
+[exampleimg2]: images/afvalwijzer-lovelace_2.png
 [buymecoffee]: https://www.buymeacoffee.com/xirixiz
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
 [customupdater]: https://github.com/custom-components/custom_updater
