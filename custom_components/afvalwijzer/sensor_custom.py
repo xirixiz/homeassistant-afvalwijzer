@@ -68,8 +68,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
     def state_attributes(self):
         attrs = {
             ATTR_LAST_UPDATE: self._last_update,
-            ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
         }
+        if "next_date" in self.name.lower():
+            attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
         if isinstance(self._state, datetime):
             attrs["device_class"] = self._device_class
         return attrs
@@ -107,6 +108,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
     def _update_attributes_non_date(self, value):
         self._state = str(value)
+        self._days_until_collection_date = None
         self._device_class = None
 
     def _handle_value_error(self):

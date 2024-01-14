@@ -125,9 +125,20 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     def _update_attributes_non_date(self, value):
         self._state = str(value)
+        self._days_until_collection_date = None
+        self._device_class = None
 
-    def _update_collection_date_flags(self, collection_date_object):
+    def _update_collection_date_flags(self, collection_date_delta):
         today = date.today()
-        self._is_collection_date_today = collection_date_object == today
-        self._is_collection_date_tomorrow = collection_date_object == today + timedelta(days=1)
-        self._is_collection_date_day_after_tomorrow = collection_date_object == today + timedelta(days=2)
+        self._is_collection_date_today = collection_date_delta == today
+        self._is_collection_date_tomorrow = collection_date_delta == today + timedelta(days=1)
+        self._is_collection_date_day_after_tomorrow = collection_date_delta == today + timedelta(days=2)
+
+    def _handle_value_error(self):
+        self._state = self._default_label
+        self._is_collection_date_today = None
+        self._is_collection_date_tomorrow = None
+        self._is_collection_date_day_after_tomorrow = None
+        self._days_until_collection_date = None
+        self._device_class = None
+        self._last_update = datetime.now().isoformat()
