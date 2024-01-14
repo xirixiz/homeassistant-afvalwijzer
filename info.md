@@ -13,5 +13,5 @@
       date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"
       default_label: geen              # (optional, default = geen) label if no date found
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
-      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft"
+      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft, restafval, pmd, etc"
 ```
