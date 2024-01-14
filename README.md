@@ -1,5 +1,5 @@
 # Afvalwijzer
-[![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
+[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
@@ -214,7 +214,7 @@ automation:
 
 [exampleimg1]: afvalwijzer-lovelace.png
 [exampleimg2]: afvalwijzer_lovelace.png
-[buymecoffee]: https://www.buymeacoffee.com/xirixiz
-[buymecoffeebedge]: https://camo.githubusercontent.com/cd005dca0ef55d7725912ec03a936d3a7c8de5b5/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6275792532306d6525323061253230636f666665652d646f6e6174652d79656c6c6f772e737667
+[buymecoffee]: [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/gbraad)
+[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
 [customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
