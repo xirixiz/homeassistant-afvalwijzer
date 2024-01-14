@@ -1,6 +1,5 @@
-from homeassistant.const import DEVICE_CLASS_TIMESTAMP
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.util import Throttle
 
 from datetime import datetime, date
@@ -15,6 +14,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
+    CONF_DATE_ISOFORMAT,
     MIN_TIME_BETWEEN_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -31,6 +31,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
         self._days_until_collection_date = None
+        self._date_isoformat = config.get(CONF_DATE_ISOFORMAT)
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
         ) + waste_type
@@ -70,7 +71,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
             ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
         }
         if isinstance(self._state, datetime):
-            attrs["device_class"] = DEVICE_CLASS_TIMESTAMP
+            attrs["device_class"] = self._device_class
         return attrs
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -84,26 +85,32 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
             if isinstance(waste_data_custom[self.waste_type], datetime):
                 self._update_attributes_date(waste_data_custom[self.waste_type])
-                self._device_class = DEVICE_CLASS_TIMESTAMP
             else:
                 self._update_attributes_non_date(waste_data_custom[self.waste_type])
-                self._device_class = None
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
             self._handle_value_error()
 
     def _update_attributes_date(self, collection_date):
-        collection_date_object = collection_date.date()
+        if self._date_isoformat.casefold() in ("true", "yes"):
+            collection_date_object = collection_date.isoformat()
+        else:
+            collection_date_object = collection_date.date()
 
-        delta = collection_date_object - date.today()
+        collection_date_delta = collection_date.date()
+        delta = collection_date_delta - date.today()
         self._days_until_collection_date = delta.days
+
+        self._device_class = SensorDeviceClass.TIMESTAMP
 
         self._state = collection_date_object
 
     def _update_attributes_non_date(self, value):
         self._state = str(value)
+        self._device_class = None
 
     def _handle_value_error(self):
         self._state = self._default_label
         self._days_until_collection_date = None
+        self._device_class = None
         self._last_update = datetime.now().isoformat()

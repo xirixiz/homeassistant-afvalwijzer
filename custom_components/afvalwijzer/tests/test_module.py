@@ -24,6 +24,7 @@ from ..collector.main_collector import MainCollector
 # Common
 suffix = ""
 exclude_pickup_today = "True"
+date_isoformat = "True"
 default_label = "geen"
 exclude_list = ""
 

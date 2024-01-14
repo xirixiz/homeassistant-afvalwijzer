@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from homeassistant.const import DEVICE_CLASS_TIMESTAMP
 from homeassistant.util import Throttle
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -19,6 +18,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
+    CONF_DATE_ISOFORMAT,
     MIN_TIME_BETWEEN_UPDATES,
     PARALLEL_UPDATES,
     SENSOR_ICON,
@@ -43,6 +43,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
+        self._date_isoformat = config.get(CONF_DATE_ISOFORMAT)
         self._state = config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._unique_id = hashlib.sha1(
@@ -82,7 +83,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
         }
         if isinstance(self._state, datetime):
-            attrs["device_class"] = DEVICE_CLASS_TIMESTAMP
+            attrs["device_class"] = self._device_class
         return attrs
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
@@ -102,20 +103,23 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
             if isinstance(waste_data_provider[self.waste_type], datetime):
                 self._update_attributes_date(waste_data_provider[self.waste_type])
-                self._device_class = DEVICE_CLASS_TIMESTAMP
             else:
                 self._update_attributes_non_date(waste_data_provider[self.waste_type])
-                self._device_class = None
         except ValueError:
             self._handle_value_error()
 
     def _update_attributes_date(self, collection_date):
-        collection_date_object = collection_date.date()
+        if self._date_isoformat.casefold() in ("true", "yes"):
+            collection_date_object = collection_date.isoformat()
+        else:
+            collection_date_object = collection_date.date()
 
-        delta = collection_date_object - date.today()
+        collection_date_delta = collection_date.date()
+        delta = collection_date_delta - date.today()
         self._days_until_collection_date = delta.days
 
-        self._update_collection_date_flags(collection_date_object)
+        self._update_collection_date_flags(collection_date_delta)
+        self._device_class = SensorDeviceClass.TIMESTAMP
 
         self._state = collection_date_object
 
