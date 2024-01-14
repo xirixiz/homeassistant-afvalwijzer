@@ -1,51 +1,54 @@
 name: 🚨 Report an issue
-description: Report an issue.
+description: Report an issue with Afvalwijzer for Home Assistant.
+labels: bug
 body:
-  - type: checkboxes
+  - type: markdown
     attributes:
-      label: Support guidelines
-      description: Please read the support guidelines before proceeding.
-      options:
-        - label: I've read the [support guidelines](https://github.com/xirixiz/homeassistant-afvalwijzer/blob/master/.github/SUPPORT.md)
-          required: true
-
-  - type: textarea
-    attributes:
-      label: Description
-      description: Please provide a brief description of the issue in 1-2 sentences.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Expected behaviour
-      description: Please describe precisely what you'd expect to happen.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Actual behaviour
-      description: Please describe precisely what is actually happening.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Version
-      description: Please provide the HASS version, component version and system information (ARM, Docker, anything usefull).
       value: |
-        * HASS version:
-        * Component version:
-        * Useful system info:
+        This issue form is for reporting bugs only!
+
+        If you have a feature or enhancement request, please use the applicable form
+  - type: textarea
     validations:
       required: true
+    attributes:
+      label: The problem
+      description: >-
+        Describe the issue you are experiencing here to communicate to the
+        maintainers. Tell us what you were trying to do and what happened.
 
+        Provide a clear and concise description of what the problem is.
+  - type: markdown
+    attributes:
+      value: |
+        ## Environment
+  - type: input
+    id: version_afvalwijzer
+    validations:
+      required: true
+    attributes:
+      label: Version of afvalwijzer integration having the issue?
+      placeholder: afvalwijzer-
+      description: >
+        Can be found in the Configuration panel -> Info.
+  - type: input
+    id: version
+    validations:
+      required: true
+    attributes:
+      label: Version of Home Assistant Core having the issue?
+      placeholder: core-
+      description: >
+        Can be found in the Configuration panel -> Info.
   - type: textarea
     attributes:
-      label: HASS logs
-      description: Please provide the HASS logs (preferably with debug enabled).
-      value: |
-        * logger -> logs -> custom_components.afvalwijzer: debug in you configuration.yaml
-    validations:
-      required: true
+      label: Anything in the logs that might be useful for us?
+      description: For example, error message, or stack traces.
+      render: txt
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        If you have any additional information for us, use the field below.
+        Please note, you can attach screenshots or screen recordings here, by
+        setting the cursor in the field below and dragging and dropping files into the box.

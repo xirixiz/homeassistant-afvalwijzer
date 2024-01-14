@@ -27,7 +27,7 @@ jobs:
       #    python3 ${{ github.workspace }}/manage/update_manifest.py --version ${{ steps.version.outputs.version }}
 
       # Pack the afvalwijzer dir as a zip and upload to the release
-      - name: ZIP afvalwijzer Dir
+      - name: ZIP Afvalwijzer
         run: |
           cd ${{ github.workspace }}/custom_components/afvalwijzer
           zip afvalwijzer.zip -r ./
