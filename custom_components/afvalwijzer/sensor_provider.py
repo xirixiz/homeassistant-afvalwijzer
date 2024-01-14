@@ -125,7 +125,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     def _update_attributes_non_date(self, value):
         self._state = str(value)
-        self._days_until_collection_date = None
+        self._days_until_collection_date = self._default_label
         self._device_class = None
 
     def _update_collection_date_flags(self, collection_date_delta):

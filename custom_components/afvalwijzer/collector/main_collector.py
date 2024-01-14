@@ -25,6 +25,7 @@ class MainCollector(object):
         street_number,
         suffix,
         exclude_pickup_today,
+        date_isoformat,
         exclude_list,
         default_label,
     ):
@@ -33,6 +34,7 @@ class MainCollector(object):
         self.street_number = street_number.strip()
         self.suffix = suffix.strip().lower()
         self.exclude_pickup_today = exclude_pickup_today.strip()
+        self.date_isoformat = date_isoformat.strip()
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label.strip()
 

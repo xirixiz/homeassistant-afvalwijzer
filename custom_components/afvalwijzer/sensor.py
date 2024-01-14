@@ -56,6 +56,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     street_number = config.get(CONF_STREET_NUMBER)
     suffix = config.get(CONF_SUFFIX)
     exclude_pickup_today = config.get(CONF_EXCLUDE_PICKUP_TODAY)
+    date_isoformat = config.get(CONF_DATE_ISOFORMAT)
     exclude_list = config.get(CONF_EXCLUDE_LIST)
     default_label = config.get(CONF_DEFAULT_LABEL)
 
@@ -72,6 +73,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 street_number,
                 suffix,
                 exclude_pickup_today,
+                date_isoformat,
                 exclude_list,
                 default_label,
             )
@@ -111,6 +113,7 @@ class AfvalwijzerData(object):
         street_number = self.config.get(CONF_STREET_NUMBER)
         suffix = self.config.get(CONF_SUFFIX)
         exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
+        date_isoformat = self.config.get(CONF_DATE_ISOFORMAT)
         default_label = self.config.get(CONF_DEFAULT_LABEL)
         exclude_list = self.config.get(CONF_EXCLUDE_LIST)
 
@@ -121,6 +124,7 @@ class AfvalwijzerData(object):
                 street_number,
                 suffix,
                 exclude_pickup_today,
+                date_isoformat,
                 exclude_list,
                 default_label,
             )

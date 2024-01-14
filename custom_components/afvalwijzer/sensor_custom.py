@@ -108,7 +108,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
     def _update_attributes_non_date(self, value):
         self._state = str(value)
-        self._days_until_collection_date = None
+        self._days_until_collection_date = self._default_label
         self._device_class = None
 
     def _handle_value_error(self):
