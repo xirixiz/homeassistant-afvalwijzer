@@ -216,4 +216,5 @@ automation:
 [exampleimg2]: afvalwijzer_lovelace.png
 [buymecoffee]: https://www.buymeacoffee.com/xirixiz
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
+[customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
