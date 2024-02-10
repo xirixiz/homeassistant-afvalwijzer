@@ -26,6 +26,8 @@ def _waste_type_rename(item_name):
         "pdb": "pmd",
         "papier en karton": "papier",
         "papierinzameling": "papier",
+        "papier en karton (inzameling overdag)": "papier",
+        "papier en karton (avond inzameling)": "papier",
         "plastic": "plastic",
         "plastic, blik & drinkpakken": "pmd",
         "plastic, blik & drinkpakken arnhem": "pmd",
