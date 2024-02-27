@@ -1,11 +1,13 @@
 # Afvalwijzer
-[![BuyMeCoffee][buymecoffeebedge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Validation And Formatting](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml/badge.svg)](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml)
+<br><br>
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
+
 
 _Component to integrate with the following providers._
 
@@ -214,7 +216,5 @@ automation:
 
 [exampleimg1]: afvalwijzer-lovelace.png
 [exampleimg2]: afvalwijzer_lovelace.png
-[buymecoffee]: https://www.buymeacoffee.com/xirixiz
-[buymecoffeebedge]: https://camo.githubusercontent.com/cd005dca0ef55d7725912ec03a936d3a7c8de5b5/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6275792532306d6525323061253230636f666665652d646f6e6174652d79656c6c6f772e737667
 [customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
