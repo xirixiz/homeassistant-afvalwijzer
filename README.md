@@ -1,11 +1,13 @@
 # Afvalwijzer
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 [![custom_updater][customupdaterbadge]][customupdater]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Validation And Formatting](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml/badge.svg)](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml)
+<br><br>
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
+
 
 _Component to integrate with the following providers._
 
@@ -89,7 +91,7 @@ The second row sorts the waste items by date using the following lovelace code
 ```
 
 More information on the reminders (ios in this case):
-- https://github.com/xirixiz/my-hass-config/blob/main/packages/waste.yaml
+- https://github.com/xirixiz/my-hass-config/blob/master/packages/waste.yaml
 - https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
@@ -112,7 +114,7 @@ custom_components/afvalwijzer/sensor.py
 ```
 
 ##### CUSTOM COMPONENT USAGE
-https://github.com/home-assistant/example-custom-config/tree/main/custom_components/example_sensor
+https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
 
 ##### LOGLEVEL
 In order to extend the log level, modify the following (configuration.yaml probably)
@@ -138,7 +140,6 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
       street_number:  5                # (required, default = '')
       suffix: ''                       # (optional, default = '')
       exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
-      date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"
       default_label: geen              # (optional, default = geen) label if no date found
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
       exclude_list: ''                 # (optional, default = '') comma separated list of waste types (case ignored). F.e. "papier, gft"
@@ -213,9 +214,7 @@ automation:
 
 ***
 
-[exampleimg1]: images/afvalwijzer_lovelace_1.png
-[exampleimg2]: images/afvalwijzer-lovelace_2.png
-[buymecoffee]: https://www.buymeacoffee.com/xirixiz
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
+[exampleimg1]: afvalwijzer-lovelace.png
+[exampleimg2]: afvalwijzer_lovelace.png
 [customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
