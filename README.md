@@ -40,6 +40,7 @@ _Component to integrate with the following providers._
 | middelburg                       |
 | mijnafvalwijzer                  |
 | montfoort                        |
+| nijkerk                          |
 | peelenmaas                       |
 | prezero                          |
 | purmerend                        |
