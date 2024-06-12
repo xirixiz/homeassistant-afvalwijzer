@@ -22,6 +22,7 @@ class WasteDataTransformer(object):
         exclude_list,
         default_label,
     ):
+        waste_data_raw.sort(key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d"))
         self.waste_data_raw = waste_data_raw
         self.exclude_pickup_today = exclude_pickup_today
         self.exclude_list = exclude_list.strip().lower()
@@ -43,10 +44,10 @@ class WasteDataTransformer(object):
             self._waste_types_custom,
         ) = self.__gen_sensor_waste_data()
 
-
     ##########################################################################
     # STRUCTURE ALL WASTE DATA IN CUSTOM FORMAT
     #########################################################################
+
     def __structure_waste_data(self):
         try:
             waste_data_with_today = {}

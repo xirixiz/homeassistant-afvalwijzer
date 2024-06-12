@@ -29,8 +29,8 @@ exclude_list = ""
 
 # DeAfvalapp
 # provider = "deafvalapp"
-# postal_code = "6105CN"
-# street_number = "1"
+# postal_code = "5701NG"
+# street_number = "4"
 
 # Icalendar
 # provider = "eemsdelta"
@@ -38,14 +38,19 @@ exclude_list = ""
 # street_number = "2"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
+
+# iCalendar file
+# provider = "veldhoven"
+# postal_code = "5508SB"
+# street_number = "51"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "3951en"
-street_number = "1"
+# provider = "mijnafvalwijzer"
+# postal_code = "3951en"
+# street_number = "1"
 
 # Afvalstoffendienstkalender
 # provider = "afvalstoffendienstkalender"
@@ -91,13 +96,23 @@ street_number = "1"
 
 # Ximmio
 # provider = "meerlanden"
-# postal_code = "2121xt"
-# street_number = "38"
+# postal_code = "3446GR"
+# street_number = "17"
+
+# Ximmio
+# provider = "woerden"
+# postal_code = "3446GL"
+# street_number = "16"
 
 # Ximmio
 # provider = "acv"
 # postal_code = "6713CG"
 # street_number = "11"
+
+# Circulus
+# provider = "circulus"
+# postal_code = "7421AC"
+# street_number = "1"
 
 # postal_code = postal_code.strip().upper()
 

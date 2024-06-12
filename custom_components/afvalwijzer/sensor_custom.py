@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from datetime import datetime
+from datetime import datetime, date
 import hashlib
 
 from homeassistant.helpers.entity import Entity
@@ -9,13 +9,14 @@ from .const.const import (
     _LOGGER,
     ATTR_LAST_UPDATE,
     ATTR_YEAR_MONTH_DAY_DATE,
+    ATTR_DAYS_UNTIL_COLLECTION_DATE,
+    ATTR_ISOFORMATTED_DATE,
     CONF_DEFAULT_LABEL,
     CONF_ID,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
     MIN_TIME_BETWEEN_UPDATES,
-    PARALLEL_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
@@ -27,18 +28,20 @@ class CustomSensor(Entity):
         self.waste_type = waste_type
         self.fetch_data = fetch_data
         self.config = config
-        self._id_name = self.config.get(CONF_ID)
-        self._default_label = self.config.get(CONF_DEFAULT_LABEL)
+        self._id_name = config.get(CONF_ID)
+        self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._last_update = None
+        self._days_until_collection_date = None
         self._name = (
-            SENSOR_PREFIX + (f"{self._id_name} " if len(self._id_name) > 0 else "")
-        ) + self.waste_type
+            SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
+        ) + waste_type
 
-        self._state = self.config.get(CONF_DEFAULT_LABEL)
+        self._state = config.get(CONF_DEFAULT_LABEL)
         self._icon = SENSOR_ICON
         self._year_month_day_date = None
+        self._isoformatted_date = None
         self._unique_id = hashlib.sha1(
-            f"{self.waste_type}{self.config.get(CONF_ID)}{self.config.get(CONF_POSTAL_CODE)}{self.config.get(CONF_STREET_NUMBER)}{self.config.get(CONF_SUFFIX,'')}".encode(
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX,'')}".encode(
                 "utf-8"
             )
         ).hexdigest()
@@ -65,6 +68,8 @@ class CustomSensor(Entity):
             return {
                 ATTR_LAST_UPDATE: self._last_update,
                 ATTR_YEAR_MONTH_DAY_DATE: self._year_month_day_date,
+                ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
+                ATTR_ISOFORMATTED_DATE: self._isoformatted_date,
             }
         else:
             return {
@@ -78,29 +83,33 @@ class CustomSensor(Entity):
         waste_data_custom = self.fetch_data.waste_data_custom
 
         try:
-            # Add attribute, set the last updated status of the sensor
             self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
 
             if isinstance(waste_data_custom[self.waste_type], datetime):
-                _LOGGER.debug(
-                    f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type].date()}"
-                )
-                # Add the US date format
-                collection_date_us = waste_data_custom[self.waste_type].date()
-                self._year_month_day_date = str(collection_date_us)
-
-                # Add the NL date format as default state
-                self._state = datetime.strftime(
-                    waste_data_custom[self.waste_type].date(), "%d-%m-%Y"
-                )
+                self._update_attributes_date(waste_data_custom[self.waste_type])
             else:
-                _LOGGER.debug(
-                    f"Generating state via AfvalwijzerCustomSensor for = {self.waste_type} with value {waste_data_custom[self.waste_type]}"
-                )
-                # Add non-date as default state
-                self._state = str(waste_data_custom[self.waste_type])
+                self._update_attributes_non_date(waste_data_custom[self.waste_type])
         except ValueError:
             _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
-            self._state = self._default_label
-            self._year_month_day_date = None
-            self._last_update = datetime.now().strftime("%d-%m-%Y %H:%M")
+            self._handle_value_error()
+
+    def _update_attributes_date(self, collection_date):
+        self._isoformatted_date = datetime.isoformat(collection_date)
+
+        collection_date_us = collection_date.date()
+        self._year_month_day_date = str(collection_date_us)
+
+        delta = collection_date_us - date.today()
+        self._days_until_collection_date = delta.days
+
+        self._state = datetime.strftime(collection_date_us, "%d-%m-%Y")
+
+    def _update_attributes_non_date(self, value):
+        self._state = str(value)
+
+    def _handle_value_error(self):
+        self._state = self._default_label
+        self._days_until_collection_date = None
+        self._year_month_day_date = None
+        self._isoformatted_date = None
+        self._last_update = datetime.now().isoformat()

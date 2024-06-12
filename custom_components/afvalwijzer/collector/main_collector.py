@@ -3,6 +3,7 @@ from ..const.const import (
     _LOGGER,
     SENSOR_COLLECTORS_AFVALWIJZER,
     SENSOR_COLLECTORS_BURGERPORTAAL,
+    SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_OPZET,
@@ -11,7 +12,7 @@ from ..const.const import (
 )
 
 try:
-    from . import burgerportaal, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
+    from . import burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -45,6 +46,13 @@ class MainCollector(object):
                 )
             elif provider in SENSOR_COLLECTORS_BURGERPORTAAL.keys():
                 waste_data_raw = burgerportaal.get_waste_data_raw(
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
+                )
+            elif provider in SENSOR_COLLECTORS_CIRCULUS.keys():
+                waste_data_raw = circulus.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,

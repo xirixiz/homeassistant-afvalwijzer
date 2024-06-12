@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2023.06.01"
+VERSION = "2024.01.06"
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_COLLECTOR_TO_URL = {
@@ -57,6 +57,7 @@ SENSOR_COLLECTORS_OPZET = {
 
 SENSOR_COLLECTORS_ICALENDAR = {
     "eemsdelta": "https://www.eemsdelta.nl/trash-calendar/download/{1}/{2}",
+    "veldhoven": "https://www.veldhoven.nl/afvalkalender/{5}/{1}-{2}.ics",
 }
 
 SENSOR_COLLECTORS_AFVALWIJZER = [
@@ -81,10 +82,15 @@ SENSOR_COLLECTORS_XIMMIO = {
     "westland": "6fc75608-126a-4a50-9241-a002ce8c8a6c",
     "ximmio": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "reinis": "9dc25c8a-175a-4a41-b7a1-83f237a80b77",
+    "woerden": "06856f74-6826-4c6a-aabf-69bc9d20b5a6",
 }
 
 SENSOR_COLLECTORS_RD4 = {
     "rd4": "https://data.rd4.nl/api/v1/waste-calendar?postal_code={0}&house_number={1}&house_number_extension={2}&year={3}",
+}
+
+SENSOR_COLLECTORS_CIRCULUS = {
+    "circulus": "https://mijn.circulus.nl",
 }
 
 SENSOR_COLLECTORS_BURGERPORTAAL = {
@@ -117,6 +123,7 @@ ATTR_IS_COLLECTION_DATE_TOMORROW = "is_collection_date_tomorrow"
 ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW = "is_collection_date_day_after_tomorrow"
 ATTR_DAYS_UNTIL_COLLECTION_DATE = "days_until_collection_date"
 ATTR_YEAR_MONTH_DAY_DATE = "year_month_day_date"
+ATTR_ISOFORMATTED_DATE = "isoformatted_date"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(hours=1)
 PARALLEL_UPDATES = 1
