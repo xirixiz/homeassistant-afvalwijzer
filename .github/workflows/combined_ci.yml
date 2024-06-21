@@ -30,7 +30,7 @@ jobs:
     name: Check style formatting
     steps:
       - uses: "actions/checkout@v3"
-      - uses: "actions/setup-python@v4"
+      - uses: "actions/setup-python@v5"
         with:
           python-version: "3.x"
       - run: python3 -m pip install black
@@ -44,7 +44,7 @@ jobs:
   #     - name: Check out code from GitHub
   #       uses: "actions/checkout@v3"
   #     - name: Setup Python
-  #       uses: actions/setup-python@v4
+  #       uses: actions/setup-python@v5
   #       with:
   #         python-version: "3.9"
   #         cache: "pip" # caching pip dependencies
