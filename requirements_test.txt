@@ -1,3 +1,0 @@
-homeassistant
-pytest-cov
-pytest-homeassistant-custom-component
