@@ -5,7 +5,8 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2024.1.7b0"
+VERSION = "2024.06.02"
+
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
 SENSOR_COLLECTOR_TO_URL = {
@@ -97,6 +98,7 @@ SENSOR_COLLECTORS_BURGERPORTAAL = {
     'rmn': '138204213564933597',
     'bar': '138204213564933497',
     'assen': '138204213565303512',
+    'nijkerk': '138204213565304094',
 }
 
 SENSOR_COLLECTORS_DEAFVALAPP = {
