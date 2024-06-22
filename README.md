@@ -206,7 +206,7 @@ automation:
       - service: notify.family
         data:
           title: "Afval"
-          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states.sensor.afvalwijzer_tomorrow.state }} wordt opgehaald op: {{ (as_timestamp(now()) + (24*3600)) | timestamp_custom("%d-%m-%Y", True) }}!'
+          message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states("sensor.afvalwijzer_tomorrow") }} wordt opgehaald op: {{ (now() + timedelta(days=1)).strftime("%d-%m-%Y") }}!'
           data:
             actions:
               - action: "MARK_WASTE_MOVED" # The key you are sending for the event
