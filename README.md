@@ -76,19 +76,38 @@ This custom component dynamically creates sensor.afvalwijzer_* items. For me per
 
 The second row sorts the waste items by date using the following lovelace code
 ```yaml
-  - type: 'custom:auto-entities'
+  - type: custom:auto-entities
     card:
       type: glance
     filter:
+      exclude:
+        - entity_id: sensor.afvalwijzer_*next*
+        - entity_id: sensor.afvalwijzer_day_after_tomorrow*
+        - entity_id: sensor.afvalwijzer_today*
+        - entity_id: sensor.afvalwijzer_tomorrow*
+        - entity_id: sensor.afvalwijzer_kerstbomen*
+        - entity_id: sensor.afvalwijzer_*orgen
+        - entity_id: sensor.afvalwijzer_van*
       include:
-        - entity_id: sensor.afvalwijzer_gft
-        - entity_id: sensor.afvalwijzer_papier
-        - entity_id: sensor.afvalwijzer_pmd
-        - entity_id: sensor.afvalwijzer_restafval
+        - entity_id: sensor.afvalwijzer_*
+          options:
+            format: date
     sort:
-      attribute: days_until_collection_date
-      method: attribute
-      numeric: true
+      method: state
+  - entities:
+      - style:
+          background: '#62717b'
+          height: 1px
+          margin-left: auto
+          margin-right: auto
+        type: divider
+    type: entities
+  - type: markdown
+    content: >-
+      <center>De volgende leging is {{ states('sensor.afvalwijzer_next_type')
+      }}. Dat is over {{ states('sensor.afvalwijzer_next_in_days') }} {% if
+      is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
+      endif %}.</center>
 ```
 
 More information on the reminders (ios in this case):
