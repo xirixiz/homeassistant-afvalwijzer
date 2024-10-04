@@ -234,7 +234,7 @@ automation:
 
 ***
 
-[exampleimg1]: afvalwijzer-lovelace.png
-[exampleimg2]: afvalwijzer_lovelace.png
+[exampleimg1]: images/afvalwijzer-lovelace_2.png
+[exampleimg2]: images/afvalwijzer_lovelace_1.png
 [customupdater]: https://github.com/custom-components/custom_updater
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
