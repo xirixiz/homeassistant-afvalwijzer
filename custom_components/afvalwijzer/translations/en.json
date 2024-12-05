@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Afvalwijzer",
+        "description": "Set up your afvalwijzer integration.",
+        "data": {
+          "provider": "Provider (e.g., mijnafvalwijzer). See README.md.",
+          "postal_code": "Postal code (e.g., 1234AB)",
+          "street_number": "Street number",
+          "suffix": "Address suffix",
+          "exclude_pickup_today": "Exclude today's pickup",
+          "date_isoformat": "Use ISO date format",
+          "default_label": "Default label when no data is available",
+          "exclude_list": "Waste type exclude list"
+        }
+      }
+    },
+    "error": {
+      "invalid_postal_code": "Invalid postal code format",
+      "invalid_street_number": "Street number must be numeric"
+    },
+    "abort": {
+      "already_configured": "Afvalwijzer is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Afvalwijzer Options",
+        "description": "Configure options for afvalwijzer integration.",
+        "data": {
+          "exclude_pickup_today": "Exclude today's pickup",
+          "date_isoformat": "Use ISO date format",
+          "default_label": "Default label when no data is available",
+          "exclude_list": "Waste type exclude list"
+        }
+      }
+    }
+  }
+}

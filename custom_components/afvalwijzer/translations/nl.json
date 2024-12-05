@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configureer Afvalwijzer",
+        "description": "Stel je Afvalwijzer-integratie in.",
+        "data": {
+          "provider": "Provider (bijv. mijnafvalwijzer). Lees README.md.",
+          "postal_code": "Postcode (bijv. 1234AB)",
+          "street_number": "Huisnummer",
+          "suffix": "Huisnummer toevoeging",
+          "exclude_pickup_today": "Sluit ophalen van vandaag uit",
+          "date_isoformat": "Gebruik ISO-datumformaat",
+          "default_label": "Standaard label bij geen datum bekend",
+          "exclude_list": "Afvaltype uitsluiten"
+        }
+      }
+    },
+    "error": {
+      "invalid_postal_code": "Ongeldig postcodeformaat",
+      "invalid_street_number": "Huisnummer moet numeriek zijn"
+    },
+    "abort": {
+      "already_configured": "Afvalwijzer is al geconfigureerd"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Afvalwijzer Opties",
+        "description": "Pas extra opties aan voor de Afvalwijzer-integratie.",
+        "data": {
+          "exclude_pickup_today": "Sluit ophalen van vandaag uit",
+          "date_isoformat": "Gebruik ISO-datumformaat",
+          "default_label": "Standaard label bij geen datum bekend",
+          "exclude_list": "Afvaltype uitsluiten"
+        }
+      }
+    }
+  }
+}

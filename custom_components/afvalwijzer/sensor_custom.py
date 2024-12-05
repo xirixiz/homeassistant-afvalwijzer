@@ -1,6 +1,5 @@
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
-from homeassistant.util import Throttle
 
 from datetime import datetime, date
 import hashlib
@@ -15,30 +14,32 @@ from .const.const import (
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
     CONF_DATE_ISOFORMAT,
-    MIN_TIME_BETWEEN_UPDATES,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
 
 
 class CustomSensor(RestoreEntity, SensorEntity):
+    """Representation of a custom-based waste sensor."""
+
     def __init__(self, hass, waste_type, fetch_data, config):
+        """Initialize the sensor."""
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_data = fetch_data
+        self.fetch_data = fetch_data  # Should be an instance of AfvalwijzerData
         self.config = config
         self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
+        self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
         self._last_update = None
         self._days_until_collection_date = None
-        self._date_isoformat = config.get(CONF_DATE_ISOFORMAT)
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
         ) + waste_type
-        self._state = config.get(CONF_DEFAULT_LABEL)
+        self._state = self._default_label
         self._icon = SENSOR_ICON
         self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX,'')}".encode(
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
                 "utf-8"
             )
         ).hexdigest()
@@ -46,26 +47,32 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
     @property
     def name(self):
+        """Return the name of the sensor."""
         return self._name
 
     @property
     def unique_id(self):
+        """Return a unique ID for the sensor."""
         return self._unique_id
 
     @property
     def icon(self):
+        """Return the icon of the sensor."""
         return self._icon
 
     @property
     def state(self):
+        """Return the state of the sensor."""
         return self._state
 
     @property
     def device_class(self):
+        """Return the device class of the sensor."""
         return self._device_class
 
     @property
     def state_attributes(self):
+        """Return the attributes of the sensor."""
         attrs = {
             ATTR_LAST_UPDATE: self._last_update,
         }
@@ -75,43 +82,52 @@ class CustomSensor(RestoreEntity, SensorEntity):
             attrs["device_class"] = self._device_class
         return attrs
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        await self.hass.async_add_executor_job(self.fetch_data.update)
-
-        waste_data_custom = self.fetch_data.waste_data_custom
+        """Fetch the latest data and update the state."""
+        _LOGGER.debug(f"Updating custom sensor: {self.name}")
 
         try:
-            self._last_update = datetime.now().isoformat()
+            # Call update method from fetch_data
+            await self.hass.async_add_executor_job(self.fetch_data.update)
 
-            if isinstance(waste_data_custom[self.waste_type], datetime):
-                self._update_attributes_date(waste_data_custom[self.waste_type])
+            # Get waste data for custom sensors
+            waste_data_custom = self.fetch_data.waste_data_custom
+
+            if not waste_data_custom or self.waste_type not in waste_data_custom:
+                raise ValueError(f"No data for waste type: {self.waste_type}")
+
+            # Update attributes and state based on waste data
+            collection_date = waste_data_custom[self.waste_type]
+            if isinstance(collection_date, datetime):
+                self._update_attributes_date(collection_date)
             else:
-                self._update_attributes_non_date(waste_data_custom[self.waste_type])
-        except ValueError:
-            _LOGGER.debug("ValueError AfvalwijzerCustomSensor - unable to set value!")
+                self._update_attributes_non_date(collection_date)
+
+        except Exception as err:
+            _LOGGER.error(f"Error updating custom sensor {self.name}: {err}")
             self._handle_value_error()
 
     def _update_attributes_date(self, collection_date):
-        if self._date_isoformat.casefold() in ("true", "yes"):
-            collection_date_object = collection_date.isoformat()
-        else:
-            collection_date_object = collection_date.date()
-
+        """Update attributes for a datetime value."""
+        collection_date_object = (
+            collection_date.isoformat() if self._date_isoformat in (
+                "true", "yes") else collection_date.date()
+        )
         collection_date_delta = collection_date.date()
         delta = collection_date_delta - date.today()
+
         self._days_until_collection_date = delta.days
-
         self._device_class = SensorDeviceClass.TIMESTAMP
-
         self._state = collection_date_object
 
     def _update_attributes_non_date(self, value):
+        """Update attributes for a non-datetime value."""
         self._state = str(value)
         self._days_until_collection_date = None
         self._device_class = None
 
     def _handle_value_error(self):
+        """Handle errors in fetching data."""
         self._state = self._default_label
         self._days_until_collection_date = None
         self._device_class = None

@@ -1,4 +1,5 @@
 # Afvalwijzer
+
 [![custom_updater][customupdaterbadge]][customupdater]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
@@ -8,11 +9,10 @@
 <br><br>
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
 
-
 _Component to integrate with the following providers._
 
 | Provider                         |
-| ---------------------------------|
+| -------------------------------- |
 | acv                              |
 | afvalstoffendienstkalender (all) |
 | alkmaar                          |
@@ -64,7 +64,7 @@ _Component to integrate with the following providers._
 | ximmio                           |
 | zrd                              |
 
-This custom component dynamically creates sensor.afvalwijzer_* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
+This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
 **This component will set up the following platform(s).**
 
@@ -75,69 +75,100 @@ This custom component dynamically creates sensor.afvalwijzer_* items. For me per
 ![example][exampleimg1]
 
 The second row sorts the waste items by date using the following lovelace code
+
 ```yaml
-  - type: custom:auto-entities
-    card:
-      type: glance
-    filter:
-      exclude:
-        - entity_id: sensor.afvalwijzer_*next*
-        - entity_id: sensor.afvalwijzer_day_after_tomorrow*
-        - entity_id: sensor.afvalwijzer_today*
-        - entity_id: sensor.afvalwijzer_tomorrow*
-        - entity_id: sensor.afvalwijzer_kerstbomen*
-        - entity_id: sensor.afvalwijzer_*orgen
-        - entity_id: sensor.afvalwijzer_van*
-      include:
-        - entity_id: sensor.afvalwijzer_*
-          options:
-            format: date
-    sort:
-      method: state
-  - entities:
-      - style:
-          background: '#62717b'
-          height: 1px
-          margin-left: auto
-          margin-right: auto
-        type: divider
-    type: entities
-  - type: markdown
-    content: >-
-      <center>De volgende leging is {{ states('sensor.afvalwijzer_next_type')
-      }}. Dat is over {{ states('sensor.afvalwijzer_next_in_days') }} {% if
-      is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
-      endif %}.</center>
+- type: custom:auto-entities
+  card:
+    type: glance
+  filter:
+    exclude:
+      - entity_id: sensor.afvalwijzer_*next*
+      - entity_id: sensor.afvalwijzer_day_after_tomorrow*
+      - entity_id: sensor.afvalwijzer_today*
+      - entity_id: sensor.afvalwijzer_tomorrow*
+      - entity_id: sensor.afvalwijzer_kerstbomen*
+      - entity_id: sensor.afvalwijzer_*orgen
+      - entity_id: sensor.afvalwijzer_van*
+    include:
+      - entity_id: sensor.afvalwijzer_*
+        options:
+          format: date
+  sort:
+    method: state
+- entities:
+    - style:
+        background: '#62717b'
+        height: 1px
+        margin-left: auto
+        margin-right: auto
+      type: divider
+  type: entities
+- type: markdown
+  content: >-
+    <center>De volgende leging is {{ states('sensor.afvalwijzer_next_type')
+    }}. Dat is over {{ states('sensor.afvalwijzer_next_in_days') }} {% if
+    is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
+    endif %}.</center>
 ```
 
 More information on the reminders (ios in this case):
+
 - https://github.com/xirixiz/my-hass-config/blob/master/packages/waste.yaml
 - https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
 
-1. Using your tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `afvalwijzer`.
-4. Download _all_ the files from the `custom_components/afvalwijzer/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Restart Home Assistant before further configuration.
-7. Look at the `Example Configuration` section for further configuration.
-8. Restart Home Assistant again when configuration is done to activate the configuration.
+### Manual Installation
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
+1. Navigate to your Home Assistant configuration directory (where your `configuration.yaml` is located).
+2. Create a folder named `custom_components` if it doesn't exist.
+3. Inside the `custom_components` folder, create another folder named `afvalwijzer`.
+4. Clone this repository or download the source code and copy all files from the `custom_components/afvalwijzer/` directory to the newly created `afvalwijzer` folder.
+5. Restart Home Assistant to load the custom component.
 
-```text
-custom_components/afvalwijzer/__init__.py
-custom_components/afvalwijzer/manifest.json
-custom_components/afvalwijzer/sensor.py
+After following these steps, your directory structure should look like this:
+
+```markdown
+custom_components/
+afvalwijzer/
+**init**.py
+manifest.json
+sensor.py
+config_flow.py
+...
 ```
 
+### Installation via HACS
+
+1. Ensure HACS is installed in your Home Assistant setup. If not, follow the [HACS installation guide](https://hacs.xyz/docs/setup/download).
+2. Open the HACS panel in Home Assistant.
+3. Click on the `Frontend` or `Integrations` tab.
+4. Click the `+` button and search for `Afvalwijzer`.
+5. Click `Install` to add the component to your Home Assistant setup.
+6. Restart Home Assistant after the installation completes.
+
+---
+
+## Configuration
+
+### Add Integration
+
+1. Go to the **Settings** → **Devices & Services** page in Home Assistant.
+2. Click **Add Integration** and search for `Afvalwijzer`.
+3. Follow the on-screen instructions to complete the setup.
+   - Provide your postal code, street number, and any other required details.
+
+After completing the config flow, the integration will dynamically create sensors for waste collection dates based on your chosen provider.
+
+---
+
 ##### CUSTOM COMPONENT USAGE
+
 https://github.com/home-assistant/example-custom-config/tree/master/custom_components/example_sensor
 
 ##### LOGLEVEL
-In order to extend the log level, modify the following (configuration.yaml probably)
+
+To enable debug logging for troubleshooting, add the following lines to your `configuration.yaml`:
 
 ```yaml
 logger:
@@ -150,22 +181,23 @@ logger:
 
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
 
-
 ###### SENSOR - CONFIGURATION.YAML
+
 ```yaml
-  sensor:
-    - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, afvalstoffendienstkalender or rova
-      postal_code: 1234AB              # (required, default = '')
-      street_number:  5                # (required, default = '')
-      suffix: ''                       # (optional, default = '')
-      exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
-      default_label: geen              # (optional, default = geen) label if no date found
-      id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
-      exclude_list: ''                 # (optional, default = '') comma separated list of waste types (case ignored). F.e. "papier, gft"
+sensor:
+  - platform: afvalwijzer
+    provider: mijnafvalwijzer # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, afvalstoffendienstkalender or rova
+    postal_code: 1234AB # (required, default = '')
+    street_number: 5 # (required, default = '')
+    suffix: '' # (optional, default = '')
+    exclude_pickup_today: true # (optional, default = true) to take or not to take Today into account in the next pickup.
+    default_label: geen # (optional, default = geen) label if no date found
+    id: '' # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
+    exclude_list: '' # (optional, default = '') comma separated list of waste types (case ignored). F.e. "papier, gft"
 ```
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)
+
 ```yaml
 input_boolean:
   waste_moved:
@@ -178,6 +210,7 @@ input_boolean:
 ```
 
 ###### AUTOMATION
+
 ```yaml
 automation:
   - alias: Reset waste notification
@@ -206,7 +239,7 @@ automation:
   - alias: Waste has not been moved
     trigger:
       platform: time_pattern
-      hours: "/1"
+      hours: '/1'
     condition:
       condition: and
       conditions:
@@ -224,15 +257,15 @@ automation:
     action:
       - service: notify.family
         data:
-          title: "Afval"
+          title: 'Afval'
           message: 'Het is vandaag - {{ now().strftime("%d-%m-%Y") }}. Afvaltype(n): {{ states("sensor.afvalwijzer_tomorrow") }} wordt opgehaald op: {{ (now() + timedelta(days=1)).strftime("%d-%m-%Y") }}!'
           data:
             actions:
-              - action: "MARK_WASTE_MOVED" # The key you are sending for the event
-                title: "Afval buiten gezet" # The button title
+              - action: 'MARK_WASTE_MOVED' # The key you are sending for the event
+                title: 'Afval buiten gezet' # The button title
 ```
 
-***
+---
 
 [exampleimg1]: afvalwijzer-lovelace.png
 [exampleimg2]: afvalwijzer_lovelace.png
