@@ -49,6 +49,7 @@ _Component to integrate with the following providers._
 | rd4                              |
 | rova                             |
 | rmn                              |
+| rwm                              |
 | schouwenand                      |
 | spaarnelanden                    |
 | sudwestfryslan                   |
