@@ -1,4 +1,6 @@
-"translations": {
-  "en": "translations/en.json",
-  "nl": "translations/nl.json"
+{
+  "translations": {
+    "en": "translations/en.json",
+    "nl": "translations/nl.json"
+  }
 }
