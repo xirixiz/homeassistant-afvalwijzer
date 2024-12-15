@@ -7,10 +7,10 @@ import afvalwijzer
 from afvalwijzer.collector.mijnafvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
-python3 -m afvalwijzer.tests.test_module
+- Comment out __init__.py
+- Run python3 -m afvalwijzer.tests.test_module
 
 """
-
 
 from ..collector.main_collector import MainCollector
 
@@ -39,9 +39,9 @@ exclude_list = ""
 # street_number = "2"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146eg"
-street_number = "1"
+# provider = "mijnafvalwijzer"
+# postal_code = "5146eg"
+# street_number = "1"
 
 # iCalendar file
 # provider = "veldhoven"
@@ -87,9 +87,9 @@ street_number = "1"
 # street_number = "24"
 # suffix = "C"
 
-# provider = "rova"
-# postal_code = "8021CC"
-# street_number = "1"
+provider = "rova"
+postal_code = "7671BL"
+street_number = "2"
 
 # provider = "rmn"
 # postal_code = "3402TA"
@@ -123,10 +123,10 @@ collector = MainCollector(
     street_number,
     suffix,
     exclude_pickup_today,
+    date_isoformat,
     exclude_list,
     default_label,
 )
-
 
 # MainCollector(
 #     provider,
