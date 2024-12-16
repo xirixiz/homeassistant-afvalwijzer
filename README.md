@@ -44,6 +44,7 @@ _Component to integrate with the following providers._
 | peelenmaas                       |
 | prezero                          |
 | purmerend                        |
+| saver                            |
 | rad                              |
 | reinis                           |
 | rd4                              |
