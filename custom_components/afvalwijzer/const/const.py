@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2024.06.02"
+VERSION = "2024.12.01"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -35,7 +35,7 @@ SENSOR_COLLECTORS_OPZET = {
     "berkelland": "https://afvalkalender.gemeenteberkelland.nl",
     "blink": "https://mijnblink.nl",
     "cranendonck": "https://afvalkalender.cranendonck.nl",
-    "cyclus": "https://afvalkalender.cyclusnv.nl",
+    "cyclus": "https://cyclusnv.nl",
     "dar": "https://afvalkalender.dar.nl",
     "denhaag": "https://huisvuilkalender.denhaag.nl",
     "gad": "https://inzamelkalender.gad.nl",
@@ -46,6 +46,7 @@ SENSOR_COLLECTORS_OPZET = {
     "peelenmaas": "https://afvalkalender.peelenmaas.nl",
     "prezero": "https://inzamelwijzer.prezero.nl",
     "purmerend": "https://afvalkalender.purmerend.nl",
+    "saver": "https://saver.nl",
     "schouwen-duiveland": "https://afvalkalender.schouwen-duiveland.nl",
     "spaarnelanden": "https://afvalwijzer.spaarnelanden.nl",
     "sudwestfryslan": "https://afvalkalender.sudwestfryslan.nl",
@@ -105,6 +106,11 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
     "deafvalapp": "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={0}&straatId=0&huisnr={1}&huisnrtoev={2}",
 }
 
+SENSOR_COLLECTORS_RWM = {
+    "getAddress": "https://rwm.nl/adressen/{0}:{1}",
+    "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen"
+}
+
 CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
@@ -126,9 +132,7 @@ ATTR_IS_COLLECTION_DATE_TOMORROW = "is_collection_date_tomorrow"
 ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW = "is_collection_date_day_after_tomorrow"
 ATTR_DAYS_UNTIL_COLLECTION_DATE = "days_until_collection_date"
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(hours=1)
-PARALLEL_UPDATES = 1
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(hours=4)
 
 DOMAIN = "afvalwijzer"
 DOMAIN_DATA = "afvalwijzer_data"
