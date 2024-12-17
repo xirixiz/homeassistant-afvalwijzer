@@ -46,6 +46,7 @@ SENSOR_COLLECTORS_OPZET = {
     "peelenmaas": "https://afvalkalender.peelenmaas.nl",
     "prezero": "https://inzamelwijzer.prezero.nl",
     "purmerend": "https://afvalkalender.purmerend.nl",
+    "saver": "https://saver.nl",
     "schouwen-duiveland": "https://afvalkalender.schouwen-duiveland.nl",
     "spaarnelanden": "https://afvalwijzer.spaarnelanden.nl",
     "sudwestfryslan": "https://afvalkalender.sudwestfryslan.nl",
