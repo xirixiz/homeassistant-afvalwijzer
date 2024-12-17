@@ -58,7 +58,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return AfvalwijzerOptionsFlow(config_entry)
+        return AfvalwijzerOptionsFlow()
 
     def _validate_postal_code(self, postal_code):
         """Validate the postal code format."""
