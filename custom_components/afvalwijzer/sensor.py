@@ -78,8 +78,12 @@ async def _setup_sensors(hass, config, async_add_entities):
 
     # Schedule periodic updates every 4 hours
     update_interval = timedelta(hours=4)
-    async_track_time_interval(
-        hass, lambda _: hass.async_add_executor_job(data.update), update_interval)
+    def schedule_update(_):
+        """Safely schedule the update."""
+        hass.loop.call_soon_threadsafe(hass.async_add_executor_job, data.update)
+    
+    async_track_time_interval(hass, schedule_update, update_interval)
+
 
     # Fetch waste types
     try:
