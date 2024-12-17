@@ -35,7 +35,6 @@ _Component to integrate with the following providers._
 | hellendoorn                      |
 | hvc                              |
 | lingewaard                       |
-| meppel                           |
 | meerlanden                       |
 | middelburg                       |
 | mijnafvalwijzer                  |
