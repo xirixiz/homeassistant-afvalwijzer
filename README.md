@@ -14,6 +14,7 @@ _Component to integrate with the following providers._
 | Provider                         |
 | -------------------------------- |
 | acv                              |
+| afval3xbeter                     |
 | afvalstoffendienstkalender (all) |
 | alkmaar                          |
 | alphenaandenrijn                 |
@@ -29,6 +30,7 @@ _Component to integrate with the following providers._
 | cyclus                           |
 | dar                              |
 | deafvalapp                       |
+| defryskemarren                   |
 | denhaag                          |
 | eemsdelta (iCalendar)            |
 | gad                              |
@@ -38,8 +40,10 @@ _Component to integrate with the following providers._
 | meerlanden                       |
 | middelburg                       |
 | mijnafvalwijzer                  |
+| mijnafvalzaken                   |
 | montfoort                        |
 | nijkerk                          |
+| offalkalinder                    |
 | peelenmaas                       |
 | prezero                          |
 | purmerend                        |
@@ -50,7 +54,9 @@ _Component to integrate with the following providers._
 | rova                             |
 | rmn                              |
 | rwm                              |
+| schouwen                         |
 | schouwenand                      |
+| sliedrecht                       |
 | spaarnelanden                    |
 | sudwestfryslan                   |
 | suez                             |
@@ -64,6 +70,7 @@ _Component to integrate with the following providers._
 | woerden                          |
 | ximmio                           |
 | zrd                              |
+
 
 This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 

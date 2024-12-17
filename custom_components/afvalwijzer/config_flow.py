@@ -82,14 +82,19 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input=None):
         """Handle options configuration."""
+        # Haal bestaande opties op uit config_entry.options
+        current_options = self.options or {}
+
         if user_input is not None:
+            # Sla wijzigingen op en creëer een nieuwe entry
             return self.async_create_entry(title="", data=user_input)
 
+        # Toon formulier met bestaande waarden als defaults
         options_schema = vol.Schema({
-            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
-            vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
-            vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
-            vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
+            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=current_options.get(CONF_EXCLUDE_PICKUP_TODAY, True)): cv.boolean,
+            vol.Optional(CONF_DATE_ISOFORMAT, default=current_options.get(CONF_DATE_ISOFORMAT, False)): cv.boolean,
+            vol.Optional(CONF_DEFAULT_LABEL, default=current_options.get(CONF_DEFAULT_LABEL, "geen")): cv.string,
+            vol.Optional(CONF_EXCLUDE_LIST, default=current_options.get(CONF_EXCLUDE_LIST, "")): cv.string,
         })
 
         return self.async_show_form(
@@ -100,4 +105,5 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                 "date_isoformat": "Use ISO date format",
             },
         )
+
 
