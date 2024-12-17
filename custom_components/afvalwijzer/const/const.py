@@ -105,6 +105,11 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
     "deafvalapp": "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={0}&straatId=0&huisnr={1}&huisnrtoev={2}",
 }
 
+SENSOR_COLLECTORS_RWM = {
+    "getAddress": "https://rwm.nl/adressen/{0}:{1}",
+    "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen"
+}
+
 CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
