@@ -8,11 +8,11 @@ from ..const.const import (
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_RD4,
-    SENSOR_COLLECTORS_XIMMIO,
+    SENSOR_COLLECTORS_XIMMIO
 )
 
 try:
-    from . import burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, ximmio
+    from . import burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, rwm, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -29,15 +29,21 @@ class MainCollector(object):
         exclude_list,
         default_label,
     ):
-        self.provider = provider.strip().lower()
-        self.postal_code = postal_code.strip().upper()
-        self.street_number = street_number.strip()
-        self.suffix = suffix.strip().lower()
-        self.exclude_pickup_today = exclude_pickup_today.strip()
-        self.date_isoformat = date_isoformat.strip()
-        self.exclude_list = exclude_list.strip().lower()
-        self.default_label = default_label.strip()
+        # Ensure provider and address fields are strings
+        self.provider = str(provider).strip().lower()
+        self.postal_code = str(postal_code).strip().upper()
+        self.street_number = str(street_number).strip()
+        self.suffix = str(suffix).strip().lower()
 
+        # Handle boolean and string parameters correctly
+        self.exclude_pickup_today = str(exclude_pickup_today).lower() if isinstance(
+            exclude_pickup_today, bool) else str(exclude_pickup_today).strip().lower()
+        self.date_isoformat = str(date_isoformat).lower() if isinstance(
+            date_isoformat, bool) else str(date_isoformat).strip().lower()
+        self.exclude_list = str(exclude_list).strip().lower()
+        self.default_label = str(default_label).strip()
+
+        # Validate and process the provider
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:
                 waste_data_raw = mijnafvalwijzer.get_waste_data_raw(
@@ -95,12 +101,20 @@ class MainCollector(object):
                     self.street_number,
                     self.suffix,
                 )
+            elif provider == "rwm":
+                waste_data_raw = rwm.get_waste_data_raw(
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
+                )
             else:
                 _LOGGER.error(f"Unknown provider: {provider}")
-                return False
+                raise ValueError(f"Unknown provider: {provider}")
 
         except ValueError as err:
-            _LOGGER.error(f"Check afvalwijzer platform settings {err.args}")
+            _LOGGER.error(f"Check afvalwijzer platform settings: {err}")
+            raise
 
         ##########################################################################
         #  COMMON CODE
