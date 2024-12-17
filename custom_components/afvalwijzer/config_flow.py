@@ -77,8 +77,8 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
     """Handle options for Afvalwijzer."""
 
-    def __init__(self, config_entry):
-        self.config_entry = config_entry
+    def __init__(self):
+        """Initialize the options flow."""
 
     async def async_step_init(self, user_input=None):
         """Handle options configuration."""
@@ -100,3 +100,4 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                 "date_isoformat": "Use ISO date format",
             },
         )
+
