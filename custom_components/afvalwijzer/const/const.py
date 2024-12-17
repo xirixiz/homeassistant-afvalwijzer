@@ -35,7 +35,7 @@ SENSOR_COLLECTORS_OPZET = {
     "berkelland": "https://afvalkalender.gemeenteberkelland.nl",
     "blink": "https://mijnblink.nl",
     "cranendonck": "https://afvalkalender.cranendonck.nl",
-    "cyclus": "https://afvalkalender.cyclusnv.nl",
+    "cyclus": "https://cyclusnv.nl",
     "dar": "https://afvalkalender.dar.nl",
     "denhaag": "https://huisvuilkalender.denhaag.nl",
     "gad": "https://inzamelkalender.gad.nl",
