@@ -8,6 +8,7 @@ def _waste_type_rename(item_name):
         "chemokar": "chemisch",
         "christmas_trees": "kerstbomen",
         "gemengde plastics": "plastic",
+        "gft & etensresten": "gft",
         "glass": "glas",
         "green": "gft",
         "groene container": "gft",
