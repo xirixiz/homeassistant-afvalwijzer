@@ -117,9 +117,9 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
             vol.Required(CONF_POSTAL_CODE, default=current_options.get(CONF_POSTAL_CODE, "")): cv.string,
             vol.Required(CONF_STREET_NUMBER, default=current_options.get(CONF_STREET_NUMBER, "")): cv.string,
             vol.Optional(CONF_SUFFIX, default=current_options.get(CONF_SUFFIX, "")): cv.string,
-            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=current_options.get(CONF_EXCLUDE_PICKUP_TODAY, True)): cv.boolean,
-            vol.Optional(CONF_DATE_ISOFORMAT, default=current_options.get(CONF_DATE_ISOFORMAT, False)): cv.boolean,
-            vol.Optional(CONF_DEFAULT_LABEL, default=current_options.get(CONF_DEFAULT_LABEL, "geen")): cv.string,
+            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=current_options.get(CONF_EXCLUDE_PICKUP_TODAY, "")): cv.boolean,
+            vol.Optional(CONF_DATE_ISOFORMAT, default=current_options.get(CONF_DATE_ISOFORMAT, "")): cv.boolean,
+            vol.Optional(CONF_DEFAULT_LABEL, default=current_options.get(CONF_DEFAULT_LABEL, "")): cv.string,
             vol.Optional(CONF_EXCLUDE_LIST, default=current_options.get(CONF_EXCLUDE_LIST, "")): cv.string,
         })
 
