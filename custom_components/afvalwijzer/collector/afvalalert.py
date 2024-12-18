@@ -61,5 +61,4 @@ def get_waste_data_raw(
     return waste_data_raw
 
 
-if __name__ == "__main__":
-    print("Yell something at a mountain!")
+

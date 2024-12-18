@@ -39,9 +39,9 @@ exclude_list = ""
 # street_number = "2"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
 
 # iCalendar file
 # provider = "veldhoven"
@@ -84,21 +84,15 @@ exclude_list = ""
 # RD4
 # provider = "rd4"
 # postal_code = "6301ET"
-# street_number = "24"
-# suffix = "C"
+# street_number = "6"
 
-provider = "rova"
-postal_code = "7671BL"
-street_number = "2"
+# provider = "rova"
+# postal_code = "7671BL"
+# street_number = "2"
 
 # provider = "rmn"
 # postal_code = "3402TA"
 # street_number = "1"
-
-# Ximmio
-# provider = "meerlanden"
-# postal_code = "3446GR"
-# street_number = "17"
 
 # Ximmio
 # provider = "woerden"

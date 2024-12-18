@@ -59,5 +59,4 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     return waste_data_raw
 
 
-if __name__ == "__main__":
-    print("Yell something at a mountain!")
+

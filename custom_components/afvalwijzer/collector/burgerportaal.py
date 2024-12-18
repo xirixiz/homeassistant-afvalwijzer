@@ -100,5 +100,4 @@ def get_waste_data_raw(
     return sorted(waste_data_raw, key=lambda d: d['date'])
 
 
-if __name__ == "__main__":
-    print("Yell something at a mountain!")
+

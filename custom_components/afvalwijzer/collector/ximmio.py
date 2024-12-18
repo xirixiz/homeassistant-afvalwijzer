@@ -1,4 +1,4 @@
-from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_XIMMIO
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_XIMMIO, SENSOR_COLLECTORS_XIMMIO_IDS
 from ..common.main_functions import _waste_type_rename
 from datetime import datetime, timedelta
 import requests
@@ -9,11 +9,15 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_waste_data_raw(provider, postal_code, street_number, suffix):
     try:
-        if provider not in SENSOR_COLLECTORS_XIMMIO:
-            raise ValueError(f"Invalid provider: {provider}, please verify")
+        suffix = suffix.strip().upper()
 
-        collectors = ("avalex", "meerlanden", "rad", "westland", "woerden")
-        provider_url = "ximmio02" if provider in collectors else "ximmio01"
+        if provider not in SENSOR_COLLECTORS_XIMMIO_IDS:
+            raise ValueError(f"Invalid provider: {provider} for XIMMIO, please verify")
+
+        url = SENSOR_COLLECTORS_XIMMIO.get("ximmio")
+
+        if not url:
+            raise ValueError(f"Invalid provider: {provider} for XIMMIO, please verify")
 
         TODAY = datetime.now().strftime("%d-%m-%Y")
         DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
@@ -22,33 +26,36 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         ##########################################################################
         # First request: get uniqueId and community
         ##########################################################################
-        url = SENSOR_COLLECTOR_TO_URL[provider_url][0]
         data = {
             "postCode": postal_code,
             "houseNumber": street_number,
-            "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
+            "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
         }
 
         if suffix:
             data["HouseLetter"] = suffix
 
-        response = requests.post(url=url, timeout=60, data=data).json()
+        response = requests.post(url="{}/api/FetchAdress".format(url), timeout=60, data=data).json()
+
+        if not response['dataList']:
+            _LOGGER.error('Address not found!')
+            return
+
         uniqueId = response["dataList"][0]["UniqueId"]
         community = response["dataList"][0]["Community"]
 
         ##########################################################################
         # Second request: get the dates
         ##########################################################################
-        url = SENSOR_COLLECTOR_TO_URL[provider_url][1]
         data = {
-            "companyCode": SENSOR_COLLECTORS_XIMMIO[provider],
+            "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
             "startDate": DATE_TODAY.date(),
             "endDate": DATE_TODAY_NEXT_YEAR,
             "community": community,
             "uniqueAddressID": uniqueId,
         }
 
-        response = requests.post(url=url, timeout=60, data=data).json()
+        response = requests.post(url="{}/api/GetCalendar".format(url), timeout=60, data=data).json()
 
         if not response:
             _LOGGER.error("Address not found!")
@@ -70,5 +77,4 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     return waste_data_raw
 
 
-if __name__ == "__main__":
-    print("Yell something at a mountain!")
+

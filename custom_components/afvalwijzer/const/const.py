@@ -19,14 +19,6 @@ SENSOR_COLLECTOR_TO_URL = {
     "afvalstoffendienstkalender-s-hertogenbosch": [
         "https://afvalstoffendienstkalender.nl/nl/{0}/{1}/"
     ],
-    "ximmio01": [
-        "https://wasteapi.ximmio.com/api/FetchAdress",
-        "https://wasteapi.ximmio.com/api/GetCalendar",
-    ],
-    "ximmio02": [
-        "https://wasteprod2api.ximmio.com/api/FetchAdress",
-        "https://wasteprod2api.ximmio.com/api/GetCalendar",
-    ],
 }
 
 SENSOR_COLLECTORS_OPZET = {
@@ -71,10 +63,13 @@ SENSOR_COLLECTORS_AFVALWIJZER = [
     "mijnafvalwijzer",
     "afvalstoffendienstkalender",
     "afvalstoffendienstkalender-s-hertogenbosch",
-    "rova",
 ]
 
 SENSOR_COLLECTORS_XIMMIO = {
+    "ximmio": "https://wasteprod2api.ximmio.com",
+}
+
+SENSOR_COLLECTORS_XIMMIO_IDS = {
     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
     "almere": "53d8db94-7945-42fd-9742-9bbc71dbe4c1",
     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
@@ -82,7 +77,6 @@ SENSOR_COLLECTORS_XIMMIO = {
     "avri": "78cd4156-394b-413d-8936-d407e334559a",
     "hellendoorn": "24434f5b-7244-412b-9306-3a2bd1e22bc1",
     "meerlanden": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
-    "meppel": "b7a594c7-2490-4413-88f9-94749a3ec62a",
     "rad": "13a2cad9-36d0-4b01-b877-efcb421a864d",
     "twentemilieu": "8d97bb56-5afd-4cbc-a651-b4f7314264b4",
     "waardlanden": "942abcf6-3775-400d-ae5d-7380d728b23c",
@@ -98,6 +92,10 @@ SENSOR_COLLECTORS_RD4 = {
 
 SENSOR_COLLECTORS_CIRCULUS = {
     "circulus": "https://mijn.circulus.nl",
+}
+
+SENSOR_COLLECTORS_ROVA = {
+    "rova": "https://www.rova.nl",
 }
 
 SENSOR_COLLECTORS_BURGERPORTAAL = {

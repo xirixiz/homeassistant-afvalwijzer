@@ -42,7 +42,6 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
     return waste_data_raw
 
-
 def get_session_cookie(url, postal_code, street_number, suffix):
     raw_response = requests.get(url, timeout=60, verify=False)
     raw_response.raise_for_status()  # Raise an HTTPError for bad responses
@@ -70,23 +69,6 @@ def get_session_cookie(url, postal_code, street_number, suffix):
         _LOGGER.error("Unable to get Session Cookie")
         return None
 
-
-def find_authentication_url(addresses, street_number, suffix):
-    if suffix:
-        search_pattern = f' {street_number} {suffix.lower()}'
-    else:
-        search_pattern = f' {street_number}'
-
-    return next(
-        (
-            address["authentication_url"]
-            for address in addresses
-            if re.search(search_pattern, address["address"])
-        ),
-        "",
-    )
-
-
 def get_waste_data(logged_in_cookies, url):
     if logged_in_cookies:
 
@@ -111,9 +93,7 @@ def get_waste_data(logged_in_cookies, url):
         for item in response['customData']['response']['garbage']:
             for date in item['dates']:
                 if waste_type := _waste_type_rename(item["code"].strip().lower()):
-                    temp = {"type": waste_type, "date": date}
-                    waste_data_raw.append(temp)
-
+                    waste_data_raw.append({"type": waste_type, "date": date})
         return waste_data_raw
 
     else:
@@ -121,5 +101,4 @@ def get_waste_data(logged_in_cookies, url):
         return []
 
 
-if __name__ == "__main__":
-    print("Yell something at a mountain!")
+

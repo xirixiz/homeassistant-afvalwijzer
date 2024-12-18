@@ -1,5 +1,4 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_AFVALWIJZER
-from ..common.main_functions import _waste_type_rename
 from datetime import datetime
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -10,9 +9,6 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 def get_waste_data_raw(provider, postal_code, street_number, suffix):
     if provider not in SENSOR_COLLECTORS_AFVALWIJZER:
         raise ValueError(f"Invalid provider: {provider}, please verify")
-
-    if provider == "rova":
-        provider = "inzamelkalender.rova"
 
     try:
         url = SENSOR_COLLECTOR_TO_URL["afvalwijzer_data_default"][0].format(
@@ -41,5 +37,4 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     return ophaaldagen_data + ophaaldagen_next_data
 
 
-if __name__ == "__main__":
-    print("Yell something at a mountain!")
+

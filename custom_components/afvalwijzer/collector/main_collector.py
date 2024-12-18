@@ -8,11 +8,12 @@ from ..const.const import (
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_RD4,
-    SENSOR_COLLECTORS_XIMMIO
+    SENSOR_COLLECTORS_ROVA,
+    SENSOR_COLLECTORS_XIMMIO_IDS
 )
 
 try:
-    from . import burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, rwm, ximmio
+    from . import burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -94,7 +95,14 @@ class MainCollector(object):
                     self.street_number,
                     self.suffix,
                 )
-            elif provider in SENSOR_COLLECTORS_XIMMIO.keys():
+            elif provider in SENSOR_COLLECTORS_ROVA.keys():
+                waste_data_raw = rova.get_waste_data_raw(
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
+                )
+            elif provider in SENSOR_COLLECTORS_XIMMIO_IDS.keys():
                 waste_data_raw = ximmio.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
