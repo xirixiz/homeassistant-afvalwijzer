@@ -5,7 +5,7 @@
 ```yaml
   sensor:
     - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, afvalstoffendienstkalender or rova
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) choose the provider for your community.
       postal_code: 1234AB              # (required, default = '')
       street_number:  5                # (required, default = '')
       suffix: ''                       # (optional, default = '')

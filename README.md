@@ -9,76 +9,76 @@
 <br><br>
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
 
-_Component to integrate with the following providers._
+_Component to integrate with the following providers/communities. Be aware that your communict_
 
-| Provider                         |
-| -------------------------------- |
-| acv                              |
-| afval3xbeter                     |
-| afvalstoffendienstkalender (all) |
-| alkmaar                          |
-| alphenaandenrijn                 |
-| areareiniging                    |
-| assen                            |
-| avalex                           |
-| avri                             |
-| bar                              |
-| berkelland                       |
-| blink                            |
-| circulus                         |
-| cranendonck                      |
-| cyclus                           |
-| dar                              |
-| deafvalapp                       |
-| defryskemarren                   |
-| denhaag                          |
-| eemsdelta (iCalendar)            |
-| gad                              |
-| hellendoorn                      |
-| hvc                              |
-| lingewaard                       |
-| meerlanden                       |
-| middelburg                       |
-| mijnafvalwijzer                  |
-| mijnafvalzaken                   |
-| montfoort                        |
-| nijkerk                          |
-| offalkalinder                    |
-| peelenmaas                       |
-| prezero                          |
-| purmerend                        |
-| saver                            |
-| rad                              |
-| reinis                           |
-| rd4                              |
-| rova                             |
-| rmn                              |
-| rwm                              |
-| schouwen                         |
-| schouwenand                      |
-| sliedrecht                       |
-| spaarnelanden                    |
-| sudwestfryslan                   |
-| suez                             |
-| twentemilieu                     |
-| veldhoven                        |
-| venray                           |
-| voorschoten                      |
-| waalre                           |
-| waardlanden                      |
-| westland                         |
-| woerden                          |
-| ximmio                           |
-| zrd                              |
 
+| Provider                                              |
+| ------------------------------------------------------|
+| acv                                                   |
+| afvalstoffendienstkalender                            |
+| alkmaar                                               |
+| areareiniging                                         |
+| avri                                                  |
+| assen (burgerportaal)                                 |
+| bar (burgerportaal)                                   |
+| rwn (burgerportaal)                                   |
+| circulus                                              |
+| deafvalapp                                            |
+| eemsdelta (iCalendar)                                 |
+| hellendoorn                                           |
+| mijnafvalwijzer (also for afvalstoffendienstkalender) |
+| nijkerk                                               |
+| alphenaandenrijn (opzet)                              |
+| afval3xbeter (opzet)                                  |
+| berkelland (opzet)                                    |
+| blink (opzet)                                         |
+| cranendonck (opzet)                                   |
+| cyclus (opzet)                                        |
+| dar (opzet)                                           |
+| defryskemarren (opzet)                                |
+| denhaag (opzet)                                       |
+| gad (opzet)                                           |
+| hvc (opzet)                                           |
+| lingewaard (opzet)                                    |
+| middelburg (opzet)                                    |
+| mijnafvalzaken (opzet)                                |
+| montfoort (opzet)                                     |
+| offalkalinder (opzet)                                 |
+| peelenmaas (opzet)                                    |
+| prezero (opzet)                                       |
+| purmerend (opzet)                                     |
+| rwm (opzet)                                           |
+| saver (opzet)                                         |
+| schouwen (opzet)                                      |
+| sliedrecht (opzet)                                    |
+| spaarnelanden (opzet)                                 |
+| sudwestfryslan (opzet)                                |
+| suez (opzet)                                          |
+| venray (opzet)                                        |
+| voorschoten (opzet)                                   |
+| waalre (opzet)                                        |
+| zrd (opzet)                                           |
+| reinis                                                |
+| rd4                                                   |
+| rova                                                  |
+| rmn                                                   |
+| schouwenand                                           |
+| twentemilieu                                          |
+| veldhoven (iCalendar)                                 |
+| waardlanden                                           |
+| avalex (ximmio)                                       |
+| meerlanden (ximmio)                                   |
+| rad (ximmio)                                          |
+| westland (ximmio)                                     |
+| woerden (ximmio)                                      |
 
 This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
 **This component will set up the following platform(s).**
 
-| Platform | Description                                                                               |
-| -------- | ----------------------------------------------------------------------------------------- |
-| `sensor` | Show waste pickup dates for mijnafvalwijzer.nl, afvalstoffendienstkalender.nl or rova.nl. |
+| Platform | Description             |
+| -------- | ----------------------- |
+| `sensor` | Show waste pickup dates |
 
 ![example][exampleimg1]
 
@@ -190,18 +190,18 @@ logger:
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
 
 ###### SENSOR - CONFIGURATION.YAML
-
 ```yaml
-sensor:
-  - platform: afvalwijzer
-    provider: mijnafvalwijzer # (required, default = mijnafvalwijzer) either choose mijnafvalwijzer, afvalstoffendienstkalender or rova
-    postal_code: 1234AB # (required, default = '')
-    street_number: 5 # (required, default = '')
-    suffix: '' # (optional, default = '')
-    exclude_pickup_today: true # (optional, default = true) to take or not to take Today into account in the next pickup.
-    default_label: geen # (optional, default = geen) label if no date found
-    id: '' # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
-    exclude_list: '' # (optional, default = '') comma separated list of waste types (case ignored). F.e. "papier, gft"
+  sensor:
+    - platform: afvalwijzer
+      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) choose the provider for your community.
+      postal_code: 1234AB              # (required, default = '')
+      street_number:  5                # (required, default = '')
+      suffix: ''                       # (optional, default = '')
+      exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
+      date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"
+      default_label: geen              # (optional, default = geen) label if no date found
+      id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
+      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft, restafval, pmd, etc"
 ```
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)
