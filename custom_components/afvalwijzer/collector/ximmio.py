@@ -14,7 +14,10 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         if provider not in SENSOR_COLLECTORS_XIMMIO_IDS:
             raise ValueError(f"Invalid provider: {provider} for XIMMIO, please verify")
 
-        url = SENSOR_COLLECTORS_XIMMIO.get("ximmio")
+        if provider in SENSOR_COLLECTORS_XIMMIO.keys():
+            url = SENSOR_COLLECTORS_XIMMIO[provider]
+        else:
+            url = SENSOR_COLLECTORS_XIMMIO["ximmio"]
 
         if not url:
             raise ValueError(f"Invalid provider: {provider} for XIMMIO, please verify")
@@ -34,7 +37,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
         if suffix:
             data["HouseLetter"] = suffix
-
+        print(data)
         response = requests.post(url="{}/api/FetchAdress".format(url), timeout=60, data=data).json()
 
         if not response['dataList']:

@@ -66,7 +66,12 @@ SENSOR_COLLECTORS_AFVALWIJZER = [
 ]
 
 SENSOR_COLLECTORS_XIMMIO = {
-    "ximmio": "https://wasteprod2api.ximmio.com",
+    "ximmio": "https://wasteapi.ximmio.com",
+    "avalex": "https://wasteprod2api.ximmio.com",
+    "meerlanden": "https://wasteprod2api.ximmio.com",
+    "rad": "https://wasteprod2api.ximmio.com",
+    "westland": "https://wasteprod2api.ximmio.com",
+    "woerden": "https://wasteprod2api.ximmio.com",
 }
 
 SENSOR_COLLECTORS_XIMMIO_IDS = {
