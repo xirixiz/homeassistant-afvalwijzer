@@ -43,9 +43,14 @@ exclude_list = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
-provider = "mijnafvalwijzer"
-postal_code = "5563CM"
-street_number = "22"
+# provider = "mijnafvalwijzer"
+# postal_code = "5563CM"
+# street_number = "22"
+
+# Afvalalert
+provider = "afvalalert"
+postal_code = "7881NW"
+street_number = "4"
 
 # ACV
 # provider = "acv"

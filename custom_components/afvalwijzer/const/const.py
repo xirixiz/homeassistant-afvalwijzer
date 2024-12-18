@@ -95,6 +95,10 @@ SENSOR_COLLECTORS_RD4 = {
     "rd4": "https://data.rd4.nl/api/v1/waste-calendar?postal_code={0}&house_number={1}&house_number_extension={2}&year={3}",
 }
 
+SENSOR_COLLECTORS_AFVALALERT = {
+    "afvalalert": "https://www.afvalalert.nl/kalender",
+}
+
 SENSOR_COLLECTORS_CIRCULUS = {
     "circulus": "https://mijn.circulus.nl",
 }

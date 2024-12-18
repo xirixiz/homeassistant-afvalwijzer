@@ -37,7 +37,6 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
         if suffix:
             data["HouseLetter"] = suffix
-        print(data)
         response = requests.post(url="{}/api/FetchAdress".format(url), timeout=60, data=data).json()
 
         if not response['dataList']:

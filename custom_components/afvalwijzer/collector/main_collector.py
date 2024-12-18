@@ -2,6 +2,7 @@ from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (
     _LOGGER,
     SENSOR_COLLECTORS_AFVALWIJZER,
+    SENSOR_COLLECTORS_AFVALALERT,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
@@ -13,7 +14,7 @@ from ..const.const import (
 )
 
 try:
-    from . import burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
+    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -48,6 +49,13 @@ class MainCollector(object):
         try:
             if provider in SENSOR_COLLECTORS_AFVALWIJZER:
                 waste_data_raw = mijnafvalwijzer.get_waste_data_raw(
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
+                )
+            elif provider in SENSOR_COLLECTORS_AFVALALERT.keys():
+                waste_data_raw = afvalalert.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
