@@ -48,9 +48,9 @@ exclude_list = ""
 # street_number = "22"
 
 # Afvalalert
-provider = "afvalalert"
-postal_code = "7881NW"
-street_number = "4"
+# provider = "afvalalert"
+# postal_code = "7881NW"
+# street_number = "4"
 
 # ACV
 # provider = "acv"
@@ -58,9 +58,9 @@ street_number = "4"
 # street_number = "20"
 
 # iCalendar file
-# provider = "veldhoven"
-# postal_code = "5508SB"
-# street_number = "51"
+provider = "veldhoven"
+postal_code = "5508SB"
+street_number = "51"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
@@ -112,6 +112,11 @@ street_number = "4"
 # provider = "woerden"
 # postal_code = "3446GL"
 # street_number = "16"
+
+# Ximmio
+# provider = "almere"
+# postal_code = "1311HG"
+# street_number = "20"
 
 # Ximmio
 # provider = "acv"

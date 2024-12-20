@@ -115,6 +115,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             else:
                 self._update_attributes_non_date(collection_date)
 
+            # Update last_update timestamp
+            self._last_update = datetime.now().isoformat()
+
         except Exception as err:
             _LOGGER.error(f"Error updating sensor {self.name}: {err}")
             self._handle_value_error()

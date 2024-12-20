@@ -1,9 +1,5 @@
-"""
-Config flow for the Afvalwijzer component
-"""
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 import logging
 
@@ -57,11 +53,6 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={},
         )
 
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        return AfvalwijzerOptionsFlow()
-
     def _validate_postal_code(self, postal_code):
         """Validate the postal code format."""
         return (
@@ -74,58 +65,3 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def _validate_street_number(self, street_number):
         """Validate the street number."""
         return street_number.isdigit()
-
-
-
-
-
-
-
-class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
-    """Handle options for Afvalwijzer."""
-
-    async def async_step_init(self, user_input=None):
-        """Handle options configuration."""
-        _LOGGER.debug(f"Config entry: {self.config_entry}")
-        errors = {}
-
-        # Ensure self.config_entry is valid
-        if not self.config_entry:
-            _LOGGER.error("Config entry is invalid.")
-            return self.async_abort(reason="invalid_config_entry")
-
-        current_options = self.config_entry.options
-
-        if user_input is not None:
-            # Merge the user input with the current options
-            updated_options = {**current_options, **user_input}
-
-            # Try to update the config entry with the options
-            try:
-                _LOGGER.debug(f"Attempting to update config entry with options: {updated_options}")
-                await self.hass.config_entries.async_update_entry(
-                    self.config_entry, options=updated_options
-                )
-            except Exception as e:
-                _LOGGER.error(f"Error updating config entry: {e}")
-                return self.async_abort(reason="update_failed")
-
-            # After updating, return to the main page or close the flow
-            return self.async_create_entry(title="", data=updated_options)
-
-        # Show the form with the existing values as defaults
-        options_schema = vol.Schema({
-            vol.Required(CONF_COLLECTOR, default=current_options.get(CONF_COLLECTOR, "")): cv.string,
-            vol.Required(CONF_POSTAL_CODE, default=current_options.get(CONF_POSTAL_CODE, "")): cv.string,
-            vol.Required(CONF_STREET_NUMBER, default=current_options.get(CONF_STREET_NUMBER, "")): cv.string,
-            vol.Optional(CONF_SUFFIX, default=current_options.get(CONF_SUFFIX, "")): cv.string,
-            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=current_options.get(CONF_EXCLUDE_PICKUP_TODAY, True)): cv.boolean,
-            vol.Optional(CONF_DATE_ISOFORMAT, default=current_options.get(CONF_DATE_ISOFORMAT, False)): cv.boolean,
-            vol.Optional(CONF_DEFAULT_LABEL, default=current_options.get(CONF_DEFAULT_LABEL, "geen")): cv.string,
-            vol.Optional(CONF_EXCLUDE_LIST, default=current_options.get(CONF_EXCLUDE_LIST, "")): cv.string,
-        })
-
-        return self.async_show_form(
-            step_id="init", data_schema=options_schema, errors=errors,
-            description_placeholders={}
-        )
