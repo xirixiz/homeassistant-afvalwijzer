@@ -14,18 +14,18 @@ _Component to integrate with the following providers/communities. Be aware that 
 
 | Provider                                              |
 | ------------------------------------------------------|
-| acv                                                   |
+| acv (ximmio)                                          |
 | afvalstoffendienstkalender                            |
 | alkmaar                                               |
-| areareiniging                                         |
-| avri                                                  |
+| areareiniging (ximmio)                                |
+| avri (ximmio)                                         |
 | assen (burgerportaal)                                 |
 | bar (burgerportaal)                                   |
 | rwn (burgerportaal)                                   |
 | circulus                                              |
 | deafvalapp                                            |
 | eemsdelta (iCalendar)                                 |
-| hellendoorn                                           |
+| hellendoorn (ximmio)                                  |
 | mijnafvalwijzer (also for afvalstoffendienstkalender) |
 | nijkerk                                               |
 | alphenaandenrijn (opzet)                              |
@@ -58,14 +58,15 @@ _Component to integrate with the following providers/communities. Be aware that 
 | voorschoten (opzet)                                   |
 | waalre (opzet)                                        |
 | zrd (opzet)                                           |
-| reinis                                                |
+| reinis (ximmio)                                       |
 | rd4                                                   |
 | rova                                                  |
 | rmn                                                   |
 | schouwenand                                           |
-| twentemilieu                                          |
+| twentemilieu (ximmio)                                 |
 | veldhoven (iCalendar)                                 |
 | waardlanden                                           |
+| almere (ximmio)                                       |
 | avalex (ximmio)                                       |
 | meerlanden (ximmio)                                   |
 | rad (ximmio)                                          |
