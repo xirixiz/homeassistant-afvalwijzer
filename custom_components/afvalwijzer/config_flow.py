@@ -1,3 +1,6 @@
+"""
+Config flow for the Afvalwijzer component
+"""
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
@@ -27,6 +30,8 @@ DATA_SCHEMA = vol.Schema({
     vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
 })
 
+_LOGGER = logging.getLogger(__name__)
+
 class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Afvalwijzer."""
     VERSION = 1
@@ -49,10 +54,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=DATA_SCHEMA,
             errors=errors,
-            description_placeholders={
-                "provider": "e.g., mijnafvalwijzer",
-                "postal_code": "e.g., 1234AB",
-            },
+            description_placeholders={},
         )
 
     @staticmethod
@@ -73,13 +75,19 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Validate the street number."""
         return street_number.isdigit()
 
+
+
+
+
+
+
 class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
     """Handle options for Afvalwijzer."""
 
     async def async_step_init(self, user_input=None):
         """Handle options configuration."""
-        _LOGGER = logging.getLogger(__name__)
         _LOGGER.debug(f"Config entry: {self.config_entry}")
+        errors = {}
 
         # Ensure self.config_entry is valid
         if not self.config_entry:
@@ -91,12 +99,6 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             # Merge the user input with the current options
             updated_options = {**current_options, **user_input}
-
-            # Ensure updated_options is a valid dictionary
-            _LOGGER.debug(f"Updated options: {updated_options}")
-            if not isinstance(updated_options, dict):
-                _LOGGER.error("Updated options must be a dictionary.")
-                return self.async_abort(reason="invalid_options")
 
             # Try to update the config entry with the options
             try:
@@ -117,13 +119,13 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
             vol.Required(CONF_POSTAL_CODE, default=current_options.get(CONF_POSTAL_CODE, "")): cv.string,
             vol.Required(CONF_STREET_NUMBER, default=current_options.get(CONF_STREET_NUMBER, "")): cv.string,
             vol.Optional(CONF_SUFFIX, default=current_options.get(CONF_SUFFIX, "")): cv.string,
-            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=current_options.get(CONF_EXCLUDE_PICKUP_TODAY, "")): cv.boolean,
-            vol.Optional(CONF_DATE_ISOFORMAT, default=current_options.get(CONF_DATE_ISOFORMAT, "")): cv.boolean,
-            vol.Optional(CONF_DEFAULT_LABEL, default=current_options.get(CONF_DEFAULT_LABEL, "")): cv.string,
+            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=current_options.get(CONF_EXCLUDE_PICKUP_TODAY, True)): cv.boolean,
+            vol.Optional(CONF_DATE_ISOFORMAT, default=current_options.get(CONF_DATE_ISOFORMAT, False)): cv.boolean,
+            vol.Optional(CONF_DEFAULT_LABEL, default=current_options.get(CONF_DEFAULT_LABEL, "geen")): cv.string,
             vol.Optional(CONF_EXCLUDE_LIST, default=current_options.get(CONF_EXCLUDE_LIST, "")): cv.string,
         })
 
         return self.async_show_form(
-            step_id="init", data_schema=options_schema, errors={},
+            step_id="init", data_schema=options_schema, errors=errors,
             description_placeholders={}
         )
