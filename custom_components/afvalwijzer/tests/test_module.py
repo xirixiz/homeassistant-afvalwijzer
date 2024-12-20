@@ -47,6 +47,10 @@ exclude_list = ""
 # postal_code = "5563CM"
 # street_number = "22"
 
+provider = "mijnafvalwijzer"
+postal_code = "3601AC"
+street_number = "10"
+
 # Afvalalert
 # provider = "afvalalert"
 # postal_code = "7881NW"
@@ -58,9 +62,9 @@ exclude_list = ""
 # street_number = "20"
 
 # iCalendar file
-provider = "veldhoven"
-postal_code = "5508SB"
-street_number = "51"
+# provider = "veldhoven"
+# postal_code = "5508SB"
+# street_number = "51"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"

@@ -35,6 +35,3 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         raise KeyError(f"Invalid and/or no data received from {url}") from err
 
     return ophaaldagen_data + ophaaldagen_next_data
-
-
-
