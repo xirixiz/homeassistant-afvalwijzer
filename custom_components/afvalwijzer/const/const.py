@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2024.12.05"
+VERSION = "2024.12.06"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
