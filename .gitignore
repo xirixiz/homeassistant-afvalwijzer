@@ -1,7 +1,3 @@
-# Custom directories not needed.
-.vscode
-
-
 @eaDir
 .DS_Store
 # __pycache__
