@@ -199,6 +199,8 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
       postal_code: 1234AB              # (required, default = '')
       street_number:  5                # (required, default = '')
       suffix: ''                       # (optional, default = '')
+      username: ''                     # (optional, default = '')
+      password: ''                     # (optional, default = '')
       exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
       date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"
       default_label: geen              # (optional, default = geen) label if no date found
