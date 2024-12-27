@@ -9,9 +9,6 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_waste_data_raw(provider, postal_code, street_number, suffix, username, password):
     try:
-        if provider not in SENSOR_COLLECTORS_KLIKOGROEP:
-            raise ValueError(f"Invalid provider: {provider} for KLIKOGROEP, please verify")
-
         url = SENSOR_COLLECTORS_KLIKOGROEP[provider]['url']
         app = SENSOR_COLLECTORS_KLIKOGROEP[provider]['app']
 
