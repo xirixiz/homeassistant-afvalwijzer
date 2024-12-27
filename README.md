@@ -72,6 +72,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | rad (ximmio)                                          |
 | westland (ximmio)                                     |
 | woerden (ximmio)                                      |
+| oudeijsselstreek (klikogroep, needs user / pass)      |
 
 This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 

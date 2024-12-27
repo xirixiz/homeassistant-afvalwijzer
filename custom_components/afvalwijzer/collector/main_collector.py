@@ -7,6 +7,7 @@ from ..const.const import (
     SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
     SENSOR_COLLECTORS_ICALENDAR,
+    SENSOR_COLLECTORS_KLIKOGROEP,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_ROVA,
@@ -14,7 +15,7 @@ from ..const.const import (
 )
 
 try:
-    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
+    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, klikogroep, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -26,6 +27,8 @@ class MainCollector(object):
         postal_code,
         street_number,
         suffix,
+        username,
+        password,
         exclude_pickup_today,
         date_isoformat,
         exclude_list,
@@ -36,6 +39,8 @@ class MainCollector(object):
         self.postal_code = str(postal_code).strip().upper()
         self.street_number = str(street_number).strip()
         self.suffix = str(suffix).strip().lower()
+        self.username = str(username).strip().lower()
+        self.password = str(password).strip()
 
         # Handle boolean and string parameters correctly
         self.exclude_pickup_today = str(exclude_pickup_today).lower() if isinstance(
@@ -88,6 +93,15 @@ class MainCollector(object):
                     self.postal_code,
                     self.street_number,
                     self.suffix,
+                )
+            elif provider in SENSOR_COLLECTORS_KLIKOGROEP.keys():
+                waste_data_raw = klikogroep.get_waste_data_raw(
+                    self.provider,
+                    self.postal_code,
+                    self.street_number,
+                    self.suffix,
+                    self.username,
+                    self.password,
                 )
             elif provider in SENSOR_COLLECTORS_OPZET.keys():
                 waste_data_raw = opzet.get_waste_data_raw(

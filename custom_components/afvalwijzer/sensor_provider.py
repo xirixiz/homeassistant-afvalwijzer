@@ -17,6 +17,8 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
+    CONF_USERNAME,
+    CONF_PASSWORD,
     CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -48,7 +50,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._state = self._default_label
         self._icon = SENSOR_ICON
         self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}{config.get(CONF_USERNAME, '')}{config.get(CONF_PASSWORD, '')}".encode(
                 "utf-8"
             )
         ).hexdigest()

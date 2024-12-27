@@ -59,6 +59,13 @@ SENSOR_COLLECTORS_ICALENDAR = {
     "veldhoven": "https://www.veldhoven.nl/afvalkalender/{5}/{1}-{2}.ics",
 }
 
+SENSOR_COLLECTORS_KLIKOGROEP = {
+    "oudeijsselstreek": {
+        "url": "https://cp-oudeijsselstreek.klikocontainermanager.com/MyKliko",
+        "app": "cp-oudeijsselstreek.kcm.com"
+    }
+}
+
 SENSOR_COLLECTORS_AFVALWIJZER = [
     "mijnafvalwijzer",
     "afvalstoffendienstkalender",
@@ -73,6 +80,7 @@ SENSOR_COLLECTORS_XIMMIO = {
     "westland": "https://wasteprod2api.ximmio.com",
     "woerden": "https://wasteprod2api.ximmio.com",
 }
+
 
 SENSOR_COLLECTORS_XIMMIO_IDS = {
     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
@@ -128,6 +136,8 @@ CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
+CONF_USERNAME = "username"
+CONF_PASSWORD = "password"
 CONF_DATE_FORMAT = "date_format"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
