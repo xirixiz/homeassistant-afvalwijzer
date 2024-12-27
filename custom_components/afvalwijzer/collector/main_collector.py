@@ -40,7 +40,7 @@ class MainCollector(object):
         self.street_number = str(street_number).strip()
         self.suffix = str(suffix).strip().lower()
         self.username = str(username).strip().lower()
-        self.password = str(password).strip()
+        self.password = str(password)
 
         # Handle boolean and string parameters correctly
         self.exclude_pickup_today = str(exclude_pickup_today).lower() if isinstance(
