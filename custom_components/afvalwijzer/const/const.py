@@ -81,7 +81,6 @@ SENSOR_COLLECTORS_XIMMIO = {
     "woerden": "https://wasteprod2api.ximmio.com",
 }
 
-
 SENSOR_COLLECTORS_XIMMIO_IDS = {
     "acv": "f8e2844a-095e-48f9-9f98-71fceb51d2c3",
     "almere": "53d8db94-7945-42fd-9742-9bbc71dbe4c1",
