@@ -21,6 +21,8 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
+    CONF_USERNAME,
+    CONF_PASSWORD,
     SCAN_INTERVAL,
 )
 from .sensor_custom import CustomSensor
@@ -33,6 +35,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
+        vol.Optional(CONF_USERNAME, default=""): cv.string,
+        vol.Optional(CONF_PASSWORD, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
@@ -63,6 +67,8 @@ async def _setup_sensors(hass, config, async_add_entities):
     postal_code = config.get(CONF_POSTAL_CODE)
     street_number = config.get(CONF_STREET_NUMBER)
     suffix = config.get(CONF_SUFFIX, "")
+    username = config.get(CONF_USERNAME, "")
+    password = config.get(CONF_PASSWORD, "")
     exclude_pickup_today = config.get(CONF_EXCLUDE_PICKUP_TODAY, True)
     date_isoformat = config.get(CONF_DATE_ISOFORMAT, False)
     exclude_list = config.get(CONF_EXCLUDE_LIST, "")
@@ -125,6 +131,8 @@ class AfvalwijzerData:
         postal_code = self.config.get(CONF_POSTAL_CODE)
         street_number = self.config.get(CONF_STREET_NUMBER)
         suffix = self.config.get(CONF_SUFFIX)
+        username = self.config.get(CONF_USERNAME)
+        password = self.config.get(CONF_PASSWORD)
         exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
         date_isoformat = self.config.get(CONF_DATE_ISOFORMAT)
         default_label = self.config.get(CONF_DEFAULT_LABEL)
@@ -136,6 +144,8 @@ class AfvalwijzerData:
                 postal_code,
                 street_number,
                 suffix,
+                username,
+                password,
                 exclude_pickup_today,
                 date_isoformat,
                 exclude_list,

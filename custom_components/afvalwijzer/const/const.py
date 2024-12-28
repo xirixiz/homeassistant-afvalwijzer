@@ -59,6 +59,13 @@ SENSOR_COLLECTORS_ICALENDAR = {
     "veldhoven": "https://www.veldhoven.nl/afvalkalender/{5}/{1}-{2}.ics",
 }
 
+SENSOR_COLLECTORS_KLIKOGROEP = {
+    "oudeijsselstreek": {
+        "url": "https://cp-oudeijsselstreek.klikocontainermanager.com/MyKliko",
+        "app": "cp-oudeijsselstreek.kcm.com"
+    }
+}
+
 SENSOR_COLLECTORS_AFVALWIJZER = [
     "mijnafvalwijzer",
     "afvalstoffendienstkalender",
@@ -128,6 +135,8 @@ CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
+CONF_USERNAME = "username"
+CONF_PASSWORD = "password"
 CONF_DATE_FORMAT = "date_format"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"

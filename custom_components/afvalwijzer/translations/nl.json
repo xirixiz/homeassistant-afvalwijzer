@@ -9,6 +9,8 @@
           "postal_code": "Postcode (bijv. 1234AB)",
           "street_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
+          "username": "Provider gebruikersnaam",
+          "password": "Provider wachtwoord",
           "exclude_pickup_today": "Sluit ophalen van vandaag uit",
           "date_isoformat": "Gebruik ISO-datumformaat",
           "default_label": "Standaard label bij geen datum bekend",
