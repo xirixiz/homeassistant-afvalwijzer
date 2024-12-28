@@ -97,9 +97,6 @@ class MainCollector(object):
             elif provider in SENSOR_COLLECTORS_KLIKOGROEP.keys():
                 waste_data_raw = klikogroep.get_waste_data_raw(
                     self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
                     self.username,
                     self.password,
                 )

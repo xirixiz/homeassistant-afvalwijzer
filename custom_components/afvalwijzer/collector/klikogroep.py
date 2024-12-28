@@ -6,7 +6,7 @@ from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def get_waste_data_raw(provider, postal_code, street_number, suffix, username, password):
+def get_waste_data_raw(provider, username, password):
     try:
         url = SENSOR_COLLECTORS_KLIKOGROEP[provider]['url']
         app = SENSOR_COLLECTORS_KLIKOGROEP[provider]['app']
