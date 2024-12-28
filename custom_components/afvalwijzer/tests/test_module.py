@@ -27,6 +27,8 @@ exclude_pickup_today = "True"
 date_isoformat = "True"
 default_label = "geen"
 exclude_list = ""
+username = ""
+password = ""
 
 # DeAfvalapp
 # provider = "deafvalapp"
@@ -144,6 +146,8 @@ collector = MainCollector(
     postal_code,
     street_number,
     suffix,
+    username,
+    password,
     exclude_pickup_today,
     date_isoformat,
     exclude_list,

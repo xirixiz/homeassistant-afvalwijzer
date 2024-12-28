@@ -41,6 +41,10 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
+            # Ensure CONF_* is saved lowercase
+            user_input[CONF_COLLECTOR] = user_input.get(CONF_COLLECTOR, "").lower()
+            user_input[CONF_EXCLUDE_LIST] = user_input.get(CONF_EXCLUDE_LIST, "").lower()
+
             # Perform validation
             if not self._validate_postal_code(user_input.get(CONF_POSTAL_CODE)):
                 errors["postal_code"] = "config.error.invalid_postal_code"
