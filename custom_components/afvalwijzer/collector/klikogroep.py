@@ -1,6 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_KLIKOGROEP
 from ..common.main_functions import _waste_type_rename
-from datetime import datetime, timedelta
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
