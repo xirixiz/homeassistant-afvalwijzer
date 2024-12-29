@@ -25,11 +25,8 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
     try:
         response = raw_response.json()
-        print(response)
         ophaaldagen_data = response.get("ophaaldagen", {}).get("data", [])
         ophaaldagen_next_data = response.get("ophaaldagenNext", {}).get("data", [])
-
-        # print(ophaaldagen_next_data)
 
         if not ophaaldagen_data and not ophaaldagen_next_data:
             _LOGGER.error("Address not found or no data available!")
@@ -37,4 +34,4 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     except KeyError as err:
         raise KeyError(f"Invalid and/or no data received from {url}") from err
 
-    return ophaaldagen_data + ophaaldagen_next_data
+    return ophaaldagen_data + ophaaldagen_next_data[:25]
