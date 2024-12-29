@@ -42,13 +42,18 @@ password = ""
 # street_number = "2"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146eg"
-street_number = "1"
+# provider = "mijnafvalwijzer"
+# postal_code = "5146eg"
+# street_number = "1"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
 # street_number = "22"
+
+provider = "mijnafvalwijzer"
+postal_code = "5685AB"
+street_number = "57"
+
 
 # provider = "mijnafvalwijzer"
 # postal_code = "3601AC"

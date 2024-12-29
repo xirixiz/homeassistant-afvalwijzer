@@ -119,7 +119,7 @@ class AfvalwijzerCollector(WasteCollectorBase):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    collector = AfvalwijzerCollector("mijnafvalwijzer", "5146EA", 73, "")
+    collector = AfvalwijzerCollector("mijnafvalwijzer", "5685AB", 57, "")
     repository = WasteCollectionRepository()
 
     try:
