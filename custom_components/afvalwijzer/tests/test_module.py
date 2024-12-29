@@ -8,7 +8,8 @@ from afvalwijzer.collector.mijnafvalwijzer import AfvalWijzer
 AfvalWijzer().get_data('','','')
 
 - Comment out __init__.py
-- Run python3 -m afvalwijzer.tests.test_module
+- Update this file with your information (or the information you would like to test with, examples are in that file)
+- Then run python3 -m afvalwijzer.tests.test_module from this path <some dir>/homeassistant-afvalwijzer/custom_components
 
 """
 
@@ -41,17 +42,17 @@ password = ""
 # street_number = "2"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
 # street_number = "22"
 
-provider = "mijnafvalwijzer"
-postal_code = "3601AC"
-street_number = "10"
+# provider = "mijnafvalwijzer"
+# postal_code = "3601AC"
+# street_number = "10"
 
 # Afvalalert
 # provider = "afvalalert"
