@@ -5,6 +5,7 @@ import logging
 
 from .const.const import (
     DOMAIN,
+    _LOGGER,
     CONF_COLLECTOR,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
@@ -15,45 +16,57 @@ from .const.const import (
     CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
+    SENSOR_COLLECTORS_AFVALWIJZER,
+    SENSOR_COLLECTORS_AFVALALERT,
+    SENSOR_COLLECTORS_BURGERPORTAAL,
+    SENSOR_COLLECTORS_CIRCULUS,
+    SENSOR_COLLECTORS_DEAFVALAPP,
+    SENSOR_COLLECTORS_ICALENDAR,
+    SENSOR_COLLECTORS_KLIKOGROEP,
+    SENSOR_COLLECTORS_OPZET,
+    SENSOR_COLLECTORS_RD4,
+    SENSOR_COLLECTORS_ROVA,
+    SENSOR_COLLECTORS_XIMMIO_IDS,
 )
 
-# Extract keys from the dictionaries
-collectors_opzet = SENSOR_COLLECTORS_OPZET.keys()
-collectors_icalendar = SENSOR_COLLECTORS_ICALENDAR.keys()
-collectors_klikogroep = SENSOR_COLLECTORS_KLIKOGROEP.keys()
-collectors_afvalwijzer = SENSOR_COLLECTORS_AFVALWIJZER
-collectors_ximmio = SENSOR_COLLECTORS_XIMMIO.keys()
-collectors_ximmio_ids = SENSOR_COLLECTORS_XIMMIO_IDS.keys()
-collectors_rd4 = SENSOR_COLLECTORS_RD4.keys()
-collectors_afvalalert = SENSOR_COLLECTORS_AFVALALERT.keys()
-collectors_circulus = SENSOR_COLLECTORS_CIRCULUS.keys()
-collectors_rova = SENSOR_COLLECTORS_ROVA.keys()
-collectors_burgerportaal = SENSOR_COLLECTORS_BURGERPORTAAL.keys()
-collectors_deafvalapp = SENSOR_COLLECTORS_DEAFVALAPP.keys()
-# collectors_rwm = SENSOR_COLLECTORS_RWM.keys() # No key set for this provider
+try:
+    from . import (
+        afvalalert,
+        burgerportaal,
+        circulus,
+        deafvalapp,
+        icalendar,
+        klikogroep,
+        mijnafvalwijzer,
+        opzet,
+        rd4,
+        rova,
+        rwm,
+        ximmio,
+    )
+except ImportError as err:
+    _LOGGER.error("Failed to import provider modules: %s", err)
 
-# Combine all collectors into a single list
-all_collectors = (
-    list(collectors_opzet) +
-    list(collectors_icalendar) +
-    list(collectors_klikogroep) +
-    list(collectors_afvalwijzer) +
-    list(collectors_ximmio) +
-    list(collectors_ximmio_ids) +
-    list(collectors_rd4) +
-    list(collectors_afvalalert) +
-    list(collectors_circulus) +
-    list(collectors_rova) +
-    list(collectors_burgerportaal) +
-    list(collectors_deafvalapp) +
-    ["rwm"]  # Add 'rwm' as a string directly
+# Extract all collectors into a single list
+all_collectors = sorted(
+    set(
+        list(SENSOR_COLLECTORS_AFVALWIJZER) +
+        list(SENSOR_COLLECTORS_AFVALALERT.keys()) +
+        list(SENSOR_COLLECTORS_BURGERPORTAAL.keys()) +
+        list(SENSOR_COLLECTORS_CIRCULUS.keys()) +
+        list(SENSOR_COLLECTORS_DEAFVALAPP.keys()) +
+        list(SENSOR_COLLECTORS_ICALENDAR.keys()) +
+        list(SENSOR_COLLECTORS_KLIKOGROEP.keys()) +
+        list(SENSOR_COLLECTORS_OPZET.keys()) +
+        list(SENSOR_COLLECTORS_RD4.keys()) +
+        list(SENSOR_COLLECTORS_ROVA.keys()) +
+        list(SENSOR_COLLECTORS_XIMMIO_IDS.keys()) +
+        ["rwm"]
+    )
 )
-
-# Sort all collectors
-unique_collectors = sorted(set(all_collectors))
 
 DATA_SCHEMA = vol.Schema({
-    vol.Required(CONF_COLLECTOR): vol.In(unique_collectors),  # Dropdown list for CONF_COLLECTOR
+    vol.Required(CONF_COLLECTOR): vol.In(all_collectors),  # Dropdown list for CONF_COLLECTOR
     vol.Required(CONF_POSTAL_CODE): cv.string,
     vol.Required(CONF_STREET_NUMBER): cv.string,
     vol.Optional(CONF_SUFFIX, default=""): cv.string,
