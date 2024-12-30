@@ -29,23 +29,23 @@ from .const.const import (
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
 
-try:
-    from . import (
-        afvalalert,
-        burgerportaal,
-        circulus,
-        deafvalapp,
-        icalendar,
-        klikogroep,
-        mijnafvalwijzer,
-        opzet,
-        rd4,
-        rova,
-        rwm,
-        ximmio,
-    )
-except ImportError as err:
-    _LOGGER.error("Failed to import provider modules: %s", err)
+# try:
+#     from . import (
+#         afvalalert,
+#         burgerportaal,
+#         circulus,
+#         deafvalapp,
+#         icalendar,
+#         klikogroep,
+#         mijnafvalwijzer,
+#         opzet,
+#         rd4,
+#         rova,
+#         rwm,
+#         ximmio,
+#     )
+# except ImportError as err:
+#     _LOGGER.error("Failed to import provider modules: %s", err)
 
 # Extract all collectors into a single list
 all_collectors = sorted(
