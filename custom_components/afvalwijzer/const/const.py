@@ -63,6 +63,10 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
     "oudeijsselstreek": {
         "url": "https://cp-oudeijsselstreek.klikocontainermanager.com/MyKliko",
         "app": "cp-oudeijsselstreek.kcm.com"
+    },
+    "uithoorn": {
+        "url": "https://cp-uithoorn.klikocontainermanager.com/MyKliko",
+        "app": "cp-uithoorn.kcm.com"
     }
 }
 
