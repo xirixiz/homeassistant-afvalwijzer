@@ -11,75 +11,77 @@
 
 _Component to integrate with the following providers/communities. Be aware that your communict_
 
-
-| Provider                                              |
-| ------------------------------------------------------|
+| **Provider**                                          |
+|-------------------------------------------------------|
 | acv (ximmio)                                          |
+| afval3xbeter (opzet)                                  |
 | afvalstoffendienstkalender                            |
 | alkmaar                                               |
-| areareiniging (ximmio)                                |
-| avri (ximmio)                                         |
-| assen (burgerportaal)                                 |
-| bar (burgerportaal)                                   |
-| rwn (burgerportaal)                                   |
-| circulus                                              |
-| deafvalapp                                            |
-| eemsdelta (iCalendar)                                 |
-| hellendoorn (ximmio)                                  |
-| mijnafvalwijzer (also for afvalstoffendienstkalender) |
-| nijkerk                                               |
+| almere (ximmio)                                       |
 | alphenaandenrijn (opzet)                              |
-| afval3xbeter (opzet)                                  |
+| areareiniging (ximmio)                                |
+| assen (burgerportaal)                                 |
+| avalex (ximmio)                                       |
+| avri (ximmio)                                         |
+| bar (burgerportaal)                                   |
 | berkelland (opzet)                                    |
 | blink (opzet)                                         |
+| circulus                                              |
 | cranendonck (opzet)                                   |
 | cyclus (opzet)                                        |
 | dar (opzet)                                           |
+| deafvalapp                                            |
 | defryskemarren (opzet)                                |
 | denhaag (opzet)                                       |
+| eemsdelta (iCalendar)                                 |
 | gad (opzet)                                           |
+| hellendoorn (ximmio)                                  |
 | hvc (opzet)                                           |
 | lingewaard (opzet)                                    |
 | middelburg (opzet)                                    |
+| mijnafvalwijzer (also for afvalstoffendienstkalender) |
 | mijnafvalzaken (opzet)                                |
 | montfoort (opzet)                                     |
+| meerlanden (ximmio)                                   |
+| nijkerk                                               |
 | offalkalinder (opzet)                                 |
+| oudeijsselstreek (klikogroep, needs user / pass)      |
 | peelenmaas (opzet)                                    |
 | prezero (opzet)                                       |
 | purmerend (opzet)                                     |
+| rad (ximmio)                                          |
+| rd4                                                   |
+| reinis (ximmio)                                       |
+| rmn                                                   |
+| rwn (burgerportaal)                                   |
+| rova                                                  |
 | rwm (opzet)                                           |
 | saver (opzet)                                         |
 | schouwen (opzet)                                      |
+| schouwenand                                           |
 | sliedrecht (opzet)                                    |
 | spaarnelanden (opzet)                                 |
 | sudwestfryslan (opzet)                                |
 | suez (opzet)                                          |
+| twentemilieu (ximmio)                                 |
+| uithoorn (klikogroep, needs user / pass)              |
+| veldhoven (iCalendar)                                 |
 | venray (opzet)                                        |
 | voorschoten (opzet)                                   |
 | waalre (opzet)                                        |
-| zrd (opzet)                                           |
-| reinis (ximmio)                                       |
-| rd4                                                   |
-| rova                                                  |
-| rmn                                                   |
-| schouwenand                                           |
-| twentemilieu (ximmio)                                 |
-| veldhoven (iCalendar)                                 |
 | waardlanden                                           |
-| almere (ximmio)                                       |
-| avalex (ximmio)                                       |
-| meerlanden (ximmio)                                   |
-| rad (ximmio)                                          |
 | westland (ximmio)                                     |
 | woerden (ximmio)                                      |
-| oudeijsselstreek (klikogroep, needs user / pass)      |
+| zrd (opzet)                                           |
 
-This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
+This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft,
+restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the
+sensor names for your region are and modify where necessary.
 
 **This component will set up the following platform(s).**
 
 | Platform | Description             |
-| -------- | ----------------------- |
+|----------|-------------------------|
 | `sensor` | Show waste pickup dates |
 
 ![example][exampleimg1]
@@ -133,7 +135,8 @@ More information on the reminders (ios in this case):
 1. Navigate to your Home Assistant configuration directory (where your `configuration.yaml` is located).
 2. Create a folder named `custom_components` if it doesn't exist.
 3. Inside the `custom_components` folder, create another folder named `afvalwijzer`.
-4. Clone this repository or download the source code and copy all files from the `custom_components/afvalwijzer/` directory to the newly created `afvalwijzer` folder.
+4. Clone this repository or download the source code and copy all files from the `custom_components/afvalwijzer/`
+   directory to the newly created `afvalwijzer` folder.
 5. Restart Home Assistant to load the custom component.
 
 After following these steps, your directory structure should look like this:
@@ -150,7 +153,8 @@ config_flow.py
 
 ### Installation via HACS
 
-1. Ensure HACS is installed in your Home Assistant setup. If not, follow the [HACS installation guide](https://hacs.xyz/docs/setup/download).
+1. Ensure HACS is installed in your Home Assistant setup. If not, follow
+   the [HACS installation guide](https://hacs.xyz/docs/setup/download).
 2. Open the HACS panel in Home Assistant.
 3. Click on the `Frontend` or `Integrations` tab.
 4. Click the `+` button and search for `Afvalwijzer`.
@@ -166,9 +170,10 @@ config_flow.py
 1. Go to the **Settings** → **Devices & Services** page in Home Assistant.
 2. Click **Add Integration** and search for `Afvalwijzer`.
 3. Follow the on-screen instructions to complete the setup.
-   - Provide your postal code, street number, and any other required details.
+    - Provide your postal code, street number, and any other required details.
 
-After completing the config flow, the integration will dynamically create sensors for waste collection dates based on your chosen provider.
+After completing the config flow, the integration will dynamically create sensors for waste collection dates based on
+your chosen provider.
 
 ---
 
@@ -192,12 +197,13 @@ logger:
 Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
 
 ###### SENSOR - CONFIGURATION.YAML
+
 ```yaml
   sensor:
     - platform: afvalwijzer
       provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) choose the provider for your community.
       postal_code: 1234AB              # (required, default = '')
-      street_number:  5                # (required, default = '')
+      street_number: 5                 # (required, default = '')
       suffix: ''                       # (optional, default = '')
       username: ''                     # (optional, default = '')
       password: ''                     # (optional, default = '')
@@ -280,6 +286,9 @@ automation:
 ---
 
 [exampleimg1]: images/afvalwijzer-lovelace_2.png
+
 [exampleimg2]: images/afvalwijzer_lovelace_1.png
+
 [customupdater]: https://github.com/custom-components/custom_updater
+
 [customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
