@@ -89,6 +89,8 @@ sensor names for your region are and modify where necessary.
 
 The second row sorts the waste items by date using the following lovelace code
 
+**The example yaml is to be used directly in the main ```cards: ``` node on the dashboard not inside a card yaml. <br/>
+This yaml uses a custom card being [auto-entities](https://github.com/thomasloven/lovelace-auto-entities), make sure its installed***
 ```yaml
 - type: custom:auto-entities
   card:
