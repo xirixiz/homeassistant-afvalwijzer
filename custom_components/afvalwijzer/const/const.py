@@ -129,6 +129,10 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
     "deafvalapp": "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={0}&straatId=0&huisnr={1}&huisnrtoev={2}",
 }
 
+SENSOR_COLLECTORS_IRADO = {
+    "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/nextpickup?zipcode={0}&number={1}&extention={2}" #pickups instead of nextpickup for all year
+}
+
 SENSOR_COLLECTORS_RWM = {
     "getAddress": "https://rwm.nl/adressen/{0}:{1}",
     "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen"

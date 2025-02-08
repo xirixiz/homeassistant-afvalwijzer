@@ -12,7 +12,6 @@ AfvalWijzer().get_data('','','')
 - Then run python3 -m afvalwijzer.tests.test_module from this path <some dir>/homeassistant-afvalwijzer/custom_components
 
 """
-
 from ..collector.main_collector import MainCollector
 
 # provider = "afvalstoffendienstkalender"
@@ -50,9 +49,9 @@ password = ""
 # postal_code = "5563CM"
 # street_number = "22"
 
-provider = "mijnafvalwijzer"
-postal_code = "5685AB"
-street_number = "57"
+#provider = "mijnafvalwijzer"
+#postal_code = "5685AB"
+#street_number = "57"
 
 
 # provider = "mijnafvalwijzer"
@@ -144,6 +143,12 @@ street_number = "57"
 # provider = "circulus"
 # postal_code = "7421AC"
 # street_number = "1"
+
+# Irado
+provider = "irado"
+postal_code = "3132SP"
+street_number = "53"
+suffix = "A"
 
 # postal_code = postal_code.strip().upper()
 

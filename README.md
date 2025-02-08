@@ -37,6 +37,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | gad (opzet)                                           |
 | hellendoorn (ximmio)                                  |
 | hvc (opzet)                                           |
+| irado                                                 |
 | lingewaard (opzet)                                    |
 | middelburg (opzet)                                    |
 | mijnafvalwijzer (also for afvalstoffendienstkalender) |
