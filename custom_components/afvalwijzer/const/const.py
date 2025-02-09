@@ -130,7 +130,7 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
 }
 
 SENSOR_COLLECTORS_IRADO = {
-    "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/nextpickup?zipcode={0}&number={1}&extention={2}" #pickups instead of nextpickup for all year
+    "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}"
 }
 
 SENSOR_COLLECTORS_RWM = {

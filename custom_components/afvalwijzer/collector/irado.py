@@ -34,19 +34,22 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
             _LOGGER.error("Äddress not found!")
             return []
         
-        waste_data_raw_temp = response["data"]
+        waste_data_raw_temp = response["calendar_data"]["pickups"]
         waste_data_raw = []
 
-        for item in waste_data_raw_temp:
-            if "date" not in item or not item["date"]: #Check if date exists
-                continue
+        for year, months in waste_data_raw_temp.items():
+            for month, days in months.items():
+                for day, items in days.items():
+                    for item in items:
+                        if "date" not in item or not item["date"]: #Check if date exists
+                            continue
 
-            waste_type = _waste_type_rename(item["type"].strip().lower())
-            if not waste_type:
-                continue
+                        waste_type = _waste_type_rename(item["type"].strip().lower())
+                        if not waste_type:
+                            continue
 
-            waste_date = datetime.strptime(item["date"], "%d/%m/%Y").strftime("%Y-%m-%d")
-            waste_data_raw.append({"type": waste_type, "date": waste_date})
+                        waste_date = datetime.strptime(item["date"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                        waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
