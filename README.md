@@ -27,7 +27,6 @@ _Component to integrate with the following providers/communities. Be aware that 
 | berkelland (opzet)                                    |
 | blink (opzet)                                         |
 | circulus                                              |
-| cleanprofs                                            |
 | cranendonck (opzet)                                   |
 | cyclus (opzet)                                        |
 | dar (opzet)                                           |

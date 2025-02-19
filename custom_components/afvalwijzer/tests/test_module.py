@@ -150,11 +150,6 @@ password = ""
 # street_number = "53"
 # suffix = "A"
 
-# Cleanprofs
-provider = "cleanprofs"
-postal_code = "1312ET"
-street_number = "5"
-
 # postal_code = postal_code.strip().upper()
 
 collector = MainCollector(

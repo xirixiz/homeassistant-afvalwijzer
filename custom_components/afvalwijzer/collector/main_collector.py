@@ -13,11 +13,10 @@ from ..const.const import (
     SENSOR_COLLECTORS_ROVA,
     SENSOR_COLLECTORS_XIMMIO_IDS,
     SENSOR_COLLECTORS_IRADO,
-    SENSOR_COLLECTORS_CLEANPROFS,
 )
 
 try:
-    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, klikogroep, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio, irado, cleanprofs
+    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, klikogroep, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio, irado
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -139,13 +138,6 @@ class MainCollector(object):
                 )
             elif provider in SENSOR_COLLECTORS_IRADO.keys():
                 waste_data_raw = irado.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_CLEANPROFS.keys():
-                waste_data_raw = cleanprofs.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
