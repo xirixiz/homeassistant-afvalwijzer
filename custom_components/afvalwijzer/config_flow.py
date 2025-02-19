@@ -28,6 +28,7 @@ from .const.const import (
     SENSOR_COLLECTORS_ROVA,
     SENSOR_COLLECTORS_XIMMIO_IDS,
     SENSOR_COLLECTORS_IRADO,
+    SENSOR_COLLECTORS_CLEANPROFS,
 )
 
 # try:
@@ -63,6 +64,7 @@ all_collectors = sorted(
         list(SENSOR_COLLECTORS_ROVA.keys()) +
         list(SENSOR_COLLECTORS_XIMMIO_IDS.keys()) +
         list(SENSOR_COLLECTORS_IRADO.keys()) +
+        list(SENSOR_COLLECTORS_CLEANPROFS.keys()) +
         ["rwm"]
     )
 )

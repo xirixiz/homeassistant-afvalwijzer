@@ -1,7 +1,6 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_IRADO
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import _waste_type_rename, format_postal_code
 from datetime import datetime
-import re
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -12,8 +11,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         if provider not in SENSOR_COLLECTORS_IRADO:
             raise ValueError(f"Invalid provider: {provider}, please verify")
 
-        corrected_postal_code_parts = re.search(r"(\d\d\d\d) ?([A-z][A-z])", postal_code)
-        corrected_postal_code = f"{corrected_postal_code_parts[1]}{corrected_postal_code_parts[2].upper()}"
+        corrected_postal_code = format_postal_code(postal_code)
 
         url = SENSOR_COLLECTORS_IRADO[provider].format(
             corrected_postal_code,

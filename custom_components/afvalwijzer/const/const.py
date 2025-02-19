@@ -130,7 +130,11 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
 }
 
 SENSOR_COLLECTORS_IRADO = {
-    "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}"
+    "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}",
+}
+
+SENSOR_COLLECTORS_CLEANPROFS = {
+    "cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&code=crm",
 }
 
 SENSOR_COLLECTORS_RWM = {

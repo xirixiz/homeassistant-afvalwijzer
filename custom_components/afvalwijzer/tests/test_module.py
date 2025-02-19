@@ -145,10 +145,15 @@ password = ""
 # street_number = "1"
 
 # Irado
-provider = "irado"
-postal_code = "3132SP"
-street_number = "53"
-suffix = "A"
+# provider = "irado"
+# postal_code = "3132SP"
+# street_number = "53"
+# suffix = "A"
+
+# Cleanprofs
+provider = "cleanprofs"
+postal_code = "1312ET"
+street_number = "5"
 
 # postal_code = postal_code.strip().upper()
 
