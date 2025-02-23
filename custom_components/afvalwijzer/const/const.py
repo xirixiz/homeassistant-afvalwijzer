@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2025.01.02"
+VERSION = "2025.02.23"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -138,6 +138,11 @@ SENSOR_COLLECTORS_RWM = {
     "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen"
 }
 
+CLEAN_COLLECTORS_CLEANPROFS = {
+    "cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={zipcode}&house_number={house_number}&code=crm",
+}
+
+
 CONF_COLLECTOR = "provider"
 CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
@@ -151,6 +156,7 @@ CONF_DEFAULT_LABEL = "default_label"
 CONF_ID = "id"
 CONF_EXCLUDE_LIST = "exclude_list"
 CONF_DATE_ISOFORMAT = "date_isoformat"
+CONF_CLEANCOLLECTOR = "clean_provider"
 
 SENSOR_PREFIX = "afvalwijzer "
 SENSOR_ICON = "mdi:recycle"

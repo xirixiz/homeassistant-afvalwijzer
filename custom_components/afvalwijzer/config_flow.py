@@ -7,6 +7,7 @@ from .const.const import (
     DOMAIN,
     _LOGGER,
     CONF_COLLECTOR,
+    CONF_CLEANCOLLECTOR,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -28,6 +29,7 @@ from .const.const import (
     SENSOR_COLLECTORS_ROVA,
     SENSOR_COLLECTORS_XIMMIO_IDS,
     SENSOR_COLLECTORS_IRADO,
+    CLEAN_COLLECTORS_CLEANPROFS,
 )
 
 # try:
@@ -67,6 +69,13 @@ all_collectors = sorted(
     )
 )
 
+# Extrat all Container Cleaning collectors into a list
+all_clean_collectors = sorted(
+    set(
+        list(CLEAN_COLLECTORS_CLEANPROFS.keys())
+    )
+)
+
 DATA_SCHEMA = vol.Schema({
     vol.Required(CONF_COLLECTOR): vol.In(all_collectors),  # Dropdown list for CONF_COLLECTOR
     vol.Required(CONF_POSTAL_CODE): cv.string,
@@ -78,6 +87,7 @@ DATA_SCHEMA = vol.Schema({
     vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
     vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
     vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
+    vol.Optional(CONF_CLEANCOLLECTOR): vol.In(all_clean_collectors), # Dropdown list for CONF_CLEANCOLLECTOR
 })
 
 _LOGGER = logging.getLogger(__name__)
@@ -94,7 +104,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Ensure CONF_* is saved lowercase
             user_input[CONF_COLLECTOR] = user_input.get(CONF_COLLECTOR, "").lower()
             user_input[CONF_EXCLUDE_LIST] = user_input.get(CONF_EXCLUDE_LIST, "").lower()
-
+            user_input[CONF_CLEANCOLLECTOR] = user_input.get(CONF_CLEANCOLLECTOR, "").lower()
             # Perform validation
             if not self._validate_postal_code(user_input.get(CONF_POSTAL_CODE)):
                 errors["postal_code"] = "config.error.invalid_postal_code"

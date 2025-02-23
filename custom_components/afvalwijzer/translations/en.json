@@ -14,7 +14,8 @@
           "exclude_pickup_today": "Exclude today's pickup",
           "date_isoformat": "Use ISO date format",
           "default_label": "Default label when no data is available",
-          "exclude_list": "Waste type exclude list"
+          "exclude_list": "Waste type exclude list",
+          "clean_provider": "Cleaning provider (e.g., cleanprofs)."
         }
       }
     },
@@ -35,7 +36,8 @@
           "exclude_pickup_today": "Exclude today's pickup",
           "date_isoformat": "Use ISO date format",
           "default_label": "Default label when no data is available",
-          "exclude_list": "Waste type exclude list"
+          "exclude_list": "Waste type exclude list",
+          "clean_provider": "Cleaning provider (e.g., cleanprofs)."
         }
       }
     }

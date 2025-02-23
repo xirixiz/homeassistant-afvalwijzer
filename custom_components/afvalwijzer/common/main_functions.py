@@ -57,6 +57,14 @@ def _waste_type_rename(item_name):
 
     return waste_mapping.get(item_name, item_name)
 
+def _clean_type_rename(item_name):
+    cleaning_mapping = {
+        "rst": "cleaning_restafval",
+        "gft": "cleaning_gft",
+    }
+
+    return cleaning_mapping.get(item_name, item_name)
+
 def format_postal_code(postal_code: str) -> str:
     match = re.search(r"(\d{4}) ?([A-Za-z]{2})", postal_code)
     if match:

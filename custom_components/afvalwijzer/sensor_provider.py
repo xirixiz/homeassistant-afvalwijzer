@@ -20,6 +20,7 @@ from .const.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_DATE_ISOFORMAT,
+    CONF_CLEANCOLLECTOR,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
@@ -28,16 +29,19 @@ from .const.const import (
 class ProviderSensor(RestoreEntity, SensorEntity):
     """Representation of a provider-based waste sensor."""
 
-    def __init__(self, hass, waste_type, fetch_data, config):
+    def __init__(self, hass, waste_type, fetch_data, clean_data, config):
         """Initialize the sensor."""
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data  # This should be an instance of AfvalwijzerData
+        self.clean_data = clean_data  # Instance of ContainerCleaningData
         self.config = config
         self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = str(
             config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()
+        self._include_cleaning_data = str(
+            config.get(CONF_CLEANCOLLECTOR)).lower()
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
         ) + waste_type
@@ -60,7 +64,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
-
+    
     @property
     def unique_id(self):
         """Return a unique ID for the sensor."""
@@ -95,23 +99,42 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     async def async_update(self):
         """Fetch the latest data and update the state."""
         _LOGGER.debug(f"Updating sensor: {self.name}")
-
+        _LOGGER.debug(f"Active?: {self._include_cleaning_data}")
         try:
+
             # Call update method from fetch_data
             await self.hass.async_add_executor_job(self.fetch_data.update)
-
+            
             # Select the correct waste data based on exclude_pickup_today
-            waste_data_provider = (
-                self.fetch_data.waste_data_with_today
-                if self._exclude_pickup_today in ("false", "no")
-                else self.fetch_data.waste_data_without_today
-            )
+            if(self._include_cleaning_data):
+                await self.hass.async_add_executor_job(self.clean_data.update)
+
+                temp_waste_data_provider = (
+                    self.fetch_data.waste_data_with_today
+                    if self._exclude_pickup_today in ("false", "no")
+                    else self.fetch_data.waste_data_without_today
+                )
+
+                clean_data_provider = (
+                    self.clean_data.waste_data_with_today
+                    if self._exclude_pickup_today in ("false", "no")
+                    else self.clean_data.waste_data_without_today
+                )
+                
+                waste_data_provider = {**temp_waste_data_provider, **clean_data_provider}
+            else:
+                waste_data_provider = (
+                    self.fetch_data.waste_data_with_today
+                    if self._exclude_pickup_today in ("false", "no")
+                    else self.fetch_data.waste_data_without_today
+                )
 
             if not waste_data_provider or self.waste_type not in waste_data_provider:
                 raise ValueError(f"No data for waste type: {self.waste_type}")
 
             # Update attributes and state based on the waste data
             collection_date = waste_data_provider[self.waste_type]
+
             if isinstance(collection_date, datetime):
                 self._update_attributes_date(collection_date)
             else:

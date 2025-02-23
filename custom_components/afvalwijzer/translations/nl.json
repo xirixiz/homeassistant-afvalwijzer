@@ -14,7 +14,8 @@
           "exclude_pickup_today": "Sluit ophalen van vandaag uit",
           "date_isoformat": "Gebruik ISO-datumformaat",
           "default_label": "Standaard label bij geen datum bekend",
-          "exclude_list": "Afvaltype uitsluiten"
+          "exclude_list": "Afvaltype uitsluiten",
+          "clean_provider": "Schoonmaak provider (bijv. cleanprofs)."
         }
       }
     },
@@ -35,7 +36,8 @@
           "exclude_pickup_today": "Sluit ophalen van vandaag uit",
           "date_isoformat": "Gebruik ISO-datumformaat",
           "default_label": "Standaard label bij geen datum bekend",
-          "exclude_list": "Afvaltype uitsluiten"
+          "exclude_list": "Afvaltype uitsluiten",
+          "clean_provider": "Schoonmaak provider (bijv. cleanprofs)."
         }
       }
     }
