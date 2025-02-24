@@ -7,6 +7,7 @@ def _waste_type_rename(item_name):
         "best_bag": "best-tas",
         "bulklitter": "grofvuil",
         "bulkygardenwaste": "tuinafval",
+        "bulkyrestwaste": "pmd-restafval"
         "chemokar": "chemisch",
         "christmas_trees": "kerstbomen",
         "gemengde plastics": "plastic",
@@ -41,7 +42,6 @@ def _waste_type_rename(item_name):
         "plastic, blik & drinkpakken overbetuwe": "pmd",
         "pmdrest": "pmd-restafval",
         "pmd-zak": "pmd",
-        "pmd+rest":"pmd-restafval",
         "pruning_waste": "snoeiafval",
         "remainder": "restwagen",
         "residual_waste": "restafval",
