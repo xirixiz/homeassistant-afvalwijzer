@@ -41,6 +41,7 @@ def _waste_type_rename(item_name):
         "plastic, blik & drinkpakken overbetuwe": "pmd",
         "pmdrest": "pmd-restafval",
         "pmd-zak": "pmd",
+        "PMD+Rest":"pmd-restafval",
         "pruning_waste": "snoeiafval",
         "remainder": "restwagen",
         "residual_waste": "restafval",
