@@ -2,17 +2,13 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 
 from datetime import datetime, date
-import hashlib
+import uuid
 
 from .const.const import (
     _LOGGER,
     ATTR_LAST_UPDATE,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_DEFAULT_LABEL,
-    CONF_ID,
-    CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
-    CONF_SUFFIX,
     CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -28,7 +24,6 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self.waste_type = waste_type
         self.fetch_data = fetch_data  # Should be an instance of AfvalwijzerData
         self.config = config
-        self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
         self._last_update = None
@@ -38,11 +33,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
         ) + waste_type
         self._state = self._default_label
         self._icon = SENSOR_ICON
-        self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
-                "utf-8"
-            )
-        ).hexdigest()
+        self._unique_id = uuid.uuid4().hex
         self._device_class = None
 
     @property

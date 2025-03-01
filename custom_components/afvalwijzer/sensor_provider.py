@@ -2,7 +2,7 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
 from datetime import datetime, date, timedelta
-import hashlib
+import uuid
 
 from .const.const import (
     _LOGGER,
@@ -13,12 +13,6 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
-    CONF_ID,
-    CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
-    CONF_SUFFIX,
-    CONF_USERNAME,
-    CONF_PASSWORD,
     CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -34,7 +28,6 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self.waste_type = waste_type
         self.fetch_data = fetch_data  # This should be an instance of AfvalwijzerData
         self.config = config
-        self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = str(
             config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()
@@ -49,11 +42,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
         self._state = self._default_label
         self._icon = SENSOR_ICON
-        self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}{config.get(CONF_USERNAME, '')}{config.get(CONF_PASSWORD, '')}".encode(
-                "utf-8"
-            )
-        ).hexdigest()
+        self._unique_id = uuid.uuid4().hex
         self._device_class = None
 
     @property
