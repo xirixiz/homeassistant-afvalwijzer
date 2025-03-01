@@ -114,6 +114,10 @@ SENSOR_COLLECTORS_CIRCULUS = {
     "circulus": "https://mijn.circulus.nl",
 }
 
+SENSOR_COLLECTORS_CLEANPROFS = {
+    "cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&suffix={2}",
+}
+
 SENSOR_COLLECTORS_ROVA = {
     "rova": "https://www.rova.nl",
 }

@@ -1,3 +1,5 @@
+import re
+
 def _waste_type_rename(item_name):
     # Mapping of waste types
     waste_mapping = {
@@ -5,6 +7,7 @@ def _waste_type_rename(item_name):
         "best_bag": "best-tas",
         "bulklitter": "grofvuil",
         "bulkygardenwaste": "tuinafval",
+        "bulkyrestwaste": "pmd-restafval",
         "chemokar": "chemisch",
         "christmas_trees": "kerstbomen",
         "gemengde plastics": "plastic",
@@ -44,6 +47,7 @@ def _waste_type_rename(item_name):
         "residual_waste": "restafval",
         "rest": "restafval",
         "restafvalzakken": "restafvalzakken",
+        "rst": "restafval",
         "sloop": "grofvuil",
         "snoeiafval": "takken",
         "tariefzak restafval": "restafvalzakken",
