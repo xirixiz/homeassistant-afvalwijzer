@@ -13,6 +13,7 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_ID,
     CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -26,8 +27,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         """Initialize the sensor."""
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_data = fetch_data  # This should be an instance of AfvalwijzerData
+        self.fetch_data = fetch_data
         self.config = config
+        self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = str(
             config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()

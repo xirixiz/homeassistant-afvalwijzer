@@ -9,6 +9,7 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_DEFAULT_LABEL,
+    CONF_ID,
     CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -22,8 +23,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
         """Initialize the sensor."""
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_data = fetch_data  # Should be an instance of AfvalwijzerData
+        self.fetch_data = fetch_data
         self.config = config
+        self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
         self._last_update = None
