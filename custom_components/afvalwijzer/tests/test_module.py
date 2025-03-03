@@ -41,6 +41,12 @@ password = ""
 # postal_code = "9991AB"
 # street_number = "2"
 
+# Irado
+# provider = "irado"
+# postal_code = "3132SP"
+# street_number = "53"
+# suffix = "A"
+
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
 # postal_code = "5146eg"
