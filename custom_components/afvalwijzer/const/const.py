@@ -59,6 +59,10 @@ SENSOR_COLLECTORS_ICALENDAR = {
     "veldhoven": "https://www.veldhoven.nl/afvalkalender/{5}/{1}-{2}.ics",
 }
 
+SENSOR_COLLECTORS_IRADO = {
+    "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}",
+}
+
 SENSOR_COLLECTORS_KLIKOGROEP = {
     "oudeijsselstreek": {
         "url": "https://cp-oudeijsselstreek.klikocontainermanager.com/MyKliko",
