@@ -65,10 +65,6 @@ street_number = "73"
 # postal_code = "5685AB"
 # street_number = "57"
 
-# provider = "cleanprofs"
-# postal_code = "5146EA"
-# street_number = "73"
-
 # provider = "mijnafvalwijzer"
 # postal_code = "3601AC"
 # street_number = "10"
