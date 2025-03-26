@@ -13,56 +13,59 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     if provider not in SENSOR_COLLECTORS_ICALENDAR:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
+    # Construct URL using the provider template
+    url = SENSOR_COLLECTORS_ICALENDAR[provider].format(
+        provider,
+        postal_code,
+        street_number,
+        suffix,
+        today.strftime("%Y-%m-%d"),
+        today.year,
+    )
+
     try:
-        url = SENSOR_COLLECTORS_ICALENDAR[provider].format(
-            provider,
-            postal_code,
-            street_number,
-            suffix,
-            today.strftime("%Y-%m-%d"),
-            today.year,
-        )
         raw_response = requests.get(url, timeout=60, verify=False)
-        raw_response.raise_for_status()  # Raise an error for bad responses
+        raw_response.raise_for_status()  # Raise error for non-200 responses
     except requests.exceptions.RequestException as err:
         raise ValueError(f"Error in request to {url}: {err}") from err
 
-    try:
-        response = raw_response.text
-    except ValueError as err:
-        raise ValueError(f"Invalid or no data received from {url}: {err}") from err
-
-    if not response:
+    response_text = raw_response.text
+    if not response_text:
         _LOGGER.error("No waste data found!")
         return []
 
     waste_data_raw = []
-    waste_date = None
-    waste_type = None
+    event = {}  # Temporary dict to hold event data
 
-    for line in response.splitlines():
-        key_value = line.split(":", 2)
-        field = key_value[0].split(";")[0]
+    for line in response_text.splitlines():
+        # Only process lines containing a colon
+        if ":" not in line:
+            continue
 
-        if field == "BEGIN" and key_value[1] == "VEVENT":
-            waste_date = None
-            waste_type = None
+        # Split the line into field and value parts
+        parts = line.split(":", 1)
+        if len(parts) < 2:
+            continue
+
+        # Clean up the field name and value
+        field = parts[0].split(";")[0].strip()
+        value = parts[1].strip()
+
+        if field == "BEGIN" and value == "VEVENT":
+            event = {}  # Initialize a new event
         elif field == "SUMMARY":
-            waste_type = waste_type_rename(key_value[1].strip().lower())
+            event["type"] = waste_type_rename(value.lower())
         elif field == "DTSTART":
-            if DATE_PATTERN.match(key_value[1]):
-                waste_date = f"{key_value[1][:4]}-{key_value[1][4:6]}-{key_value[1][6:8]}"
+            if DATE_PATTERN.match(value):
+                # Format date as YYYY-MM-DD
+                event["date"] = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
             else:
-                _LOGGER.debug(f"Unsupported waste_date format: {key_value[1]}")
-        elif field == "END" and key_value[1] == "VEVENT":
-            if waste_date and waste_type:
-                waste_data_raw.append({"type": waste_type, "date": waste_date})
+                _LOGGER.debug(f"Unsupported waste_date format: {value}")
+        elif field == "END" and value == "VEVENT":
+            if "date" in event and "type" in event:
+                waste_data_raw.append(event)
             else:
-                _LOGGER.debug(
-                    f"No waste_date or waste_type extracted from event: waste_date={waste_date}, waste_type={waste_type}"
-                )
+                _LOGGER.debug(f"Incomplete event data encountered: {event}")
+            event = {}  # Reset the event for the next one
 
     return waste_data_raw
-
-
-
