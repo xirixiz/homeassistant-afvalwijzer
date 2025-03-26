@@ -21,21 +21,25 @@ except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
 
-class MainCollector(object):
+class MainCollector:
+    """
+    MainCollector collects and transforms waste data from various providers.
+    """
+
     def __init__(
         self,
-        provider,
-        postal_code,
-        street_number,
-        suffix,
-        username,
-        password,
+        provider: str,
+        postal_code: str,
+        street_number: str,
+        suffix: str,
+        username: str,
+        password: str,
         exclude_pickup_today,
         date_isoformat,
-        exclude_list,
-        default_label,
+        exclude_list: str,
+        default_label: str,
     ):
-        # Ensure provider and address fields are strings
+        # Normalize input parameters
         self.provider = str(provider).strip().lower()
         self.postal_code = str(postal_code).strip().upper()
         self.street_number = str(street_number).strip()
@@ -43,117 +47,15 @@ class MainCollector(object):
         self.username = str(username).strip().lower()
         self.password = str(password)
 
-        # Handle boolean and string parameters correctly
-        self.exclude_pickup_today = str(exclude_pickup_today).lower() if isinstance(
-            exclude_pickup_today, bool) else str(exclude_pickup_today).strip().lower()
-        self.date_isoformat = str(date_isoformat).lower() if isinstance(
-            date_isoformat, bool) else str(date_isoformat).strip().lower()
+        self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
+        self.date_isoformat = self._normalize_bool_param(date_isoformat)
         self.exclude_list = str(exclude_list).strip().lower()
         self.default_label = str(default_label).strip()
 
-        # Validate and process the provider
-        try:
-            if provider in SENSOR_COLLECTORS_AFVALWIJZER:
-                waste_data_raw = mijnafvalwijzer.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_AFVALALERT.keys():
-                waste_data_raw = afvalalert.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_BURGERPORTAAL.keys():
-                waste_data_raw = burgerportaal.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_CIRCULUS.keys():
-                waste_data_raw = circulus.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_DEAFVALAPP.keys():
-                waste_data_raw = deafvalapp.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_ICALENDAR.keys():
-                waste_data_raw = icalendar.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_IRADO.keys():
-                waste_data_raw = irado.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_KLIKOGROEP.keys():
-                waste_data_raw = klikogroep.get_waste_data_raw(
-                    self.provider,
-                    self.username,
-                    self.password,
-                )
-            elif provider in SENSOR_COLLECTORS_OPZET.keys():
-                waste_data_raw = opzet.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_RD4.keys():
-                waste_data_raw = rd4.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_ROVA.keys():
-                waste_data_raw = rova.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_XIMMIO_IDS.keys():
-                waste_data_raw = ximmio.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider == "rwm":
-                waste_data_raw = rwm.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            else:
-                _LOGGER.error(f"Unknown provider: {provider}")
-                raise ValueError(f"Unknown provider: {provider}")
+        # Get raw waste data using the appropriate provider method
+        waste_data_raw = self._get_waste_data_raw()
 
-        except ValueError as err:
-            _LOGGER.error(f"Check afvalwijzer platform settings: {err}")
-            raise
-
-        ##########################################################################
-        #  COMMON CODE
-        ##########################################################################
+        # Transform raw waste data
         self._waste_data = WasteDataTransformer(
             waste_data_raw,
             self.exclude_pickup_today,
@@ -161,9 +63,52 @@ class MainCollector(object):
             self.default_label,
         )
 
-    ##########################################################################
-    #  PROPERTIES FOR EXECUTION
-    ##########################################################################
+    def _normalize_bool_param(self, param) -> str:
+        """
+        Normalizes a parameter that might be a boolean or string into a lowercase string.
+        """
+        if isinstance(param, bool):
+            return str(param).lower()
+        return str(param).strip().lower()
+
+    def _get_waste_data_raw(self):
+        """
+        Determines the correct provider module to call based on the provider and retrieves raw waste data.
+        """
+        try:
+            # List of providers with common parameter signatures
+            common_providers = [
+                (SENSOR_COLLECTORS_AFVALWIJZER, mijnafvalwijzer.get_waste_data_raw),
+                (SENSOR_COLLECTORS_AFVALALERT, afvalalert.get_waste_data_raw),
+                (SENSOR_COLLECTORS_BURGERPORTAAL, burgerportaal.get_waste_data_raw),
+                (SENSOR_COLLECTORS_CIRCULUS, circulus.get_waste_data_raw),
+                (SENSOR_COLLECTORS_DEAFVALAPP, deafvalapp.get_waste_data_raw),
+                (SENSOR_COLLECTORS_ICALENDAR, icalendar.get_waste_data_raw),
+                (SENSOR_COLLECTORS_IRADO, irado.get_waste_data_raw),
+                (SENSOR_COLLECTORS_OPZET, opzet.get_waste_data_raw),
+                (SENSOR_COLLECTORS_RD4, rd4.get_waste_data_raw),
+                (SENSOR_COLLECTORS_ROVA, rova.get_waste_data_raw),
+                (SENSOR_COLLECTORS_XIMMIO_IDS, ximmio.get_waste_data_raw),
+            ]
+            for sensor_set, getter in common_providers:
+                # sensor_set might be a list or a dict (using its keys)
+                keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
+                if self.provider in keys:
+                    return getter(self.provider, self.postal_code, self.street_number, self.suffix)
+
+            # Providers with unique parameter requirements
+            if self.provider in SENSOR_COLLECTORS_KLIKOGROEP:
+                return klikogroep.get_waste_data_raw(self.provider, self.username, self.password)
+            if self.provider == "rwm":
+                return rwm.get_waste_data_raw(self.provider, self.postal_code, self.street_number, self.suffix)
+
+            _LOGGER.error(f"Unknown provider: {self.provider}")
+            raise ValueError(f"Unknown provider: {self.provider}")
+
+        except ValueError as err:
+            _LOGGER.error(f"Check afvalwijzer platform settings: {err}")
+            raise
+
     @property
     def waste_data_with_today(self):
         return self._waste_data.waste_data_with_today

@@ -1,18 +1,40 @@
 import re
 
+# Precompile the postal code pattern for better performance
+POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")
+
 def format_postal_code(postal_code: str) -> str:
-    match = re.search(r"(\d{4}) ?([A-Za-z]{2})", postal_code)
+    """
+    Formats a postal code string by removing any spaces and converting letters to uppercase.
+
+    Parameters:
+        postal_code (str): The input postal code.
+
+    Returns:
+        str: A formatted postal code (e.g., "1234AB"). If no match is found, returns the original string.
+    """
+    match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
-        return f"{match[1]}{match[2].upper()}"
+        return f"{match.group(1)}{match.group(2).upper()}"
     return postal_code
 
-def _waste_type_rename(item_name):
+def waste_type_rename(item_name: str) -> str:
+    """
+    Cleans and renames the waste type based on a mapping dictionary.
 
-    # Remove escape sequences and everything after '/'
-    # Solve issue: https://github.com/xirixiz/homeassistant-afvalwijzer/issues/387
-    re.sub(r'\\/', '', item_name).split('/')[0]
+    It removes escape sequences and anything after a '/', then trims and lowercases the result
+    before mapping it to the standardized waste type.
 
-    # Mapping of waste types
+    Parameters:
+        item_name (str): The original waste type string.
+
+    Returns:
+        str: The standardized waste type.
+    """
+    # Remove escape sequences and text after '/'
+    cleaned_item_name = re.sub(r'\\/', '', item_name).split('/')[0].strip().lower()
+
+    # Mapping of waste types to standardized names
     waste_mapping = {
         "branches": "takken",
         "best_bag": "best-tas",
@@ -67,4 +89,4 @@ def _waste_type_rename(item_name):
         "zak_blauw": "restafval",
     }
 
-    return waste_mapping.get(item_name, item_name)
+    return waste_mapping.get(cleaned_item_name, cleaned_item_name)

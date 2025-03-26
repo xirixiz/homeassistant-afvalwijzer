@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 import requests
 
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
 
 
@@ -48,7 +48,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
             waste_date = None
             waste_type = None
         elif field == "SUMMARY":
-            waste_type = _waste_type_rename(key_value[1].strip().lower())
+            waste_type = waste_type_rename(key_value[1].strip().lower())
         elif field == "DTSTART":
             if DATE_PATTERN.match(key_value[1]):
                 waste_date = f"{key_value[1][:4]}-{key_value[1][4:6]}-{key_value[1][6:8]}"

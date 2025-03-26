@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_CIRCULUS
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename
 from datetime import datetime, timedelta
 import re
 import requests
@@ -92,7 +92,7 @@ def get_waste_data(logged_in_cookies, url):
         waste_data_raw = []
         for item in response['customData']['response']['garbage']:
             for date in item['dates']:
-                if waste_type := _waste_type_rename(item["code"].strip().lower()):
+                if waste_type := waste_type_rename(item["code"].strip().lower()):
                     waste_data_raw.append({"type": waste_type, "date": date})
         return waste_data_raw
 

@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_AFVALALERT
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename
 from datetime import datetime
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -31,7 +31,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         for item in response['items']:
             if not item['date']:
                 continue
-            waste_type =_waste_type_rename(item['type'])
+            waste_type =waste_type_rename(item['type'])
             if not waste_type:
                 continue
             waste_date=datetime.strptime(item['date'], '%Y-%m-%d'),

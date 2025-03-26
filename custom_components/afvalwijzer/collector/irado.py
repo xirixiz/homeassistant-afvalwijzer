@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_IRADO
-from ..common.main_functions import _waste_type_rename, format_postal_code
+from ..common.main_functions import waste_type_rename, format_postal_code
 from datetime import datetime
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -31,7 +31,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         if not response["valid"]:
             _LOGGER.error("Äddress not found!")
             return []
-        
+
         waste_data_raw_temp = response["calendar_data"]["pickups"]
         waste_data_raw = []
 
@@ -42,7 +42,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
                         if "date" not in item or not item["date"]: #Check if date exists
                             continue
 
-                        waste_type = _waste_type_rename(item["type"].strip().lower())
+                        waste_type = waste_type_rename(item["type"].strip().lower())
                         if not waste_type:
                             continue
 
@@ -51,5 +51,5 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
-    
+
     return waste_data_raw
