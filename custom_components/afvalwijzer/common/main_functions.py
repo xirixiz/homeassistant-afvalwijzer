@@ -1,6 +1,17 @@
 import re
 
+def format_postal_code(postal_code: str) -> str:
+    match = re.search(r"(\d{4}) ?([A-Za-z]{2})", postal_code)
+    if match:
+        return f"{match[1]}{match[2].upper()}"
+    return postal_code
+
 def _waste_type_rename(item_name):
+
+    # Remove escape sequences and everything after '/'
+    # Solve issue: https://github.com/xirixiz/homeassistant-afvalwijzer/issues/387
+    re.sub(r'\\/', '', item_name).split('/')[0]
+
     # Mapping of waste types
     waste_mapping = {
         "branches": "takken",

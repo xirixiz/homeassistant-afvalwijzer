@@ -5,7 +5,6 @@ from ..const.const import (
     SENSOR_COLLECTORS_AFVALALERT,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
-    SENSOR_COLLECTORS_CLEANPROFS,
     SENSOR_COLLECTORS_DEAFVALAPP,
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_KLIKOGROEP,
@@ -17,7 +16,7 @@ from ..const.const import (
 )
 
 try:
-    from . import afvalalert, burgerportaal, circulus, cleanprofs, deafvalapp, icalendar, irado, klikogroep, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
+    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, irado, klikogroep, mijnafvalwijzer, opzet, rd4, rova, rwm, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -77,13 +76,6 @@ class MainCollector(object):
                 )
             elif provider in SENSOR_COLLECTORS_CIRCULUS.keys():
                 waste_data_raw = circulus.get_waste_data_raw(
-                    self.provider,
-                    self.postal_code,
-                    self.street_number,
-                    self.suffix,
-                )
-            elif provider in SENSOR_COLLECTORS_CLEANPROFS.keys():
-                waste_data_raw = cleanprofs.get_waste_data_raw(
                     self.provider,
                     self.postal_code,
                     self.street_number,
