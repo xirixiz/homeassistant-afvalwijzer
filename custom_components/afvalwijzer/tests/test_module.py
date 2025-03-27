@@ -53,9 +53,9 @@ password = ""
 # street_number = "1"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146ea"
-street_number = "73"
+# provider = "mijnafvalwijzer"
+# postal_code = "5146ea"
+# street_number = "73"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
@@ -80,9 +80,14 @@ street_number = "73"
 # street_number = "20"
 
 # iCalendar file
-# provider = "veldhoven"
-# postal_code = "5508SB"
-# street_number = "51"
+provider = "veldhoven"
+postal_code = "5508SB"
+street_number = "51"
+
+# hvc
+provider = "hvc"
+postal_code = "1822AL"
+street_number = "198"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
