@@ -32,7 +32,7 @@ def waste_type_rename(item_name: str) -> str:
         str: The standardized waste type.
     """
     # Remove escape sequences and text after '/'
-    cleaned_item_name = re.sub(r'\\/', '', item_name).split('/')[0].strip().lower()
+    cleaned_item_name = item_name.strip().lower()
 
     # Mapping of waste types to standardized names
     waste_mapping = {

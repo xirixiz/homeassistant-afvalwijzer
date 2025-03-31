@@ -26,17 +26,10 @@ class NextSensorData:
 
     def __get_next_waste_in_days(self):
         try:
-            # Check if self.next_waste_date is a datetime object; if so, convert it to a date.
-            if isinstance(self.next_waste_date, datetime):
-                next_date = self.next_waste_date.date()
-            else:
-                next_date = self.next_waste_date  # It is already a date object.
-
-            return abs(next_date - date.today()).days
+            return abs(self.next_waste_date.date() - date.today()).days
         except Exception as err:
             _LOGGER.error(f"Error occurred in __get_next_waste_in_days: {err}")
             return self.default_label
-
 
     def __get_next_waste_type(self):
         try:
