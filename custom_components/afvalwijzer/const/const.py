@@ -115,8 +115,7 @@ SENSOR_COLLECTORS_CIRCULUS = {
 }
 
 SENSOR_COLLECTORS_CLEANPROFS = {
-    #"cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&suffix={2}",
-    "cleanprofs": "http://192.168.2.125/cleanprof.json"
+    "cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&suffix={2}",
 }
 
 SENSOR_COLLECTORS_ROVA = {
