@@ -19,6 +19,7 @@ from .const.const import (
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
     CONF_DATE_ISOFORMAT,
+    CONF_SECONDARY_COLLECTOR,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
@@ -27,16 +28,19 @@ from .const.const import (
 class ProviderSensor(RestoreEntity, SensorEntity):
     """Representation of a provider-based waste sensor."""
 
-    def __init__(self, hass, waste_type, fetch_data, config):
+    def __init__(self, hass, waste_type, fetch_data, secondary_data, config):
         """Initialize the sensor."""
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
+        self.secondary_data = secondary_data
         self.config = config
         self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
         self._exclude_pickup_today = str(
             config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()
+        self._include_secondary_data = str(
+            config.get(CONF_SECONDARY_COLLECTOR)).lower()
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
         ) + waste_type
@@ -99,12 +103,29 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             # Call update method from fetch_data
             await self.hass.async_add_executor_job(self.fetch_data.update)
 
-            # Select the correct waste data based on exclude_pickup_today
-            waste_data_provider = (
-                self.fetch_data.waste_data_with_today
-                if self._exclude_pickup_today in ("false", "no")
-                else self.fetch_data.waste_data_without_today
-            )
+            # Select the correct waste data based on exclude_pickup_today and check for secondary provider
+            if(self._include_secondary_data):
+                await self.hass.async_add_executor_job(self.secondary_data.update)
+
+                temp_waste_data_provider = (
+                    self.fetch_data.waste_data_with_today
+                    if self._exclude_pickup_today in ("false", "no")
+                    else self.fetch_data.waste_data_without_today
+                )
+
+                secondary_data_provider = (
+                    self.secondary_data.waste_data_with_today
+                    if self._exclude_pickup_today in ("false", "no")
+                    else self.secondary_data.waste_data_without_today
+                )
+
+                waste_data_provider = {**temp_waste_data_provider, **secondary_data_provider}
+            else:
+                waste_data_provider = (
+                    self.fetch_data.waste_data_with_today
+                    if self._exclude_pickup_today in ("false", "no")
+                    else self.fetch_data.waste_data_without_today
+                )
 
             if not waste_data_provider or self.waste_type not in waste_data_provider:
                 raise ValueError(f"No data for waste type: {self.waste_type}")

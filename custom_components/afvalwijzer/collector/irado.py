@@ -31,7 +31,6 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         if not response["valid"]:
             _LOGGER.error("Äddress not found!")
             return []
-
         waste_data_raw_temp = response["calendar_data"]["pickups"]
         waste_data_raw = []
 
@@ -51,5 +50,4 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
-
     return waste_data_raw

@@ -8,6 +8,7 @@
           "provider": "Provider (bijv. mijnafvalwijzer). Lees README.md.",
           "postal_code": "Postcode (bijv. 1234AB)",
           "street_number": "Huisnummer",
+          "secondary_provider": "Tweede provider (bijv. cleanprofs). Lees README.md",
           "suffix": "Huisnummer toevoeging",
           "username": "Provider gebruikersnaam (klikogroep)",
           "password": "Provider wachtwoord (klikogroep)",
