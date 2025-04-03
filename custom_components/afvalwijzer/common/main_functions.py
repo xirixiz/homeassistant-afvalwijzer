@@ -93,7 +93,7 @@ def waste_type_rename(item_name: str) -> str:
 
     return waste_mapping.get(cleaned_item_name, cleaned_item_name)
 
-def _secondary_type_rename(item_name):
+def secondary_type_rename(item_name):
 
         # Remove escape sequences and text after '/'
     cleaned_item_name = item_name.strip().lower()

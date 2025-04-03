@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_CLEANPROFS
-from ..common.main_functions import _secondary_type_rename
+from ..common.main_functions import secondary_type_rename
 from datetime import datetime, timedelta
 from homeassistant.helpers.storage import STORAGE_DIR
 import requests
@@ -80,7 +80,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         for item in response:
             if not item['full_date']:
                 continue
-            waste_type = _secondary_type_rename(item['product_name'].strip().lower())
+            waste_type = secondary_type_rename(item['product_name'].strip().lower())
             if not waste_type:
                 continue
             waste_data_raw.append({"type": waste_type, "date": item['full_date']})
