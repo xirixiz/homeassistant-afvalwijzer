@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_XIMMIO, SENSOR_COLLECTORS_XIMMIO_IDS
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename
 from datetime import datetime, timedelta
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -68,7 +68,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         for item in response["dataList"]:
             if pickup_dates := sorted(item.get("pickupDates", [])):
                 temp = {
-                    "type": _waste_type_rename(item["_pickupTypeText"].strip().lower()),
+                    "type": waste_type_rename(item["_pickupTypeText"].strip().lower()),
                     "date": datetime.strptime(pickup_dates[0], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d"),
                 }
                 waste_data_raw.append(temp)

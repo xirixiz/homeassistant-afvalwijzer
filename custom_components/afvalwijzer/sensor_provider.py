@@ -2,7 +2,7 @@
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
 from datetime import datetime, date, timedelta
-import uuid
+import hashlib
 
 from .const.const import (
     _LOGGER,
@@ -14,6 +14,10 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_ID,
+    CONF_COLLECTOR,
+    CONF_POSTAL_CODE,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
     CONF_DATE_ISOFORMAT,
     CONF_SECONDARY_COLLECTOR,
     SENSOR_ICON,
@@ -48,7 +52,11 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
         self._state = self._default_label
         self._icon = SENSOR_ICON
-        self._unique_id = uuid.uuid4().hex
+        self._unique_id = hashlib.sha1(
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
         self._device_class = None
 
     @property

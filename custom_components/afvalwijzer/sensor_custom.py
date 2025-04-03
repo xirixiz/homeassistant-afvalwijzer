@@ -2,7 +2,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 
 from datetime import datetime, date
-import uuid
+import hashlib
 
 from .const.const import (
     _LOGGER,
@@ -10,6 +10,10 @@ from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_DEFAULT_LABEL,
     CONF_ID,
+    CONF_COLLECTOR,
+    CONF_POSTAL_CODE,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
     CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -35,7 +39,11 @@ class CustomSensor(RestoreEntity, SensorEntity):
         ) + waste_type
         self._state = self._default_label
         self._icon = SENSOR_ICON
-        self._unique_id = uuid.uuid4().hex
+        self._unique_id = hashlib.sha1(
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
+                "utf-8"
+            )
+        ).hexdigest()
         self._device_class = None
 
     @property

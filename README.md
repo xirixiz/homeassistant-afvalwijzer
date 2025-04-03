@@ -27,7 +27,6 @@ _Component to integrate with the following providers/communities. Be aware that 
 | berkelland (opzet)                                    |
 | blink (opzet)                                         |
 | circulus                                              |
-| cleanprofs                                            |
 | cranendonck (opzet)                                   |
 | cyclus (opzet)                                        |
 | dar (opzet)                                           |
@@ -174,14 +173,6 @@ config_flow.py
 
 1. Go to the **Settings** → **Devices & Services** page in Home Assistant.
 2. Click **Add Integration** and search for `Afvalwijzer`.
-3. Follow the on-screen instructions to complete the setup.
-    - Provide your postal code, street number, and any other required details.
-
-It's also possible to add multiple configurations, for example to add cleanprofs.
-Todo so, follow these steps
-
-1. Go to the **Settings** → **Devices & Services** page in Home Assistant.
-2. Click on the existing `Afvalwijzer` integration and click at the bottom on **Add Entry**
 3. Follow the on-screen instructions to complete the setup.
     - Provide your postal code, street number, and any other required details.
 

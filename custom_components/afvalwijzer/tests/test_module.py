@@ -52,6 +52,11 @@ password = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
+# Afvalwijzer
+provider = "mijnafvalwijzer"
+postal_code = "5146ea"
+street_number = "73"
+
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
 # street_number = "22"
@@ -59,10 +64,6 @@ password = ""
 # provider = "mijnafvalwijzer"
 # postal_code = "5685AB"
 # street_number = "57"
-
-provider = "cleanprofs"
-postal_code = "5146EA"
-street_number = "73"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "3601AC"
@@ -82,6 +83,11 @@ street_number = "73"
 # provider = "veldhoven"
 # postal_code = "5508SB"
 # street_number = "51"
+
+# hvc
+# provider = "hvc"
+# postal_code = "1822AL"
+# street_number = "198"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"

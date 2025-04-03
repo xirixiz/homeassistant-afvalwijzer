@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_RD4
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename, format_postal_code
 from datetime import datetime
 import re
 import requests
@@ -16,8 +16,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         TODAY = datetime.now()
         YEAR_CURRENT = TODAY.year
 
-        corrected_postal_code_parts = re.search(r"(\d\d\d\d) ?([A-z][A-z])", postal_code)
-        corrected_postal_code = f"{corrected_postal_code_parts[1]}+{corrected_postal_code_parts[2].upper()}"
+        corrected_postal_code = format_postal_code(postal_code)
 
         url = SENSOR_COLLECTORS_RD4[provider].format(
             corrected_postal_code,
@@ -46,7 +45,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
             if not item["date"]:
                 continue
 
-            waste_type = _waste_type_rename(item["type"].strip().lower())
+            waste_type = waste_type_rename(item["type"].strip().lower())
             if not waste_type:
                 continue
 

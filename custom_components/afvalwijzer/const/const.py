@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2025.03.01"
+VERSION = "2025.03.04"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -15,9 +15,6 @@ SENSOR_COLLECTOR_TO_URL = {
     ],
     "afvalstoffendienstkalender": [
         "https://{0}.afvalstoffendienstkalender.nl/nl/{1}/{2}/"
-    ],
-    "afvalstoffendienstkalender-s-hertogenbosch": [
-        "https://afvalstoffendienstkalender.nl/nl/{0}/{1}/"
     ],
 }
 
@@ -77,7 +74,6 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
 SENSOR_COLLECTORS_AFVALWIJZER = [
     "mijnafvalwijzer",
     "afvalstoffendienstkalender",
-    "afvalstoffendienstkalender-s-hertogenbosch",
 ]
 
 SENSOR_COLLECTORS_XIMMIO = {
@@ -151,6 +147,7 @@ CONF_SUFFIX = "suffix"
 CONF_SECONDARY_COLLECTOR = "secondary_provider"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
+CONF_INCLUDE_CLEANPROFS = "include_cleanprofs"
 CONF_DATE_FORMAT = "date_format"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"

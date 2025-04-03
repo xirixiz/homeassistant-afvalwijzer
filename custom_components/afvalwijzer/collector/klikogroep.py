@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_KLIKOGROEP
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -72,7 +72,7 @@ def _fetch_waste_calendar(base_url, headers, token, provider, app):
 def _parse_waste_calendar(response):
     """Parse the waste calendar response into a structured list."""
     waste_type_mapping = {
-        fraction['id']: _waste_type_rename(fraction['name'].lower())
+        fraction['id']: waste_type_rename(fraction['name'].lower())
         for fraction in response.get('fractions', [])
     }
 

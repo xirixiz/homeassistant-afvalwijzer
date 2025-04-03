@@ -66,19 +66,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 async def _setup_sensors(hass, config, async_add_entities):
     """Common setup logic for platform and config entry."""
-    provider = config.get(CONF_COLLECTOR)
-    secondary_provider = config.get(CONF_SECONDARY_COLLECTOR)
-    postal_code = config.get(CONF_POSTAL_CODE)
-    street_number = config.get(CONF_STREET_NUMBER)
-    suffix = config.get(CONF_SUFFIX, "")
-    username = config.get(CONF_USERNAME, "")
-    password = config.get(CONF_PASSWORD, "")
-    exclude_pickup_today = config.get(CONF_EXCLUDE_PICKUP_TODAY, True)
-    date_isoformat = config.get(CONF_DATE_ISOFORMAT, False)
-    exclude_list = config.get(CONF_EXCLUDE_LIST, "")
-    default_label = config.get(CONF_DEFAULT_LABEL, "geen")
-
-    _LOGGER.debug(f"Setting up Afvalwijzer sensors for provider: {provider}.")
+    _LOGGER.debug(f"Setting up Afvalwijzer sensors for provider: {config.get(CONF_COLLECTOR)}.")
 
     # Initialize data handlers
     data = AfvalwijzerData(hass, config)
@@ -97,6 +85,7 @@ async def _setup_sensors(hass, config, async_add_entities):
         if secondary_data:
             hass.loop.call_soon_threadsafe(hass.async_add_executor_job, secondary_data.update)
     
+
     async_track_time_interval(hass, schedule_update, update_interval)
 
 
@@ -140,42 +129,31 @@ class AfvalwijzerData:
 
     def update(self):
         """Fetch the latest waste data."""
-        provider = self.config.get(CONF_COLLECTOR)
-        postal_code = self.config.get(CONF_POSTAL_CODE)
-        street_number = self.config.get(CONF_STREET_NUMBER)
-        suffix = self.config.get(CONF_SUFFIX)
-        username = self.config.get(CONF_USERNAME)
-        password = self.config.get(CONF_PASSWORD)
-        exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
-        date_isoformat = self.config.get(CONF_DATE_ISOFORMAT)
-        default_label = self.config.get(CONF_DEFAULT_LABEL)
-        exclude_list = self.config.get(CONF_EXCLUDE_LIST)
-
         try:
             collector = MainCollector(
-                provider,
-                postal_code,
-                street_number,
-                suffix,
-                username,
-                password,
-                exclude_pickup_today,
-                date_isoformat,
-                exclude_list,
-                default_label,
+                self.config.get(CONF_COLLECTOR),
+                self.config.get(CONF_POSTAL_CODE),
+                self.config.get(CONF_STREET_NUMBER),
+                self.config.get(CONF_SUFFIX),
+                self.config.get(CONF_USERNAME),
+                self.config.get(CONF_PASSWORD),
+                self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
+                self.config.get(CONF_DATE_ISOFORMAT),
+                self.config.get(CONF_EXCLUDE_LIST),
+                self.config.get(CONF_DEFAULT_LABEL),
             )
         except ValueError as err:
-            _LOGGER.error(f"Collector initialization failed: {err}")
+            _LOGGER.error(f"Secondary collector initialization failed: {err}")
             return
 
         try:
             self.waste_data_with_today = collector.waste_data_with_today
             self.waste_data_without_today = collector.waste_data_without_today
             self.waste_data_custom = collector.waste_data_custom
-            _LOGGER.debug("Waste data updated successfully.")
+            _LOGGER.debug("Secondary waste data updated successfully.")
         except ValueError as err:
             _LOGGER.error(f"Failed to fetch waste data: {err}")
-            self.waste_data_with_today = self.waste_data_without_today = self.waste_data_custom = default_label
+            self.waste_data_with_today = self.waste_data_without_today = self.waste_data_custom = self.config.get(CONF_DEFAULT_LABEL)
 
 class SecondaryData:
     """Class to handle fetching and storing Secondary data."""

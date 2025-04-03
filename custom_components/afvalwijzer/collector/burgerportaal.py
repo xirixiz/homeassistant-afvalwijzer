@@ -1,5 +1,5 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_BURGERPORTAAL
-from ..common.main_functions import _waste_type_rename
+from ..common.main_functions import waste_type_rename
 from datetime import datetime
 
 import requests
@@ -90,7 +90,7 @@ def get_waste_data_raw(
         if not waste_type:
             continue
 
-        temp = {"type": _waste_type_rename(item["fraction"].strip().lower())}
+        temp = {"type": waste_type_rename(item["fraction"].strip().lower())}
         temp_date = item["collectionDate"][:item["collectionDate"].rfind("T")]
         temp["date"] = datetime.strptime(temp_date, "%Y-%m-%d").strftime(
             "%Y-%m-%d"
