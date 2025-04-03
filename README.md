@@ -38,6 +38,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | gad (opzet)                                           |
 | hellendoorn (ximmio)                                  |
 | hvc (opzet)                                           |
+| irado                                                 |
 | lingewaard (opzet)                                    |
 | middelburg (opzet)                                    |
 | mijnafvalwijzer (also for afvalstoffendienstkalender) |
@@ -88,6 +89,9 @@ sensor names for your region are and modify where necessary.
 ![example][exampleimg1]
 
 The second row sorts the waste items by date using the following lovelace code
+
+**The example yaml is to be used directly in the main ```cards: ``` node on the dashboard not inside a card yaml. <br/>
+This yaml uses a custom card being [auto-entities](https://github.com/thomasloven/lovelace-auto-entities), make sure its installed***
 
 ```yaml
 - type: custom:auto-entities

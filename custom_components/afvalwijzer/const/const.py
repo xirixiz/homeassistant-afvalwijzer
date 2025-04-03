@@ -119,7 +119,8 @@ SENSOR_COLLECTORS_CIRCULUS = {
 }
 
 SENSOR_COLLECTORS_CLEANPROFS = {
-    "cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&suffix={2}",
+    #"cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&suffix={2}",
+    "cleanprofs": "http://192.168.2.125/cleanprof.json"
 }
 
 SENSOR_COLLECTORS_ROVA = {
@@ -147,6 +148,7 @@ CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
+CONF_SECONDARY_COLLECTOR = "secondary_provider"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
 CONF_DATE_FORMAT = "date_format"

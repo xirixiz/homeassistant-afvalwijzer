@@ -57,3 +57,11 @@ def _waste_type_rename(item_name):
     }
 
     return waste_mapping.get(item_name, item_name)
+
+def _secondary_type_rename(item_name):
+    auxilery_mapping = {
+        "rst": "secondary_restafval",
+        "gft": "secondary_gft",
+    }
+
+    return auxilery_mapping.get(item_name, item_name)
