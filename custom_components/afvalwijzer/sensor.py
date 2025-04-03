@@ -70,7 +70,11 @@ async def _setup_sensors(hass, config, async_add_entities):
 
     # Initialize data handlers
     data = AfvalwijzerData(hass, config)
-    secondary_data = SecondaryData(hass, config)
+
+    # Only initialize SecondaryData if CONF_SECONDARY_COLLECTOR is provided
+    secondary_data = None
+    if config.get(CONF_SECONDARY_COLLECTOR):
+        secondary_data = SecondaryData(hass, config)
 
     # Perform an initial update at startup
     await hass.async_add_executor_job(data.update)
@@ -93,7 +97,7 @@ async def _setup_sensors(hass, config, async_add_entities):
     try:
         waste_types_provider = set(data.waste_data_with_today.keys())
         waste_types_custom = set(data.waste_data_custom.keys())
-
+        
         if secondary_data:
             data.waste_data_with_today.update(secondary_data.waste_data_with_today)
             waste_types_provider.update(secondary_data.waste_data_with_today.keys())
