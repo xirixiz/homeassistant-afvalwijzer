@@ -1,19 +1,17 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_CLEANPROFS
 from ..common.main_functions import _secondary_type_rename
-from datetime import datetime
+from datetime import datetime, timedelta
 from homeassistant.helpers.storage import STORAGE_DIR
-import requests, json
+import requests
+import json
 import os
 import glob
 from urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-# Generate timestamp
-timestamp = datetime.now().strftime("%d-%m-%Y_%H_%M_%S")
-
-# Define the backup file name pattern for 'cleanprofs' backups
-BACKUP_FILE_PATTERN = os.path.join(STORAGE_DIR, "cleanprofs*.json")
+# Define the backup file pattern
+BACKUP_FILE_PATTERN = os.path.join(STORAGE_DIR, "cleanprofs_*.json")
 
 def get_waste_data_raw(provider, postal_code, street_number, suffix):
     if provider not in SENSOR_COLLECTORS_CLEANPROFS:
@@ -22,15 +20,20 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     # Initialize response variable
     response = None
 
+    # Get the most recent backup file, if it exists
+    existing_backups = sorted(glob.glob(BACKUP_FILE_PATTERN), key=os.path.getmtime, reverse=True)
+    latest_backup = existing_backups[0] if existing_backups else None
+    backup_age_ok = False
+
+    if latest_backup:
+        file_time = datetime.fromtimestamp(os.path.getmtime(latest_backup))
+        backup_age_ok = (datetime.now() - file_time) < timedelta(days=1)
+
     try:
-        url = SENSOR_COLLECTORS_CLEANPROFS[provider].format(
-            postal_code,
-            street_number,
-            suffix,
-        )
+        # API Request
+        url = SENSOR_COLLECTORS_CLEANPROFS[provider].format(postal_code, street_number, suffix)
         raw_response = requests.get(url, timeout=60, verify=False)
 
-        # If response is not successful (status code not in 200-299), raise an error
         if not raw_response.ok:
             raise ValueError(f"Endpoint {url} returned status {raw_response.status_code}")
 
@@ -39,40 +42,40 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         except ValueError as err:
             raise ValueError(f"Invalid and/or no JSON data received from {url}") from err
 
-        # If the API response is OK, delete old backup files and create a new one
-        existing_backups = glob.glob(BACKUP_FILE_PATTERN)
-        if existing_backups:
-            for backup in existing_backups:
-                os.remove(backup)
-                _LOGGER.debug(f"Deleted old backup file: {backup}")
+        # If API response is OK, handle backup creation
+        if latest_backup and backup_age_ok:
+            _LOGGER.debug(f"Existing backup is recent ({latest_backup}), skipping new backup creation.")
+        else:
+            timestamp = datetime.now().strftime("%d-%m-%Y_%H_%M_%S")
+            new_backup = os.path.join(STORAGE_DIR, f"cleanprofs_{timestamp}.json")
 
-        # Generate the backup file name with the current timestamp
-        BACKUP_FILE = os.path.join(STORAGE_DIR, f"cleanprofs_{timestamp}.json")
-        with open(BACKUP_FILE, "w") as backup_file:
-            json.dump(response, backup_file)
-            _LOGGER.debug(f"CleanProfs backup file created at {BACKUP_FILE}")
+            with open(new_backup, "w") as backup_file:
+                json.dump(response, backup_file)
+                _LOGGER.debug(f"New backup created: {new_backup}")
+
+            if latest_backup:
+                os.remove(latest_backup)
+                _LOGGER.debug(f"Deleted old backup file: {latest_backup}")
 
     except (requests.exceptions.RequestException, ValueError) as err:
-        _LOGGER.error(f"Error fetching data from API: {err}. Loading backup data...")
-        # If the API request failed, use the most recent backup instead of creating a new one
-        try:
-            # Get the most recent backup file based on the pattern
-            existing_backups = sorted(glob.glob(BACKUP_FILE_PATTERN), key=os.path.getmtime, reverse=True)
-            if existing_backups:
-                with open(existing_backups[0], "r", encoding="utf-8") as f:
-                    response = json.load(f)
-                    _LOGGER.debug(f"Loaded backup file from {existing_backups[0]}")
-            else:
-                raise ValueError("No backup files found.")
-        except (FileNotFoundError, json.JSONDecodeError) as backup_err:
-            raise ValueError(f"Failed to load from local json file: {backup_err}")
+        _LOGGER.error(f"Error fetching data from API: {err}. Attempting to use backup...")
+
+        if latest_backup:
+            with open(latest_backup, "r", encoding="utf-8") as f:
+                response = json.load(f)
+                _LOGGER.warning(
+                    f"BAD API response, using backup file: {latest_backup} "
+                    f"{'(older than 1 day)' if not backup_age_ok else ''}"
+                )
+        else:
+            _LOGGER.error("BAD API response and no local backup file available.")
+            return []
 
     if not response:
         _LOGGER.error("No waste data found!")
         return []
 
     waste_data_raw = []
-
     try:
         for item in response:
             if not item['full_date']:

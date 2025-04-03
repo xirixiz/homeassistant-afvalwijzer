@@ -143,14 +143,14 @@ class AfvalwijzerData:
                 self.config.get(CONF_DEFAULT_LABEL),
             )
         except ValueError as err:
-            _LOGGER.error(f"Secondary collector initialization failed: {err}")
+            _LOGGER.error(f"Waste collector initialization failed: {err}")
             return
 
         try:
             self.waste_data_with_today = collector.waste_data_with_today
             self.waste_data_without_today = collector.waste_data_without_today
             self.waste_data_custom = collector.waste_data_custom
-            _LOGGER.debug("Secondary waste data updated successfully.")
+            _LOGGER.debug("Waste data updated successfully.")
         except ValueError as err:
             _LOGGER.error(f"Failed to fetch waste data: {err}")
             self.waste_data_with_today = self.waste_data_without_today = self.waste_data_custom = self.config.get(CONF_DEFAULT_LABEL)
@@ -167,27 +167,17 @@ class SecondaryData:
 
     def update(self):
         """Fetch the latest waste data."""
-        secondary_provider = self.config.get(CONF_SECONDARY_COLLECTOR)
-        postal_code = self.config.get(CONF_POSTAL_CODE)
-        street_number = self.config.get(CONF_STREET_NUMBER)
-        suffix = self.config.get(CONF_SUFFIX)
-        username = self.config.get(CONF_USERNAME)
-        password = self.config.get(CONF_PASSWORD)
-        exclude_pickup_today = self.config.get(CONF_EXCLUDE_PICKUP_TODAY)
-        date_isoformat = self.config.get(CONF_DATE_ISOFORMAT)
-        default_label = self.config.get(CONF_DEFAULT_LABEL)
-        exclude_list = self.config.get(CONF_EXCLUDE_LIST)
 
         try:
             collector = SecondaryCollector(
-                secondary_provider,
-                postal_code,
-                street_number,
-                suffix,
-                exclude_pickup_today,
-                date_isoformat,
-                exclude_list,
-                default_label,
+                self.config.get(CONF_SECONDARY_COLLECTOR),
+                self.config.get(CONF_POSTAL_CODE),
+                self.config.get(CONF_STREET_NUMBER),
+                self.config.get(CONF_SUFFIX),
+                self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
+                self.config.get(CONF_DATE_ISOFORMAT),
+                self.config.get(CONF_EXCLUDE_LIST),
+                self.config.get(CONF_DEFAULT_LABEL),
             )
         except ValueError as err:
             _LOGGER.error(f"Secondary collector initialization failed: {err}")
@@ -200,4 +190,4 @@ class SecondaryData:
             _LOGGER.debug("Secondary waste data updated successfully.")
         except ValueError as err:
             _LOGGER.error(f"Failed to fetch secondary waste data: {err}")
-            self.waste_data_with_today = self.waste_data_without_today = self.waste_data_custom = default_label
+            self.waste_data_with_today = self.waste_data_without_today = self.waste_data_custom = self.config.get(CONF_DEFAULT_LABEL)
