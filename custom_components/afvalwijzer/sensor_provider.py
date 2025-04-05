@@ -104,7 +104,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             await self.hass.async_add_executor_job(self.fetch_data.update)
 
             # Select the correct waste data based on exclude_pickup_today and check for secondary provider
-            if(self._include_secondary_data):
+            if self._include_secondary_data and self.secondary_data:
                 await self.hass.async_add_executor_job(self.secondary_data.update)
 
                 temp_waste_data_provider = (
