@@ -41,6 +41,9 @@ class SecondaryCollector(object):
         # Get raw auxiliary dtaa using the appropriate provider method
         auxiliary_data_raw = self._get_auxiliary_data_raw()
 
+        if( not auxiliary_data_raw):
+            raise ValueError(f"Secondary Collector: {self.secondary_provider} - no data found")
+
         # Transform raw auxiliary data
         self._auxiliary_data = WasteDataTransformer(
             auxiliary_data_raw,
