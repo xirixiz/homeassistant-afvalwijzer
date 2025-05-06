@@ -70,14 +70,11 @@ async def _setup_sensors(hass, config, async_add_entities):
 
     # Initialize data handlers
     data = AfvalwijzerData(hass, config)
-
-    # Only initialize SecondaryData if CONF_SECONDARY_COLLECTOR is provided
-    secondary_data = None
-    if config.get(CONF_SECONDARY_COLLECTOR):
-        secondary_data = SecondaryData(hass, config)
+    secondary_data = SecondaryData(hass, config)
 
     # Perform an initial update at startup
     await hass.async_add_executor_job(data.update)
+
     if secondary_data:
         await hass.async_add_executor_job(secondary_data.update)
 
@@ -86,19 +83,18 @@ async def _setup_sensors(hass, config, async_add_entities):
     def schedule_update(_):
         """Safely schedule the update."""
         hass.loop.call_soon_threadsafe(hass.async_add_executor_job, data.update)
-        if secondary_data:
+        if secondary_data.valid:
             hass.loop.call_soon_threadsafe(hass.async_add_executor_job, secondary_data.update)
     
 
     async_track_time_interval(hass, schedule_update, update_interval)
 
-
     # Fetch waste types
     try:
         waste_types_provider = set(data.waste_data_with_today.keys())
         waste_types_custom = set(data.waste_data_custom.keys())
-        
-        if secondary_data:
+
+        if secondary_data.valid:
             data.waste_data_with_today.update(secondary_data.waste_data_with_today)
             waste_types_provider.update(secondary_data.waste_data_with_today.keys())
     except Exception as err:
@@ -165,12 +161,18 @@ class SecondaryData:
     def __init__(self, hass, config):
         self.hass = hass
         self.config = config
+        self.valid = False
         self.waste_data_with_today = None
         self.waste_data_without_today = None
         self.waste_data_custom = None
 
     def update(self):
         """Fetch the latest waste data."""
+
+        if not self.config.get(CONF_SECONDARY_COLLECTOR):
+            self.valid = False
+            return
+
 
         try:
             collector = SecondaryCollector(
@@ -191,6 +193,7 @@ class SecondaryData:
             self.waste_data_with_today = collector.waste_data_with_today
             self.waste_data_without_today = collector.waste_data_without_today
             self.waste_data_custom = collector.waste_data_custom
+            self.valid = True
             _LOGGER.debug("Secondary waste data updated successfully.")
         except ValueError as err:
             _LOGGER.error(f"Failed to fetch secondary waste data: {err}")

@@ -24,15 +24,30 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     existing_backups = sorted(glob.glob(BACKUP_FILE_PATTERN), key=os.path.getmtime, reverse=True)
     latest_backup = existing_backups[0] if existing_backups else None
     backup_age_ok = False
+    usable_backup_exists = False
 
     if latest_backup:
         file_time = datetime.fromtimestamp(os.path.getmtime(latest_backup))
         backup_age_ok = (datetime.now() - file_time) < timedelta(days=1)
 
+        #Ensure backup is usable
+        try:
+            with open(latest_backup, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                if content and content != "[]":
+                    usable_backup_exists = True
+        except Exception as e:
+            _LOGGER.error(f"Failed to read backup file {latest_backup}: {e}")
+    else:
+        usable_backup_exists = False
+
     try:
         # API Request
         url = SENSOR_COLLECTORS_CLEANPROFS[provider].format(postal_code, street_number, suffix)
         raw_response = requests.get(url, timeout=60, verify=False)
+
+        if raw_response.ok and raw_response.json() == [] and not usable_backup_exists:
+            raise ValueError(f"Endpoint {url} returned an empty array and no usable backup, indicating no data available for {postal_code} {street_number} {suffix}")
 
         if not raw_response.ok:
             raise ValueError(f"Endpoint {url} returned status {raw_response.status_code}")
@@ -60,7 +75,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
     except (requests.exceptions.RequestException, ValueError) as err:
         _LOGGER.error(f"Error fetching data from API: {err}. Attempting to use backup...")
 
-        if latest_backup:
+        if latest_backup and usable_backup_exists:
             with open(latest_backup, "r", encoding="utf-8") as f:
                 response = json.load(f)
                 _LOGGER.warning(
@@ -69,11 +84,11 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
                 )
         else:
             _LOGGER.error("BAD API response and no local backup file available.")
-            return []
+            return False
 
     if not response:
-        _LOGGER.error("No waste data found!")
-        return []
+        _LOGGER.error("No waste data found for cleanprofs!")
+        return False
 
     waste_data_raw = []
     try:
