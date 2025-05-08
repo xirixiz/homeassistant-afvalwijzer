@@ -35,6 +35,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | denhaag (opzet)                                       |
 | eemsdelta (iCalendar)                                 |
 | gad (opzet)                                           |
+| groningen (burgerportaal)                             |
 | hellendoorn (ximmio)                                  |
 | hvc (opzet)                                           |
 | irado                                                 |
