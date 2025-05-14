@@ -54,6 +54,7 @@ SENSOR_COLLECTORS_OPZET = {
 SENSOR_COLLECTORS_ICALENDAR = {
     "eemsdelta": "https://www.eemsdelta.nl/trash-calendar/download/{1}/{2}",
     "veldhoven": "https://www.veldhoven.nl/afvalkalender/{5}/{1}-{2}.ics",
+    "venlo": "https://www.venlo.nl/trash-calendar/download/{1}/{2}",
 }
 
 SENSOR_COLLECTORS_IRADO = {
