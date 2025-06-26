@@ -40,6 +40,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | hvc (opzet)                                           |
 | irado                                                 |
 | lingewaard (opzet)                                    |
+| landvancuijk (deafvalapp)                             |
 | middelburg (opzet)                                    |
 | mijnafvalwijzer (also for afvalstoffendienstkalender) |
 | mijnafvalzaken (opzet)                                |
@@ -135,7 +136,7 @@ This yaml uses a custom card being [auto-entities](https://github.com/thomaslove
     endif %}.</center>
 ```
 
-More information on the reminders (ios in this case):
+More information on the reminders (iOS in this case):
 
 - https://github.com/xirixiz/my-hass-config/blob/master/packages/waste.yaml
 - https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
