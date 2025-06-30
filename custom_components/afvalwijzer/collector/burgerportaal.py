@@ -70,14 +70,18 @@ def get_waste_data_raw(
             return
         
         address_id = None
-        for item in raw_response:
-           if item.get('addition').casefold() == suffix.casefold():
-              address_id = item['addressId']
-              break
-          
+
+        if suffix:
+            for item in raw_response:
+                addition = item.get('addition')
+                if addition and addition.casefold() == suffix.casefold():
+                    address_id = item['addressId']
+                    break
+        
         if not address_id:
-            _LOGGER.error('Address not found!')
-            return
+            address_id = raw_response[0]['addressId']
+            _LOGGER.warning('Address not found!')
+            
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
