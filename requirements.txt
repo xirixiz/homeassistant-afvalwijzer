@@ -3,7 +3,7 @@ homeassistant
 pip>=21.0,<25.2
 ruff==0.67
 pre-commit==4.2.0
-bumpver==2024.1130
+bumpver==2025.1131
 urllib3>=1.26.5,<3
 flatdict==4.0.1
 requests
