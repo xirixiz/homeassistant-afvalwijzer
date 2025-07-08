@@ -8,5 +8,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "requirements": [],
-  "version": "2025.05.01"
+  "version": "2025.07.01"
 }
