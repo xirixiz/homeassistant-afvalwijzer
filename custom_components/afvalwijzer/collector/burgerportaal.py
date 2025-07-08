@@ -68,7 +68,20 @@ def get_waste_data_raw(
         if not raw_response:
             _LOGGER.error('Unable to fetch refresh token!')
             return
-        address_id = raw_response[0]['addressId']
+        
+        address_id = None
+
+        if suffix:
+            for item in raw_response:
+                addition = item.get('addition')
+                if addition and addition.casefold() == suffix.casefold():
+                    address_id = item['addressId']
+                    break
+        
+        if not address_id:
+            address_id = raw_response[0]['addressId']
+            _LOGGER.warning('Address not found!')
+            
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 
