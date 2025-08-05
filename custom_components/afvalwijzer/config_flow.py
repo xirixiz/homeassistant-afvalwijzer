@@ -102,6 +102,36 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={},
         )
 
+    async def async_step_reconfigure(self, user_input=None):
+        """Handle reconfiguration of the integration."""
+        entry = self._get_reconfigure_entry()
+        errors = {}
+
+        if user_input is not None:
+            # Ensure CONF_* is saved lowercase
+            user_input[CONF_COLLECTOR] = user_input.get(CONF_COLLECTOR, "").lower()
+            user_input[CONF_EXCLUDE_LIST] = user_input.get(CONF_EXCLUDE_LIST, "").lower()
+            user_input[CONF_SECONDARY_COLLECTOR] = user_input.get(CONF_SECONDARY_COLLECTOR, "").lower()
+
+            # Perform validation
+            if not self._validate_postal_code(user_input.get(CONF_POSTAL_CODE)):
+                errors["postal_code"] = "config.error.invalid_postal_code"
+            elif not self._validate_street_number(user_input.get(CONF_STREET_NUMBER)):
+                errors["street_number"] = "config.error.invalid_street_number"
+            else:
+                # Validation passed, reload
+                return self.async_update_reload_and_abort(entry, data_updates=user_input)
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(
+                data_schema=DATA_SCHEMA,
+                suggested_values=entry.data | (user_input or {}),
+            ),
+            errors=errors,
+            description_placeholders={},
+        )
+
     def _validate_postal_code(self, postal_code):
         """Validate the postal code format."""
         return (
