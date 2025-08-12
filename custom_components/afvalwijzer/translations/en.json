@@ -41,7 +41,8 @@
       "invalid_street_number": "Street number must be numeric"
     },
     "abort": {
-      "already_configured": "Afvalwijzer is already configured"
+      "already_configured": "Afvalwijzer is already configured",
+      "reconfigure_successful": "Re-configuration was successful"
     }
   },
   "options": {

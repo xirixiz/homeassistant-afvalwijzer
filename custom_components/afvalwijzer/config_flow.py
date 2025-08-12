@@ -48,7 +48,8 @@ all_collectors_tagged = (
     [(collector, True) for collector in SENSOR_COLLECTORS_RD4.keys()] +  # Primary
     [(collector, True) for collector in SENSOR_COLLECTORS_ROVA.keys()] +  # Primary
     [(collector, True) for collector in SENSOR_COLLECTORS_XIMMIO_IDS.keys()] +  # Primary
-    [("rwm", True)]  # Primary
+    [("rwm", True)] +  # Primary
+    [("", False)]  # Secondary
 )
 
 # Extract primary collectors (where tag is True)

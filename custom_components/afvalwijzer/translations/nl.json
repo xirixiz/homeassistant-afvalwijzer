@@ -41,7 +41,8 @@
       "invalid_street_number": "Huisnummer moet numeriek zijn"
     },
     "abort": {
-      "already_configured": "Afvalwijzer is al geconfigureerd"
+      "already_configured": "Afvalwijzer is al geconfigureerd",
+      "reconfigure_successful": "Afvalwijzer is geconfigureerd"
     }
   },
   "options": {
