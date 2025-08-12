@@ -260,9 +260,9 @@ automation:
   - alias: Mark waste as moved from notification
     trigger:
       platform: event
-      event_type: ios.notification_action_fired
+      event_type: mobile_app_notification_action
       event_data:
-        actionName: MARK_WASTE_MOVED
+        action: "MARK_WASTE_MOVED"
     action:
       - service: input_boolean.turn_on
         entity_id: input_boolean.waste_moved
