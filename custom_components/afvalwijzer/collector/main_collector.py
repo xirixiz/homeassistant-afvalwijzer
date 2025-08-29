@@ -21,14 +21,6 @@ except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
 
-def normalize_bool_param(param) -> str:
-    """
-    Normalizes a parameter that might be a boolean or string into a lowercase string.
-    """
-    if isinstance(param, bool):
-        return str(param).lower()
-    return str(param).strip().lower()
-
 class MainCollector:
     """
     MainCollector collects and transforms waste data from various providers.
@@ -55,8 +47,8 @@ class MainCollector:
         self.username = str(username).strip().lower()
         self.password = str(password)
 
-        self.exclude_pickup_today = normalize_bool_param(exclude_pickup_today)
-        self.date_isoformat = normalize_bool_param(date_isoformat)
+        self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
+        self.date_isoformat = self._normalize_bool_param(date_isoformat)
         self.exclude_list = str(exclude_list).strip().lower()
         self.default_label = str(default_label).strip()
 
@@ -70,6 +62,14 @@ class MainCollector:
             self.exclude_list,
             self.default_label,
         )
+
+    def _normalize_bool_param(self, param) -> str:
+        """
+        Normalizes a parameter that might be a boolean or string into a lowercase string.
+        """
+        if isinstance(param, bool):
+            return str(param).lower()
+        return str(param).strip().lower()
 
     def _get_waste_data_raw(self):
         """

@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2025.07.01"
+VERSION = "2025.08.01"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -115,10 +115,6 @@ SENSOR_COLLECTORS_CIRCULUS = {
     "circulus": "https://mijn.circulus.nl",
 }
 
-SENSOR_COLLECTORS_CLEANPROFS = {
-    "cleanprofs": "https://cleanprofs.jmsdev.nl/api/get-plannings-address?zipcode={0}&house_number={1}&suffix={2}",
-}
-
 SENSOR_COLLECTORS_ROVA = {
     "rova": "https://www.rova.nl",
 }
@@ -145,7 +141,6 @@ CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
-CONF_SECONDARY_COLLECTOR = "secondary_provider"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
 CONF_DATE_FORMAT = "date_format"

@@ -82,11 +82,7 @@ This custom component dynamically creates sensor.afvalwijzer\_\* items. For me p
 restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the
 sensor names for your region are and modify where necessary.
 
-| **Tweede (Secondary) Provider**                       |
-|-------------------------------------------------------|
-| cleanprofs                                            |
-
-The use case for the secondary provider arises from the fact that some people have container cleaning contracts. By enabling this option, additional sensors will be displayed, showing which container will be cleaned and when.
+If you are searching for a component with the focus on container cleaning services, you can us the following component. [ha-afvalcontainer-cleaning by @PatrickSt1991](https://github.com/PatrickSt1991/ha-afvalcontainer-cleaning).
 
 **This component will set up the following platform(s).**
 
