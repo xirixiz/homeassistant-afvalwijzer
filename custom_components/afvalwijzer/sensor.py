@@ -49,8 +49,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up sensors using the platform schema."""
     if not discovery_info:
-        _LOGGER.error(
-            "No discovery information provided; sensors cannot be created.")
+        if hass.is_running:
+            _LOGGER.warning(
+                "No discovery information provided; sensors cannot be created."
+            )
         return
 
     await _setup_sensors(hass, discovery_info, async_add_entities)
