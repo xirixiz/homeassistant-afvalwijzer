@@ -160,7 +160,12 @@ street_number = "73"
 # postal_code = "7421AC"
 # street_number = "1"
 
-# postal_code = postal_code.strip().upper()
+# Reinis
+provider = "reinis"
+postal_code = "3209BS"
+street_number = "14"
+
+postal_code = postal_code.strip().upper()
 
 collector = MainCollector(
     provider,
