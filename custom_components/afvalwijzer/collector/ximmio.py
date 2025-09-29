@@ -4,8 +4,31 @@ from datetime import datetime, timedelta
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+import socket
+from urllib3.util import connection as urllib3_connection
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+
+def _post_ipv4_then_ipv6(url: str, **kwargs) -> requests.Response:
+    """Try POST via IPv4 first; if that fails (DNS/connect), try IPv6."""
+    original_allowed = urllib3_connection.allowed_gai_family
+
+    try:
+        urllib3_connection.allowed_gai_family = lambda: socket.AF_INET
+        return requests.post(url=url, **kwargs)
+    except requests.exceptions.RequestException as e_v4:
+        last_err = e_v4
+    finally:
+        urllib3_connection.allowed_gai_family = original_allowed
+
+    try:
+        urllib3_connection.allowed_gai_family = lambda: socket.AF_INET6
+        return requests.post(url=url, **kwargs)
+    except requests.exceptions.RequestException as e_v6:
+        raise ValueError(f"POST failed (IPv4 then IPv6): {last_err}") from e_v6
+    finally:
+        urllib3_connection.allowed_gai_family = original_allowed
 
 def get_waste_data_raw(provider, postal_code, street_number, suffix):
     try:
@@ -37,7 +60,8 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
 
         if suffix:
             data["HouseLetter"] = suffix
-        response = requests.post(url="{}/api/FetchAdress".format(url), timeout=60, data=data).json()
+
+        response = _post_ipv4_then_ipv6(url=f"{url}/api/FetchAdress", timeout=60, data=data).json()
 
         if not response['dataList']:
             _LOGGER.error('Address not found!')
@@ -57,7 +81,7 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
             "uniqueAddressID": uniqueId,
         }
 
-        response = requests.post(url="{}/api/GetCalendar".format(url), timeout=60, data=data).json()
+        response = _post_ipv4_then_ipv6(url=f"{url}/api/GetCalendar", timeout=60, data=data).json()
 
         if not response:
             _LOGGER.error("Address not found!")
