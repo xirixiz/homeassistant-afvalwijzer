@@ -31,10 +31,8 @@ from .const.const import (
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
 
-# Compile once; accept "1234AB" or "1234 AB"
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 
-# Collect all supported collectors into a single, sorted list
 all_collectors = sorted(
     set(
         list(SENSOR_COLLECTORS_AFVALWIJZER)
@@ -78,23 +76,15 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            # Normalize and validate inputs
             collector = user_input.get(CONF_COLLECTOR, "")
             exclude_list = user_input.get(CONF_EXCLUDE_LIST, "")
             postal_code_raw = user_input.get(CONF_POSTAL_CODE, "")
             street_number_raw = user_input.get(CONF_STREET_NUMBER, "")
             suffix = user_input.get(CONF_SUFFIX, "")
 
-            # Normalize postal code: remove space, uppercase letters
             postal_code = postal_code_raw.replace(" ", "").upper()
             user_input[CONF_POSTAL_CODE] = postal_code
-
-            # Keep collector as-is unless your backend needs lowercase.
-            # If it does, uncomment the next line:
-            # collector = collector.lower()
-            user_input[CONF_COLLECTOR] = collector
-
-            # Your code previously lowercased exclude_list; keep that behavior if intentional
+            user_input[CONF_COLLECTOR] = collector  # keep case if your backend expects it
             user_input[CONF_EXCLUDE_LIST] = exclude_list.lower()
 
             if not self._validate_postal_code(postal_code):
@@ -102,14 +92,11 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             elif not self._validate_street_number(street_number_raw):
                 errors["base"] = "invalid_street_number"
             else:
-                # Prevent duplicates by setting a deterministic unique_id
                 unique = f"{collector}:{postal_code}:{street_number_raw}:{suffix}".strip(":")
                 await self.async_set_unique_id(unique)
                 self._abort_if_unique_id_configured()
-
                 return self.async_create_entry(title="Afvalwijzer", data=user_input)
 
-        # Persist typed values on error
         schema = self.add_suggested_values_to_schema(BASE_SCHEMA, user_input or {})
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
@@ -117,5 +104,4 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return isinstance(postal_code, str) and bool(_POSTAL_RE.match(postal_code.strip()))
 
     def _validate_street_number(self, street_number: str) -> bool:
-        # You keep suffix separate, so digits-only for the number field is fine
         return isinstance(street_number, str) and street_number.strip().isdigit()
