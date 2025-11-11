@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sensor component for AfvalDienst
+Sensor component for AfvalWijzer
 Author: Bram van Dartel - xirixiz
 
 import afvalwijzer
@@ -15,12 +15,7 @@ AfvalWijzer().get_data('','','')
 
 from ..collector.main_collector import MainCollector
 
-# provider = "afvalstoffendienstkalender"
 # api_token = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
-
-# Afvalstoffendienstkalender
-# postal_code = "5391KE"
-# street_number = "1"
 
 # Common
 suffix = ""
@@ -94,10 +89,10 @@ street_number = "73"
 # postal_code = "3951en"
 # street_number = "1"
 
-# Afvalstoffendienstkalender
-# provider = "afvalstoffendienstkalender"
-# postal_code = "4266NB"
-# street_number = "1"
+# Afvalstoffendienst
+provider = "afvalstoffendienst"
+postal_code = "4266NB"
+street_number = "1"
 
 # provider = "rmn"
 # postal_code = "3701XK"
@@ -161,9 +156,9 @@ street_number = "73"
 # street_number = "1"
 
 # Reinis
-provider = "reinis"
-postal_code = "3209BS"
-street_number = "14"
+# provider = "reinis"
+# postal_code = "3209BS"
+# street_number = "14"
 
 postal_code = postal_code.strip().upper()
 

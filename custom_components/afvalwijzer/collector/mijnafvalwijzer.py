@@ -1,4 +1,5 @@
-from ..const.const import _LOGGER, SENSOR_COLLECTOR_TO_URL, SENSOR_COLLECTORS_AFVALWIJZER
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
+from ..common.main_functions import format_postal_code
 from datetime import datetime
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -7,19 +8,20 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_waste_data_raw(provider, postal_code, street_number, suffix):
-    if provider not in SENSOR_COLLECTORS_AFVALWIJZER:
+    if provider not in SENSOR_COLLECTORS_MIJNAFVALWIJZER:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
+    corrected_postal_code = format_postal_code(postal_code)
+
     try:
-        url = SENSOR_COLLECTOR_TO_URL["afvalwijzer_data_default"][0].format(
-            provider,
-            postal_code,
+        url = SENSOR_COLLECTORS_MIJNAFVALWIJZER[provider].format(
+            corrected_postal_code,
             street_number,
             suffix,
             datetime.now().strftime("%Y-%m-%d"),
         )
         raw_response = requests.get(url, timeout=60, verify=False)
-        raw_response.raise_for_status()  # Raise an HTTPError for bad responses
+        raw_response.raise_for_status()
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
 

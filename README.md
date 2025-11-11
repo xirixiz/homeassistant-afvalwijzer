@@ -15,7 +15,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 |-------------------------------------------------------|
 | acv (ximmio)                                          |
 | afval3xbeter (opzet)                                  |
-| afvalstoffendienstkalender                            |
+| afvalstoffendienst (ximmio)                           |
 | alkmaar                                               |
 | almere (ximmio)                                       |
 | alphenaandenrijn (opzet)                              |
@@ -42,7 +42,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | lingewaard (opzet)                                    |
 | landvancuijk (deafvalapp)                             |
 | middelburg (opzet)                                    |
-| mijnafvalwijzer (also for afvalstoffendienstkalender) |
+| mijnafvalwijzer                                       |
 | mijnafvalzaken (opzet)                                |
 | montfoort (opzet)                                     |
 | meerlanden (ximmio)                                   |

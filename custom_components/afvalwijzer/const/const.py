@@ -5,27 +5,17 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2025.09.02"
+VERSION = "2026.01.01"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
-
-SENSOR_COLLECTOR_TO_URL = {
-    "afvalwijzer_data_default": [
-        "https://api.{0}.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={1}&street=&huisnummer={2}&toevoeging={3}&app_name=afvalwijzer&platform=web&afvaldata={4}&langs=nl&"
-    ],
-    "afvalstoffendienstkalender": [
-        "https://{0}.afvalstoffendienstkalender.nl/nl/{1}/{2}/"
-    ],
-}
 
 SENSOR_COLLECTORS_AFVALALERT = {
     "afvalalert": "https://www.afvalalert.nl/kalender",
 }
 
-SENSOR_COLLECTORS_AFVALWIJZER = [
-    "afvalstoffendienstkalender",
-    "mijnafvalwijzer",
-]
+SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
+    "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&afvaldata={3}&langs=nl&",
+}
 
 SENSOR_COLLECTORS_BURGERPORTAAL = {
     'assen': '138204213565303512',
@@ -66,6 +56,7 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
 
 SENSOR_COLLECTORS_OPZET = {
     'afval3xbeter':             'https://afval3xbeter.nl',
+    'afvalstoffendienst':       'https://afvalstoffendienst.nl',
     'alphenaandenrijn':         'https://afvalkalender.alphenaandenrijn.nl',
     'berkelland':               'https://afvalkalender.gemeenteberkelland.nl',
     'blink':                    'https://mijnblink.nl',
