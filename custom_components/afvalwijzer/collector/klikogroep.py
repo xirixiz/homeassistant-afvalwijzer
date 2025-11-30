@@ -10,6 +10,8 @@ def get_waste_data_raw(provider, username, password):
     try:
         base_url = SENSOR_COLLECTORS_KLIKOGROEP[provider]['url']
         app = SENSOR_COLLECTORS_KLIKOGROEP[provider]['app']
+        _LOGGER.debug(f"[klikogroep] base_url: '{base_url}'")
+        _LOGGER.debug(f"[klikogroep] app: '{app}'")
 
         headers = {
             'Content-Type': 'application/json',
@@ -18,9 +20,11 @@ def get_waste_data_raw(provider, username, password):
 
         # Login and get token
         token = _login_and_get_token(base_url, headers, provider, username, password, app)
+        _LOGGER.debug(f"[klikogroep] token: '{token}'")
 
         # Get waste calendar
         waste_data_raw = _fetch_waste_calendar(base_url, headers, token, provider, app)
+        _LOGGER.debug(f"[klikogroep] waste_data_raw: '{waste_data_raw}'")
 
         # Logout (optional, no error handling required here)
         _logout(base_url, headers, token, provider, app)
@@ -67,6 +71,7 @@ def _fetch_waste_calendar(base_url, headers, token, provider, app):
     except ValueError as err:
         raise ValueError(f"Invalid response from {calendar_url}: {err}") from err
 
+    _LOGGER.debug(f"[klikogroep] response_data: '{response_data}'")
     return _parse_waste_calendar(response_data)
 
 def _parse_waste_calendar(response):
@@ -75,6 +80,10 @@ def _parse_waste_calendar(response):
         fraction['id']: waste_type_rename(fraction['name'].lower())
         for fraction in response.get('fractions', [])
     }
+
+    if not response.get("dates", []):
+        _LOGGER.error("[klikogroep] There is no 'dates' key in the response_data, or the 'dates' key had no elements. Check if the Waste Calendar has entries on your waste collector's portal.")
+        return []
 
     waste_data_raw = []
     for pickup_date, pickups in response.get("dates", {}).items():
