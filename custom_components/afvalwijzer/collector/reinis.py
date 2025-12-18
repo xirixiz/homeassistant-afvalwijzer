@@ -33,29 +33,25 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix=""):
 
     try:
         now = datetime.now()
-        years_to_fetch = [now.year]
-        if now.month == 12:
-            years_to_fetch.append(now.year + 1)  # fetch next year too
 
-        for year in years_to_fetch:
-            kalender_url = f"{url}/rest/adressen/{bagid}/kalender/{year}"
-            afvalstromen_url = f"{url}/rest/adressen/{bagid}/afvalstromen"
+        kalender_url = f"{url}/rest/adressen/{bagid}/kalender/{now.year}"
+        afvalstromen_url = f"{url}/rest/adressen/{bagid}/afvalstromen"
 
-            waste_response = requests.get(kalender_url, timeout=60, verify=False).json()
-            afvalstroom_response = requests.get(afvalstromen_url, timeout=60, verify=False).json()
+        waste_response = requests.get(kalender_url, timeout=60, verify=False).json()
+        afvalstroom_response = requests.get(afvalstromen_url, timeout=60, verify=False).json()
 
-            for item in waste_response:
-                if not item.get('ophaaldatum') or not item.get('afvalstroom_id'):
-                    continue
+        for item in waste_response:
+            if not item.get('ophaaldatum') or not item.get('afvalstroom_id'):
+                continue
 
-                afval_type = next(
-                    (waste_type_rename(a['title']) for a in afvalstroom_response if a['id'] == item['afvalstroom_id']),
-                    None
-                )
-                if not afval_type:
-                    continue
+            afval_type = next(
+                (waste_type_rename(a['title']) for a in afvalstroom_response if a['id'] == item['afvalstroom_id']),
+                None
+            )
+            if not afval_type:
+                continue
 
-                waste_data_raw.append({"type": afval_type, "date": item['ophaaldatum']})
+            waste_data_raw.append({"type": afval_type, "date": item['ophaaldatum']})
 
     except requests.exceptions.RequestException as exc:
         _LOGGER.error('Error occurred while fetching waste data: %r', exc)
