@@ -9,7 +9,7 @@ AfvalWijzer().get_data('','','')
 
 Obs
 - Update this file with your information (or the information you would like to test with, examples are in that file)
-- Then run python3 -m afvalwijzer.tests.test_module from this path <some dir>/homeassistant-afvalwijzer/custom_components
+- Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
 
 """
 import os
@@ -54,6 +54,16 @@ provider = "mijnafvalwijzer"
 postal_code = "5146ea"
 street_number = "73"
 
+# Omrin
+provider = "omrin"
+postal_code = "3844JP"
+street_number = "4"
+
+# opzet - gtb
+provider = "geertruidenberg"
+postal_code = "4931DN"
+street_number = "2"
+
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
 # street_number = "22"
@@ -92,9 +102,9 @@ street_number = "73"
 # street_number = "1"
 
 # Afvalstoffendienst
-provider = "afvalstoffendienst"
-postal_code = "4266NB"
-street_number = "1"
+# provider = "afvalstoffendienst"
+# postal_code = "4266NB"
+# street_number = "1"
 
 # provider = "rmn"
 # postal_code = "3701XK"

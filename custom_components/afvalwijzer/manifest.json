@@ -7,6 +7,9 @@
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer/blob/main/README.md",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
-  "requirements": [],
-  "version": "2025.12.01"
+  "requirements": [
+    "rsa",
+    "pycryptodome"
+  ],
+  "version": "2026.01.01"
 }

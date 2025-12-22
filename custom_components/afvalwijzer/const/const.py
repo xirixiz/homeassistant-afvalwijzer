@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2025.12.01"
+VERSION = "2026.01.01"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -54,38 +54,44 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
     },
 }
 
+SENSOR_COLLECTORS_OMRIN = {
+    "omrin": "https://api-omrin.freed.nl/Account",
+}
+
 SENSOR_COLLECTORS_OPZET = {
-    'afval3xbeter':             'https://afval3xbeter.nl',
-    'afvalstoffendienst':       'https://afvalstoffendienst.nl',
-    'alphenaandenrijn':         'https://afvalkalender.alphenaandenrijn.nl',
-    'berkelland':               'https://afvalkalender.gemeenteberkelland.nl',
-    'blink':                    'https://mijnblink.nl',
-    'cranendonck':              'https://afvalkalender.cranendonck.nl',
-    'cyclus':                   'https://cyclusnv.nl',
-    'dar':                      'https://afvalkalender.dar.nl',
-    'defryskemarren':           'https://afvalkalender.defryskemarren.nl',
-    'denhaag':                  'https://huisvuilkalender.denhaag.nl',
-    'gad':                      'https://inzamelkalender.gad.nl',
-    'hvc':                      'https://inzamelkalender.hvcgroep.nl',
-    'lingewaard':               'https://afvalwijzer.lingewaard.nl',
-    'middelburg-vlissingen':    'https://afvalwijzer.middelburgvlissingen.nl',
-    'mijnafvalzaken':           'https://mijnafvalzaken.nl',
-    'montfoort':                'https://cyclusnv.nl',
-    'offalkalinder':            'https://www.offalkalinder.nl',
-    'peelenmaas':               'https://afvalkalender.peelenmaas.nl',
-    'prezero':                  'https://inzamelwijzer.prezero.nl',
-    'purmerend':                'https://afvalkalender.purmerend.nl',
-    'rwm':                      'https://rwm.nl',
-    'saver':                    'https://saver.nl',
-    'schouwen-duiveland':       'https://afvalkalender.schouwen-duiveland.nl',
-    'sliedrecht':               'https://afvalkalender.sliedrecht.nl',
-    'spaarnelanden':            'https://afvalwijzer.spaarnelanden.nl',
-    'sudwestfryslan':           'https://afvalkalender.sudwestfryslan.nl',
-    'suez':                     'https://inzamelwijzer.prezero.nl',
-    'venray':                   'https://afvalkalender.venray.nl',
-    'voorschoten':              'https://afvalkalender.voorschoten.nl',
-    'waalre':                   'https://afvalkalender.waalre.nl',
-    'zrd':                      'https://www.zrd.nl',
+    'afval3xbeter':                 'https://afval3xbeter.nl',
+    'afvalstoffendienst':           'https://afvalstoffendienst.nl',
+    'afvalstoffendienstkalender':   'https://afvalstoffendienst.nl',
+    'alphenaandenrijn':             'https://afvalkalender.alphenaandenrijn.nl',
+    'berkelland':                   'https://afvalkalender.gemeenteberkelland.nl',
+    'blink':                        'https://mijnblink.nl',
+    'cranendonck':                  'https://afvalkalender.cranendonck.nl',
+    'cyclus':                       'https://cyclusnv.nl',
+    'dar':                          'https://afvalkalender.dar.nl',
+    'defryskemarren':               'https://afvalkalender.defryskemarren.nl',
+    'denhaag':                      'https://huisvuilkalender.denhaag.nl',
+    'gad':                          'https://inzamelkalender.gad.nl',
+    'geertruidenberg':              'https://afval.geertruidenberg.nl',
+    'hvc':                          'https://inzamelkalender.hvcgroep.nl',
+    'lingewaard':                   'https://afvalwijzer.lingewaard.nl',
+    'middelburg-vlissingen':        'https://afvalwijzer.middelburgvlissingen.nl',
+    'mijnafvalzaken':               'https://mijnafvalzaken.nl',
+    'montfoort':                    'https://cyclusnv.nl',
+    'offalkalinder':                'https://www.offalkalinder.nl',
+    'peelenmaas':                   'https://afvalkalender.peelenmaas.nl',
+    'prezero':                      'https://inzamelwijzer.prezero.nl',
+    'purmerend':                    'https://afvalkalender.purmerend.nl',
+    'rwm':                          'https://rwm.nl',
+    'saver':                        'https://saver.nl',
+    'schouwen-duiveland':           'https://afvalkalender.schouwen-duiveland.nl',
+    'sliedrecht':                   'https://afvalkalender.sliedrecht.nl',
+    'spaarnelanden':                'https://afvalwijzer.spaarnelanden.nl',
+    'sudwestfryslan':               'https://afvalkalender.sudwestfryslan.nl',
+    'suez':                         'https://inzamelwijzer.prezero.nl',
+    'venray':                       'https://afvalkalender.venray.nl',
+    'voorschoten':                  'https://afvalkalender.voorschoten.nl',
+    'waalre':                       'https://afvalkalender.waalre.nl',
+    'zrd':                          'https://www.zrd.nl',
 }
 
 SENSOR_COLLECTORS_RD4 = {

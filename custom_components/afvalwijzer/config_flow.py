@@ -24,6 +24,7 @@ from .const.const import (
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_IRADO,
     SENSOR_COLLECTORS_KLIKOGROEP,
+    SENSOR_COLLECTORS_OMRIN,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_REINIS,
@@ -43,6 +44,7 @@ all_collectors = sorted(
         + list(SENSOR_COLLECTORS_ICALENDAR.keys())
         + list(SENSOR_COLLECTORS_IRADO.keys())
         + list(SENSOR_COLLECTORS_KLIKOGROEP.keys())
+        + list(SENSOR_COLLECTORS_OMRIN.keys())
         + list(SENSOR_COLLECTORS_OPZET.keys())
         + list(SENSOR_COLLECTORS_RD4.keys())
         + list(SENSOR_COLLECTORS_REINIS.keys())

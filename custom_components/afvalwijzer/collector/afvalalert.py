@@ -16,7 +16,6 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
         url = SENSOR_COLLECTORS_AFVALALERT[provider]
 
         response = requests.get('{}/{}/{}{}'.format(url, postal_code, street_number, suffix), timeout=60, verify=False)
-        print(response)
         response.raise_for_status()  # Raise an HTTPError for bad responses
     except requests.exceptions.RequestException as err:
         raise ValueError(err) from err
