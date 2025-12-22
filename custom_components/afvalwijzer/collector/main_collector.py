@@ -8,6 +8,7 @@ from ..const.const import (
     SENSOR_COLLECTORS_DEAFVALAPP,
     SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_KLIKOGROEP,
+    SENSOR_COLLECTORS_OMRIN,
     SENSOR_COLLECTORS_OPZET,
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_REINIS,
@@ -17,7 +18,7 @@ from ..const.const import (
 )
 
 try:
-    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, irado, klikogroep, mijnafvalwijzer, opzet, rd4, reinis, rova, rwm, ximmio
+    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, irado, klikogroep, omrin, mijnafvalwijzer, opzet, rd4, reinis, rova, rwm, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -84,6 +85,7 @@ class MainCollector:
                 (SENSOR_COLLECTORS_BURGERPORTAAL, burgerportaal.get_waste_data_raw),
                 (SENSOR_COLLECTORS_CIRCULUS, circulus.get_waste_data_raw),
                 (SENSOR_COLLECTORS_DEAFVALAPP, deafvalapp.get_waste_data_raw),
+                (SENSOR_COLLECTORS_OMRIN, omrin.get_waste_data_raw),
                 (SENSOR_COLLECTORS_ICALENDAR, icalendar.get_waste_data_raw),
                 (SENSOR_COLLECTORS_IRADO, irado.get_waste_data_raw),
                 (SENSOR_COLLECTORS_OPZET, opzet.get_waste_data_raw),

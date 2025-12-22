@@ -9,14 +9,14 @@ AfvalWijzer().get_data('','','')
 
 Obs
 - Update this file with your information (or the information you would like to test with, examples are in that file)
-- Then run python3 -m afvalwijzer.tests.test_module from this path <some dir>/homeassistant-afvalwijzer/custom_components
+- Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
 
 """
 import os
-from ..collector.main_collector import MainCollector
-
 # skip init, required for this test module
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
+from ..collector.main_collector import MainCollector
+
 # api_token = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
 
 # Common
@@ -53,6 +53,16 @@ password = ""
 provider = "mijnafvalwijzer"
 postal_code = "5146ea"
 street_number = "73"
+
+# Omrin
+provider = "omrin"
+postal_code = "3844JP"
+street_number = "4"
+
+# opzet - gtb
+provider = "geertruidenberg"
+postal_code = "4941GZ"
+street_number = "283"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
@@ -92,9 +102,9 @@ street_number = "73"
 # street_number = "1"
 
 # Afvalstoffendienst
-provider = "afvalstoffendienst"
-postal_code = "4266NB"
-street_number = "1"
+# provider = "afvalstoffendienst"
+# postal_code = "4266NB"
+# street_number = "1"
 
 # provider = "rmn"
 # postal_code = "3701XK"
@@ -107,9 +117,9 @@ street_number = "1"
 # street_number = "1"
 
 # Opzet
-# provider = "saver"
-# postal_code = "4708LS"
-# street_number = "10"
+provider = "saver"
+postal_code = "4708LS"
+street_number = "10"
 
 # provider = "prezero"
 # postal_code = "6822NG"
@@ -151,6 +161,11 @@ street_number = "1"
 # provider = "acv"
 # postal_code = "6713CG"
 # street_number = "11"
+
+# Burgerportaal
+# provider = "tilburg"
+# postal_code = "5038EC"
+# street_number = "37"
 
 # Circulus
 # provider = "circulus"
