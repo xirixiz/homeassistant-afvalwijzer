@@ -35,7 +35,9 @@ _Component to integrate with the following providers/communities. Be aware that 
 | denhaag (opzet)                                       |
 | eemsdelta (iCalendar)                                 |
 | gad (opzet)                                           |
+| geertruidenberg (opzet)                               |
 | groningen (burgerportaal)                             |
+| harderwijk (omrin)                                    |
 | hellendoorn (ximmio)                                  |
 | hvc (opzet)                                           |
 | irado                                                 |
@@ -48,6 +50,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | meerlanden (ximmio)                                   |
 | nijkerk                                               |
 | offalkalinder (opzet)                                 |
+| omrin                                                 |
 | oudeijsselstreek (klikogroep, needs user / pass)      |
 | peelenmaas (opzet)                                    |
 | prezero (opzet)                                       |
@@ -66,6 +69,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | spaarnelanden (opzet)                                 |
 | sudwestfryslan (opzet)                                |
 | suez (opzet)                                          |
+| tilburg (burgerportaal)                               |
 | twentemilieu (ximmio)                                 |
 | uithoorn (klikogroep, needs user / pass)              |
 | veldhoven (iCalendar)                                 |
