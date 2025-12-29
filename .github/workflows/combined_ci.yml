@@ -19,13 +19,12 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Hassfest validation
     steps:
-      - uses: "actions/checkout@v6"
-
-      - name: HACS validation
+      - uses: "actions/checkout@v6.0.1"
+      - name: HACS Action
         uses: "hacs/action@main"
         with:
           category: "integration"
-          ignore: brands
+          ignore: "brands"
 
       - name: Hassfest validation
         uses: "home-assistant/actions/hassfest@master"

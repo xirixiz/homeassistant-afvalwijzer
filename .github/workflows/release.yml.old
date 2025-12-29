@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v6.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.x"
+          python-version: '3.x'
 
       #- name: Get version
       #  id: version
@@ -27,12 +27,12 @@ jobs:
       #    python3 ${{ github.workspace }}/manage/update_manifest.py --version ${{ steps.version.outputs.version }}
 
       # Pack the afvalwijzer dir as a zip and upload to the release
-      - name: ZIP Afvalwijzer
+      - name: ZIP afvalwijzer Dir
         run: |
           cd ${{ github.workspace }}/custom_components/afvalwijzer
           zip afvalwijzer.zip -r ./
       - name: Upload zip to release
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@2.11.3
 
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

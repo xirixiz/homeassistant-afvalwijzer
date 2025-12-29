@@ -9,22 +9,23 @@ if [[ ! -d "${PWD}/config" ]]; then
     mkdir -p "${PWD}/config"
     hass --config "${PWD}/config" --script ensure_config
 fi
-if ! grep -R "^logger:" config/configuration.yaml >>/dev/null; then
-    echo "
+if ! grep -R "^logger:" config/configuration.yaml >> /dev/null;then
+echo "
 logger:
     default: info
     logs:
-        custom_components.afvalwijzer: debug
-        pyafvalwijzer: debug
+        custom_components.miele: debug
+        pymiele: debug
 isal:
-" >>config/configuration.yaml
+" >> config/configuration.yaml
 fi
-if ! grep -R "debugpy:" config/configuration.yaml >>/dev/null; then
-    echo "
+if ! grep -R "debugpy:" config/configuration.yaml >> /dev/null;then
+echo "
 # Uncomment the line below if you want to use debugger
 # debugpy:
-" >>config/configuration.yaml
+" >> config/configuration.yaml
 fi
+
 
 # Set the path to custom_components
 ## This let's us have the structure we want <root>/custom_components/ake_dev

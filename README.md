@@ -72,7 +72,6 @@ _Component to integrate with the following providers/communities. Be aware that 
 | tilburg (burgerportaal)                               |
 | twentemilieu (ximmio)                                 |
 | uithoorn (klikogroep, needs user / pass)              |
-| veldhoven (iCalendar)                                 |
 | venlo (iCalender)                                     |
 | venray (opzet)                                        |
 | voorschoten (opzet)                                   |
