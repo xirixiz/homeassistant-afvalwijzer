@@ -51,18 +51,18 @@ password = ""
 
 # Afvalwijzer
 provider = "mijnafvalwijzer"
-postal_code = "5146ea"
-street_number = "73"
+postal_code = "3192NC"
+street_number = "86"
 
 # Omrin
-provider = "omrin"
-postal_code = "3844JP"
-street_number = "4"
+#provider = "omrin"
+#postal_code = "3844JP"
+#street_number = "4"
 
 # opzet - gtb
-provider = "geertruidenberg"
-postal_code = "4941GZ"
-street_number = "283"
+#provider = "geertruidenberg"
+#postal_code = "4941GZ"
+#street_number = "283"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
@@ -117,9 +117,9 @@ street_number = "283"
 # street_number = "1"
 
 # Opzet
-provider = "saver"
-postal_code = "4708LS"
-street_number = "10"
+#provider = "saver"
+#postal_code = "4708LS"
+#street_number = "10"
 
 # provider = "prezero"
 # postal_code = "6822NG"
