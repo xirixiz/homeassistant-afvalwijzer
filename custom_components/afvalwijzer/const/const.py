@@ -64,7 +64,6 @@ SENSOR_COLLECTORS_OPZET = {
     'afvalstoffendienstkalender':   'https://afvalstoffendienst.nl',
     'alphenaandenrijn':             'https://afvalkalender.alphenaandenrijn.nl',
     'berkelland':                   'https://afvalkalender.gemeenteberkelland.nl',
-    'blink':                        'https://mijnblink.nl',
     'cranendonck':                  'https://afvalkalender.cranendonck.nl',
     'cyclus':                       'https://cyclusnv.nl',
     'dar':                          'https://afvalkalender.dar.nl',
@@ -114,6 +113,7 @@ SENSOR_COLLECTORS_ROVA = {
 
 SENSOR_COLLECTORS_XIMMIO = {
     "avalex": "https://wasteprod2api.ximmio.com",
+    "blink": "https://wasteprod2api.ximmio.com",
     "meerlanden": "https://wasteprod2api.ximmio.com",
     "rad": "https://wasteprod2api.ximmio.com",
     "westland": "https://wasteprod2api.ximmio.com",
@@ -127,6 +127,7 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
     "avalex": "f7a74ad1-fdbf-4a43-9f91-44644f4d4222",
     "avri": "78cd4156-394b-413d-8936-d407e334559a",
+    'blink': "252d30d0-2e74-469c-8f1e-c0e2e434eb58",
     "hellendoorn": "24434f5b-7244-412b-9306-3a2bd1e22bc1",
     "meerlanden": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "rad": "13a2cad9-36d0-4b01-b877-efcb421a864d",

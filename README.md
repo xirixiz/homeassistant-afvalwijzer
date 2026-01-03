@@ -25,7 +25,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | avri (ximmio)                                         |
 | bar (burgerportaal)                                   |
 | berkelland (opzet)                                    |
-| blink (opzet)                                         |
+| blink (ximmio)                                        |
 | circulus                                              |
 | cranendonck (opzet)                                   |
 | cyclus (opzet)                                        |
