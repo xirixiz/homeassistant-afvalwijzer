@@ -58,9 +58,9 @@ exclude_list = ""
 #street_number = "4"
 
 # Omrin
-# provider = "omrin"
-# postal_code = "3845DE"
-# street_number = "17"
+provider = "omrin"
+postal_code = "3845DE"
+street_number = "17"
 
 # opzet - gtb
 #provider = "geertruidenberg"
@@ -181,9 +181,9 @@ exclude_list = ""
 # street_number = "22"
 
 # Opzet
-provider = "uithoorn"
-postal_code = "1423DT"
-street_number = "37"
+# provider = "uithoorn"
+# postal_code = "1423DT"
+# street_number = "37"
 
 # Circulus
 # provider = "circulus"
