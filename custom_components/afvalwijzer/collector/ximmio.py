@@ -62,7 +62,6 @@ def get_waste_data_raw(provider, postal_code, street_number, suffix):
             data["HouseLetter"] = suffix
 
         response = _post_ipv4_then_ipv6(url=f"{url}/api/FetchAdress", timeout=60, data=data).json()
-
         if not response['dataList']:
             _LOGGER.error('Address not found!')
             return

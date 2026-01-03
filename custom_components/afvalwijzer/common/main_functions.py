@@ -68,6 +68,7 @@ def waste_type_rename(item_name: str) -> str:
         "kerstboom": "kerstbomen",
         "opk": "papier",
         "packages": "pmd",
+        "packagesbag": "pmd",
         "pap": "papier",
         "paper": "papier",
         "papier": "papier",
