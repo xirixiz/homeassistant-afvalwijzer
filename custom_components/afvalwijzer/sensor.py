@@ -23,8 +23,6 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
-    CONF_USERNAME,
-    CONF_PASSWORD,
     SCAN_INTERVAL,
 )
 from .sensor_custom import CustomSensor
@@ -37,8 +35,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
-        vol.Optional(CONF_USERNAME, default=""): cv.string,
-        vol.Optional(CONF_PASSWORD, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
@@ -144,8 +140,6 @@ class AfvalwijzerData:
                 self.config.get(CONF_POSTAL_CODE),
                 self.config.get(CONF_STREET_NUMBER),
                 self.config.get(CONF_SUFFIX),
-                self.config.get(CONF_USERNAME),
-                self.config.get(CONF_PASSWORD),
                 self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
                 self.config.get(CONF_DATE_ISOFORMAT),
                 self.config.get(CONF_EXCLUDE_LIST),

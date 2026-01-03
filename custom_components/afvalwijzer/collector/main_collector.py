@@ -13,6 +13,7 @@ from ..const.const import (
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_REINIS,
     SENSOR_COLLECTORS_ROVA,
+    SENSOR_COLLECTORS_RWM,
     SENSOR_COLLECTORS_XIMMIO_IDS,
     SENSOR_COLLECTORS_IRADO,
 )
@@ -34,8 +35,6 @@ class MainCollector:
         postal_code: str,
         street_number: str,
         suffix: str,
-        username: str,
-        password: str,
         exclude_pickup_today,
         date_isoformat,
         exclude_list: str,
@@ -46,9 +45,6 @@ class MainCollector:
         self.postal_code = str(postal_code).strip().upper()
         self.street_number = str(street_number).strip()
         self.suffix = str(suffix).strip().lower()
-        self.username = str(username).strip().lower()
-        self.password = str(password)
-
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
         self.date_isoformat = self._normalize_bool_param(date_isoformat)
         self.exclude_list = str(exclude_list).strip().lower()
@@ -85,6 +81,7 @@ class MainCollector:
                 (SENSOR_COLLECTORS_BURGERPORTAAL, burgerportaal.get_waste_data_raw),
                 (SENSOR_COLLECTORS_CIRCULUS, circulus.get_waste_data_raw),
                 (SENSOR_COLLECTORS_DEAFVALAPP, deafvalapp.get_waste_data_raw),
+                (SENSOR_COLLECTORS_KLIKOGROEP, klikogroep.get_waste_data_raw),
                 (SENSOR_COLLECTORS_OMRIN, omrin.get_waste_data_raw),
                 (SENSOR_COLLECTORS_ICALENDAR, icalendar.get_waste_data_raw),
                 (SENSOR_COLLECTORS_IRADO, irado.get_waste_data_raw),
@@ -92,6 +89,7 @@ class MainCollector:
                 (SENSOR_COLLECTORS_RD4, rd4.get_waste_data_raw),
                 (SENSOR_COLLECTORS_REINIS, reinis.get_waste_data_raw),
                 (SENSOR_COLLECTORS_ROVA, rova.get_waste_data_raw),
+                (SENSOR_COLLECTORS_RWM, rwm.get_waste_data_raw),
                 (SENSOR_COLLECTORS_XIMMIO_IDS, ximmio.get_waste_data_raw),
             ]
             for sensor_set, getter in common_providers:
@@ -99,12 +97,6 @@ class MainCollector:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
                     return getter(self.provider, self.postal_code, self.street_number, self.suffix)
-
-            # Providers with unique parameter requirements
-            if self.provider in SENSOR_COLLECTORS_KLIKOGROEP:
-                return klikogroep.get_waste_data_raw(self.provider, self.username, self.password)
-            if self.provider == "rwm":
-                return rwm.get_waste_data_raw(self.provider, self.postal_code, self.street_number, self.suffix)
 
             _LOGGER.error(f"Unknown provider: {self.provider}")
             raise ValueError(f"Unknown provider: {self.provider}")

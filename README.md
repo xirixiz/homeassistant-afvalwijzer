@@ -43,6 +43,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | irado                                                 |
 | lingewaard (opzet)                                    |
 | landvancuijk (deafvalapp)                             |
+| maassluis (klikogroep)                                |
 | middelburg (opzet)                                    |
 | mijnafvalwijzer                                       |
 | mijnafvalzaken (opzet)                                |
@@ -51,7 +52,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | nijkerk                                               |
 | offalkalinder (opzet)                                 |
 | omrin                                                 |
-| oudeijsselstreek (klikogroep, needs user / pass)      |
+| oudeijsselstreek (klikogroep)                         |
 | peelenmaas (opzet)                                    |
 | prezero (opzet)                                       |
 | purmerend (opzet)                                     |
@@ -71,7 +72,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | suez (opzet)                                          |
 | tilburg (burgerportaal)                               |
 | twentemilieu (ximmio)                                 |
-| uithoorn (klikogroep, needs user / pass)              |
+| uithoorn (opzet)                                      |
 | venlo (iCalender)                                     |
 | venray (opzet)                                        |
 | voorschoten (opzet)                                   |
@@ -217,8 +218,6 @@ Here's an example of my own Home Asisstant config: https://github.com/xirixiz/ho
       postal_code: 1234AB              # (required, default = '')
       street_number: 5                 # (required, default = '')
       suffix: ''                       # (optional, default = '')
-      username: ''                     # (optional, default = '')
-      password: ''                     # (optional, default = '')
       exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
       date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"
       default_label: geen              # (optional, default = geen) label if no date found

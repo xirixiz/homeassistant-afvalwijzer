@@ -11,8 +11,6 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
-    CONF_USERNAME,
-    CONF_PASSWORD,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
@@ -61,8 +59,6 @@ BASE_SCHEMA = vol.Schema(
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
-        vol.Optional(CONF_USERNAME, default=""): cv.string,
-        vol.Optional(CONF_PASSWORD, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
@@ -84,7 +80,6 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             postal_code_raw = user_input.get(CONF_POSTAL_CODE, "")
             street_number_raw = user_input.get(CONF_STREET_NUMBER, "")
             suffix = user_input.get(CONF_SUFFIX, "")
-
             postal_code = postal_code_raw.replace(" ", "").upper()
             user_input[CONF_POSTAL_CODE] = postal_code
             user_input[CONF_COLLECTOR] = collector  # keep case if your backend expects it

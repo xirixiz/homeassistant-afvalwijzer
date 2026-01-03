@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2025.1006"
+VERSION = "2026.1000"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -40,18 +40,13 @@ SENSOR_COLLECTORS_IRADO = {
 
 SENSOR_COLLECTORS_ICALENDAR = {
     "eemsdelta": "https://www.eemsdelta.nl/trash-calendar/download/{1}/{2}",
-    "veldhoven": "https://www.veldhoven.nl/afvalkalender/{5}/{1}-{2}.ics",
     "venlo": "https://www.venlo.nl/trash-calendar/download/{1}/{2}",
 }
 
 SENSOR_COLLECTORS_KLIKOGROEP = {
-    "oudeijsselstreek": {
-        "app": "cp-oudeijsselstreek.kcm.com",
-        "url": "https://cp-oudeijsselstreek.klikocontainermanager.com/MyKliko",
-    },
-    "uithoorn": {
-        "app": "cp-uithoorn.kcm.com",
-        "url": "https://cp-uithoorn.klikocontainermanager.com/MyKliko",
+    'oudeijsselstreek': {
+        'id': '454',
+        'url': 'cp-oudeijsselstreek.klikocontainermanager.com',
     },
     'maassluis': {
         'id': '505',
@@ -93,6 +88,7 @@ SENSOR_COLLECTORS_OPZET = {
     'spaarnelanden':                'https://afvalwijzer.spaarnelanden.nl',
     'sudwestfryslan':               'https://afvalkalender.sudwestfryslan.nl',
     'suez':                         'https://inzamelwijzer.prezero.nl',
+    'uithoorn':                     'https://cyclusnv.nl',
     'venray':                       'https://afvalkalender.venray.nl',
     'voorschoten':                  'https://afvalkalender.voorschoten.nl',
     'waalre':                       'https://afvalkalender.waalre.nl',
@@ -146,8 +142,6 @@ CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
-CONF_USERNAME = "username"
-CONF_PASSWORD = "password"
 CONF_DATE_FORMAT = "date_format"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"

@@ -25,8 +25,6 @@ exclude_pickup_today = "True"
 date_isoformat = "True"
 default_label = "geen"
 exclude_list = ""
-username = ""
-password = ""
 
 # DeAfvalapp
 # provider = "deafvalapp"
@@ -50,14 +48,19 @@ password = ""
 # street_number = "1"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "3192NC"
-street_number = "86"
+# provider = "mijnafvalwijzer"
+# postal_code = "3192NC"
+# street_number = "86"
 
 # Omrin
 #provider = "omrin"
 #postal_code = "3844JP"
 #street_number = "4"
+
+# Omrin
+# provider = "omrin"
+# postal_code = "3845DE"
+# street_number = "17"
 
 # opzet - gtb
 #provider = "geertruidenberg"
@@ -116,6 +119,11 @@ street_number = "86"
 # postal_code = "6665CN"
 # street_number = "1"
 
+# RWM
+# provider = "rwm"
+# postal_code = "6105CL"
+# street_number = "50"
+
 # Opzet
 #provider = "saver"
 #postal_code = "4708LS"
@@ -167,6 +175,16 @@ street_number = "86"
 # postal_code = "5038EC"
 # street_number = "37"
 
+# Klikogroep
+# provider = "maassluis"
+# postal_code = "3146BL"
+# street_number = "22"
+
+# Opzet
+provider = "uithoorn"
+postal_code = "1423DT"
+street_number = "37"
+
 # Circulus
 # provider = "circulus"
 # postal_code = "7421AC"
@@ -184,8 +202,6 @@ collector = MainCollector(
     postal_code,
     street_number,
     suffix,
-    username,
-    password,
     exclude_pickup_today,
     date_isoformat,
     exclude_list,

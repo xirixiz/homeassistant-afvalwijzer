@@ -1,111 +1,56 @@
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_KLIKOGROEP
 from ..common.main_functions import waste_type_rename
-
+from datetime import datetime
 import requests
 from urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def get_waste_data_raw(provider, username, password):
-    """Fetch raw waste collection data from the provider API."""
+
+def get_waste_data_raw(provider, postal_code, street_number, suffix):
+    if provider not in SENSOR_COLLECTORS_KLIKOGROEP.keys():
+        raise ValueError(f"Invalid provider: {provider}, please verify")
+
     try:
-        base_url = SENSOR_COLLECTORS_KLIKOGROEP[provider]['url']
-        app = SENSOR_COLLECTORS_KLIKOGROEP[provider]['app']
-        _LOGGER.debug(f"[klikogroep] base_url: '{base_url}'")
-        _LOGGER.debug(f"[klikogroep] app: '{app}'")
+        provider_config = SENSOR_COLLECTORS_KLIKOGROEP[provider]
+        provider_id = provider_config['id']
+        provider_base_url = provider_config['url']
+
+        provider_path = f'/MyKliko/wasteCalendarJSON/{provider_id}/{postal_code}/{street_number}'
+        url = f'https://{provider_base_url}{provider_path}'
 
         headers = {
             'Content-Type': 'application/json',
-            'Referer': base_url,
+            'User-Agent': 'homeassistant-afvalwijzer',
         }
 
-        # Login and get token
-        token = _login_and_get_token(base_url, headers, provider, username, password, app)
-        _LOGGER.debug(f"[klikogroep] token: '{token}'")
-
-        # Get waste calendar
-        waste_data_raw = _fetch_waste_calendar(base_url, headers, token, provider, app)
-        _LOGGER.debug(f"[klikogroep] waste_data_raw: '{waste_data_raw}'")
-
-        # Logout (optional, no error handling required here)
-        _logout(base_url, headers, token, provider, app)
-
-        return waste_data_raw
-    except KeyError as err:
-        raise ValueError(f"Invalid provider configuration: {err}") from err
-
-def _login_and_get_token(base_url, headers, provider, username, password, app):
-    """Authenticate and retrieve a session token."""
-    login_url = f"{base_url}/loginWithPassword"
-    data = {
-        "cardNumber": username,
-        "password": password,
-        "clientName": provider,
-        "app": app,
-    }
-    try:
-        response = requests.post(url=login_url, timeout=60, headers=headers, json=data)
-        response.raise_for_status()
-        response_data = response.json()
-        if not response_data.get('success'):
-            raise ValueError('Login failed. Check username and/or password!')
-        return response_data["token"]
+        raw_response = requests.get(url, headers=headers, timeout=60, verify=False)
+        raw_response.raise_for_status()  # Raise an HTTPError for bad responses
     except requests.exceptions.RequestException as err:
-        raise ValueError(f"Login request failed: {err}") from err
-    except ValueError as err:
-        raise ValueError(f"Invalid response from {login_url}: {err}") from err
+        raise ValueError(err) from err
 
-def _fetch_waste_calendar(base_url, headers, token, provider, app):
-    """Retrieve the waste collection calendar."""
-    calendar_url = f"{base_url}/getMyWasteCalendar"
-    data = {
-        "token": token,
-        "clientName": provider,
-        "app": app,
-    }
     try:
-        response = requests.post(url=calendar_url, timeout=60, headers=headers, json=data)
-        response.raise_for_status()
-        response_data = response.json()
-    except requests.exceptions.RequestException as err:
-        raise ValueError(f"Waste calendar request failed: {err}") from err
+        response = raw_response.json()
     except ValueError as err:
-        raise ValueError(f"Invalid response from {calendar_url}: {err}") from err
+        raise ValueError(f"Invalid and/or no data received from {url}") from err
 
-    _LOGGER.debug(f"[klikogroep] response_data: '{response_data}'")
-    return _parse_waste_calendar(response_data)
-
-def _parse_waste_calendar(response):
-    """Parse the waste calendar response into a structured list."""
-    waste_type_mapping = {
-        fraction['id']: waste_type_rename(fraction['name'].lower())
-        for fraction in response.get('fractions', [])
-    }
-
-    if not response.get("dates", []):
-        _LOGGER.error("[klikogroep] There is no 'dates' key in the response_data, or the 'dates' key had no elements. Check if the Waste Calendar has entries on your waste collector's portal.")
+    if not response:
+        _LOGGER.error("No waste data found!")
         return []
 
     waste_data_raw = []
-    for pickup_date, pickups in response.get("dates", {}).items():
-        for pick_up in pickups[0]:
-            if pick_up:
-                waste_data_raw.append({
-                    "type": waste_type_mapping.get(pick_up, "unknown"),
-                    "date": pickup_date,
-                })
+
+    calendar = response.get("calendar", {})
+
+    for date_str, waste_types in calendar.items():
+        for waste_code in waste_types.keys():
+            waste_type = waste_type_rename(waste_code.strip().lower())
+            waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
+            waste_data_raw.append(
+                {
+                    "type": waste_type,
+                    "date": waste_date,
+                }
+            )
 
     return waste_data_raw
-
-def _logout(base_url, headers, token, provider, app):
-    """Log out to invalidate the session token."""
-    logout_url = f"{base_url}/logout"
-    data = {
-        "token": token,
-        "clientName": provider,
-        "app": app,
-    }
-    try:
-        requests.post(url=logout_url, timeout=60, headers=headers, json=data)
-    except requests.exceptions.RequestException:
-        # Logout failures are non-critical, so we can safely ignore them.
-        pass
