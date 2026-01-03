@@ -73,7 +73,7 @@ _Component to integrate with the following providers/communities. Be aware that 
 | tilburg (burgerportaal)                               |
 | twentemilieu (ximmio)                                 |
 | uithoorn (opzet)                                      |
-| venlo (iCalender)                                     |
+| venlo (ximmio)                                        |
 | venray (opzet)                                        |
 | voorschoten (opzet)                                   |
 | waalre (opzet)                                        |

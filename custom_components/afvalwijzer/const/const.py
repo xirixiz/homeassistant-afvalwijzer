@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2026.1000"
+VERSION = "2026.1001"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -40,7 +40,6 @@ SENSOR_COLLECTORS_IRADO = {
 
 SENSOR_COLLECTORS_ICALENDAR = {
     "eemsdelta": "https://www.eemsdelta.nl/trash-calendar/download/{1}/{2}",
-    "venlo": "https://www.venlo.nl/trash-calendar/download/{1}/{2}",
 }
 
 SENSOR_COLLECTORS_KLIKOGROEP = {
@@ -132,6 +131,7 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
     "meerlanden": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "rad": "13a2cad9-36d0-4b01-b877-efcb421a864d",
     "twentemilieu": "8d97bb56-5afd-4cbc-a651-b4f7314264b4",
+    "venlo": "280affe9-1428-443b-895a-b90431b8ca31",
     "waardlanden": "942abcf6-3775-400d-ae5d-7380d728b23c",
     "westland": "6fc75608-126a-4a50-9241-a002ce8c8a6c",
     "woerden": "06856f74-6826-4c6a-aabf-69bc9d20b5a6",
