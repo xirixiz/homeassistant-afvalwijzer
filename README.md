@@ -212,8 +212,6 @@ logger:
 
 ## EXAMPLE CONFIGURATION
 
-Here's an example of my own Home Asisstant config: https://github.com/xirixiz/home-assistant
-
 ###### SENSOR - CONFIGURATION.YAML
 
 ```yaml
