@@ -31,16 +31,15 @@ exclude_list = ""
 # postal_code = "5701NG"
 # street_number = "4"
 
-# Icalendar
-# provider = "eemsdelta"
+# Omrin
+# provider = "omrin"
 # postal_code = "9991AB"
 # street_number = "2"
 
 # Irado
 # provider = "irado"
-# postal_code = "3132SP"
-# street_number = "53"
-# suffix = "A"
+# postal_code = "3124VM"
+# street_number = "38"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
@@ -58,9 +57,9 @@ exclude_list = ""
 # street_number = "4"
 
 # Omrin
-provider = "omrin"
-postal_code = "3845DE"
-street_number = "17"
+# provider = "omrin"
+# postal_code = "3845DE"
+# street_number = "17"
 
 # Ximmio
 # provider = "venlo"
@@ -130,9 +129,9 @@ street_number = "17"
 # street_number = "50"
 
 # Opzet
-#provider = "saver"
-#postal_code = "4708LS"
-#street_number = "10"
+# provider = "saver"
+# postal_code = "4708LS"
+# street_number = "10"
 
 # provider = "prezero"
 # postal_code = "6822NG"
@@ -152,6 +151,7 @@ street_number = "17"
 # postal_code = "6301ET"
 # street_number = "6"
 
+# ROVA
 # provider = "rova"
 # postal_code = "7671BL"
 # street_number = "2"
@@ -164,6 +164,11 @@ street_number = "17"
 # provider = "woerden"
 # postal_code = "3446GL"
 # street_number = "16"
+
+# Amsterdam
+# provider = "amsterdam"
+# postal_code = "1066KC"
+# street_number = "18"
 
 # Ximmio
 # provider = "almere"

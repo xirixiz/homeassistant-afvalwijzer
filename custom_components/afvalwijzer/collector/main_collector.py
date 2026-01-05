@@ -3,23 +3,26 @@ from ..const.const import (
     _LOGGER,
     SENSOR_COLLECTORS_MIJNAFVALWIJZER,
     SENSOR_COLLECTORS_AFVALALERT,
+    SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
-    SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_KLIKOGROEP,
+    SENSOR_COLLECTORS_MONTFERLAND,
     SENSOR_COLLECTORS_OMRIN,
     SENSOR_COLLECTORS_OPZET,
+    SENSOR_COLLECTORS_RECYCLEAPP,
     SENSOR_COLLECTORS_RD4,
     SENSOR_COLLECTORS_REINIS,
     SENSOR_COLLECTORS_ROVA,
     SENSOR_COLLECTORS_RWM,
+    SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
     SENSOR_COLLECTORS_IRADO,
 )
 
 try:
-    from . import afvalalert, burgerportaal, circulus, deafvalapp, icalendar, irado, klikogroep, omrin, mijnafvalwijzer, opzet, rd4, reinis, rova, rwm, ximmio
+    from . import afvalalert, amsterdam, burgerportaal, circulus, deafvalapp, irado, klikogroep, montferland, omrin, mijnafvalwijzer, opzet, rd4, recycleapp, reinis, rova, rwm, straatbeeld, ximmio
 except ImportError as err:
     _LOGGER.error(f"Import error {err.args}")
 
@@ -78,18 +81,21 @@ class MainCollector:
             common_providers = [
                 (SENSOR_COLLECTORS_MIJNAFVALWIJZER, mijnafvalwijzer.get_waste_data_raw),
                 (SENSOR_COLLECTORS_AFVALALERT, afvalalert.get_waste_data_raw),
+                (SENSOR_COLLECTORS_AMSTERDAM, amsterdam.get_waste_data_raw),
                 (SENSOR_COLLECTORS_BURGERPORTAAL, burgerportaal.get_waste_data_raw),
                 (SENSOR_COLLECTORS_CIRCULUS, circulus.get_waste_data_raw),
                 (SENSOR_COLLECTORS_DEAFVALAPP, deafvalapp.get_waste_data_raw),
                 (SENSOR_COLLECTORS_KLIKOGROEP, klikogroep.get_waste_data_raw),
+                (SENSOR_COLLECTORS_MONTFERLAND, montferland.get_waste_data_raw),
                 (SENSOR_COLLECTORS_OMRIN, omrin.get_waste_data_raw),
-                (SENSOR_COLLECTORS_ICALENDAR, icalendar.get_waste_data_raw),
                 (SENSOR_COLLECTORS_IRADO, irado.get_waste_data_raw),
                 (SENSOR_COLLECTORS_OPZET, opzet.get_waste_data_raw),
                 (SENSOR_COLLECTORS_RD4, rd4.get_waste_data_raw),
+                (SENSOR_COLLECTORS_RECYCLEAPP, recycleapp.get_waste_data_raw),
                 (SENSOR_COLLECTORS_REINIS, reinis.get_waste_data_raw),
                 (SENSOR_COLLECTORS_ROVA, rova.get_waste_data_raw),
                 (SENSOR_COLLECTORS_RWM, rwm.get_waste_data_raw),
+                (SENSOR_COLLECTORS_STRAATBEELD , straatbeeld.get_waste_data_raw),
                 (SENSOR_COLLECTORS_XIMMIO_IDS, ximmio.get_waste_data_raw),
             ]
             for sensor_set, getter in common_providers:
@@ -97,7 +103,7 @@ class MainCollector:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
                     return getter(self.provider, self.postal_code, self.street_number, self.suffix)
-
+            print(self.provider)
             _LOGGER.error(f"Unknown provider: {self.provider}")
             raise ValueError(f"Unknown provider: {self.provider}")
 

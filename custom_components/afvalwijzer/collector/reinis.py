@@ -1,60 +1,166 @@
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_REINIS
-from ..common.main_functions import waste_type_rename, format_postal_code
-from datetime import datetime, timedelta
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_REINIS
+from ..common.main_functions import waste_type_rename, format_postal_code
+
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
 
-def get_waste_data_raw(provider, postal_code, street_number, suffix=""):
+
+def _build_base_url(provider: str) -> str:
     if provider not in SENSOR_COLLECTORS_REINIS:
         raise ValueError(f"Invalid provider: {provider}, please verify")
+    return SENSOR_COLLECTORS_REINIS[provider]
+
+
+def _fetch_address_data(
+    session: requests.Session,
+    base_url: str,
+    corrected_postal_code: str,
+    street_number: str,
+    suffix: str,
+    *,
+    timeout: Tuple[float, float],
+    verify: bool,
+) -> List[Dict[str, Any]]:
+    address_url = f"{base_url}/adressen/{corrected_postal_code}:{street_number}{suffix}"
+    response = session.get(address_url, timeout=timeout, verify=verify)
+    response.raise_for_status()
+    data = response.json()
+    return data or []
+
+
+def _extract_bagid(address_data: List[Dict[str, Any]]) -> Optional[str]:
+    if not address_data:
+        return None
+    return (address_data[0] or {}).get("bagid")
+
+
+def _fetch_waste_data_raw_temp(
+    session: requests.Session,
+    base_url: str,
+    bagid: str,
+    year: int,
+    *,
+    timeout: Tuple[float, float],
+    verify: bool,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """
+    Returns:
+      - waste_response (calendar entries)
+      - afvalstroom_response (stream lookup)
+    """
+    kalender_url = f"{base_url}/rest/adressen/{bagid}/kalender/{year}"
+    afvalstromen_url = f"{base_url}/rest/adressen/{bagid}/afvalstromen"
+
+    waste_response = session.get(kalender_url, timeout=timeout, verify=verify)
+    waste_response.raise_for_status()
+
+    afvalstroom_response = session.get(afvalstromen_url, timeout=timeout, verify=verify)
+    afvalstroom_response.raise_for_status()
+
+    return (waste_response.json() or []), (afvalstroom_response.json() or [])
+
+
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+    afvalstroom_response: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
+    # Build lookup dict once (faster and clearer than next(...) per item)
+    afvalstroom_map: Dict[Any, str] = {}
+    for a in afvalstroom_response:
+        afval_id = a.get("id")
+        title = a.get("title")
+        if afval_id is None or not title:
+            continue
+        afvalstroom_map[afval_id] = title
+
+    waste_data_raw: List[Dict[str, str]] = []
+
+    for item in waste_data_raw_temp:
+        ophalen = item.get("ophaaldatum")
+        afvalstroom_id = item.get("afvalstroom_id")
+        if not ophalen or afvalstroom_id is None:
+            continue
+
+        title = afvalstroom_map.get(afvalstroom_id)
+        if not title:
+            continue
+
+        afval_type = waste_type_rename(title)
+        if not afval_type:
+            continue
+
+        # Original code kept date as-is (already YYYY-MM-DD); keep that behavior.
+        waste_data_raw.append({"type": afval_type, "date": ophalen})
+
+    return waste_data_raw
+
+
+def get_waste_data_raw(
+    provider: str,
+    postal_code: str,
+    street_number: str,
+    suffix: str = "",
+    *,
+    session: Optional[requests.Session] = None,
+    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    verify: bool = False,
+) -> List[Dict[str, str]]:
+    """
+    Collector-style function:
+    - Always returns `waste_data_raw`
+    - Naming aligned: waste_data_raw_temp -> waste_data_raw
+    - Same behavior, but:
+      - avoids per-item linear scans by building an id->title map
+      - consistent request/JSON error handling
+    """
+    session = session or requests.Session()
+    base_url = _build_base_url(provider)
 
     try:
         corrected_postal_code = format_postal_code(postal_code)
-        url = SENSOR_COLLECTORS_REINIS[provider]
+        suffix = suffix or ""
 
-        address_url = f"{url}/adressen/{corrected_postal_code}:{street_number}{suffix}"
-        response = requests.get(address_url, timeout=60, verify=False)
-        response.raise_for_status()
-        address_data = response.json()
+        address_data = _fetch_address_data(
+            session,
+            base_url,
+            corrected_postal_code,
+            street_number,
+            suffix,
+            timeout=timeout,
+            verify=verify,
+        )
 
-        if not address_data or 'bagid' not in address_data[0]:
+        bagid = _extract_bagid(address_data)
+        if not bagid:
             _LOGGER.error("No address found, missing bagid!")
             return []
 
-        bagid = address_data[0]['bagid']
+        year = datetime.now().year
+        waste_data_raw_temp, afvalstroom_response = _fetch_waste_data_raw_temp(
+            session,
+            base_url,
+            bagid,
+            year,
+            timeout=timeout,
+            verify=verify,
+        )
+
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, afvalstroom_response)
+        return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        raise ValueError(f"Error fetching address data: {err}") from err
-
-    waste_data_raw = []
-
-    try:
-        now = datetime.now()
-
-        kalender_url = f"{url}/rest/adressen/{bagid}/kalender/{now.year}"
-        afvalstromen_url = f"{url}/rest/adressen/{bagid}/afvalstromen"
-
-        waste_response = requests.get(kalender_url, timeout=60, verify=False).json()
-        afvalstroom_response = requests.get(afvalstromen_url, timeout=60, verify=False).json()
-
-        for item in waste_response:
-            if not item.get('ophaaldatum') or not item.get('afvalstroom_id'):
-                continue
-
-            afval_type = next(
-                (waste_type_rename(a['title']) for a in afvalstroom_response if a['id'] == item['afvalstroom_id']),
-                None
-            )
-            if not afval_type:
-                continue
-
-            waste_data_raw.append({"type": afval_type, "date": item['ophaaldatum']})
-
-    except requests.exceptions.RequestException as exc:
-        _LOGGER.error('Error occurred while fetching waste data: %r', exc)
-        return []
-
-    return waste_data_raw
+        _LOGGER.error("Reinis request error: %s", err)
+        raise ValueError(err) from err
+    except (KeyError, TypeError, ValueError) as err:
+        _LOGGER.error("Reinis: Invalid and/or no data received from %s", base_url)
+        raise ValueError(f"Invalid and/or no data received from {base_url}") from err

@@ -5,7 +5,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2026.1002"
+VERSION = "2026.1003"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -13,8 +13,29 @@ SENSOR_COLLECTORS_AFVALALERT = {
     "afvalalert": "https://www.afvalalert.nl/kalender",
 }
 
+SENSOR_COLLECTORS_AMSTERDAM = {
+    "amsterdam": "https://api.data.amsterdam.nl/v1/afvalwijzer/afvalwijzer",
+}
+
+SENSOR_COLLECTORS_LIMBURG_NET = {
+    "limburg_net": {"city": "Hasselt", "street": "Kerkstraat"},
+    "LIMBURG_NET": {"city": "Hasselt", "street": "Kerkstraat"},
+}
+
 SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
     "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&afvaldata={3}&langs=nl&",
+}
+
+SENSOR_COLLECTORS_MONTFERLAND = {
+    "montferland": "http://afvalwijzer.afvaloverzicht.nl",
+}
+
+SENSOR_COLLECTORS_STRAATBEELD = {
+    "straatbeeld": "https://drimmelen.api.straatbeeld.online",
+}
+
+SENSOR_COLLECTORS_RECYCLEAPP = {
+    "recycleapp": "https://www.recycleapp.be/api/app/v1/",
 }
 
 SENSOR_COLLECTORS_BURGERPORTAAL = {
@@ -36,10 +57,6 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
 
 SENSOR_COLLECTORS_IRADO = {
     "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}",
-}
-
-SENSOR_COLLECTORS_ICALENDAR = {
-    "eemsdelta": "https://www.eemsdelta.nl/trash-calendar/download/{1}/{2}",
 }
 
 SENSOR_COLLECTORS_KLIKOGROEP = {

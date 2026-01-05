@@ -1,46 +1,105 @@
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_AFVALALERT
-from ..common.main_functions import waste_type_rename
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_AFVALALERT
+from ..common.main_functions import waste_type_rename
+
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
 
-def get_waste_data_raw(provider, postal_code, street_number, suffix):
+
+def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
     if provider not in SENSOR_COLLECTORS_AFVALALERT:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    try:
-        suffix = "a"
-        url = SENSOR_COLLECTORS_AFVALALERT[provider]
+    base_url = SENSOR_COLLECTORS_AFVALALERT[provider]
 
-        response = requests.get('{}/{}/{}{}'.format(url, postal_code, street_number, suffix), timeout=60, verify=False)
-        response.raise_for_status()  # Raise an HTTPError for bad responses
-    except requests.exceptions.RequestException as err:
-        raise ValueError(err) from err
+    # Preserve original behavior: suffix is forced to "a"
+    suffix = "a"
 
-    if not response:
-        _LOGGER.error("No waste data found!")
-        return []
+    # Original string format: '{}/{}/{}{}'.format(url, postal_code, street_number, suffix)
+    return f"{base_url}/{postal_code}/{street_number}{suffix}"
 
-    waste_data_raw = []
 
-    try:
-        for item in response['items']:
-            if not item['date']:
-                continue
-            waste_type =waste_type_rename(item['type'])
-            if not waste_type:
-                continue
-            waste_date=datetime.strptime(item['date'], '%Y-%m-%d'),
-            waste_data_raw.append({"type": waste_type, "date": waste_date})
+def _fetch_waste_data_raw_temp(
+    session: requests.Session,
+    url: str,
+    *,
+    timeout: Tuple[float, float],
+    verify: bool,
+) -> Dict[str, Any]:
+    response = session.get(url, timeout=timeout, verify=verify)
+    response.raise_for_status()
+    return response.json()
 
-    except requests.exceptions.RequestException as exc:
-        _LOGGER.error('Error occurred while fetching data: %r', exc)
-        return False
+
+def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str, str]]:
+    waste_data_raw: List[Dict[str, str]] = []
+
+    items = waste_data_raw_temp.get("items") or []
+    for item in items:
+        date_str = item.get("date")
+        if not date_str:
+            continue
+
+        waste_type = waste_type_rename((item.get("type") or "").strip().lower())
+        if not waste_type:
+            continue
+
+        # Fixes original bug: previous code created a tuple and returned datetime object.
+        # Keep intended output format consistent with other collectors: YYYY-MM-DD string.
+        waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
+
+        waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return waste_data_raw
 
 
+def get_waste_data_raw(
+    provider: str,
+    postal_code: str,
+    street_number: str,
+    suffix: str,
+    *,
+    session: Optional[requests.Session] = None,
+    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    verify: bool = False,
+) -> List[Dict[str, str]]:
+    """
+    Collector-style function:
+    - Always returns `waste_data_raw`
+    - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw
+    - Preserves original behavior (suffix forced to "a")
+    - Fixes obvious bugs in the original implementation while keeping intent
+    """
+    session = session or requests.Session()
+    url = _build_url(provider, postal_code, street_number, suffix)
 
+    try:
+        waste_data_raw_temp = _fetch_waste_data_raw_temp(
+            session,
+            url,
+            timeout=timeout,
+            verify=verify,
+        )
+    except requests.exceptions.RequestException as err:
+        _LOGGER.error("AfvalAlert request error: %s", err)
+        raise ValueError(err) from err
+
+    if not waste_data_raw_temp:
+        _LOGGER.error("No waste data found!")
+        return []
+
+    try:
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        return waste_data_raw
+    except (KeyError, TypeError, ValueError) as err:
+        _LOGGER.error("AfvalAlert: Invalid and/or no data received from %s", url)
+        raise ValueError(f"Invalid and/or no data received from {url}") from err

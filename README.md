@@ -12,75 +12,85 @@
 _Component to integrate with the following providers/communities. Be aware that your communict_
 
 | **Provider**                                          |
-|-------------------------------------------------------|
-| acv (ximmio)                                          |
-| afval3xbeter (opzet)                                  |
-| afvalstoffendienst (ximmio)                           |
-| alkmaar                                               |
-| almere (ximmio)                                       |
-| alphenaandenrijn (opzet)                              |
-| areareiniging (ximmio)                                |
-| assen (burgerportaal)                                 |
-| avalex (ximmio)                                       |
-| avri (ximmio)                                         |
-| bar (burgerportaal)                                   |
-| berkelland (opzet)                                    |
-| blink (ximmio)                                        |
-| circulus                                              |
-| cranendonck (opzet)                                   |
-| cyclus (opzet)                                        |
-| dar (opzet)                                           |
-| deafvalapp                                            |
-| defryskemarren (opzet)                                |
-| denhaag (opzet)                                       |
-| eemsdelta (iCalendar)                                 |
-| gad (opzet)                                           |
-| geertruidenberg (opzet)                               |
-| groningen (burgerportaal)                             |
-| harderwijk (omrin)                                    |
-| hellendoorn (ximmio)                                  |
-| hvc (opzet)                                           |
-| irado                                                 |
-| lingewaard (opzet)                                    |
-| landvancuijk (deafvalapp)                             |
-| maassluis (klikogroep)                                |
-| middelburg (opzet)                                    |
-| mijnafvalwijzer                                       |
-| mijnafvalzaken (opzet)                                |
-| montfoort (opzet)                                     |
-| meerlanden (ximmio)                                   |
-| nijkerk                                               |
-| offalkalinder (opzet)                                 |
-| omrin                                                 |
-| oudeijsselstreek (klikogroep)                         |
-| peelenmaas (opzet)                                    |
-| prezero (opzet)                                       |
-| purmerend (opzet)                                     |
-| rad (ximmio)                                          |
-| rd4                                                   |
-| reinis (ximmio)                                       |
-| rmn                                                   |
-| rwn (burgerportaal)                                   |
-| rova                                                  |
-| rwm (opzet)                                           |
-| saver (opzet)                                         |
-| schouwen (opzet)                                      |
-| schouwenand                                           |
-| sliedrecht (opzet)                                    |
-| spaarnelanden (opzet)                                 |
-| sudwestfryslan (opzet)                                |
-| suez (opzet)                                          |
-| tilburg (burgerportaal)                               |
-| twentemilieu (ximmio)                                 |
-| uithoorn (opzet)                                      |
-| venlo (ximmio)                                        |
-| venray (opzet)                                        |
-| voorschoten (opzet)                                   |
-| waalre (opzet)                                        |
-| waardlanden                                           |
-| westland (ximmio)                                     |
-| woerden (ximmio)                                      |
-| zrd (opzet)                                           |
+## Samengevoegde afvalproviders
+
+Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide aangeleverde overzichten. Dubbele vermeldingen zijn samengevoegd; waar bekend is de **bron of techniek** (bijv. ximmio, opzet, burgerportaal) toegevoegd. Specifieke vereisten staan tussen haakjes.
+
+| Provider                       | Opmerking / bron                 |
+| -------------------------------| -------------------------------- |
+| ACV                            | ximmio                           |
+| Afval3xBeter                   | opzet                            |
+| AfvalAlert                     |                                  |
+| Afvalstoffendienst             | ximmio                           |
+| Alkmaar                        |                                  |
+| Almere                         | ximmio                           |
+| AlphenAanDenRijn               | opzet                            |
+| AreaReiniging                  | ximmio                           |
+| Assen                          | burgerportaal                    |
+| Avalex                         | ximmio                           |
+| Avri                           | ximmio                           |
+| BAR                            | burgerportaal                    |
+| Berkelland                     | opzet                            |
+| Blink                          | ximmio                           |
+| Circulus                       |                                  |
+| Cleanprofs                     |                                  |
+| Cranendonck                    | opzet                            |
+| Cure                           | mijnafvalwijzer                  |
+| Cyclus                         | opzet                            |
+| DAR                            | opzet                            |
+| DeAfvalApp                     |                                  |
+| DeFryskeMarren                 | opzet                            |
+| DenHaag                        | opzet                            |
+| Drimmelen                      |                                  |
+| Eemsdelta                      | omrin                            |
+| GAD                            | opzet                            |
+| Geertruidenberg                | opzet                            |
+| Groningen                      | burgerportaal                    |
+| Harderwijk                     | omrin                            |
+| Hellendoorn                    | ximmio                           |
+| HVC                            | opzet                            |
+| Irado                          |                                  |
+| LandvanCuijk                   | DeAfvalApp                       |
+| Lingewaard                     | opzet                            |
+| Maassluis                      | klikogroep                       |
+| Meerlanden                     | ximmio                           |
+| Meppel                         |                                  |
+| Middelburg-Vlissingen          | opzet                            |
+| MijnAfvalwijzer                |                                  |
+| Mijnafvalzaken                 | opzet                            |
+| Montferland                    |                                  |
+| Montfoort                      | opzet                            |
+| Nijkerk                        |                                  |
+| Omrin                          |                                  |
+| OudeIJsselstreek               | klikogroep                       |
+| PeelEnMaas                     | opzet                            |
+| PreZero                        | opzet                            |
+| Purmerend                      | opzet                            |
+| RAD                            | ximmio                           |
+| RD4                            |                                  |
+| RecycleApp                     |                                  |
+| Reinis                         | ximmio                           |
+| RMN                            |                                  |
+| ROVA                           |                                  |
+| RWM                            | opzet                            |
+| RWN                            | burgerportaal                    |
+| Saver                          | opzet                            |
+| Schouwen-Duiveland             | opzet                            |
+| Sliedrecht                     | opzet                            |
+| Spaarnelanden                  | opzet                            |
+| SudwestFryslan                 | opzet                            |
+| SUEZ                           | opzet                            |
+| Tilburg                        | burgerportaal                    |
+| TwenteMilieu                   | ximmio                           |
+| Uithoorn                       | opzet                            |
+| Venlo                          | ximmio                           |
+| Venray                         |                                  |
+| Voorschoten                    | opzet                            |
+| Waalre                         |                                  |
+| Waardlanden                    |                                  |
+| Westland                       | ximmio                           |
+| Woerden                        | ximmio                           |
+| ZRD                            | opzet                            |
 
 This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft,
 restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the
@@ -135,11 +145,6 @@ This yaml uses a custom card being [auto-entities](https://github.com/thomaslove
     is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
     endif %}.</center>
 ```
-
-More information on the reminders (iOS in this case):
-
-- https://github.com/xirixiz/my-hass-config/blob/master/packages/waste.yaml
-- https://github.com/xirixiz/my-hass-config/blob/05d8755a737676b60faac98dc0cce91d06277939/configuration.yaml#L73
 
 ## Installation
 
