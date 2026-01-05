@@ -205,6 +205,10 @@ exclude_list = ""
 # postal_code = "3209BS"
 # street_number = "14"
 
+provider = "omrin"
+postal_code = "8085RT"
+street_number = "11"
+
 postal_code = postal_code.strip().upper()
 
 collector = MainCollector(
@@ -235,7 +239,7 @@ collector = MainCollector(
 #########################################################################################################
 print("\n")
 
-print(f"Data collected from: {provider} with postcal code: {postal_code}")
+print(f"Data collected from: {provider} with postcal code: {postal_code} and street number: {street_number}")
 print("\n")
 
 print(collector.waste_data_with_today)
