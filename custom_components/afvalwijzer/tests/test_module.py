@@ -53,19 +53,19 @@ exclude_list = ""
 # street_number = "86"
 
 # Omrin
-#provider = "omrin"
-#postal_code = "3844JP"
-#street_number = "4"
+# provider = "omrin"
+# postal_code = "3844JP"
+# street_number = "4"
 
 # Omrin
-# provider = "omrin"
-# postal_code = "3845DE"
-# street_number = "17"
+provider = "omrin"
+postal_code = "3845DE"
+street_number = "17"
 
 # Ximmio
-provider = "venlo"
-postal_code = "5922TS"
-street_number = "1"
+# provider = "venlo"
+# postal_code = "5922TS"
+# street_number = "1"
 
 # opzet - gtb
 #provider = "geertruidenberg"

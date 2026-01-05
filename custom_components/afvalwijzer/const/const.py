@@ -54,7 +54,7 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
 }
 
 SENSOR_COLLECTORS_OMRIN = {
-    "omrin": "https://api-omrin.freed.nl/Account",
+    "omrin": "https://api.omrinafvalapp.nl",
 }
 
 SENSOR_COLLECTORS_OPZET = {

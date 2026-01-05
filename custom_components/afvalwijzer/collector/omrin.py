@@ -1,122 +1,200 @@
 from __future__ import annotations
 
-from base64 import b64decode, b64encode
 from datetime import datetime
-import json
 import uuid
-from typing import Any
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import requests
-from Cryptodome.PublicKey import RSA
-from rsa import pkcs1
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_OMRIN
 from ..common.main_functions import waste_type_rename, format_postal_code
 
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-DEFAULT_TIMEOUT = 60
 
-def _post_json(
-    session: requests.Session,
-    url: str,
-    *,
-    json_body: Any | None = None,
-    data: Any | None = None,
-    timeout: int = DEFAULT_TIMEOUT,
-) -> Any:
-    """POST helper with consistent error handling."""
-    resp = session.post(url, json=json_body, data=data, timeout=timeout, verify=False)
-    try:
-        resp.raise_for_status()
-    except requests.HTTPError as err:
-        raise ValueError(f"HTTP error calling {url}: {resp.status_code}") from err
-
-    try:
-        return resp.json()
-    except ValueError as err:
-        raise ValueError(f"Non-JSON response from {url}") from err
+_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 30.0)
 
 
-def get_waste_data_raw(provider: str, postal_code: str, street_number: str, suffix: str | None = None) -> list[dict[str, str]]:
-    """
-    Fetch waste pickup calendar from Omrin-like providers.
-
-    Returns: [{"type": "<waste_type>", "date": "YYYY-MM-DD"}, ...]
-    """
-    corrected_postal_code = format_postal_code(postal_code)
+def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
     if provider not in SENSOR_COLLECTORS_OMRIN:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    base_url = SENSOR_COLLECTORS_OMRIN[provider].rstrip("/")
-    app_id = str(uuid.uuid1())
+    corrected_postal_code = format_postal_code(postal_code)
 
-    with requests.Session() as session:
-        # Get public key
-        _LOGGER.debug("Fetching public key from Omrin provider=%s url=%s", provider, base_url)
-        token_url = f"{base_url}/GetToken/"
-        token_payload = {"AppId": app_id, "AppVersion": "", "OsVersion": "", "Platform": "HomeAssistant"}
+    return SENSOR_COLLECTORS_OMRIN[provider].format(
+        corrected_postal_code,
+        street_number,
+        suffix,
+    )
 
-        try:
-            token_json = _post_json(session, token_url, json_body=token_payload)
-            public_key_b64 = token_json["PublicKey"]
-            public_key_bytes = b64decode(public_key_b64)
-        except (KeyError, requests.RequestException, ValueError) as err:
-            raise ValueError(f"Failed to obtain public key from {token_url}") from err
 
-        # Fetch account/calendar
-        _LOGGER.debug("Fetching waste data from Omrin provider=%s", provider)
+def _login(
+    session: requests.Session,
+    url: str,
+    postal_code: str,
+    street_number: str,
+    suffix: str,
+    *,
+    timeout: Tuple[float, float],
+    verify: bool,
+) -> str:
+    payload = {
+        "Email": None,
+        "Password": None,
+        "PostalCode": postal_code,
+        "HouseNumber": int(street_number),
+        "HouseNumberExtension": suffix,
+        "DeviceId": str(uuid.uuid4()),
+        "Platform": "HomeAssistant",
+        "AppVersion": "4.0.3.273",
+        "OsVersion": "HomeAssistant 2024.1",
+    }
 
-        request_body = {
-            "a": False,
-            "Email": None,
-            "Password": None,
-            "PostalCode": corrected_postal_code,
-            "HouseNumber": street_number,
-            "Suffix": suffix,
-        }
+    response = session.post(
+        f"{url}/api/auth/login",
+        json=payload,
+        headers={
+            "User-Agent": "Omrin.Afvalapp.Client/1.0",
+            "Accept": "application/json",
+        },
+        timeout=timeout,
+        verify=verify,
+    )
+    response.raise_for_status()
 
-        try:
-            rsa_public_key = RSA.import_key(public_key_bytes)
-            encrypted = pkcs1.encrypt(json.dumps(request_body, separators=(",", ":")).encode("utf-8"), rsa_public_key)
-            encoded = b64encode(encrypted).decode("utf-8")
+    data = response.json()
 
-            fetch_url = f"{base_url}/FetchAccount/{app_id}"
-            # API expects a JSON string body containing the base64 payload (including quotes).
-            fetch_json = _post_json(session, fetch_url, data=f"\"{encoded}\"")
+    if not (data.get("success") and data.get("data")):
+        raise ValueError(f"Login failed: {data.get('errors', 'Unknown error')}")
 
-            calendar = fetch_json.get("CalendarV2", [])
-        except (requests.RequestException, ValueError) as err:
-            raise ValueError(f"Failed to fetch waste data from {base_url}") from err
+    token = data["data"].get("accessToken")
+    if not token:
+        raise ValueError("Not logged in")
 
-    if not calendar:
-        _LOGGER.error("No waste data found for provider=%s postal_code=%s house=%s", provider, corrected_postal_code, street_number)
-        return []
+    return token
 
-    waste_data: list[dict[str, str]] = []
-    for item in calendar:
-        raw_date = item.get("Datum")
-        if not raw_date or raw_date == "0001-01-01T00:00:00":
+
+def _fetch_calendar(
+    session: requests.Session,
+    url: str,
+    token: str,
+    *,
+    timeout: Tuple[float, float],
+    verify: bool,
+) -> Sequence[Dict[str, Any]]:
+    query = """
+    query FetchCalendar {
+      fetchCalendar {
+        id
+        date
+        description
+        type
+        containerType
+        placingTime
+        state
+      }
+    }
+    """
+
+    response = session.post(
+        f"{url}/graphql",
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "GraphQL.Client/6.1.0.0",
+            "Authorization": f"Bearer {token}",
+        },
+        json={"query": query},
+        timeout=timeout,
+        verify=verify,
+    )
+    response.raise_for_status()
+
+    result = response.json()
+
+    if result.get("errors"):
+        error_messages = ", ".join(
+            e.get("message", str(e)) for e in result["errors"]
+        )
+        raise ValueError(f"GraphQL error: {error_messages}")
+
+    return (result.get("data") or {}).get("fetchCalendar") or []
+
+
+def _parse_waste_data_raw(
+    waste_data_raw_temp: Sequence[Dict[str, Any]],
+) -> List[Dict[str, str]]:
+    waste_data_raw: List[Dict[str, str]] = []
+
+    for item in waste_data_raw_temp:
+        if not item.get("date"):
             continue
 
-        desc = (item.get("Omschrijving") or "").strip().lower()
-        waste_type = waste_type_rename(desc)
+        waste_type = waste_type_rename(
+            (item.get("type") or "").strip().lower()
+        )
         if not waste_type:
             continue
 
-        # Omrin returns ISO-like datetime with timezone (e.g. 2025-01-01T00:00:00+0100)
-        try:
-            dt = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S%z")
-            date_str = dt.date().isoformat()
-        except ValueError:
-            # Be tolerant: some APIs return without tz
-            try:
-                dt = datetime.strptime(raw_date, "%Y-%m-%dT%H:%M:%S")
-                date_str = dt.date().isoformat()
-            except ValueError:
-                _LOGGER.debug("Skipping item with unparseable date: %r", raw_date)
-                continue
+        waste_date = datetime.strptime(
+            item["date"], "%Y-%m-%d"
+        ).strftime("%Y-%m-%d")
 
-        waste_data.append({"type": waste_type, "date": date_str})
+        waste_data_raw.append(
+            {
+                "type": waste_type,
+                "date": waste_date,
+            }
+        )
 
-    return waste_data
+    return waste_data_raw
+
+
+def get_waste_data_raw(
+    provider: str,
+    postal_code: str,
+    street_number: str,
+    suffix: str,
+    *,
+    token: Optional[str] = None,
+    session: Optional[requests.Session] = None,
+    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    verify: bool = False,
+) -> List[Dict[str, str]]:
+    """
+    Collector-style function:
+    - Logs in only if no token is provided
+    """
+    url = _build_url(provider, postal_code, street_number, suffix)
+    session = session or requests.Session()
+
+    try:
+        if not token:
+            _LOGGER.debug("Omrin: no token supplied, logging in")
+            token = _login(
+                session,
+                url,
+                postal_code,
+                street_number,
+                suffix,
+                timeout=timeout,
+                verify=verify,
+            )
+        else:
+            _LOGGER.debug("Omrin: token supplied, skipping login")
+
+        waste_data_raw_temp = _fetch_calendar(
+            session,
+            url,
+            token,
+            timeout=timeout,
+            verify=verify,
+        )
+
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+
+        return waste_data_raw
+
+    except requests.exceptions.RequestException as err:
+        _LOGGER.error("Omrin request error: %s", err)
+        raise ValueError(err) from err
