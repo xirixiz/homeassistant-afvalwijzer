@@ -50,7 +50,7 @@ Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide
 | Hellendoorn                    | ximmio                           |
 | HVC                            | opzet                            |
 | Irado                          |                                  |
-| LandvanCuijk                   | DeAfvalApp                       |
+| LandvanCuijk                   | deafvalapp                       |
 | Lingewaard                     | opzet                            |
 | Maassluis                      | klikogroep                       |
 | Meerlanden                     | ximmio                           |
