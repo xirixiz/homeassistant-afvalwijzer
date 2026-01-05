@@ -33,7 +33,6 @@ Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide
 | Berkelland                     | opzet                            |
 | Blink                          | ximmio                           |
 | Circulus                       |                                  |
-| Cleanprofs                     |                                  |
 | Cranendonck                    | opzet                            |
 | Cure                           | mijnafvalwijzer                  |
 | Cyclus                         | opzet                            |
