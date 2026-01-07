@@ -73,12 +73,8 @@ def get_waste_data_raw(
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict]:
-<<<<<<< HEAD
-    """Collector-style function for fetching waste data.
+    """Collector-style function.
 
-=======
-    """Collector-style function:
->>>>>>> 57f4220 (Run pre-commit hooks on all files (#495))
     - Always returns `waste_data_raw`
     - Naming aligned with other collectors
     - Clear fetch → parse → return flow

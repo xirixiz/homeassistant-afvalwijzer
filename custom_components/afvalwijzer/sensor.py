@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 """Sensor component Afvalwijzer.
 
-=======
-"""Sensor component Afvalwijzer
->>>>>>> 57f4220 (Run pre-commit hooks on all files (#495))
 Author: Bram van Dartel - xirixiz
 """
 
@@ -115,14 +111,11 @@ async def _setup_sensors(hass, config, async_add_entities, data=None):
     entities = [
         ProviderSensor(hass, wtype, data, config) for wtype in waste_types_provider
     ] + [CustomSensor(hass, wtype, data, config) for wtype in waste_types_custom]
-<<<<<<< HEAD
 
     # Add notification sensor if provider supports it
     if data.notification_data is not None:
         entities.append(ProviderSensor(hass, "notifications", data, config))
         _LOGGER.debug("Added notification sensor for provider")
-=======
->>>>>>> 57f4220 (Run pre-commit hooks on all files (#495))
 
     if not entities:
         _LOGGER.error("No entities created; check configuration or collector output.")
@@ -150,11 +143,6 @@ class AfvalwijzerData:
         Returns:
             (ok: bool, transient_error: Exception | None)
 
-<<<<<<< HEAD
-        Indicates whether the update was successful, and if not.
-
-=======
->>>>>>> 57f4220 (Run pre-commit hooks on all files (#495))
         """
         try:
             collector = MainCollector(
