@@ -1,14 +1,17 @@
+"""OPZET collector functions."""
+
 from __future__ import annotations
 
 from datetime import datetime
+from html import unescape
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -47,7 +50,10 @@ def _select_bag_id(
     # Original behavior: if multiple and suffix, match huisletter or huisnummerToevoeging
     if len(response_address) > 1 and suffix:
         for item in response_address:
-            if item.get("huisletter") == suffix or item.get("huisnummerToevoeging") == suffix:
+            if (
+                item.get("huisletter") == suffix
+                or item.get("huisnummerToevoeging") == suffix
+            ):
                 return item.get("bagId")
         return None
 
@@ -69,7 +75,9 @@ def _fetch_waste_data_raw_temp(
     return data or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -97,11 +105,11 @@ def get_waste_data_raw(
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
-    - Always returns `waste_data_raw`
-    - Naming aligned: response_address / waste_data_raw_temp / waste_data_raw
-    - Keeps original selection logic for bagId
+    """Collector-style function for fetching waste data.
+
+    - Always returns `waste_data_raw`.
+    - Naming aligned: response_address / waste_data_raw_temp / waste_data_raw.
+    - Keeps original selection logic for bagId.
     """
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
@@ -148,3 +156,111 @@ def get_waste_data_raw(
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("OPZET: Invalid and/or no data received from %s", base_url)
         raise ValueError(f"Invalid and/or no data received from {base_url}") from err
+
+
+def _fetch_notification_data_raw_temp(
+    session: requests.Session,
+    base_url: str,
+    bag_id: str,
+    *,
+    timeout: Tuple[float, float],
+    verify: bool,
+) -> List[Dict[str, Any]]:
+    """Fetch raw notification data from the API."""
+    url_notification = f"{base_url}/api/meldingen/{bag_id}/App"
+    response = session.get(url_notification, timeout=timeout, verify=verify)
+    response.raise_for_status()
+    data = response.json()
+    return data or []
+
+
+def _parse_notification_data_raw(
+    notification_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Parse and clean notification data."""
+    notification_data_raw: List[Dict[str, Any]] = []
+
+    for item in notification_data_raw_temp:
+        content = item.get("content")
+        if not content:
+            continue
+
+        # Strip HTML tags and decode HTML entities
+        clean_content = re.sub("<[^<]+?>", "", content)
+        clean_content = unescape(clean_content).strip()
+
+        if not clean_content:
+            continue
+
+        notification_data_raw.append(
+            {
+                "id": item.get("id"),
+                "title": item.get("kop", ""),
+                "content": clean_content,
+                "dismissable": bool(item.get("afwijsbaar", 0)),
+            }
+        )
+
+    return notification_data_raw
+
+
+def get_notification_data_raw(
+    provider: str,
+    postal_code: str,
+    street_number: str,
+    suffix: str,
+    *,
+    session: Optional[requests.Session] = None,
+    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    verify: bool = False,
+) -> List[Dict[str, Any]]:
+    """Collector-style function for fetching notification data.
+
+    Returns a list of notification dictionaries with id, title, content, and dismissable fields.
+    Returns empty list if provider doesn't support notifications or if there are no notifications.
+    """
+    session = session or requests.Session()
+    suffix = (suffix or "").strip().upper()
+    base_url = _build_base_url(provider)
+
+    try:
+        # Reuse address fetching logic
+        response_address = _fetch_address_list(
+            session,
+            base_url,
+            postal_code,
+            street_number,
+            timeout=timeout,
+            verify=verify,
+        )
+
+        if not response_address:
+            _LOGGER.debug("No address data found for notifications")
+            return []
+
+        bag_id = _select_bag_id(response_address, suffix)
+        if not bag_id:
+            _LOGGER.debug("No bag_id found for notifications")
+            return []
+
+        notification_data_raw_temp = _fetch_notification_data_raw_temp(
+            session,
+            base_url,
+            bag_id,
+            timeout=timeout,
+            verify=verify,
+        )
+
+        notification_data_raw = _parse_notification_data_raw(notification_data_raw_temp)
+        _LOGGER.debug(
+            f"Retrieved {len(notification_data_raw)} notification(s) from {provider}"
+        )
+
+        return notification_data_raw
+
+    except requests.exceptions.RequestException as err:
+        _LOGGER.warning(f"OPZET notification request error: {err}")
+        return []
+    except (KeyError, TypeError, ValueError) as err:
+        _LOGGER.warning(f"OPZET: Invalid notification data from {base_url}: {err}")
+        return []
