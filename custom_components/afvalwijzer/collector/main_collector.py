@@ -139,9 +139,13 @@ class MainCollector:
         """
 
         try:
-            # Currently only OPZET collectors support notifications
+            # List of providers with notification support
             notification_providers = [
                 (SENSOR_COLLECTORS_OPZET, opzet.get_notification_data_raw),
+                (
+                    SENSOR_COLLECTORS_MIJNAFVALWIJZER,
+                    mijnafvalwijzer.get_notification_data_raw,
+                ),
             ]
 
             for sensor_set, getter in notification_providers:
