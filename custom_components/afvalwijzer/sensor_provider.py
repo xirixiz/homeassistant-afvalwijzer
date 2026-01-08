@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
-from datetime import datetime, date, timedelta
+from homeassistant.util import dt as dt_util
+from datetime import datetime, timedelta
 import hashlib
 
 from .const.const import (
@@ -117,7 +118,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
                 self._update_attributes_non_date(collection_date)
 
             # Update last_update timestamp
-            self._last_update = datetime.now().isoformat()
+            self._last_update = dt_util.now().isoformat()
 
         except Exception as err:
             _LOGGER.error(f"Error updating sensor {self.name}: {err}")
@@ -130,7 +131,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
                 "true", "yes") else collection_date.date()
         )
         collection_date_delta = collection_date.date()
-        delta = collection_date_delta - date.today()
+        delta = collection_date_delta - dt_util.now().date()
 
         self._days_until_collection_date = delta.days
         self._update_collection_date_flags(collection_date_delta)
@@ -145,7 +146,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     def _update_collection_date_flags(self, collection_date_delta):
         """Update flags for collection date."""
-        today = date.today()
+        today = dt_util.now().date()
         self._is_collection_date_today = collection_date_delta == today
         self._is_collection_date_tomorrow = collection_date_delta == today + \
             timedelta(days=1)
@@ -160,4 +161,4 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_day_after_tomorrow = None
         self._days_until_collection_date = None
         self._device_class = None
-        self._last_update = datetime.now().isoformat()
+        self._last_update = dt_util.now().isoformat()

@@ -1,7 +1,8 @@
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.util import dt as dt_util
 
-from datetime import datetime, date
+from datetime import datetime
 import hashlib
 
 from .const.const import (
@@ -105,7 +106,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
                 self._update_attributes_non_date(collection_date)
 
             # Update last_update timestamp
-            self._last_update = datetime.now().isoformat()
+            self._last_update = dt_util.now().isoformat()
 
         except Exception as err:
             _LOGGER.error(f"Error updating custom sensor {self.name}: {err}")
@@ -118,7 +119,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
                 "true", "yes") else collection_date.date()
         )
         collection_date_delta = collection_date.date()
-        delta = collection_date_delta - date.today()
+        delta = collection_date_delta - dt_util.now().date()
 
         self._days_until_collection_date = delta.days
         self._device_class = SensorDeviceClass.TIMESTAMP
@@ -135,4 +136,4 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self._state = self._default_label
         self._days_until_collection_date = None
         self._device_class = None
-        self._last_update = datetime.now().isoformat()
+        self._last_update = dt_util.now().isoformat()
