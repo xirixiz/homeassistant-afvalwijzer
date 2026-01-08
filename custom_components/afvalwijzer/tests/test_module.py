@@ -171,9 +171,13 @@ exclude_list = ""
 # street_number = "18"
 
 # Ximmio
-# provider = "almere"
-# postal_code = "1311HG"
-# street_number = "20"
+provider = "almere"
+postal_code = "1311HG"
+street_number = "20"
+
+provider = "avalex"
+postal_code = "2611XG"
+street_number = "87"
 
 # Ximmio
 # provider = "acv"
@@ -205,9 +209,9 @@ exclude_list = ""
 # postal_code = "3209BS"
 # street_number = "14"
 
-provider = "omrin"
-postal_code = "8085RT"
-street_number = "11"
+# provider = "omrin"
+# postal_code = "8085RT"
+# street_number = "11"
 
 postal_code = postal_code.strip().upper()
 
