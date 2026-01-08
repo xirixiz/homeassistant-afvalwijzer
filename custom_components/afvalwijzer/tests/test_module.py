@@ -171,13 +171,13 @@ exclude_list = ""
 # street_number = "18"
 
 # Ximmio
-provider = "almere"
-postal_code = "1311HG"
-street_number = "20"
+# provider = "almere"
+# postal_code = "1311HG"
+# street_number = "20"
 
-provider = "avalex"
-postal_code = "2611XG"
-street_number = "87"
+# provider = "avalex"
+# postal_code = "2611XG"
+# street_number = "87"
 
 # Ximmio
 # provider = "acv"
