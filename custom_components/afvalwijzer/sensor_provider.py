@@ -149,7 +149,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             else collection_date.date()
         )
         collection_date_delta = collection_date.date()
-        delta = collection_date_delta - dt_util.now().today()
+        delta = collection_date_delta - dt_util.now().date()
 
         self._days_until_collection_date = delta.days
         self._update_collection_date_flags(collection_date_delta)
@@ -164,7 +164,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     def _update_collection_date_flags(self, collection_date_delta):
         """Update flags for collection date."""
-        today = dt_util.now().today()
+        today = dt_util.now().date()
         self._is_collection_date_today = collection_date_delta == today
         self._is_collection_date_tomorrow = collection_date_delta == today + timedelta(
             days=1
