@@ -1,9 +1,7 @@
-atomicwrites-homeassistant==1.4.1
 bumpver==2025.1131
 colorlog==6.10.1
 flatdict==4.0.1
 homeassistant==2026.1.0
-pip-tools==7.5.2
 pycryptodome==3.23.0
 requests==2.32.5
 rsa==4.9.1
