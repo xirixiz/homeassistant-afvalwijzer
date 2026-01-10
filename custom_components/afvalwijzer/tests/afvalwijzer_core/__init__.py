@@ -1,5 +1,4 @@
-"""
-Afvalwijzer core logic.
+"""Afvalwijzer core logic.
 
 Reusable for:
 - CLI testing

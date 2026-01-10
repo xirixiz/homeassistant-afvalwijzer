@@ -17,7 +17,9 @@ class WasteCollection:
         elif isinstance(day_value, str):
             d = datetime.strptime(day_value, "%Y-%m-%d").date()
         else:
-            raise TypeError(f"day_value must be date, datetime, or str, got {type(day_value)}")
+            raise TypeError(
+                f"day_value must be date, datetime, or str, got {type(day_value)}"
+            )
         return WasteCollection(day=d, waste_type=waste_type)
 
     def to_dict(self) -> Dict[str, str]:

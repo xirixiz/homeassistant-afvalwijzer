@@ -43,7 +43,7 @@ def _fetch_address_list(
 def _select_bag_id(
     response_address: List[Dict[str, Any]],
     suffix: str,
-) -> Optional[str]:
+) -> str | None:
     if not response_address:
         return None
 
@@ -101,7 +101,7 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:

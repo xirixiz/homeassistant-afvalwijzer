@@ -10,6 +10,7 @@ const_path = pathlib.Path("custom_components/afvalwijzer/const/const.py")
 
 VERSION_RE = re.compile(r"^(?P<year>\d{4})\.(?P<seq>\d{4,})$")
 
+
 def compute_next_version(current_version: str | None) -> str:
     current_year = date.today().year
 
@@ -56,4 +57,3 @@ else:
 const_path.write_text(const_text, encoding="utf-8")
 
 print("Updated version from", old_version, "to", new_version)
-

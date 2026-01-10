@@ -3,24 +3,25 @@ import re
 # Precompile the postal code pattern for better performance
 POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")
 
+
 def format_postal_code(postal_code: str) -> str:
-    """
-    Formats a postal code string by removing any spaces and converting letters to uppercase.
+    """Formats a postal code string by removing any spaces and converting letters to uppercase.
 
     Parameters:
         postal_code (str): The input postal code.
 
     Returns:
         str: A formatted postal code (e.g., "1234AB"). If no match is found, returns the original string.
+
     """
     match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
         return f"{match.group(1)}{match.group(2).upper()}"
     return postal_code
 
+
 def waste_type_rename(item_name: str) -> str:
-    """
-    Cleans and renames the waste type based on a mapping dictionary.
+    """Cleans and renames the waste type based on a mapping dictionary.
 
     It removes escape sequences and anything after a '/', then trims and lowercases the result
     before mapping it to the standardized waste type.
@@ -30,6 +31,7 @@ def waste_type_rename(item_name: str) -> str:
 
     Returns:
         str: The standardized waste type.
+
     """
     # Remove escape sequences and text after '/'
     cleaned_item_name = item_name.strip().lower()

@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_IRADO
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -61,10 +60,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str,
     if not waste_data_raw_temp.get("valid", False):
         return []
 
-    pickups = (
-        waste_data_raw_temp.get("calendar_data", {})
-        .get("pickups", {})
-    )
+    pickups = waste_data_raw_temp.get("calendar_data", {}).get("pickups", {})
 
     waste_data_raw: List[Dict[str, str]] = []
 
@@ -97,7 +93,9 @@ def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str,
                     if not waste_type:
                         continue
 
-                    waste_date = datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
+                    waste_date = datetime.strptime(date_str, "%d/%m/%Y").strftime(
+                        "%Y-%m-%d"
+                    )
                     waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return waste_data_raw
@@ -109,12 +107,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming: url -> waste_data_raw_temp -> waste_data_raw
     - Same behavior as original, with safer parsing and clearer structure

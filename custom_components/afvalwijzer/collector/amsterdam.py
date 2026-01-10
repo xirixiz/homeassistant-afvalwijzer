@@ -11,13 +11,13 @@ This version is adapted to the "collector function" style used in your project:
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
+
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_AMSTERDAM
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -35,10 +35,9 @@ WEEKDAY_MAP: Dict[str, int] = {
 
 
 def _build_url(provider: str) -> str:
-    """
-    Expects SENSOR_COLLECTORS_AMSTERDAM to be either:
-      - dict[str, str] with provider->base_url, OR
-      - dict with key "amsterdam" as fallback
+    """Expects SENSOR_COLLECTORS_AMSTERDAM to be either:
+    - dict[str, str] with provider->base_url, OR
+    - dict with key "amsterdam" as fallback
     """
     if provider in SENSOR_COLLECTORS_AMSTERDAM:
         url = SENSOR_COLLECTORS_AMSTERDAM[provider]
@@ -50,12 +49,11 @@ def _build_url(provider: str) -> str:
     return url.rstrip("/")
 
 
-def _parse_date(date_str: str, today: datetime) -> Optional[datetime]:
-    """
-    Parse Amsterdam date strings. The API sometimes returns:
-      - dd-mm-yy
-      - dd-mm-YYYY
-      - dd-mm (no year)
+def _parse_date(date_str: str, today: datetime) -> datetime | None:
+    """Parse Amsterdam date strings. The API sometimes returns:
+    - dd-mm-yy
+    - dd-mm-YYYY
+    - dd-mm (no year)
     """
     date_str = (date_str or "").strip()
     if not date_str:
@@ -74,19 +72,22 @@ def _parse_date(date_str: str, today: datetime) -> Optional[datetime]:
     return None
 
 
-def _date_in_future(dates_list: List[datetime], current_date: datetime) -> List[datetime]:
+def _date_in_future(
+    dates_list: List[datetime], current_date: datetime
+) -> List[datetime]:
     return [d for d in dates_list if d > current_date]
 
 
-def _calculate_day_delta(week_day: int, today: datetime, frequency_type: Optional[str] = None) -> int:
-    """
-    week_day: ISO weekday (Mon=1 .. Sun=7)
+def _calculate_day_delta(
+    week_day: int, today: datetime, frequency_type: str | None = None
+) -> int:
+    """week_day: ISO weekday (Mon=1 .. Sun=7)
     frequency_type: None / "even" / "oneven"
     """
     iso = today.isocalendar()
     current_week = iso[1]
     current_weekday = iso[2]
-    is_even_week = (current_week % 2 == 0)
+    is_even_week = current_week % 2 == 0
 
     if frequency_type == "oneven":
         if is_even_week:
@@ -114,8 +115,7 @@ def _generate_dates_for_year(
     current_date: datetime,
     even_weeks: bool = False,
 ) -> List[datetime]:
-    """
-    Ported logic from the original collector. Kept as close as possible to preserve behavior.
+    """Ported logic from the original collector. Kept as close as possible to preserve behavior.
     Generates dates for up to ~1 year.
     """
     dates: List[datetime] = []
@@ -127,7 +127,9 @@ def _generate_dates_for_year(
         if week_interval > 1:
             # Handle 52/53-week year edge cases from original code
             week_num = date.isocalendar()[1]
-            if ((week_num % 2 == 0) and not even_weeks) or ((week_num % 2 > 0) and even_weeks):
+            if ((week_num % 2 == 0) and not even_weeks) or (
+                (week_num % 2 > 0) and even_weeks
+            ):
                 date = date - timedelta(weeks=1)
                 if dates and dates[-1] == date:
                     date = date + timedelta(weeks=2)
@@ -144,10 +146,10 @@ def _generate_dates_for_year(
     return dates
 
 
-def _build_query_params(postal_code: str, street_number: str, suffix: str) -> List[Dict[str, str]]:
-    """
-    Returns a list of param dicts to try (suffix variations first).
-    """
+def _build_query_params(
+    postal_code: str, street_number: str, suffix: str
+) -> List[Dict[str, str]]:
+    """Returns a list of param dicts to try (suffix variations first)."""
     base_params = {
         "postcode": postal_code,
         "huisnummer": str(street_number),
@@ -182,8 +184,7 @@ def _fetch_waste_data_raw_temp(
     timeout: Tuple[float, float],
     verify: bool,
 ) -> Dict[str, Any]:
-    """
-    Tries multiple suffix variants; returns the JSON dict for the first valid response.
+    """Tries multiple suffix variants; returns the JSON dict for the first valid response.
     Raises ValueError if none match.
     """
     last_url = None
@@ -206,9 +207,7 @@ def _fetch_waste_data_raw_temp(
 
 
 def _is_item_valid(item: Dict[str, Any]) -> bool:
-    """
-    Ported logic (with guards) from the original collector.
-    """
+    """Ported logic (with guards) from the original collector."""
     freq = item.get("afvalwijzerAfvalkalenderFrequentie")
     waar = item.get("afvalwijzerWaar") or ""
     code = item.get("afvalwijzerFractieCode")
@@ -224,10 +223,10 @@ def _is_item_valid(item: Dict[str, Any]) -> bool:
 
 
 def _process_collection_dates(item: Dict[str, Any], today: datetime) -> List[datetime]:
-    """
-    Convert Amsterdam's frequency + weekday strings to concrete future dates.
-    """
-    collection_days = (item.get("afvalwijzerOphaaldagen") or "").replace(" ", "").split(",")
+    """Convert Amsterdam's frequency + weekday strings to concrete future dates."""
+    collection_days = (
+        (item.get("afvalwijzerOphaaldagen") or "").replace(" ", "").split(",")
+    )
     future_dates: List[datetime] = []
 
     for day in collection_days:
@@ -245,7 +244,9 @@ def _process_collection_dates(item: Dict[str, Any], today: datetime) -> List[dat
 
         if ("weken" in frequency) or ("week" in frequency):
             # Bi-weekly odd/even
-            frequency_clean = frequency.replace(" weken", "").replace(" week", "").strip()
+            frequency_clean = (
+                frequency.replace(" weken", "").replace(" week", "").strip()
+            )
             day_delta = _calculate_day_delta(week_day, today, frequency_clean)
             is_even = frequency_clean == "even"
             future_dates.extend(_generate_dates_for_year(day_delta, 2, today, is_even))
@@ -253,10 +254,7 @@ def _process_collection_dates(item: Dict[str, Any], today: datetime) -> List[dat
 
         # Specific dates list
         date_strings = (
-            frequency.replace(" ", ".")
-            .replace("./", "")
-            .replace(".", ",")
-            .split(",")
+            frequency.replace(" ", ".").replace("./", "").replace(".", ",").split(",")
         )
         dates: List[datetime] = []
         for date_str in date_strings:
@@ -274,14 +272,15 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    AMSTERDAM collector in your project style.
+    """AMSTERDAM collector in your project style.
+
     Returns:
       waste_data_raw: [{"type": <renamed_type>, "date": "YYYY-MM-DD"}, ...]
+
     """
     session = session or requests.Session()
 
@@ -322,7 +321,9 @@ def get_waste_data_raw(
             future_dates = _process_collection_dates(item, today)
 
             for date in future_dates:
-                waste_date = date.replace(hour=0, minute=0, second=0, microsecond=0).strftime("%Y-%m-%d")
+                waste_date = date.replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                ).strftime("%Y-%m-%d")
                 waste_data_raw.append({"type": waste_type, "date": waste_date})
 
         # Keep deterministic output (nice for sensors)

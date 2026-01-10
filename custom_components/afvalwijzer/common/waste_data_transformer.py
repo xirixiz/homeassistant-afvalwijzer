@@ -10,8 +10,7 @@ from ..const.const import _LOGGER
 # sys.excepthook = excepthook
 
 
-class WasteDataTransformer(object):
-
+class WasteDataTransformer:
     ##########################################################################
     #  INIT
     ##########################################################################
@@ -22,7 +21,9 @@ class WasteDataTransformer(object):
         exclude_list,
         default_label,
     ):
-        waste_data_raw.sort(key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d"))
+        waste_data_raw.sort(
+            key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d")
+        )
         self.waste_data_raw = waste_data_raw
         self.exclude_pickup_today = exclude_pickup_today
         self.exclude_list = exclude_list.strip().lower()
@@ -77,9 +78,9 @@ class WasteDataTransformer(object):
                 for item in self.waste_data_raw:
                     item_name = item["type"].strip().lower()
                     if item_name not in self.exclude_list:
-                        if item_name not in waste_data_with_today.keys():
+                        if item_name not in waste_data_with_today:
                             waste_data_with_today[item_name] = self.default_label
-                        if item_name not in waste_data_without_today.keys():
+                        if item_name not in waste_data_without_today:
                             waste_data_without_today[item_name] = self.default_label
             except Exception as err:
                 _LOGGER.error(f"Other error occurred: {err}")
@@ -143,7 +144,7 @@ class WasteDataTransformer(object):
             _LOGGER.error(f"Other error occurred waste_data_custom: {err}")
 
         try:
-            waste_types_custom = list(sorted(waste_data_custom.keys()))
+            waste_types_custom = sorted(waste_data_custom.keys())
         except Exception as err:
             _LOGGER.error(f"Other error occurred waste_types_custom: {err}")
 

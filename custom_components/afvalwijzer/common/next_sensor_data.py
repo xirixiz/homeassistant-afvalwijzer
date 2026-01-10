@@ -1,9 +1,9 @@
 from datetime import date, datetime
+
 from ..const.const import _LOGGER
 
 
 class NextSensorData:
-
     def __init__(self, waste_data_after_date_selected, default_label):
         self.waste_data_after_date_selected = sorted(
             waste_data_after_date_selected, key=lambda d: d["date"]
@@ -33,7 +33,11 @@ class NextSensorData:
 
     def __get_next_waste_type(self):
         try:
-            return [waste["type"] for waste in self.waste_data_after_date_selected if waste["date"] == self.next_waste_date] or [self.default_label]
+            return [
+                waste["type"]
+                for waste in self.waste_data_after_date_selected
+                if waste["date"] == self.next_waste_date
+            ] or [self.default_label]
         except Exception as err:
             _LOGGER.error(f"Error occurred in __get_next_waste_type: {err}")
             return [self.default_label]
@@ -43,7 +47,7 @@ class NextSensorData:
             return {
                 "next_date": self.next_waste_date,
                 "next_in_days": self.next_waste_in_days,
-                "next_type": ", ".join(self.next_waste_type)
+                "next_type": ", ".join(self.next_waste_type),
             }
         except Exception as err:
             _LOGGER.error(f"Error occurred in _gen_next_sensor_data: {err}")

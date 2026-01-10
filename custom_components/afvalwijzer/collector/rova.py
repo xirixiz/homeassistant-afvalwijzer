@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_ROVA
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_ROVA
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -42,7 +41,9 @@ def _fetch_waste_data_raw_temp(
     return data or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -56,7 +57,9 @@ def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dic
             continue
 
         # Input format: 2024-01-01T00:00:00Z
-        waste_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+        waste_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").strftime(
+            "%Y-%m-%d"
+        )
         waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return waste_data_raw
@@ -68,12 +71,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw
     - Fixes the original request formatting bug while keeping the same endpoint/query params

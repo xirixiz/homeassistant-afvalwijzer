@@ -1,6 +1,5 @@
 """Provider sensor implementation for Afvalwijzer."""
 
-#!/usr/bin/env python3
 from datetime import datetime, timedelta
 import hashlib
 
@@ -53,9 +52,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._state = self._default_label if not self._is_notification_sensor else 0
         self._icon = "mdi:bell-outline" if self._is_notification_sensor else SENSOR_ICON
         self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
-                "utf-8"
-            )
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode()
         ).hexdigest()
         self._device_class = None
 

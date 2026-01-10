@@ -1,15 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
 import uuid
-from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_OMRIN
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -29,7 +29,7 @@ def _build_url(provider: str, postal_code: str, street_number: str, suffix: str)
     )
 
 
-def _normalize_token(token: Optional[str]) -> Optional[str]:
+def _normalize_token(token: str | None) -> str | None:
     """Allow passing either a raw token or 'Bearer <token>'."""
     if not token:
         return None
@@ -50,7 +50,7 @@ def _login(
     *,
     timeout: Tuple[float, float],
     verify: bool,
-    device_id: Optional[str] = None,
+    device_id: str | None = None,
 ) -> str:
     payload = {
         "Email": None,
@@ -158,14 +158,13 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    token: Optional[str] = None,
-    session: Optional[requests.Session] = None,
+    token: str | None = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-    device_id: Optional[str] = None,
+    device_id: str | None = None,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Logs in only if no token is provided
     - Keeps naming: waste_data_raw_temp -> waste_data_raw
     """
