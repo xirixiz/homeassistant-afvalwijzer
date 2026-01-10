@@ -9,9 +9,8 @@
 <br><br>
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
 
-_Component to integrate with the following providers/communities. Be aware that your communict_
+_Component to integrate with the following providers/communities._
 
-| **Provider**                                          |
 ## Samengevoegde afvalproviders
 
 Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide aangeleverde overzichten. Dubbele vermeldingen zijn samengevoegd; waar bekend is de **bron of techniek** (bijv. ximmio, opzet, burgerportaal) toegevoegd. Specifieke vereisten staan tussen haakjes.
