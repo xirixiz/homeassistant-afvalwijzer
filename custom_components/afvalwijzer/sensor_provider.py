@@ -1,11 +1,12 @@
 """Provider sensor implementation for Afvalwijzer."""
 
 #!/usr/bin/env python3
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 import hashlib
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.util import dt as dt_util
 
 from .const.const import (
     _LOGGER,
@@ -134,7 +135,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
                 self._update_attributes_non_date(collection_date)
 
             # Update last_update timestamp
-            self._last_update = datetime.now().isoformat()
+            self._last_update = dt_util.now().isoformat()
 
         except Exception as err:
             _LOGGER.error(f"Error updating sensor {self.name}: {err}")
@@ -148,7 +149,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             else collection_date.date()
         )
         collection_date_delta = collection_date.date()
-        delta = collection_date_delta - date.today()
+        delta = collection_date_delta - dt_util.now().today()
 
         self._days_until_collection_date = delta.days
         self._update_collection_date_flags(collection_date_delta)
@@ -163,7 +164,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     def _update_collection_date_flags(self, collection_date_delta):
         """Update flags for collection date."""
-        today = date.today()
+        today = dt_util.now().today()
         self._is_collection_date_today = collection_date_delta == today
         self._is_collection_date_tomorrow = collection_date_delta == today + timedelta(
             days=1
@@ -180,7 +181,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         # Update icon based on notification count
         self._icon = "mdi:bell-alert" if len(notifications) > 0 else "mdi:bell-outline"
 
-        self._last_update = datetime.now().isoformat()
+        self._last_update = dt_util.now().isoformat()
         _LOGGER.debug(f"Notification sensor updated: {self._state} notification(s)")
 
     def _handle_value_error(self):
@@ -191,4 +192,4 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_day_after_tomorrow = None
         self._days_until_collection_date = None
         self._device_class = None
-        self._last_update = datetime.now().isoformat()
+        self._last_update = dt_util.now().isoformat()
