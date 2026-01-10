@@ -74,6 +74,7 @@ def get_waste_data_raw(
     verify: bool = False,
 ) -> List[Dict]:
     """Collector-style function.
+
     - Always returns `waste_data_raw`
     - Naming aligned with other collectors
     - Clear fetch → parse → return flow

@@ -1,5 +1,3 @@
-"""Provider sensor implementation for Afvalwijzer."""
-
 from datetime import datetime, timedelta
 import hashlib
 

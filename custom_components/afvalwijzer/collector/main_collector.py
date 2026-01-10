@@ -84,7 +84,7 @@ class MainCollector:
             self.default_label,
         )
 
-        # Get notification data
+         # Get notification data
         self._notification_data = self._get_notification_data_raw()
 
     def _normalize_bool_param(self, param) -> str:
