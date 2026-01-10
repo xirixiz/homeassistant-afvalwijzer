@@ -9,14 +9,13 @@ Montferland collector (MONTFERLAND) adapted to your project style.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_MONTFERLAND
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -26,9 +25,8 @@ _QUERY_START = "?Username=GSD&Password=gsd$2014"
 
 
 def _build_url(provider: str) -> str:
-    """
-    Expects:
-      SENSOR_COLLECTORS_MONTFERLAND = {"montferland": "http://afvalwijzer.afvaloverzicht.nl"}
+    """Expects:
+    SENSOR_COLLECTORS_MONTFERLAND = {"montferland": "http://afvalwijzer.afvaloverzicht.nl"}
     """
     url = SENSOR_COLLECTORS_MONTFERLAND.get(provider)
     if not url:
@@ -61,10 +59,8 @@ def _fetch_address_data(
     return response.json() or []
 
 
-def _extract_ids(address_data: List[Dict[str, Any]]) -> Tuple[Optional[str], Optional[str]]:
-    """
-    Returns (administratie_id, adres_id)
-    """
+def _extract_ids(address_data: List[Dict[str, Any]]) -> Tuple[str | None, str | None]:
+    """Returns (administratie_id, adres_id)"""
     if not address_data:
         return None, None
 
@@ -72,8 +68,10 @@ def _extract_ids(address_data: List[Dict[str, Any]]) -> Tuple[Optional[str], Opt
     adres_id = first.get("AdresID")
     administratie_id = first.get("AdministratieID")
 
-    return (str(administratie_id) if administratie_id else None,
-            str(adres_id) if adres_id else None)
+    return (
+        str(administratie_id) if administratie_id else None,
+        str(adres_id) if adres_id else None,
+    )
 
 
 def _fetch_waste_data_raw_temp(
@@ -100,7 +98,9 @@ def _fetch_waste_data_raw_temp(
     return response.json() or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -116,7 +116,9 @@ def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dic
         if not waste_type:
             continue
 
-        waste_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
+        waste_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S").strftime(
+            "%Y-%m-%d"
+        )
         waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return waste_data_raw
@@ -128,13 +130,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    MONTFERLAND collector in your project style.
-    """
+    """MONTFERLAND collector in your project style."""
     session = session or requests.Session()
     suffix = (suffix or "").strip()
     postal_code = format_postal_code(postal_code)

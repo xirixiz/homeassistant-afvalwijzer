@@ -1,10 +1,11 @@
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const import COLLECTORS_BURGERPORTAAL, BURGERPORTAAL_API_KEY
+from ..const import BURGERPORTAAL_API_KEY, COLLECTORS_BURGERPORTAAL
 from ..model import WasteCollection
 from .base import BaseCollector
 
@@ -19,7 +20,7 @@ class BurgerportaalCollector(BaseCollector):
         postal_code: str,
         street_number: str,
         suffix: str,
-        waste_type_rename: Callable[[str], Optional[str]],
+        waste_type_rename: Callable[[str], str | None],
     ):
         if provider not in COLLECTORS_BURGERPORTAAL:
             raise ValueError(f"Invalid provider: {provider}")
@@ -31,7 +32,7 @@ class BurgerportaalCollector(BaseCollector):
         self.suffix = (suffix or "").strip().upper()
         self.waste_type_rename = waste_type_rename
 
-        self._id_token: Optional[str] = None
+        self._id_token: str | None = None
 
     def fetch_raw(self) -> Dict[str, Any]:
         self._authenticate()

@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-"""
-Sensor component for AfvalWijzer
+"""Sensor component for AfvalWijzer
 Author: Bram van Dartel - xirixiz
 
 import afvalwijzer
@@ -12,7 +10,9 @@ Obs
 - Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
 
 """
+
 import os
+
 # skip init, required for this test module
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 from ..collector.main_collector import MainCollector
@@ -67,9 +67,9 @@ exclude_list = ""
 # street_number = "1"
 
 # opzet - gtb
-#provider = "geertruidenberg"
-#postal_code = "4941GZ"
-#street_number = "283"
+# provider = "geertruidenberg"
+# postal_code = "4941GZ"
+# street_number = "283"
 
 # provider = "mijnafvalwijzer"
 # postal_code = "5563CM"
@@ -243,7 +243,9 @@ collector = MainCollector(
 #########################################################################################################
 print("\n")
 
-print(f"Data collected from: {provider} with postcal code: {postal_code} and street number: {street_number}")
+print(
+    f"Data collected from: {provider} with postcal code: {postal_code} and street number: {street_number}"
+)
 print("\n")
 
 print(collector.waste_data_with_today)

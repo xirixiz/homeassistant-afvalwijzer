@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_KLIKOGROEP
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_KLIKOGROEP
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -23,7 +22,9 @@ def _build_url(provider: str, postal_code: str, street_number: str) -> str:
     provider_id = provider_config["id"]
     provider_base_url = provider_config["url"]
 
-    provider_path = f"/MyKliko/wasteCalendarJSON/{provider_id}/{postal_code}/{street_number}"
+    provider_path = (
+        f"/MyKliko/wasteCalendarJSON/{provider_id}/{postal_code}/{street_number}"
+    )
     return f"https://{provider_base_url}{provider_path}"
 
 
@@ -75,12 +76,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw
     - Same behavior, but safer parsing and consistent structure

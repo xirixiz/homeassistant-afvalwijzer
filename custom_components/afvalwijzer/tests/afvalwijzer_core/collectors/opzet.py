@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -32,7 +32,9 @@ class OpzetCollector(BaseCollector):
         self.waste_type_rename = waste_type_rename
 
     def fetch_raw(self) -> Dict[str, Any]:
-        url_address = f"{self.base_url}/rest/adressen/{self.postal_code}-{self.street_number}"
+        url_address = (
+            f"{self.base_url}/rest/adressen/{self.postal_code}-{self.street_number}"
+        )
         r_addr = requests.get(url_address, timeout=60, verify=False)
         r_addr.raise_for_status()
         addresses = r_addr.json()
@@ -70,7 +72,10 @@ class OpzetCollector(BaseCollector):
     def _select_bag_id(addresses: List[Dict[str, Any]], suffix: str) -> str:
         if len(addresses) > 1 and suffix:
             for item in addresses:
-                if item.get("huisletter") == suffix or item.get("huisnummerToevoeging") == suffix:
+                if (
+                    item.get("huisletter") == suffix
+                    or item.get("huisnummerToevoeging") == suffix
+                ):
                     bag = item.get("bagId")
                     if bag:
                         return bag

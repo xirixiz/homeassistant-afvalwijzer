@@ -1,10 +1,11 @@
+from collections.abc import Callable
 from datetime import date
-from typing import Any, Dict, List, Callable, Optional
+from typing import Any, Dict, List
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const import MIJNAFVALWIJZER_API_KEY, COLLECTORS_MIJNAFVALWIJZER
+from ..const import COLLECTORS_MIJNAFVALWIJZER, MIJNAFVALWIJZER_API_KEY
 from ..model import WasteCollection
 from .base import BaseCollector
 
@@ -19,7 +20,7 @@ class MijnAfvalwijzerCollector(BaseCollector):
         postal_code: str,
         street_number: str,
         suffix: str,
-        waste_type_rename: Callable[[str], Optional[str]],
+        waste_type_rename: Callable[[str], str | None],
     ):
         if provider not in COLLECTORS_MIJNAFVALWIJZER:
             raise ValueError(f"Invalid provider: {provider}")
@@ -56,7 +57,7 @@ class MijnAfvalwijzerCollector(BaseCollector):
             raise KeyError("No pickup data returned")
 
         out: List[WasteCollection] = []
-        for entry in (part1 + part2):
+        for entry in part1 + part2:
             waste_type = self.waste_type_rename(entry["type"])
             if not waste_type:
                 continue

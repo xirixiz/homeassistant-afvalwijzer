@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_RD4
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -53,7 +52,9 @@ def _fetch_waste_data_raw_temp(
     return items or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -77,12 +78,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw
     - Keeps original behavior (current year in URL, success/address checks)

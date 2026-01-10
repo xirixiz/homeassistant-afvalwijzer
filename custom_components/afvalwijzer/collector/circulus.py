@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_CIRCULUS
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_CIRCULUS
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -31,11 +30,11 @@ def _get_session_cookie(
     *,
     timeout: Tuple[float, float],
     verify: bool,
-) -> Tuple[Optional[Dict[str, Any]], Optional[requests.cookies.RequestsCookieJar]]:
-    """
-    Returns:
-      - response (json dict) from /register/zipcode.json (or None)
-      - logged_in_cookies (cookie jar) (or None)
+) -> Tuple[Dict[str, Any] | None, requests.cookies.RequestsCookieJar | None]:
+    """Returns:
+    - response (json dict) from /register/zipcode.json (or None)
+    - logged_in_cookies (cookie jar) (or None)
+
     """
     raw_response = session.get(url, timeout=timeout, verify=verify)
     raw_response.raise_for_status()
@@ -76,8 +75,7 @@ def _maybe_select_address(
     street_number: str,
     suffix: str,
 ) -> str:
-    """
-    Some responses require picking an address via authenticationUrl.
+    """Some responses require picking an address via authenticationUrl.
     Returns '' if none selected.
     """
     addresses = (response.get("customData") or {}).get("addresses") or []
@@ -86,9 +84,11 @@ def _maybe_select_address(
 
     # Keep original intent: if suffix given try to match address containing " <number> <suffix>"
     if suffix:
-        search_pattern = rf" {re.escape(str(street_number))} {re.escape(suffix.lower())}\b"
+        search_pattern = (
+            rf" {re.escape(str(street_number))} {re.escape(suffix.lower())}\b"
+        )
         for address in addresses:
-            address_str = (address.get("address") or "")
+            address_str = address.get("address") or ""
             if re.search(search_pattern, address_str):
                 return address.get("authenticationUrl") or ""
         return ""
@@ -107,8 +107,7 @@ def _ensure_authenticated_address(
     timeout: Tuple[float, float],
     verify: bool,
 ) -> None:
-    """
-    If the API indicates multiple/ambiguous addresses, select an address.
+    """If the API indicates multiple/ambiguous addresses, select an address.
     This mirrors the original behavior: do a GET to authenticationUrl when present.
     """
     flash_message = response.get("flashMessage")
@@ -137,9 +136,7 @@ def _fetch_waste_data_raw_temp(
     timeout: Tuple[float, float],
     verify: bool,
 ) -> List[Dict[str, Any]]:
-    """
-    Returns the raw 'garbage' list from the response.
-    """
+    """Returns the raw 'garbage' list from the response."""
     start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
     end_date = (datetime.now() + timedelta(days=days_forward)).strftime("%Y-%m-%d")
 
@@ -153,16 +150,14 @@ def _fetch_waste_data_raw_temp(
     response.raise_for_status()
     data = response.json()
 
-    garbage = (
-        (data.get("customData") or {})
-        .get("response", {})
-        .get("garbage", [])
-    )
+    garbage = (data.get("customData") or {}).get("response", {}).get("garbage", [])
 
     return garbage or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -186,12 +181,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw` (list)
     - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw
     - Clear flow: cookie/session -> optional address selection -> fetch -> parse

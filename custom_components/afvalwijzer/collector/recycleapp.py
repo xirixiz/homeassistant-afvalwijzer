@@ -10,14 +10,13 @@ RecycleApp collector (RECYCLEAPP) adapted to your project style.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_RECYCLEAPP
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -25,15 +24,12 @@ _DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
 
 # Keep the original constants; do not change functionality
 _BASE_URL = "https://www.recycleapp.be/api/app/v1/"
-_X_SECRET = (
-    "Op2tDi2pBmh1wzeC5TaN2U3knZan7ATcfOQgxh4vqC0mDKmnPP2qzoQusmInpglfIkxx8SZrasBqi5zgMSvyHggK9j6xCQNQ8xwPFY2o03GCcQfcXVOyKsvGWLze7iwcfcgk2Ujpl0dmrt3hSJMCDqzAlvTrsvAEiaSzC9hKRwhijQAFHuFIhJssnHtDSB76vnFQeTCCvwVB27DjSVpDmq8fWQKEmjEncdLqIsRnfxLcOjGIVwX5V0LBntVbeiBvcjyKF2nQ08rIxqHHGXNJ6SbnAmTgsPTg7k6Ejqa7dVfTmGtEPdftezDbuEc8DdK66KDecqnxwOOPSJIN0zaJ6k2Ye2tgMSxxf16gxAmaOUqHS0i7dtG5PgPSINti3qlDdw6DTKEPni7X0rxM"
-)
+_X_SECRET = "Op2tDi2pBmh1wzeC5TaN2U3knZan7ATcfOQgxh4vqC0mDKmnPP2qzoQusmInpglfIkxx8SZrasBqi5zgMSvyHggK9j6xCQNQ8xwPFY2o03GCcQfcXVOyKsvGWLze7iwcfcgk2Ujpl0dmrt3hSJMCDqzAlvTrsvAEiaSzC9hKRwhijQAFHuFIhJssnHtDSB76vnFQeTCCvwVB27DjSVpDmq8fWQKEmjEncdLqIsRnfxLcOjGIVwX5V0LBntVbeiBvcjyKF2nQ08rIxqHHGXNJ6SbnAmTgsPTg7k6Ejqa7dVfTmGtEPdftezDbuEc8DdK66KDecqnxwOOPSJIN0zaJ6k2Ye2tgMSxxf16gxAmaOUqHS0i7dtG5PgPSINti3qlDdw6DTKEPni7X0rxM"
 _X_CONSUMER = "recycleapp.be"
 
 
 def _build_url(provider: str) -> str:
-    """
-    Keep project pattern:
+    """Keep project pattern:
       SENSOR_COLLECTORS_RECYCLEAPP = {"recycleapp": "https://www.recycleapp.be/api/app/v1/"}
     If you only want to validate provider but use the same base url, this works too.
     """
@@ -93,7 +89,9 @@ def _fetch_postcode_id(
 
     # Original behavior: refresh token on 401 and retry once
     if response.status_code == 401:
-        access_token = _fetch_access_token(session, base_url, timeout=timeout, verify=verify)
+        access_token = _fetch_access_token(
+            session, base_url, timeout=timeout, verify=verify
+        )
         response = session.get(
             f"{base_url}zipcodes",
             params={"q": postal_code},
@@ -181,7 +179,7 @@ def _fetch_waste_data_raw_temp(
 def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
-    for item in (waste_data_raw_temp.get("items") or []):
+    for item in waste_data_raw_temp.get("items") or []:
         timestamp = item.get("timestamp")
         if not timestamp:
             continue
@@ -201,7 +199,9 @@ def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str,
         if not waste_type:
             continue
 
-        waste_date = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.000Z").strftime("%Y-%m-%d")
+        waste_date = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.000Z").strftime(
+            "%Y-%m-%d"
+        )
         waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return sorted(waste_data_raw, key=lambda d: (d["date"], d["type"]))
@@ -213,20 +213,20 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    street_name: Optional[str] = None,
-    access_token: Optional[str] = None,
-    session: Optional[requests.Session] = None,
+    street_name: str | None = None,
+    access_token: str | None = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    RECYCLEAPP collector.
+    """RECYCLEAPP collector.
 
     Note:
     - RecycleApp requires a street name; your old collector passed it via __init__.
     - To keep your standard signature unchanged, `street_name` is an optional kwarg.
       If you cannot pass it from your integration, you can store it in const config instead.
     - Token reuse: if access_token is provided, we do not fetch one.
+
     """
     session = session or requests.Session()
 
@@ -240,7 +240,9 @@ def get_waste_data_raw(
 
         # Token reuse requirement
         if not access_token:
-            access_token = _fetch_access_token(session, base_url, timeout=timeout, verify=verify)
+            access_token = _fetch_access_token(
+                session, base_url, timeout=timeout, verify=verify
+            )
 
         postcode_id = _fetch_postcode_id(
             session,

@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-
 import socket
+from typing import Any, Dict, List, Tuple
+
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3.util import connection as urllib3_connection
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_XIMMIO, SENSOR_COLLECTORS_XIMMIO_IDS
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import (
+    _LOGGER,
+    SENSOR_COLLECTORS_XIMMIO,
+    SENSOR_COLLECTORS_XIMMIO_IDS,
+)
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -24,7 +27,7 @@ def _post_ipv4_then_ipv6(
 ) -> requests.Response:
     """Try POST via IPv4 first; if that fails (DNS/connect), try IPv6."""
     original_allowed = urllib3_connection.allowed_gai_family
-    last_err: Optional[BaseException] = None
+    last_err: BaseException | None = None
 
     try:
         urllib3_connection.allowed_gai_family = lambda: socket.AF_INET
@@ -104,7 +107,7 @@ def _fetch_waste_data_raw_temp(
     data = {
         "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
         "startDate": start_date.date(),  # original behavior: a date object
-        "endDate": end_date,             # original behavior: yyyy-mm-dd string
+        "endDate": end_date,  # original behavior: yyyy-mm-dd string
         "community": community,
         "uniqueAddressID": unique_id,
     }
@@ -127,11 +130,15 @@ def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str,
         if not pickup_dates:
             continue
 
-        waste_type = waste_type_rename((item.get("_pickupTypeText") or "").strip().lower())
+        waste_type = waste_type_rename(
+            (item.get("_pickupTypeText") or "").strip().lower()
+        )
         if not waste_type:
             continue
 
-        waste_date = datetime.strptime(pickup_dates[0], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")
+        waste_date = datetime.strptime(pickup_dates[0], "%Y-%m-%dT%H:%M:%S").strftime(
+            "%Y-%m-%d"
+        )
         waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return waste_data_raw
@@ -143,11 +150,10 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw` (list)
     - Naming aligned: response/address -> waste_data_raw_temp -> waste_data_raw
     - Keeps IPv4->IPv6 POST fallback behavior

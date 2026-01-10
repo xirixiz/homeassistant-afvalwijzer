@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -40,14 +39,17 @@ def _fetch_address_list(
 def _select_bag_id(
     response_address: List[Dict[str, Any]],
     suffix: str,
-) -> Optional[str]:
+) -> str | None:
     if not response_address:
         return None
 
     # Original behavior: if multiple and suffix, match huisletter or huisnummerToevoeging
     if len(response_address) > 1 and suffix:
         for item in response_address:
-            if item.get("huisletter") == suffix or item.get("huisnummerToevoeging") == suffix:
+            if (
+                item.get("huisletter") == suffix
+                or item.get("huisnummerToevoeging") == suffix
+            ):
                 return item.get("bagId")
         return None
 
@@ -69,7 +71,9 @@ def _fetch_waste_data_raw_temp(
     return data or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -93,12 +97,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: response_address / waste_data_raw_temp / waste_data_raw
     - Keeps original selection logic for bagId
