@@ -1,12 +1,12 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
-from .mijnafvalwijzer import MijnAfvalwijzerCollector
-from ..const import COLLECTORS_MIJNAFVALWIJZER
+from ..const import (
+    COLLECTORS_BURGERPORTAAL,
+    COLLECTORS_MIJNAFVALWIJZER,
+    COLLECTORS_OPZET,
+)
 from .burgerportaal import BurgerportaalCollector
-from ..const import COLLECTORS_BURGERPORTAAL
-from .opzet import OpzetCollector
-from ..const import COLLECTORS_OPZET
-
+from .mijnafvalwijzer import MijnAfvalwijzerCollector
 from .opzet import OpzetCollector
 
 
@@ -17,7 +17,7 @@ def make_collector(
     street_number: str,
     suffix: str,
     *,
-    waste_type_rename: Callable[[str], Optional[str]],
+    waste_type_rename: Callable[[str], str | None],
 ):
     family = (family or "auto").strip().lower()
     provider = (provider or "").strip().lower()
@@ -66,7 +66,7 @@ def make_collector(
                 street_number=street_number,
                 suffix=suffix,
                 waste_type_rename=waste_type_rename,
-        )
+            )
         if provider in COLLECTORS_OPZET:
             return OpzetCollector(
                 provider=provider,

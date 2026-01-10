@@ -26,7 +26,7 @@ def _skip_runtime_setup() -> bool:
     return os.getenv("AFVALWIJZER_SKIP_INIT") == "1"
 
 
-async def async_setup(hass: "HomeAssistant", config: "ConfigType") -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if _skip_runtime_setup():
         return True
 
@@ -35,7 +35,7 @@ async def async_setup(hass: "HomeAssistant", config: "ConfigType") -> bool:
     return True
 
 
-async def async_setup_entry(hass: "HomeAssistant", entry: "ConfigEntry") -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if _skip_runtime_setup():
         return True
 
@@ -48,7 +48,7 @@ async def async_setup_entry(hass: "HomeAssistant", entry: "ConfigEntry") -> bool
     return True
 
 
-async def async_unload_entry(hass: "HomeAssistant", entry: "ConfigEntry") -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if _skip_runtime_setup():
         return True
 

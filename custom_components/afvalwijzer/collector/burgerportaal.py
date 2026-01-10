@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_BURGERPORTAAL
 from ..common.main_functions import waste_type_rename
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_BURGERPORTAAL
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -75,11 +74,10 @@ def _get_auth_token(
     *,
     timeout: Tuple[float, float],
     verify: bool,
-    id_token: Optional[str] = None,
-    refresh_token: Optional[str] = None,
-) -> Tuple[str, Optional[str]]:
-    """
-    Important requirement: do not login if a token is already present.
+    id_token: str | None = None,
+    refresh_token: str | None = None,
+) -> Tuple[str, str | None]:
+    """Important requirement: do not login if a token is already present.
     - If id_token is provided, reuse it and skip any Google calls.
     - Else if refresh_token is provided, refresh into an id_token.
     - Else create a new anonymous user and refresh to get id_token.
@@ -90,7 +88,9 @@ def _get_auth_token(
         return id_token, refresh_token
 
     if refresh_token:
-        return _refresh_id_token(session, refresh_token, timeout=timeout, verify=verify), refresh_token
+        return _refresh_id_token(
+            session, refresh_token, timeout=timeout, verify=verify
+        ), refresh_token
 
     signup = _signup_anonymous(session, timeout=timeout, verify=verify)
     if not signup:
@@ -130,7 +130,7 @@ def _fetch_address_list(
 def _select_address_id(
     address_list: List[Dict[str, Any]],
     suffix: str,
-) -> Optional[str]:
+) -> str | None:
     if not address_list:
         return None
 
@@ -164,7 +164,9 @@ def _fetch_waste_data_raw_temp(
     return data or []
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
     waste_data_raw: List[Dict[str, str]] = []
 
     for item in waste_data_raw_temp:
@@ -196,15 +198,14 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
     # Optional reuse to avoid re-login (requirement)
-    id_token: Optional[str] = None,
-    refresh_token: Optional[str] = None,
+    id_token: str | None = None,
+    refresh_token: str | None = None,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: waste_data_raw_temp -> waste_data_raw
     - Adds optional token reuse: pass id_token/refresh_token to skip signup/login where possible

@@ -1,7 +1,7 @@
 {
   "name": "Afvalwijzer",
   "content_in_root": false,
-  "render_readme": true,
   "country": "NL",
-  "homeassistant": "2023.11.0"
+  "homeassistant": "2023.11.0",
+  "render_readme": true
 }

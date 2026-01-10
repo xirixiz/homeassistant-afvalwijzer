@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
-from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.util import dt as dt_util
 from datetime import datetime, timedelta
 import hashlib
+
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.util import dt as dt_util
 
 from .const.const import (
     _LOGGER,
@@ -12,14 +13,14 @@ from .const.const import (
     ATTR_IS_COLLECTION_DATE_TODAY,
     ATTR_IS_COLLECTION_DATE_TOMORROW,
     ATTR_LAST_UPDATE,
+    CONF_COLLECTOR,
+    CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_ID,
-    CONF_COLLECTOR,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
-    CONF_DATE_ISOFORMAT,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
@@ -36,8 +37,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self.config = config
         self._id_name = config.get(CONF_ID)
         self._default_label = config.get(CONF_DEFAULT_LABEL)
-        self._exclude_pickup_today = str(
-            config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()
+        self._exclude_pickup_today = str(config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()
         self._name = (
             SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
         ) + waste_type
@@ -50,9 +50,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._state = self._default_label
         self._icon = SENSOR_ICON
         self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode(
-                "utf-8"
-            )
+            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode()
         ).hexdigest()
         self._device_class = None
 
@@ -127,8 +125,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     def _update_attributes_date(self, collection_date):
         """Update attributes for a datetime value."""
         collection_date_object = (
-            collection_date.isoformat() if self._date_isoformat in (
-                "true", "yes") else collection_date.date()
+            collection_date.isoformat()
+            if self._date_isoformat in ("true", "yes")
+            else collection_date.date()
         )
         collection_date_delta = collection_date.date()
         delta = collection_date_delta - dt_util.now().date()
@@ -148,10 +147,12 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         """Update flags for collection date."""
         today = dt_util.now().date()
         self._is_collection_date_today = collection_date_delta == today
-        self._is_collection_date_tomorrow = collection_date_delta == today + \
-            timedelta(days=1)
-        self._is_collection_date_day_after_tomorrow = collection_date_delta == today + \
-            timedelta(days=2)
+        self._is_collection_date_tomorrow = collection_date_delta == today + timedelta(
+            days=1
+        )
+        self._is_collection_date_day_after_tomorrow = (
+            collection_date_delta == today + timedelta(days=2)
+        )
 
     def _handle_value_error(self):
         """Handle errors in fetching data."""

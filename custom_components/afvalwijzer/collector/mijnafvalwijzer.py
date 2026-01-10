@@ -6,9 +6,8 @@ from typing import Dict, List, Tuple
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
 from ..common.main_functions import format_postal_code
-
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -71,8 +70,7 @@ def get_waste_data_raw(
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned with other collectors
     - Clear fetch → parse → return flow

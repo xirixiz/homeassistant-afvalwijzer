@@ -1,13 +1,12 @@
 import json
 import logging
 import sys
-from typing import Optional
 
 from .collectors.factory import make_collector
 from .repository import WasteCollectionRepository
 
 
-def waste_type_rename(raw: str) -> Optional[str]:
+def waste_type_rename(raw: str) -> str | None:
     s = (raw or "").strip().lower()
     if not s:
         return None
@@ -15,7 +14,9 @@ def waste_type_rename(raw: str) -> Optional[str]:
 
 
 def usage() -> None:
-    print("Usage: python -m afvalwijzer_core.runner <family> <provider> <postal_code> <street_number> [suffix]")
+    print(
+        "Usage: python -m afvalwijzer_core.runner <family> <provider> <postal_code> <street_number> [suffix]"
+    )
     print("family: auto | afvalwijzer | opzet")
 
 

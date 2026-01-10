@@ -9,14 +9,13 @@ Straatbeeld collector (STRAATBEELD) adapted to your project style.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_STRAATBEELD
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -24,9 +23,8 @@ _DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(provider: str) -> str:
-    """
-    Expects:
-      SENSOR_COLLECTORS_STRAATBEELD = {"straatbeeld": "https://drimmelen.api.straatbeeld.online"}
+    """Expects:
+    SENSOR_COLLECTORS_STRAATBEELD = {"straatbeeld": "https://drimmelen.api.straatbeeld.online"}
     """
     url = SENSOR_COLLECTORS_STRAATBEELD.get(provider)
     if not url:
@@ -79,13 +77,19 @@ def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str,
                 continue
 
             for day in days:
-                date_str = ((day.get("date") or {}).get("formatted")) if isinstance(day, dict) else None
+                date_str = (
+                    ((day.get("date") or {}).get("formatted"))
+                    if isinstance(day, dict)
+                    else None
+                )
                 if not date_str:
                     continue
 
-                waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
+                waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime(
+                    "%Y-%m-%d"
+                )
 
-                for item in (day.get("data") or []):
+                for item in day.get("data") or []:
                     name = item.get("name")
                     if not name:
                         continue
@@ -105,13 +109,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    STRAATBEELD collector in your project style.
-    """
+    """STRAATBEELD collector in your project style."""
     session = session or requests.Session()
     postal_code = format_postal_code(postal_code)
     suffix = (suffix or "").strip()

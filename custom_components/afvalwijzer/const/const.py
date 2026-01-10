@@ -39,12 +39,12 @@ SENSOR_COLLECTORS_RECYCLEAPP = {
 }
 
 SENSOR_COLLECTORS_BURGERPORTAAL = {
-    'assen': '138204213565303512',
-    'bar': '138204213564933497',
-    'groningen': '452048812597326549',
-    'nijkerk': '138204213565304094',
-    'rmn': '138204213564933597',
-    'tilburg': '452048812597339353',
+    "assen": "138204213565303512",
+    "bar": "138204213564933497",
+    "groningen": "452048812597326549",
+    "nijkerk": "138204213565304094",
+    "rmn": "138204213564933597",
+    "tilburg": "452048812597339353",
 }
 
 SENSOR_COLLECTORS_CIRCULUS = {
@@ -60,13 +60,13 @@ SENSOR_COLLECTORS_IRADO = {
 }
 
 SENSOR_COLLECTORS_KLIKOGROEP = {
-    'oudeijsselstreek': {
-        'id': '454',
-        'url': 'cp-oudeijsselstreek.klikocontainermanager.com',
+    "oudeijsselstreek": {
+        "id": "454",
+        "url": "cp-oudeijsselstreek.klikocontainermanager.com",
     },
-    'maassluis': {
-        'id': '505',
-        'url': 'cp-maassluis.klikocontainermanager.com',
+    "maassluis": {
+        "id": "505",
+        "url": "cp-maassluis.klikocontainermanager.com",
     },
 }
 
@@ -75,39 +75,39 @@ SENSOR_COLLECTORS_OMRIN = {
 }
 
 SENSOR_COLLECTORS_OPZET = {
-    'afval3xbeter':                 'https://afval3xbeter.nl',
-    'afvalstoffendienst':           'https://afvalstoffendienst.nl',
-    'afvalstoffendienstkalender':   'https://afvalstoffendienst.nl',
-    'alphenaandenrijn':             'https://afvalkalender.alphenaandenrijn.nl',
-    'berkelland':                   'https://afvalkalender.gemeenteberkelland.nl',
-    'cranendonck':                  'https://afvalkalender.cranendonck.nl',
-    'cyclus':                       'https://cyclusnv.nl',
-    'dar':                          'https://afvalkalender.dar.nl',
-    'defryskemarren':               'https://afvalkalender.defryskemarren.nl',
-    'denhaag':                      'https://huisvuilkalender.denhaag.nl',
-    'gad':                          'https://inzamelkalender.gad.nl',
-    'geertruidenberg':              'https://afval.geertruidenberg.nl',
-    'hvc':                          'https://inzamelkalender.hvcgroep.nl',
-    'lingewaard':                   'https://afvalwijzer.lingewaard.nl',
-    'middelburg-vlissingen':        'https://afvalwijzer.middelburgvlissingen.nl',
-    'mijnafvalzaken':               'https://mijnafvalzaken.nl',
-    'montfoort':                    'https://cyclusnv.nl',
-    'offalkalinder':                'https://www.offalkalinder.nl',
-    'peelenmaas':                   'https://afvalkalender.peelenmaas.nl',
-    'prezero':                      'https://inzamelwijzer.prezero.nl',
-    'purmerend':                    'https://afvalkalender.purmerend.nl',
-    'rwm':                          'https://rwm.nl',
-    'saver':                        'https://saver.nl',
-    'schouwen-duiveland':           'https://afvalkalender.schouwen-duiveland.nl',
-    'sliedrecht':                   'https://afvalkalender.sliedrecht.nl',
-    'spaarnelanden':                'https://afvalwijzer.spaarnelanden.nl',
-    'sudwestfryslan':               'https://afvalkalender.sudwestfryslan.nl',
-    'suez':                         'https://inzamelwijzer.prezero.nl',
-    'uithoorn':                     'https://cyclusnv.nl',
-    'venray':                       'https://afvalkalender.venray.nl',
-    'voorschoten':                  'https://afvalkalender.voorschoten.nl',
-    'waalre':                       'https://afvalkalender.waalre.nl',
-    'zrd':                          'https://www.zrd.nl',
+    "afval3xbeter": "https://afval3xbeter.nl",
+    "afvalstoffendienst": "https://afvalstoffendienst.nl",
+    "afvalstoffendienstkalender": "https://afvalstoffendienst.nl",
+    "alphenaandenrijn": "https://afvalkalender.alphenaandenrijn.nl",
+    "berkelland": "https://afvalkalender.gemeenteberkelland.nl",
+    "cranendonck": "https://afvalkalender.cranendonck.nl",
+    "cyclus": "https://cyclusnv.nl",
+    "dar": "https://afvalkalender.dar.nl",
+    "defryskemarren": "https://afvalkalender.defryskemarren.nl",
+    "denhaag": "https://huisvuilkalender.denhaag.nl",
+    "gad": "https://inzamelkalender.gad.nl",
+    "geertruidenberg": "https://afval.geertruidenberg.nl",
+    "hvc": "https://inzamelkalender.hvcgroep.nl",
+    "lingewaard": "https://afvalwijzer.lingewaard.nl",
+    "middelburg-vlissingen": "https://afvalwijzer.middelburgvlissingen.nl",
+    "mijnafvalzaken": "https://mijnafvalzaken.nl",
+    "montfoort": "https://cyclusnv.nl",
+    "offalkalinder": "https://www.offalkalinder.nl",
+    "peelenmaas": "https://afvalkalender.peelenmaas.nl",
+    "prezero": "https://inzamelwijzer.prezero.nl",
+    "purmerend": "https://afvalkalender.purmerend.nl",
+    "rwm": "https://rwm.nl",
+    "saver": "https://saver.nl",
+    "schouwen-duiveland": "https://afvalkalender.schouwen-duiveland.nl",
+    "sliedrecht": "https://afvalkalender.sliedrecht.nl",
+    "spaarnelanden": "https://afvalwijzer.spaarnelanden.nl",
+    "sudwestfryslan": "https://afvalkalender.sudwestfryslan.nl",
+    "suez": "https://inzamelwijzer.prezero.nl",
+    "uithoorn": "https://cyclusnv.nl",
+    "venray": "https://afvalkalender.venray.nl",
+    "voorschoten": "https://afvalkalender.voorschoten.nl",
+    "waalre": "https://afvalkalender.waalre.nl",
+    "zrd": "https://www.zrd.nl",
 }
 
 SENSOR_COLLECTORS_RD4 = {
@@ -120,7 +120,7 @@ SENSOR_COLLECTORS_REINIS = {
 
 SENSOR_COLLECTORS_RWM = {
     "getAddress": "https://rwm.nl/adressen/{0}:{1}",
-    "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen"
+    "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen",
 }
 
 SENSOR_COLLECTORS_ROVA = {
@@ -143,7 +143,7 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
     "areareiniging": "adc418da-d19b-11e5-ab30-625662870761",
     "avalex": "f7a74ad1-fdbf-4a43-9f91-44644f4d4222",
     "avri": "78cd4156-394b-413d-8936-d407e334559a",
-    'blink': "252d30d0-2e74-469c-8f1e-c0e2e434eb58",
+    "blink": "252d30d0-2e74-469c-8f1e-c0e2e434eb58",
     "hellendoorn": "24434f5b-7244-412b-9306-3a2bd1e22bc1",
     "meerlanden": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
     "rad": "13a2cad9-36d0-4b01-b877-efcb421a864d",

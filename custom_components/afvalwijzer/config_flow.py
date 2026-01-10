@@ -1,37 +1,38 @@
 DOMAIN = "afvalwijzer"
 
 import re
+
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.helpers import config_validation as cv
 
 from .const.const import (
-    _LOGGER,
     CONF_COLLECTOR,
-    CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
-    CONF_SUFFIX,
-    CONF_EXCLUDE_PICKUP_TODAY,
     CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
-    SENSOR_COLLECTORS_MIJNAFVALWIJZER,
+    CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_POSTAL_CODE,
+    CONF_STREET_NUMBER,
+    CONF_SUFFIX,
     SENSOR_COLLECTORS_AFVALALERT,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
+    SENSOR_COLLECTORS_IRADO,
     SENSOR_COLLECTORS_KLIKOGROEP,
+    SENSOR_COLLECTORS_MIJNAFVALWIJZER,
     SENSOR_COLLECTORS_MONTFERLAND,
     SENSOR_COLLECTORS_OMRIN,
     SENSOR_COLLECTORS_OPZET,
-    SENSOR_COLLECTORS_RECYCLEAPP,
     SENSOR_COLLECTORS_RD4,
+    SENSOR_COLLECTORS_RECYCLEAPP,
     SENSOR_COLLECTORS_REINIS,
     SENSOR_COLLECTORS_ROVA,
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
-    SENSOR_COLLECTORS_IRADO,
 )
 
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
@@ -76,6 +77,7 @@ BASE_SCHEMA = vol.Schema(
 
 class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle the Afvalwijzer config flow."""
+
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
@@ -89,7 +91,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             suffix = user_input.get(CONF_SUFFIX, "")
             postal_code = postal_code_raw.replace(" ", "").upper()
             user_input[CONF_POSTAL_CODE] = postal_code
-            user_input[CONF_COLLECTOR] = collector  # keep case if your backend expects it
+            user_input[CONF_COLLECTOR] = (
+                collector  # keep case if your backend expects it
+            )
             user_input[CONF_EXCLUDE_LIST] = exclude_list.lower()
 
             if not self._validate_postal_code(postal_code):
@@ -97,7 +101,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             elif not self._validate_street_number(street_number_raw):
                 errors["base"] = "invalid_street_number"
             else:
-                unique = f"{collector}:{postal_code}:{street_number_raw}:{suffix}".strip(":")
+                unique = (
+                    f"{collector}:{postal_code}:{street_number_raw}:{suffix}".strip(":")
+                )
                 await self.async_set_unique_id(unique)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title="Afvalwijzer", data=user_input)
@@ -106,7 +112,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     def _validate_postal_code(self, postal_code: str) -> bool:
-        return isinstance(postal_code, str) and bool(_POSTAL_RE.match(postal_code.strip()))
+        return isinstance(postal_code, str) and bool(
+            _POSTAL_RE.match(postal_code.strip())
+        )
 
     def _validate_street_number(self, street_number: str) -> bool:
         return isinstance(street_number, str) and street_number.strip().isdigit()

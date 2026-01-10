@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_REINIS
-from ..common.main_functions import waste_type_rename, format_postal_code
-
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -38,7 +37,7 @@ def _fetch_address_data(
     return data or []
 
 
-def _extract_bagid(address_data: List[Dict[str, Any]]) -> Optional[str]:
+def _extract_bagid(address_data: List[Dict[str, Any]]) -> str | None:
     if not address_data:
         return None
     return (address_data[0] or {}).get("bagid")
@@ -53,10 +52,10 @@ def _fetch_waste_data_raw_temp(
     timeout: Tuple[float, float],
     verify: bool,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    """
-    Returns:
-      - waste_response (calendar entries)
-      - afvalstroom_response (stream lookup)
+    """Returns:
+    - waste_response (calendar entries)
+    - afvalstroom_response (stream lookup)
+
     """
     kalender_url = f"{base_url}/rest/adressen/{bagid}/kalender/{year}"
     afvalstromen_url = f"{base_url}/rest/adressen/{bagid}/afvalstromen"
@@ -111,12 +110,11 @@ def get_waste_data_raw(
     street_number: str,
     suffix: str = "",
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, str]]:
-    """
-    Collector-style function:
+    """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: waste_data_raw_temp -> waste_data_raw
     - Same behavior, but:
@@ -155,7 +153,9 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, afvalstroom_response)
+        waste_data_raw = _parse_waste_data_raw(
+            waste_data_raw_temp, afvalstroom_response
+        )
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

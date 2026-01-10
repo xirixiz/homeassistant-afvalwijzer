@@ -1,4 +1,3 @@
-
 COLLECTORS_BURGERPORTAAL = {
     "assen": "138204213565303512",
     "bar": "138204213564933497",
@@ -12,7 +11,9 @@ BURGERPORTAAL_API_KEY = "AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk"
 COLLECTORS_MIJNAFVALWIJZER = {
     "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl",
 }
-MIJNAFVALWIJZER_API_KEY = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
+MIJNAFVALWIJZER_API_KEY = (
+    "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
+)
 
 COLLECTORS_OPZET = {
     "afval3xbeter": "https://afval3xbeter.nl",
@@ -49,5 +50,3 @@ COLLECTORS_OPZET = {
     "waalre": "https://afvalkalender.waalre.nl",
     "zrd": "https://www.zrd.nl",
 }
-
-

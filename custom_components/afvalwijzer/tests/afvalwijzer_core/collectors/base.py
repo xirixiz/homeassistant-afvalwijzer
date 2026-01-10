@@ -5,6 +5,7 @@ from ..model import WasteCollection
 
 class BaseCollector:
     """All collectors must use keyword-only constructors."""
+
     def collect(self) -> List[WasteCollection]:
         raw = self.fetch_raw()
         return self.parse(raw)
