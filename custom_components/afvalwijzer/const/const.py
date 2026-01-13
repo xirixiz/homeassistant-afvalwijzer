@@ -1,3 +1,5 @@
+"""Constants for the Afvalwijzer integration."""
+
 from datetime import timedelta
 import logging
 
@@ -23,7 +25,7 @@ SENSOR_COLLECTORS_LIMBURG_NET = {
 }
 
 SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
-    "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&afvaldata={3}&langs=nl&",
+    "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&langs=nl",
 }
 
 SENSOR_COLLECTORS_MONTFERLAND = {
