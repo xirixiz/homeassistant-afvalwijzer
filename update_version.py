@@ -2,13 +2,14 @@
 
 from datetime import date
 import json
-import pathlib
+from pathlib import Path
 import re
 
-manifest_path = pathlib.Path("custom_components/afvalwijzer/manifest.json")
-const_path = pathlib.Path("custom_components/afvalwijzer/const/const.py")
+MANIFEST_PATH = Path("custom_components/afvalwijzer/manifest.json")
+CONST_PATH = Path("custom_components/afvalwijzer/const/const.py")
 
 VERSION_RE = re.compile(r"^(?P<year>\d{4})\.(?P<seq>\d{4,})$")
+VERSION_ASSIGN_RE = re.compile(r'VERSION\s*=\s*"(?P<version>[0-9.]+)"')
 
 
 def compute_next_version(current_version: str | None) -> str:
@@ -28,32 +29,32 @@ def compute_next_version(current_version: str | None) -> str:
     return f"{current_year}.1000"
 
 
-# read current version from manifest.json (source of truth)
-with manifest_path.open("r", encoding="utf-8") as f:
-    manifest = json.load(f)
+def main() -> None:
+    # read current version from manifest.json (source of truth)
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    old_version = str(manifest.get("version", "")).strip() or None
+    new_version = compute_next_version(old_version)
 
-old_version = str(manifest.get("version", "")).strip() or None
-new_version = compute_next_version(old_version)
+    # update manifest.json
+    if manifest.get("version") != new_version:
+        manifest["version"] = new_version
+        MANIFEST_PATH.write_text(
+            json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
 
-# update manifest.json
-manifest["version"] = new_version
-with manifest_path.open("w", encoding="utf-8") as f:
-    json.dump(manifest, f, indent=2)
-    f.write("\n")
+    # update const.py
+    const_text = CONST_PATH.read_text(encoding="utf-8")
 
-# update const.py
-const_text = const_path.read_text(encoding="utf-8")
+    if VERSION_ASSIGN_RE.search(const_text):
+        new_const_text = VERSION_ASSIGN_RE.sub(f'VERSION = "{new_version}"', const_text)
+    else:
+        new_const_text = const_text.rstrip() + f'\n\nVERSION = "{new_version}"\n'
 
-if re.search(r'VERSION\s*=\s*"[0-9.]+"', const_text):
-    const_text = re.sub(
-        r'VERSION\s*=\s*"[0-9.]+"',
-        f'VERSION = "{new_version}"',
-        const_text,
-    )
-else:
-    # optional: add VERSION if it does not exist
-    const_text = const_text.rstrip() + f'\n\nVERSION = "{new_version}"\n'
+    if new_const_text != const_text:
+        CONST_PATH.write_text(new_const_text, encoding="utf-8")
 
-const_path.write_text(const_text, encoding="utf-8")
+    print(f"Updated version from {old_version} to {new_version}")
 
-print("Updated version from", old_version, "to", new_version)
+
+if __name__ == "__main__":
+    main()
