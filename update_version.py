@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Update the Afvalwijzer integration version."""
+"""Afvalwijzer integration."""
+
+from datetime import date
+from pathlib import Path
 
 import json
 import logging
 import re
-from datetime import date
-from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
