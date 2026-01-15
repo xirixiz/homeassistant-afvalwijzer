@@ -33,10 +33,10 @@ def _get_session_cookie(
     timeout: tuple[float, float],
     verify: bool,
 ) -> tuple[dict[str, Any] | None, requests.cookies.RequestsCookieJar | None]:
-    """Returns:
-    - response (json dict) from /register/zipcode.json (or None)
-    - logged_in_cookies (cookie jar) (or None)
+    """Obtain a logged-in session cookie.
 
+    Perform the zipcode registration call and return the response payload and
+    authenticated cookie jar when successful.
     """
     raw_response = session.get(url, timeout=timeout, verify=verify)
     raw_response.raise_for_status()
@@ -48,7 +48,6 @@ def _get_session_cookie(
         _LOGGER.error("Circulus: Unable to get Session Cookie (CB_SESSION missing)")
         return None, None
 
-    # Extract authenticityToken from CB_SESSION: __AT=<token>&___TS=...
     match = re.search(r"__AT=(.*)&___TS=", session_cookie)
     authenticity_token = match.group(1) if match else ""
 
@@ -67,9 +66,7 @@ def _get_session_cookie(
     )
     raw_response.raise_for_status()
 
-    response = raw_response.json()
-    logged_in_cookies = raw_response.cookies
-    return response, logged_in_cookies
+    return raw_response.json(), raw_response.cookies
 
 
 def _maybe_select_address(
@@ -77,14 +74,14 @@ def _maybe_select_address(
     street_number: str,
     suffix: str,
 ) -> str:
-    """Some responses require picking an address via authenticationUrl.
-    Returns '' if none selected.
+    """Select an address when multiple options are returned.
+
+    Return an authentication URL or an empty string if no selection is required.
     """
     addresses = (response.get("customData") or {}).get("addresses") or []
     if not addresses:
         return ""
 
-    # Keep original intent: if suffix given try to match address containing " <number> <suffix>"
     if suffix:
         search_pattern = (
             rf" {re.escape(str(street_number))} {re.escape(suffix.lower())}\b"
@@ -94,8 +91,8 @@ def _maybe_select_address(
             if re.search(search_pattern, address_str):
                 return address.get("authenticationUrl") or ""
         return ""
-    else:
-        return addresses[0].get("authenticationUrl") or ""
+
+    return addresses[0].get("authenticationUrl") or ""
 
 
 def _ensure_authenticated_address(
@@ -109,9 +106,7 @@ def _ensure_authenticated_address(
     timeout: tuple[float, float],
     verify: bool,
 ) -> None:
-    """If the API indicates multiple/ambiguous addresses, select an address.
-    This mirrors the original behavior: do a GET to authenticationUrl when present.
-    """
+    """Authenticate a specific address when required."""
     flash_message = response.get("flashMessage")
     if not flash_message:
         return
@@ -138,7 +133,7 @@ def _fetch_waste_data_raw_temp(
     timeout: tuple[float, float],
     verify: bool,
 ) -> list[dict[str, Any]]:
-    """Returns the raw 'garbage' list from the response."""
+    """Fetch the raw garbage list from the API response."""
     start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
     end_date = (datetime.now() + timedelta(days=days_forward)).strftime("%Y-%m-%d")
 
@@ -150,8 +145,8 @@ def _fetch_waste_data_raw_temp(
         verify=verify,
     )
     response.raise_for_status()
-    data = response.json()
 
+    data = response.json()
     garbage = (data.get("customData") or {}).get("response", {}).get("garbage", [])
 
     return garbage or []
@@ -163,7 +158,6 @@ def _parse_waste_data_raw(
     waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
-        # Original: type derived from item["code"]
         waste_type = waste_type_rename((item.get("code") or "").strip().lower())
         if not waste_type:
             continue
@@ -171,7 +165,6 @@ def _parse_waste_data_raw(
         for date in item.get("dates") or []:
             if not date:
                 continue
-            # Original: date already in yyyy-mm-dd
             waste_data_raw.append({"type": waste_type, "date": date})
 
     return waste_data_raw
@@ -188,7 +181,6 @@ def get_waste_data_raw(
     verify: bool = False,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
-
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
     url = _build_url(provider)
@@ -230,8 +222,7 @@ def get_waste_data_raw(
             _LOGGER.error("Circulus: No Waste data found!")
             return []
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
-        return waste_data_raw
+        return _parse_waste_data_raw(waste_data_raw_temp)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("Circulus request error: %s", err)

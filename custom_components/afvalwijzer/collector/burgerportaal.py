@@ -79,12 +79,14 @@ def _get_auth_token(
     id_token: str | None = None,
     refresh_token: str | None = None,
 ) -> tuple[str, str | None]:
-    """Important requirement: do not login if a token is already present.
-    - If id_token is provided, reuse it and skip any Google calls.
-    - Else if refresh_token is provided, refresh into an id_token.
-    - Else create a new anonymous user and refresh to get id_token.
+    """Obtain an authentication token.
 
-    Returns (id_token, refresh_token)
+    Do not log in if a token is already present.
+    - Reuse id_token if provided.
+    - Refresh id_token using refresh_token if provided.
+    - Otherwise create a new anonymous user and refresh to obtain tokens.
+
+    Return a tuple of (id_token, refresh_token).
     """
     if id_token:
         return id_token, refresh_token
@@ -99,7 +101,6 @@ def _get_auth_token(
         raise ValueError("Unable to fetch id and refresh token")
 
     refresh_token = signup.get("refreshToken")
-    # idToken exists too, but original code refreshes anyway; keep behavior consistent.
     if not refresh_token:
         raise KeyError("Missing refreshToken in signup response")
 
@@ -208,7 +209,6 @@ def get_waste_data_raw(
     refresh_token: str | None = None,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
-
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
     org_id = _build_org_id(provider)

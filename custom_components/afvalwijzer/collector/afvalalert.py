@@ -73,8 +73,7 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """Return waste_data_raw for AfvalAlert."""
-
+    """Return waste_data_raw."""
     session = session or requests.Session()
     url = _build_url(provider, postal_code, street_number, suffix)
 
