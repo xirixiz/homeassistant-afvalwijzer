@@ -17,9 +17,10 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 20.0)
 
 
 def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
-    """- validate provider
-    - normalize postal code if needed
-    - build base url or full url
+    """Build and validate the request URL.
+
+    Validate the provider, normalize the postal code if needed, and build the base
+    or full URL for the collector request.
     """
     raise NotImplementedError
 
@@ -31,15 +32,19 @@ def _fetch_waste_data_raw_temp(
     timeout: tuple[float, float],
     verify: bool,
 ) -> Any:
-    """Do the HTTP work (GET/POST/GraphQL/etc) and return the raw response payload
-    or the temp list to parse (waste_data_raw_temp).
+    """Fetch the raw response payload for the collector.
+
+    Perform the HTTP work (GET, POST, GraphQL, etc.) and return the raw response
+    payload or an intermediate structure (waste_data_raw_temp) that can be parsed.
     """
     raise NotImplementedError
 
 
 def _parse_waste_data_raw(waste_data_raw_temp: Any) -> list[dict[str, Any]]:
-    """Convert API-specific output into a list[dict] where each dict matches your common schema.
-    Keep collector naming: waste_data_raw_temp -> waste_data_raw
+    """Parse provider output into the common waste schema.
+
+    Convert API specific output into a list of dicts where each dict matches the
+    common schema. Keep collector naming: waste_data_raw_temp becomes waste_data_raw.
     """
     raise NotImplementedError
 
@@ -54,10 +59,11 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, Any]]:
-    """Collector-style:
-    - always returns waste_data_raw
-    - linear flow: url -> fetch temp -> parse -> return
-    - wrap requests errors as ValueError (consistent with existing collectors)
+    """Return waste data in the common raw format.
+
+    Always returns waste_data_raw. Flow: build URL, fetch temp data, parse into the
+    common schema, and return. Wrap request errors as ValueError for consistency
+    with other collectors.
     """
     session = session or requests.Session()
     url = _build_url(provider, postal_code, street_number, suffix)

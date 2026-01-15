@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Collector package for the Afvalwijzer integration."""
 
 from __future__ import annotations
 
