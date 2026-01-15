@@ -1,3 +1,5 @@
+"""Afvalwijzer integration."""
+
 from __future__ import annotations
 
 import os
@@ -22,11 +24,14 @@ except ImportError:
     PLATFORMS = []
     CONFIG_SCHEMA = {}  # dummy, never used
 
+
 def _skip_runtime_setup() -> bool:
+    """Return True when runtime setup should be skipped (test mode)."""
     return os.getenv("AFVALWIJZER_SKIP_INIT") == "1"
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the Afvalwijzer integration."""
     if _skip_runtime_setup():
         return True
 
@@ -36,6 +41,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Afvalwijzer from a config entry."""
     if _skip_runtime_setup():
         return True
 
@@ -49,6 +55,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload an Afvalwijzer config entry."""
     if _skip_runtime_setup():
         return True
 
