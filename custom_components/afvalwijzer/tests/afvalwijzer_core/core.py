@@ -1,10 +1,10 @@
 from datetime import date, datetime
-from typing import Any, Dict
+from typing import Any
 
 from .repository import WasteCollectionRepository
 
 
-def build_ha_json(repo: WasteCollectionRepository) -> Dict[str, Any]:
+def build_ha_json(repo: WasteCollectionRepository) -> dict[str, Any]:
     today = date.today()
     tomorrow = date.fromordinal(today.toordinal() + 1)
     day_after = date.fromordinal(today.toordinal() + 2)

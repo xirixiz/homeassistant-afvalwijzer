@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -11,7 +11,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_IRADO
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 _DEFAULT_HEADERS = {
     "User-Agent": (
@@ -39,9 +39,9 @@ def _fetch_waste_data_raw_temp(
     session: requests.Session,
     url: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     raw_response = session.get(
         url,
         headers=_DEFAULT_HEADERS,
@@ -52,7 +52,7 @@ def _fetch_waste_data_raw_temp(
     return raw_response.json()
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
     if not waste_data_raw_temp:
         return []
 
@@ -62,7 +62,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str,
 
     pickups = waste_data_raw_temp.get("calendar_data", {}).get("pickups", {})
 
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw: list[dict[str, str]] = []
 
     # Structure: {year: {month: {day: [ {date,type,...}, ... ]}}}
     for _year, months in pickups.items():
@@ -108,9 +108,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming: url -> waste_data_raw_temp -> waste_data_raw

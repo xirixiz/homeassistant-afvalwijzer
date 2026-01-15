@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -11,7 +11,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_RD4
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
@@ -33,9 +33,9 @@ def _fetch_waste_data_raw_temp(
     session: requests.Session,
     url: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     response = session.get(url, timeout=timeout, verify=verify)
     response.raise_for_status()
     data = response.json() or {}
@@ -53,9 +53,9 @@ def _fetch_waste_data_raw_temp(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: List[Dict[str, Any]],
-) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw_temp: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         date_str = item.get("date")
@@ -79,9 +79,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw

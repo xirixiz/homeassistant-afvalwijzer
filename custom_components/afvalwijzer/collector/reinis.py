@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -11,7 +11,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_REINIS
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_base_url(provider: str) -> str:
@@ -27,9 +27,9 @@ def _fetch_address_data(
     street_number: str,
     suffix: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     address_url = f"{base_url}/adressen/{corrected_postal_code}:{street_number}{suffix}"
     response = session.get(address_url, timeout=timeout, verify=verify)
     response.raise_for_status()
@@ -37,7 +37,7 @@ def _fetch_address_data(
     return data or []
 
 
-def _extract_bagid(address_data: List[Dict[str, Any]]) -> str | None:
+def _extract_bagid(address_data: list[dict[str, Any]]) -> str | None:
     if not address_data:
         return None
     return (address_data[0] or {}).get("bagid")
@@ -49,9 +49,9 @@ def _fetch_waste_data_raw_temp(
     bagid: str,
     year: int,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Returns:
     - waste_response (calendar entries)
     - afvalstroom_response (stream lookup)
@@ -70,11 +70,11 @@ def _fetch_waste_data_raw_temp(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: List[Dict[str, Any]],
-    afvalstroom_response: List[Dict[str, Any]],
-) -> List[Dict[str, str]]:
+    waste_data_raw_temp: list[dict[str, Any]],
+    afvalstroom_response: list[dict[str, Any]],
+) -> list[dict[str, str]]:
     # Build lookup dict once (faster and clearer than next(...) per item)
-    afvalstroom_map: Dict[Any, str] = {}
+    afvalstroom_map: dict[Any, str] = {}
     for a in afvalstroom_response:
         afval_id = a.get("id")
         title = a.get("title")
@@ -82,7 +82,7 @@ def _parse_waste_data_raw(
             continue
         afvalstroom_map[afval_id] = title
 
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         ophalen = item.get("ophaaldatum")
@@ -111,9 +111,9 @@ def get_waste_data_raw(
     suffix: str = "",
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: waste_data_raw_temp -> waste_data_raw

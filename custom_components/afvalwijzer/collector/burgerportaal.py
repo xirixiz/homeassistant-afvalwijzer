@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -11,7 +11,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_BURGERPORTAAL
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 # Keep existing behavior: static API key in code (not ideal, but not changing functionality)
 _API_KEY = "AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk"
@@ -34,9 +34,9 @@ def _build_org_id(provider: str) -> str:
 def _signup_anonymous(
     session: requests.Session,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     response = session.post(
         f"{_BASE_GOOGLE_SIGNUP_URL}?key={_API_KEY}",
         timeout=timeout,
@@ -50,7 +50,7 @@ def _refresh_id_token(
     session: requests.Session,
     refresh_token: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> str:
     response = session.post(
@@ -72,11 +72,11 @@ def _refresh_id_token(
 def _get_auth_token(
     session: requests.Session,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
     id_token: str | None = None,
     refresh_token: str | None = None,
-) -> Tuple[str, str | None]:
+) -> tuple[str, str | None]:
     """Important requirement: do not login if a token is already present.
     - If id_token is provided, reuse it and skip any Google calls.
     - Else if refresh_token is provided, refresh into an id_token.
@@ -112,9 +112,9 @@ def _fetch_address_list(
     street_number: str,
     id_token: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address"
         f"?zipcode={postal_code}&housenumber={street_number}",
@@ -128,7 +128,7 @@ def _fetch_address_list(
 
 
 def _select_address_id(
-    address_list: List[Dict[str, Any]],
+    address_list: list[dict[str, Any]],
     suffix: str,
 ) -> str | None:
     if not address_list:
@@ -150,9 +150,9 @@ def _fetch_waste_data_raw_temp(
     address_id: str,
     id_token: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address/{address_id}/calendar",
         headers={"authorization": id_token},
@@ -165,9 +165,9 @@ def _fetch_waste_data_raw_temp(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: List[Dict[str, Any]],
-) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw_temp: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         collection_dt = item.get("collectionDate")
@@ -199,12 +199,12 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
     # Optional reuse to avoid re-login (requirement)
     id_token: str | None = None,
     refresh_token: str | None = None,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming aligned: waste_data_raw_temp -> waste_data_raw

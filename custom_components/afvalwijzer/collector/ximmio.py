@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 import socket
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -17,7 +17,7 @@ from ..const.const import (
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _post_ipv4_then_ipv6(
@@ -71,9 +71,9 @@ def _fetch_address_data(
     street_number: str,
     suffix: str,
     *,
-    timeout: Tuple[float, float],
-) -> Dict[str, Any]:
-    data: Dict[str, Any] = {
+    timeout: tuple[float, float],
+) -> dict[str, Any]:
+    data: dict[str, Any] = {
         "postCode": postal_code,
         "houseNumber": street_number,
         "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
@@ -102,8 +102,8 @@ def _fetch_waste_data_raw_temp(
     start_date: datetime,
     end_date: str,
     *,
-    timeout: Tuple[float, float],
-) -> Dict[str, Any]:
+    timeout: tuple[float, float],
+) -> dict[str, Any]:
     data = {
         "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
         "startDate": start_date.date(),  # original behavior: a date object
@@ -122,10 +122,10 @@ def _fetch_waste_data_raw_temp(
     return response.json() or {}
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
-    for item in waste_data_raw_temp.get("dataList") or []:
+    for item in waste_data_raw_temp.get("datalist") or []:
         pickup_dates = sorted(item.get("pickupDates") or [])
         if not pickup_dates:
             continue
@@ -151,8 +151,8 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
-) -> List[Dict[str, str]]:
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw` (list)
     - Naming aligned: response/address -> waste_data_raw_temp -> waste_data_raw
@@ -178,7 +178,7 @@ def get_waste_data_raw(
             timeout=timeout,
         )
 
-        data_list = response_address.get("dataList") or []
+        data_list = response_address.get("datalist") or []
         if not data_list:
             _LOGGER.error("Address not found!")
             return []

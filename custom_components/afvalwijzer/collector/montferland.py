@@ -9,7 +9,7 @@ Montferland collector (MONTFERLAND) adapted to your project style.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -19,7 +19,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_MONTFERLAND
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 _QUERY_START = "?Username=GSD&Password=gsd$2014"
 
@@ -41,9 +41,9 @@ def _fetch_address_data(
     street_number: str,
     suffix: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     # Original used Toevoeging='' always; keep that behavior (but still accept suffix if you want later).
     response = session.get(
         f"{base_url}/Login.ashx{_QUERY_START}",
@@ -59,7 +59,7 @@ def _fetch_address_data(
     return response.json() or []
 
 
-def _extract_ids(address_data: List[Dict[str, Any]]) -> Tuple[str | None, str | None]:
+def _extract_ids(address_data: list[dict[str, Any]]) -> tuple[str | None, str | None]:
     """Returns (administratie_id, adres_id)"""
     if not address_data:
         return None, None
@@ -81,9 +81,9 @@ def _fetch_waste_data_raw_temp(
     adres_id: str,
     year: int,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     response = session.get(
         f"{base_url}/OphaalDatums.ashx/{_QUERY_START}",
         params={
@@ -99,9 +99,9 @@ def _fetch_waste_data_raw_temp(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: List[Dict[str, Any]],
-) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw_temp: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         date_str = item.get("Datum")
@@ -131,9 +131,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """MONTFERLAND collector in your project style."""
     session = session or requests.Session()
     suffix = (suffix or "").strip()

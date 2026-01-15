@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -31,7 +31,7 @@ class OpzetCollector(BaseCollector):
         self.suffix = (suffix or "").strip().upper()
         self.waste_type_rename = waste_type_rename
 
-    def fetch_raw(self) -> Dict[str, Any]:
+    def fetch_raw(self) -> dict[str, Any]:
         url_address = (
             f"{self.base_url}/rest/adressen/{self.postal_code}-{self.street_number}"
         )
@@ -50,9 +50,9 @@ class OpzetCollector(BaseCollector):
 
         return {"bag_id": bag_id, "streams": streams}
 
-    def parse(self, raw: Dict[str, Any]) -> List[WasteCollection]:
+    def parse(self, raw: dict[str, Any]) -> list[WasteCollection]:
         streams = raw.get("streams") or []
-        out: List[WasteCollection] = []
+        out: list[WasteCollection] = []
         for item in streams:
             pickup = item.get("ophaaldatum")
             if not pickup:
@@ -69,7 +69,7 @@ class OpzetCollector(BaseCollector):
         return out
 
     @staticmethod
-    def _select_bag_id(addresses: List[Dict[str, Any]], suffix: str) -> str:
+    def _select_bag_id(addresses: list[dict[str, Any]], suffix: str) -> str:
         if len(addresses) > 1 and suffix:
             for item in addresses:
                 if (

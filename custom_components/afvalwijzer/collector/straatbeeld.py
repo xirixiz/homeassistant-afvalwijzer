@@ -9,7 +9,7 @@ Straatbeeld collector (STRAATBEELD) adapted to your project style.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -19,7 +19,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_STRAATBEELD
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(provider: str) -> str:
@@ -39,9 +39,9 @@ def _fetch_waste_data_raw_temp(
     street_number: str,
     suffix: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
@@ -64,8 +64,8 @@ def _fetch_waste_data_raw_temp(
     return response.json() or {}
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     collections = waste_data_raw_temp.get("collections") or {}
     for _, months in collections.items():
@@ -110,9 +110,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """STRAATBEELD collector in your project style."""
     session = session or requests.Session()
     postal_code = format_postal_code(postal_code)

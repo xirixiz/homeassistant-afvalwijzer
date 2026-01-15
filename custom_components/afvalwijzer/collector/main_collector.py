@@ -84,7 +84,7 @@ class MainCollector:
             self.default_label,
         )
 
-         # Get notification data
+        # Get notification data
         self._notification_data = self._get_notification_data_raw()
 
     def _normalize_bool_param(self, param) -> str:
@@ -96,7 +96,7 @@ class MainCollector:
     def _get_waste_data_raw(self):
         """Determine the correct provider module to call based on the provider and retrieves raw waste data."""
         try:
-            # List of providers with common parameter signatures
+            # list of providers with common parameter signatures
             common_providers = [
                 (SENSOR_COLLECTORS_MIJNAFVALWIJZER, mijnafvalwijzer.get_waste_data_raw),
                 (SENSOR_COLLECTORS_AFVALALERT, afvalalert.get_waste_data_raw),
@@ -139,7 +139,7 @@ class MainCollector:
         """
 
         try:
-            # List of providers with notification support
+            # list of providers with notification support
             notification_providers = [
                 (SENSOR_COLLECTORS_OPZET, opzet.get_notification_data_raw),
                 (

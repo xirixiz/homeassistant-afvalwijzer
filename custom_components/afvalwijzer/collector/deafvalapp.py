@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -11,7 +10,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
@@ -29,7 +28,7 @@ def _fetch_waste_data_raw_temp(
     session: requests.Session,
     url: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> str:
     response = session.get(url, timeout=timeout, verify=verify)
@@ -38,12 +37,12 @@ def _fetch_waste_data_raw_temp(
     return response.text or ""
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: str) -> List[Dict[str, str]]:
+def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
     # Original behavior: if empty -> []
     if not waste_data_raw_temp:
         return []
 
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw: list[dict[str, str]] = []
 
     # Each row: "<type>;<date>;<date>;...;"
     for row in waste_data_raw_temp.strip().split("\n"):
@@ -81,9 +80,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw`
     - Naming: url -> waste_data_raw_temp -> waste_data_raw
