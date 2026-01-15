@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from html import unescape
 import re
-from typing import Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -15,7 +14,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(
@@ -40,9 +39,9 @@ def _fetch_data(
     session: requests.Session,
     url: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Dict:
+) -> dict:
     response = session.get(
         url,
         timeout=timeout,
@@ -52,7 +51,7 @@ def _fetch_data(
     return response.json()
 
 
-def _parse_waste_data_raw(response: Dict) -> List[Dict]:
+def _parse_waste_data_raw(response: dict) -> list[dict]:
     ophaaldagen_data = response.get("ophaaldagen", {}).get("data", [])
     ophaaldagen_next_data = response.get("ophaaldagenNext", {}).get("data", [])
 
@@ -70,9 +69,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict]:
+) -> list[dict]:
     """Collector-style function.
 
     - Always returns `waste_data_raw`
@@ -106,7 +105,7 @@ def get_waste_data_raw(
         raise KeyError(f"Invalid and/or no data received from {url}") from err
 
 
-def _parse_notification_data_raw(response: Dict) -> List[Dict]:
+def _parse_notification_data_raw(response: dict) -> list[dict]:
     """Parse notification data from the 'mededelingen' response."""
     mededelingen_data = response.get("data", {}).get("mededelingen", {}).get("data", [])
 
@@ -117,7 +116,7 @@ def _parse_notification_data_raw(response: Dict) -> List[Dict]:
     # Set cutoff date to only show actual notifications
     cutoff_date = datetime.now().date() - timedelta(days=30)
 
-    notification_data_raw: List[Dict] = []
+    notification_data_raw: list[dict] = []
 
     for item in mededelingen_data:
         start_date_str = item.get("start_date", "")
@@ -168,9 +167,9 @@ def get_notification_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict]:
+) -> list[dict]:
     """Collector-style function for fetching notification data.
 
     Returns a list of notification dictionaries with id, title, content, description and other fields.

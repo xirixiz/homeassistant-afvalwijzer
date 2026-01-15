@@ -10,7 +10,7 @@ RecycleApp collector (RECYCLEAPP) adapted to your project style.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -20,7 +20,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_RECYCLEAPP
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 # Keep the original constants; do not change functionality
 _BASE_URL = "https://www.recycleapp.be/api/app/v1/"
@@ -39,7 +39,7 @@ def _build_url(provider: str) -> str:
     return url.rstrip("/") + "/"
 
 
-def _build_headers(access_token: str) -> Dict[str, str]:
+def _build_headers(access_token: str) -> dict[str, str]:
     return {
         "x-secret": _X_SECRET,
         "x-consumer": _X_CONSUMER,
@@ -52,7 +52,7 @@ def _fetch_access_token(
     session: requests.Session,
     base_url: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> str:
     response = session.get(
@@ -76,7 +76,7 @@ def _fetch_postcode_id(
     access_token: str,
     postal_code: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> str:
     response = session.get(
@@ -115,7 +115,7 @@ def _fetch_street_id(
     street_name: str,
     postcode_id: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> str:
     response = session.get(
@@ -152,9 +152,9 @@ def _fetch_waste_data_raw_temp(
     street_number: str,
     *,
     days_forward: int = 60,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     startdate = datetime.now().strftime("%Y-%m-%d")
     enddate = (datetime.now() + timedelta(days=days_forward)).strftime("%Y-%m-%d")
 
@@ -176,8 +176,8 @@ def _fetch_waste_data_raw_temp(
     return response.json() or {}
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: Dict[str, Any]) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp.get("items") or []:
         timestamp = item.get("timestamp")
@@ -216,9 +216,9 @@ def get_waste_data_raw(
     street_name: str | None = None,
     access_token: str | None = None,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """RECYCLEAPP collector.
 
     Note:

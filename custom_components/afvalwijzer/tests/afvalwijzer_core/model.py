@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Any, Dict
+from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,5 +22,5 @@ class WasteCollection:
             )
         return WasteCollection(day=d, waste_type=waste_type)
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         return {"type": self.waste_type, "date": self.day.isoformat()}

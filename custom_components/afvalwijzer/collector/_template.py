@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -13,7 +13,7 @@ from ..const.const import _LOGGER
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 20.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 20.0)
 
 
 def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
@@ -28,7 +28,7 @@ def _fetch_waste_data_raw_temp(
     session: requests.Session,
     url: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> Any:
     """Do the HTTP work (GET/POST/GraphQL/etc) and return the raw response payload
@@ -37,7 +37,7 @@ def _fetch_waste_data_raw_temp(
     raise NotImplementedError
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: Any) -> List[Dict[str, Any]]:
+def _parse_waste_data_raw(waste_data_raw_temp: Any) -> list[dict[str, Any]]:
     """Convert API-specific output into a list[dict] where each dict matches your common schema.
     Keep collector naming: waste_data_raw_temp -> waste_data_raw
     """
@@ -51,9 +51,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Collector-style:
     - always returns waste_data_raw
     - linear flow: url -> fetch temp -> parse -> return

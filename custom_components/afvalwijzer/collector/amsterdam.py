@@ -11,7 +11,7 @@ This version is adapted to the "collector function" style used in your project:
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -21,9 +21,9 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_AMSTERDAM
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
-WEEKDAY_MAP: Dict[str, int] = {
+WEEKDAY_MAP: dict[str, int] = {
     "maandag": 1,
     "dinsdag": 2,
     "woensdag": 3,
@@ -73,8 +73,8 @@ def _parse_date(date_str: str, today: datetime) -> datetime | None:
 
 
 def _date_in_future(
-    dates_list: List[datetime], current_date: datetime
-) -> List[datetime]:
+    dates_list: list[datetime], current_date: datetime
+) -> list[datetime]:
     return [d for d in dates_list if d > current_date]
 
 
@@ -114,11 +114,11 @@ def _generate_dates_for_year(
     week_interval: int,
     current_date: datetime,
     even_weeks: bool = False,
-) -> List[datetime]:
+) -> list[datetime]:
     """Ported logic from the original collector. Kept as close as possible to preserve behavior.
     Generates dates for up to ~1 year.
     """
-    dates: List[datetime] = []
+    dates: list[datetime] = []
     week_offset = 0
 
     while week_offset <= 52:
@@ -148,7 +148,7 @@ def _generate_dates_for_year(
 
 def _build_query_params(
     postal_code: str, street_number: str, suffix: str
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Returns a list of param dicts to try (suffix variations first)."""
     base_params = {
         "postcode": postal_code,
@@ -179,11 +179,11 @@ def _check_response_is_valid(text: str) -> bool:
 def _fetch_waste_data_raw_temp(
     session: requests.Session,
     base_url: str,
-    params_list: List[Dict[str, str]],
+    params_list: list[dict[str, str]],
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Tries multiple suffix variants; returns the JSON dict for the first valid response.
     Raises ValueError if none match.
     """
@@ -206,7 +206,7 @@ def _fetch_waste_data_raw_temp(
     raise ValueError(f"Invalid and/or no data received from {last_url or base_url}")
 
 
-def _is_item_valid(item: Dict[str, Any]) -> bool:
+def _is_item_valid(item: dict[str, Any]) -> bool:
     """Ported logic (with guards) from the original collector."""
     freq = item.get("afvalwijzerAfvalkalenderFrequentie")
     waar = item.get("afvalwijzerWaar") or ""
@@ -222,12 +222,12 @@ def _is_item_valid(item: Dict[str, Any]) -> bool:
     return True
 
 
-def _process_collection_dates(item: Dict[str, Any], today: datetime) -> List[datetime]:
+def _process_collection_dates(item: dict[str, Any], today: datetime) -> list[datetime]:
     """Convert Amsterdam's frequency + weekday strings to concrete future dates."""
     collection_days = (
         (item.get("afvalwijzerOphaaldagen") or "").replace(" ", "").split(",")
     )
-    future_dates: List[datetime] = []
+    future_dates: list[datetime] = []
 
     for day in collection_days:
         week_day = WEEKDAY_MAP.get(day)
@@ -256,7 +256,7 @@ def _process_collection_dates(item: Dict[str, Any], today: datetime) -> List[dat
         date_strings = (
             frequency.replace(" ", ".").replace("./", "").replace(".", ",").split(",")
         )
-        dates: List[datetime] = []
+        dates: list[datetime] = []
         for date_str in date_strings:
             parsed = _parse_date(date_str, today)
             if parsed:
@@ -273,9 +273,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """AMSTERDAM collector in your project style.
 
     Returns:
@@ -306,7 +306,7 @@ def get_waste_data_raw(
             _LOGGER.error("No Waste data found!")
             return []
 
-        waste_data_raw: List[Dict[str, str]] = []
+        waste_data_raw: list[dict[str, str]] = []
         today = datetime.now()
 
         for item in embedded:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 import uuid
 
 import requests
@@ -13,7 +13,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_OMRIN
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 30.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 30.0)
 
 
 def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
@@ -48,7 +48,7 @@ def _login(
     street_number: str,
     suffix: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
     device_id: str | None = None,
 ) -> str:
@@ -93,9 +93,9 @@ def _fetch_calendar(
     url: str,
     token: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Sequence[Dict[str, Any]]:
+) -> Sequence[dict[str, Any]]:
     query = """
     query FetchCalendar {
       fetchCalendar {
@@ -133,9 +133,9 @@ def _fetch_calendar(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: Sequence[Dict[str, Any]],
-) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw_temp: Sequence[dict[str, Any]],
+) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         date_str = item.get("date")
@@ -160,10 +160,10 @@ def get_waste_data_raw(
     *,
     token: str | None = None,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
     device_id: str | None = None,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Logs in only if no token is provided
     - Keeps naming: waste_data_raw_temp -> waste_data_raw

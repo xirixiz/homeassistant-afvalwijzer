@@ -1,12 +1,11 @@
 """OPZET collector functions."""
 
-
 from __future__ import annotations
 
 from datetime import datetime
 from html import unescape
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -16,7 +15,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_base_url(provider: str) -> str:
@@ -31,9 +30,9 @@ def _fetch_address_list(
     postal_code: str,
     street_number: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     url_address = f"{base_url}/rest/adressen/{postal_code}-{street_number}"
     response = session.get(url_address, timeout=timeout, verify=verify)
     response.raise_for_status()
@@ -42,7 +41,7 @@ def _fetch_address_list(
 
 
 def _select_bag_id(
-    response_address: List[Dict[str, Any]],
+    response_address: list[dict[str, Any]],
     suffix: str,
 ) -> str | None:
     if not response_address:
@@ -66,9 +65,9 @@ def _fetch_waste_data_raw_temp(
     base_url: str,
     bag_id: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     url_waste = f"{base_url}/rest/adressen/{bag_id}/afvalstromen"
     response = session.get(url_waste, timeout=timeout, verify=verify)
     response.raise_for_status()
@@ -77,9 +76,9 @@ def _fetch_waste_data_raw_temp(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: List[Dict[str, Any]],
-) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw_temp: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         date_str = item.get("ophaaldatum")
@@ -103,9 +102,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function for fetching waste data.
 
     - Always returns `waste_data_raw`.
@@ -164,9 +163,9 @@ def _fetch_notification_data_raw_temp(
     base_url: str,
     bag_id: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Fetch raw notification data from the API."""
     url_notification = f"{base_url}/api/meldingen/{bag_id}/App"
     response = session.get(url_notification, timeout=timeout, verify=verify)
@@ -176,10 +175,10 @@ def _fetch_notification_data_raw_temp(
 
 
 def _parse_notification_data_raw(
-    notification_data_raw_temp: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    notification_data_raw_temp: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Parse and clean notification data."""
-    notification_data_raw: List[Dict[str, Any]] = []
+    notification_data_raw: list[dict[str, Any]] = []
 
     for item in notification_data_raw_temp:
         content = item.get("content")
@@ -211,10 +210,10 @@ def get_notification_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    session: requests.Session | None = None,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Collector-style function for fetching notification data.
 
     Returns a list of notification dictionaries with id, title, content, and dismissable fields.

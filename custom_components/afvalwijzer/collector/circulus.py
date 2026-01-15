@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -12,7 +12,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_CIRCULUS
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-_DEFAULT_TIMEOUT: Tuple[float, float] = (5.0, 60.0)
+_DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(provider: str) -> str:
@@ -28,9 +28,9 @@ def _get_session_cookie(
     postal_code: str,
     street_number: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> Tuple[Dict[str, Any] | None, requests.cookies.RequestsCookieJar | None]:
+) -> tuple[dict[str, Any] | None, requests.cookies.RequestsCookieJar | None]:
     """Returns:
     - response (json dict) from /register/zipcode.json (or None)
     - logged_in_cookies (cookie jar) (or None)
@@ -71,7 +71,7 @@ def _get_session_cookie(
 
 
 def _maybe_select_address(
-    response: Dict[str, Any],
+    response: dict[str, Any],
     street_number: str,
     suffix: str,
 ) -> str:
@@ -99,12 +99,12 @@ def _maybe_select_address(
 def _ensure_authenticated_address(
     session: requests.Session,
     url: str,
-    response: Dict[str, Any],
+    response: dict[str, Any],
     logged_in_cookies: requests.cookies.RequestsCookieJar,
     street_number: str,
     suffix: str,
     *,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
 ) -> None:
     """If the API indicates multiple/ambiguous addresses, select an address.
@@ -133,9 +133,9 @@ def _fetch_waste_data_raw_temp(
     *,
     days_back: int = 14,
     days_forward: int = 90,
-    timeout: Tuple[float, float],
+    timeout: tuple[float, float],
     verify: bool,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Returns the raw 'garbage' list from the response."""
     start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
     end_date = (datetime.now() + timedelta(days=days_forward)).strftime("%Y-%m-%d")
@@ -156,9 +156,9 @@ def _fetch_waste_data_raw_temp(
 
 
 def _parse_waste_data_raw(
-    waste_data_raw_temp: List[Dict[str, Any]],
-) -> List[Dict[str, str]]:
-    waste_data_raw: List[Dict[str, str]] = []
+    waste_data_raw_temp: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         # Original: type derived from item["code"]
@@ -182,9 +182,9 @@ def get_waste_data_raw(
     suffix: str,
     *,
     session: requests.Session | None = None,
-    timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """Collector-style function:
     - Always returns `waste_data_raw` (list)
     - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw

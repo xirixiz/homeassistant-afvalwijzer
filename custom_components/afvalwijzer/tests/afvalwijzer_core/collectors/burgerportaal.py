@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -34,14 +34,14 @@ class BurgerportaalCollector(BaseCollector):
 
         self._id_token: str | None = None
 
-    def fetch_raw(self) -> Dict[str, Any]:
+    def fetch_raw(self) -> dict[str, Any]:
         self._authenticate()
         address_id = self._fetch_address_id()
         calendar = self._fetch_calendar(address_id)
         return {"calendar": calendar}
 
-    def parse(self, raw: Dict[str, Any]) -> List[WasteCollection]:
-        out: List[WasteCollection] = []
+    def parse(self, raw: dict[str, Any]) -> list[WasteCollection]:
+        out: list[WasteCollection] = []
 
         for item in raw.get("calendar", []) or []:
             collection_date = item.get("collectionDate")
@@ -119,7 +119,7 @@ class BurgerportaalCollector(BaseCollector):
             raise KeyError("addressId missing from address response")
         return address_id
 
-    def _fetch_calendar(self, address_id: str) -> List[Dict[str, Any]]:
+    def _fetch_calendar(self, address_id: str) -> list[dict[str, Any]]:
         if not self._id_token:
             raise ValueError("Not authenticated")
 

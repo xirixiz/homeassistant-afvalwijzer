@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from datetime import date
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -32,7 +32,7 @@ class MijnAfvalwijzerCollector(BaseCollector):
         self.suffix = (suffix or "").strip().upper()
         self.waste_type_rename = waste_type_rename
 
-    def fetch_raw(self) -> Dict[str, Any]:
+    def fetch_raw(self) -> dict[str, Any]:
         url = (
             f"{self.base_url}/webservices/appsinput/"
             f"?apikey={MIJNAFVALWIJZER_API_KEY}"
@@ -50,13 +50,13 @@ class MijnAfvalwijzerCollector(BaseCollector):
         r.raise_for_status()
         return r.json()
 
-    def parse(self, raw: Dict[str, Any]) -> List[WasteCollection]:
+    def parse(self, raw: dict[str, Any]) -> list[WasteCollection]:
         part1 = raw.get("ophaaldagen", {}).get("data", []) or []
         part2 = raw.get("ophaaldagenNext", {}).get("data", []) or []
         if not part1 and not part2:
             raise KeyError("No pickup data returned")
 
-        out: List[WasteCollection] = []
+        out: list[WasteCollection] = []
         for entry in part1 + part2:
             waste_type = self.waste_type_rename(entry["type"])
             if not waste_type:
