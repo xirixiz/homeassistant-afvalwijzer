@@ -187,11 +187,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """Collector-style function:
-    - Always returns `waste_data_raw` (list)
-    - Naming aligned: url -> waste_data_raw_temp -> waste_data_raw
-    - Clear flow: cookie/session -> optional address selection -> fetch -> parse
-    """
+    """Return waste_data_raw."""
+
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
     url = _build_url(provider)

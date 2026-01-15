@@ -116,13 +116,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """Collector-style function:
-    - Always returns `waste_data_raw`
-    - Naming aligned: waste_data_raw_temp -> waste_data_raw
-    - Same behavior, but:
-      - avoids per-item linear scans by building an id->title map
-      - consistent request/JSON error handling
-    """
+    """Return waste_data_raw."""
+
     session = session or requests.Session()
     base_url = _build_base_url(provider)
 

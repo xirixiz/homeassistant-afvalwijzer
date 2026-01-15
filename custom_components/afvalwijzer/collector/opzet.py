@@ -105,12 +105,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """Collector-style function for fetching waste data.
+    """Return waste_data_raw."""
 
-    - Always returns `waste_data_raw`.
-    - Naming aligned: response_address / waste_data_raw_temp / waste_data_raw.
-    - Keeps original selection logic for bagId.
-    """
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
 

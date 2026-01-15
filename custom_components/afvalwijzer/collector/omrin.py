@@ -166,10 +166,8 @@ def get_waste_data_raw(
     verify: bool = False,
     device_id: str | None = None,
 ) -> list[dict[str, str]]:
-    """Collector-style function:
-    - Logs in only if no token is provided
-    - Keeps naming: waste_data_raw_temp -> waste_data_raw
-    """
+    """Return waste_data_raw."""
+
     url = _build_url(provider, postal_code, street_number, suffix)
     session = session or requests.Session()
 

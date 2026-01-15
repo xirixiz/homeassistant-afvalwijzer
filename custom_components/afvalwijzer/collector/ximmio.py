@@ -155,11 +155,8 @@ def get_waste_data_raw(
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
 ) -> list[dict[str, str]]:
-    """Collector-style function:
-    - Always returns `waste_data_raw` (list)
-    - Naming aligned: response/address -> waste_data_raw_temp -> waste_data_raw
-    - Keeps IPv4->IPv6 POST fallback behavior
-    """
+    """Return waste_data_raw."""
+
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
 

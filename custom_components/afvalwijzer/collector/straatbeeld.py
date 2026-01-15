@@ -115,7 +115,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """STRAATBEELD collector in your project style."""
+    """Return waste_data_raw."""
+
     session = session or requests.Session()
     postal_code = format_postal_code(postal_code)
     suffix = (suffix or "").strip()

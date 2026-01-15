@@ -78,11 +78,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """Collector-style function:
-    - Always returns `waste_data_raw`
-    - Flow: address -> bag_id -> schedule -> parse
-    - No unused helpers
-    """
+    """Return waste_data_raw."""
+
     if provider != "rwm":
         raise ValueError(f"Invalid provider: {provider}, please verify")
 

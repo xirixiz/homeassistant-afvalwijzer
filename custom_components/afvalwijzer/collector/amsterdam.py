@@ -278,12 +278,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """AMSTERDAM collector in your project style.
+    """Return waste_data_raw."""
 
-    Returns:
-      waste_data_raw: [{"type": <renamed_type>, "date": "YYYY-MM-DD"}, ...]
-
-    """
     session = session or requests.Session()
 
     try:

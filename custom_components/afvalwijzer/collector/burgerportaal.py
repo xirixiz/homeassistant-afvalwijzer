@@ -207,11 +207,8 @@ def get_waste_data_raw(
     id_token: str | None = None,
     refresh_token: str | None = None,
 ) -> list[dict[str, str]]:
-    """Collector-style function:
-    - Always returns `waste_data_raw`
-    - Naming aligned: waste_data_raw_temp -> waste_data_raw
-    - Adds optional token reuse: pass id_token/refresh_token to skip signup/login where possible
-    """
+    """Return waste_data_raw."""
+
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
     org_id = _build_org_id(provider)

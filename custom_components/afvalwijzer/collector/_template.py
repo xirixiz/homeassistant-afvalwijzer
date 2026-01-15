@@ -59,12 +59,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, Any]]:
-    """Return waste data in the common raw format.
+    """Return waste_data_raw."""
 
-    Always returns waste_data_raw. Flow: build URL, fetch temp data, parse into the
-    common schema, and return. Wrap request errors as ValueError for consistency
-    with other collectors.
-    """
     session = session or requests.Session()
     url = _build_url(provider, postal_code, street_number, suffix)
 

@@ -221,15 +221,8 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> list[dict[str, str]]:
-    """RECYCLEAPP collector.
+    """Return waste_data_raw."""
 
-    Note:
-    - RecycleApp requires a street name; your old collector passed it via __init__.
-    - To keep your standard signature unchanged, `street_name` is an optional kwarg.
-      If you cannot pass it from your integration, you can store it in const config instead.
-    - Token reuse: if access_token is provided, we do not fetch one.
-
-    """
     session = session or requests.Session()
 
     try:
