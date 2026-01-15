@@ -1,3 +1,5 @@
+# ruff: noqa
+
 """Sensor component for AfvalWijzer
 Author: Bram van Dartel - xirixiz
 
