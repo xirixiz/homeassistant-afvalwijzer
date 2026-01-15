@@ -163,7 +163,7 @@ def _fetch_notification_data_raw_temp(
     verify: bool,
 ) -> list[dict[str, Any]]:
     """Fetch raw notification data from the API."""
-    url_notification = f"{base_url}/api/meldingen/{bag_id}/App"
+    url_notification = f"{base_url}/rest/app/meldingen/{bag_id}"
     response = session.get(url_notification, timeout=timeout, verify=verify)
     response.raise_for_status()
     data = response.json()
