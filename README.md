@@ -11,33 +11,30 @@
 
 _Component to integrate with the following providers/communities._
 
-## Samengevoegde afvalproviders
-
-Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide aangeleverde overzichten. Dubbele vermeldingen zijn samengevoegd; waar bekend is de **bron of techniek** (bijv. ximmio, opzet, burgerportaal) toegevoegd. Specifieke vereisten staan tussen haakjes.
+## Supported waste collectors
 
 | Provider                       | Opmerking / bron                 |
 | -------------------------------| -------------------------------- |
 | ACV                            | ximmio                           |
 | Afval3xBeter                   | opzet                            |
 | AfvalAlert                     |                                  |
-| Afvalstoffendienst             | ximmio                           |
+| Afvalstoffendienst             | opzet                            |
 | Alkmaar                        |                                  |
 | Almere                         | ximmio                           |
-| AlphenAanDenRijn               | opzet                            |
+| Alphen aan den Rijn            | opzet                            |
 | AreaReiniging                  | ximmio                           |
 | Assen                          | burgerportaal                    |
 | Avalex                         | ximmio                           |
 | Avri                           | ximmio                           |
 | BAR                            | burgerportaal                    |
-| Berkelland                     | opzet                            |
 | Blink                          | ximmio                           |
 | Circulus                       |                                  |
 | Cranendonck                    | opzet                            |
 | Cure                           | mijnafvalwijzer                  |
-| Cyclus                         | opzet                            |
+| Cyclus NV                      | opzet                            |
 | DAR                            | opzet                            |
 | DeAfvalApp                     |                                  |
-| DeFryskeMarren                 | opzet                            |
+| De Fryske Marren               | opzet                            |
 | DenHaag                        | opzet                            |
 | Drimmelen                      |                                  |
 | Eemsdelta                      | omrin                            |
@@ -48,20 +45,21 @@ Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide
 | Hellendoorn                    | ximmio                           |
 | HVC                            | opzet                            |
 | Irado                          |                                  |
-| LandvanCuijk                   | deafvalapp                       |
+| Land van Cuijk                 | deafvalapp                       |
 | Lingewaard                     | opzet                            |
 | Maassluis                      | klikogroep                       |
 | Meerlanden                     | ximmio                           |
 | Meppel                         |                                  |
 | Middelburg-Vlissingen          | opzet                            |
-| MijnAfvalwijzer                |                                  |
+| Mijn Afvalwijzer               |                                  |
 | Mijnafvalzaken                 | opzet                            |
 | Montferland                    |                                  |
 | Montfoort                      | opzet                            |
 | Nijkerk                        |                                  |
+| Ôffalkalinder                  | opzet                            |
 | Omrin                          |                                  |
-| OudeIJsselstreek               | klikogroep                       |
-| PeelEnMaas                     | opzet                            |
+| Oude IJsselstreek              | klikogroep                       |
+| Peel en Maas                   | opzet                            |
 | PreZero                        | opzet                            |
 | Purmerend                      | opzet                            |
 | RAD                            | ximmio                           |
@@ -76,10 +74,10 @@ Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide
 | Schouwen-Duiveland             | opzet                            |
 | Sliedrecht                     | opzet                            |
 | Spaarnelanden                  | opzet                            |
-| SudwestFryslan                 | opzet                            |
+| Sudwest Fryslan                | opzet                            |
 | SUEZ                           | opzet                            |
 | Tilburg                        | burgerportaal                    |
-| TwenteMilieu                   | ximmio                           |
+| Twente Milieu                  | ximmio                           |
 | Uithoorn                       | opzet                            |
 | Venlo                          | ximmio                           |
 | Venray                         |                                  |
@@ -90,9 +88,7 @@ Onderstaande lijst is een **samengevoegde en opgeschoonde** combinatie van beide
 | Woerden                        | ximmio                           |
 | ZRD                            | opzet                            |
 
-This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft,
-restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the
-sensor names for your region are and modify where necessary.
+This custom component dynamically creates sensor.afvalwijzer\_\* items. For me personally the items created are gft, restafval, papier, pmd and kerstbomen. Look in the states overview in the developer tools in Home Assistant what the sensor names for your region are and modify where necessary.
 
 If you are searching for a component with the focus on container cleaning services, you can us the following component. [ha-afvalcontainer-cleaning by @PatrickSt1991](https://github.com/PatrickSt1991/ha-afvalcontainer-cleaning).
 
@@ -225,6 +221,7 @@ logger:
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
       exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft, restafval, pmd, etc"
 ```
+---
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)
 
@@ -294,12 +291,58 @@ automation:
               - action: 'MARK_WASTE_MOVED' # The key you are sending for the event
                 title: 'Afval buiten gezet' # The button title
 ```
+---
+
+###### WASTE COLLECTOR MESSAGES - MARKDOWN CARD
+
+```yaml
+type: markdown
+content: >
+  {% for notif in state_attr('sensor.afvalwijzer_notifications', 'notifications') | sort(attribute='id', reverse=true %}
+
+  ### {{ notif.title }}
+
+  {{ notif.content }}
+
+  {% endfor %}
+```
+
+<details>
+<summary> Image preview</summary>
+
+![example][exampleimg3]
+
+</details>
+
+###### WASTE COLLECTOR MESSAGES - AUTOMATION
+
+```yaml
+alias: Notify waste collection messages
+description: "Notify the latest waste collector message to mobile app"
+triggers:
+  - trigger: state
+    entity_id: sensor.afvalwijzer_notifications
+    from: null
+    to: null
+conditions:
+  - condition: template
+    value_template: "{{ states('sensor.afvalwijzer_notifications') | int > 0 }}"
+actions:
+  - action: notify.mobile_app
+    data:
+      title: Afvalwijzer notification
+      message: >-
+        {% set notifs = state_attr('sensor.afvalwijzer_notifications',
+        'notifications') %} {{ notifs[-1].content }}
+```
 
 ---
 
 [exampleimg1]: images/afvalwijzer-lovelace_2.png
 
 [exampleimg2]: images/afvalwijzer_lovelace_1.png
+
+[exampleimg3]: images/afvalwijzer-lovelace_3.png
 
 [customupdater]: https://github.com/custom-components/custom_updater
 
