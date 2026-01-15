@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: I001
 """Afvalwijzer integration."""
 
 from datetime import date
