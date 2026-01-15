@@ -1,12 +1,11 @@
 """OPZET collector functions."""
 
-
 from __future__ import annotations
 
 from datetime import datetime
 from html import unescape
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -211,7 +210,7 @@ def get_notification_data_raw(
     street_number: str,
     suffix: str,
     *,
-    session: Optional[requests.Session] = None,
+    session: requests.Session | None = None,
     timeout: Tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = False,
 ) -> List[Dict[str, Any]]:
