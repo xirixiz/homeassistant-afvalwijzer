@@ -9,7 +9,6 @@ AfvalWijzer().get_data('','','')
 Obs
 - Update this file with your information (or the information you would like to test with, examples are in that file)
 - Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
-
 """
 
 import logging
@@ -44,9 +43,9 @@ exclude_list = ""
 # street_number = "38"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146eg"
-street_number = "1"
+# provider = "mijnafvalwijzer"
+# postal_code = "5146eg"
+# street_number = "1"
 
 provider = "nijkerk"
 postal_code = "3861XJ"
@@ -219,6 +218,11 @@ street_number = "1"
 # provider = "omrin"
 # postal_code = "8085RT"
 # street_number = "11"
+
+# DAR
+# provider = "dar"
+# postal_code = "6532AJ"
+# street_number = "1"
 
 postal_code = postal_code.strip().upper()
 
