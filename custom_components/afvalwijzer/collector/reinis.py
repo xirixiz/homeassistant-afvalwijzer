@@ -54,10 +54,9 @@ def _fetch_waste_data_raw_temp(
     timeout: tuple[float, float],
     verify: bool,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Returns:
-    - waste_response (calendar entries)
-    - afvalstroom_response (stream lookup)
+    """Fetch waste calendar and waste stream data.
 
+    Return a tuple containing the calendar entries and the afvalstroom lookup data.
     """
     kalender_url = f"{base_url}/rest/adressen/{bagid}/kalender/{year}"
     afvalstromen_url = f"{base_url}/rest/adressen/{bagid}/afvalstromen"

@@ -21,9 +21,10 @@ _X_CONSUMER = "recycleapp.be"
 
 
 def _build_url(provider: str) -> str:
-    """Keep project pattern:
-      SENSOR_COLLECTORS_RECYCLEAPP = {"recycleapp": "https://www.recycleapp.be/api/app/v1/"}
-    If you only want to validate provider but use the same base url, this works too.
+    """Build the base URL for the RecycleApp collector.
+
+    Keep the project pattern:
+    SENSOR_COLLECTORS_RECYCLEAPP = {"recycleapp": "https://www.recycleapp.be/api/app/v1/"}.
     """
     url = SENSOR_COLLECTORS_RECYCLEAPP.get(provider)
     if not url:

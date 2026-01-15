@@ -2,14 +2,6 @@
 
 from __future__ import annotations
 
-"""
-Straatbeeld collector (STRAATBEELD) adapted to your project style.
-
-- entrypoint: get_waste_data_raw(provider, postal_code, street_number, suffix)
-- returns: waste_data_raw (list[{"type": <renamed_type>, "date": "YYYY-MM-DD"}])
-- naming: waste_data_raw_temp -> waste_data_raw
-"""
-
 from datetime import datetime
 from typing import Any
 
@@ -25,8 +17,9 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
 def _build_url(provider: str) -> str:
-    """Expects:
-    SENSOR_COLLECTORS_STRAATBEELD = {"straatbeeld": "https://drimmelen.api.straatbeeld.online"}
+    """Build the base URL for the Straatbeeld collector.
+
+    Expect SENSOR_COLLECTORS_STRAATBEELD to contain the provider base URL.
     """
     url = SENSOR_COLLECTORS_STRAATBEELD.get(provider)
     if not url:
@@ -49,7 +42,6 @@ def _fetch_waste_data_raw_temp(
         "content-type": "application/json",
     }
     payload = {
-        # Keep API field names as required by endpoint
         "postal_code": postal_code,
         "house_number": street_number,
         "house_letter": suffix or "",
@@ -70,11 +62,11 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
     waste_data_raw: list[dict[str, str]] = []
 
     collections = waste_data_raw_temp.get("collections") or {}
-    for _, months in collections.items():
+    for months in collections.values():
         if not isinstance(months, dict):
             continue
 
-        for _, days in months.items():
+        for days in months.values():
             if not isinstance(days, list):
                 continue
 
@@ -116,7 +108,6 @@ def get_waste_data_raw(
     verify: bool = False,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
-
     session = session or requests.Session()
     postal_code = format_postal_code(postal_code)
     suffix = (suffix or "").strip()
@@ -138,8 +129,7 @@ def get_waste_data_raw(
             _LOGGER.error("No Waste data found!")
             return []
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
-        return waste_data_raw
+        return _parse_waste_data_raw(waste_data_raw_temp)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("STRAATBEELD request error: %s", err)
