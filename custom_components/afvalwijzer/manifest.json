@@ -1,6 +1,6 @@
 {
-  "name": "Afvalwijzer",
   "domain": "afvalwijzer",
+  "name": "Afvalwijzer",
   "codeowners": [
     "@xirixiz"
   ],
