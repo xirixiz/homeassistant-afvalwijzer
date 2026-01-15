@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-# ruff: noqa: I001
 """Afvalwijzer integration."""
 
 from datetime import date
-from pathlib import Path
-
 import json
 import logging
+from pathlib import Path
 import re
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 LOGGER = logging.getLogger(__name__)
 
 MANIFEST_PATH = Path("custom_components/afvalwijzer/manifest.json")
