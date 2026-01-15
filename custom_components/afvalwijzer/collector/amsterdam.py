@@ -275,15 +275,15 @@ def get_waste_data_raw(
             if not waste_type:
                 continue
 
-            for date in _process_collection_dates(item, today):
-                waste_data_raw.append(
-                    {
-                        "type": waste_type,
-                        "date": date.replace(
-                            hour=0, minute=0, second=0, microsecond=0
-                        ).strftime("%Y-%m-%d"),
-                    }
-                )
+            waste_data_raw.extend(
+                {
+                    "type": waste_type,
+                    "date": date.replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    ).strftime("%Y-%m-%d"),
+                }
+                for date in _process_collection_dates(item, today)
+            )
 
         return sorted(waste_data_raw, key=lambda d: (d["date"], d["type"]))
 

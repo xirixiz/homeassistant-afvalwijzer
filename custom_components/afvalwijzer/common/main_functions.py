@@ -16,6 +16,7 @@ def format_postal_code(postal_code: str) -> str:
     Returns:
         A formatted postal code (for example "1234AB"). If no match is found,
         return the original string.
+
     """
     match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
@@ -33,6 +34,7 @@ def waste_type_rename(item_name: str) -> str:
 
     Returns:
         The standardized waste type.
+
     """
     cleaned_item_name = item_name.strip().lower()
 
