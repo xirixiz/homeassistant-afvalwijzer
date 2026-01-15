@@ -1,3 +1,5 @@
+"""Afvalwijzer integration."""
+
 from datetime import datetime
 import hashlib
 

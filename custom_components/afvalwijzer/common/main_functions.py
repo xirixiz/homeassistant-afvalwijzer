@@ -2,19 +2,20 @@
 
 import re
 
-# Precompile the postal code pattern for better performance
 POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")
 
 
 def format_postal_code(postal_code: str) -> str:
-    """Formats a postal code string by removing any spaces and converting letters to uppercase.
+    """Format a postal code string.
 
-    Parameters:
-        postal_code (str): The input postal code.
+    Remove spaces and convert letters to uppercase.
+
+    Args:
+        postal_code: The input postal code.
 
     Returns:
-        str: A formatted postal code (e.g., "1234AB"). If no match is found, returns the original string.
-
+        A formatted postal code (for example "1234AB"). If no match is found,
+        return the original string.
     """
     match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
@@ -23,22 +24,18 @@ def format_postal_code(postal_code: str) -> str:
 
 
 def waste_type_rename(item_name: str) -> str:
-    """Cleans and renames the waste type based on a mapping dictionary.
+    """Rename a waste type to a standardized value.
 
-    It removes escape sequences and anything after a '/', then trims and lowercases the result
-    before mapping it to the standardized waste type.
+    Clean the input value and map it to a standardized waste type when possible.
 
-    Parameters:
-        item_name (str): The original waste type string.
+    Args:
+        item_name: The original waste type string.
 
     Returns:
-        str: The standardized waste type.
-
+        The standardized waste type.
     """
-    # Remove escape sequences and text after '/'
     cleaned_item_name = item_name.strip().lower()
 
-    # Mapping of waste types to standardized names
     waste_mapping = {
         "branches": "takken",
         "best_bag": "best-tas",
@@ -67,8 +64,6 @@ def waste_type_rename(item_name: str) -> str:
         "grofvuil en elektrische apparaten": "grofvuil",
         "grey": "restafval",
         "grijze container": "restafval",
-        "kca": "chemisch",
-        "kca": "kca",
         "kerstb": "kerstboom",
         "kerstboom": "kerstbomen",
         "opk": "papier",

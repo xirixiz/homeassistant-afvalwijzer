@@ -6,7 +6,13 @@ from ..const.const import _LOGGER
 
 
 class DaySensorData:
+    """Generate day-based waste sensor data."""
+
     def __init__(self, waste_data_formatted, default_label):
+        """Initialize day-based sensor data.
+
+        Prepare waste data for today, tomorrow, and the day after tomorrow.
+        """
         today = datetime.now().strftime("%d-%m-%Y")
 
         self.waste_data_formatted = sorted(
@@ -34,19 +40,21 @@ class DaySensorData:
             if not day:
                 day.append(self.default_label)
         except Exception as err:
-            _LOGGER.error(f"Error occurred in __gen_day_sensor: {err}")
+            _LOGGER.error("Error occurred in __gen_day_sensor: %s", err)
         return day
 
     def _gen_day_sensor_data(self):
+        """Generate the combined day sensor data dictionary."""
         day_sensor = {}
         try:
             day_sensor["today"] = ", ".join(self.waste_data_today)
             day_sensor["tomorrow"] = ", ".join(self.waste_data_tomorrow)
             day_sensor["day_after_tomorrow"] = ", ".join(self.waste_data_dot)
         except Exception as err:
-            _LOGGER.error(f"Error occurred in _gen_day_sensor_data: {err}")
+            _LOGGER.error("Error occurred in _gen_day_sensor_data: %s", err)
         return day_sensor
 
     @property
     def day_sensor_data(self):
+        """Return the prepared day sensor data."""
         return self.data

@@ -6,7 +6,14 @@ from ..const.const import _LOGGER
 
 
 class NextSensorData:
+    """Generate next-collection sensor data."""
+
     def __init__(self, waste_data_after_date_selected, default_label):
+        """Initialize next waste sensor data.
+
+        Prepare data for the next waste collection date, the number of days
+        until that date, and the corresponding waste type.
+        """
         self.waste_data_after_date_selected = sorted(
             waste_data_after_date_selected, key=lambda d: d["date"]
         )
@@ -30,7 +37,7 @@ class NextSensorData:
         try:
             return abs(self.next_waste_date.date() - date.today()).days
         except Exception as err:
-            _LOGGER.error(f"Error occurred in __get_next_waste_in_days: {err}")
+            _LOGGER.error("Error occurred in __get_next_waste_in_days: %s", err)
             return self.default_label
 
     def __get_next_waste_type(self):
@@ -41,10 +48,11 @@ class NextSensorData:
                 if waste["date"] == self.next_waste_date
             ] or [self.default_label]
         except Exception as err:
-            _LOGGER.error(f"Error occurred in __get_next_waste_type: {err}")
+            _LOGGER.error("Error occurred in __get_next_waste_type: %s", err)
             return [self.default_label]
 
     def _gen_next_sensor_data(self):
+        """Generate the next sensor data dictionary."""
         try:
             return {
                 "next_date": self.next_waste_date,
@@ -52,9 +60,10 @@ class NextSensorData:
                 "next_type": ", ".join(self.next_waste_type),
             }
         except Exception as err:
-            _LOGGER.error(f"Error occurred in _gen_next_sensor_data: {err}")
+            _LOGGER.error("Error occurred in _gen_next_sensor_data: %s", err)
             return {}
 
     @property
     def next_sensor_data(self):
+        """Return the prepared next sensor data."""
         return self.data

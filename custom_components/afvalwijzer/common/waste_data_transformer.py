@@ -6,16 +6,10 @@ from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
 from ..const.const import _LOGGER
 
-# import sys
-# def excepthook(type, value, traceback):
-#     _LOGGER.error(value)
-# sys.excepthook = excepthook
-
 
 class WasteDataTransformer:
-    ##########################################################################
-    #  INIT
-    ##########################################################################
+    """Transform raw waste data into structures used by sensors."""
+
     def __init__(
         self,
         waste_data_raw,
@@ -23,6 +17,10 @@ class WasteDataTransformer:
         exclude_list,
         default_label,
     ):
+        """Initialize the waste data transformer.
+
+        Prepare raw waste data and generate derived datasets for sensor use.
+        """
         waste_data_raw.sort(
             key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d")
         )
@@ -31,9 +29,9 @@ class WasteDataTransformer:
         self.exclude_list = exclude_list.strip().lower()
         self.default_label = default_label
 
-        TODAY = datetime.now().strftime("%d-%m-%Y")
-        self.DATE_TODAY = datetime.strptime(TODAY, "%d-%m-%Y")
-        self.DATE_TOMORROW = datetime.strptime(TODAY, "%d-%m-%Y") + timedelta(days=1)
+        today = datetime.now().strftime("%d-%m-%Y")
+        self.DATE_TODAY = datetime.strptime(today, "%d-%m-%Y")
+        self.DATE_TOMORROW = self.DATE_TODAY + timedelta(days=1)
 
         (
             self._waste_data_with_today,
@@ -46,10 +44,6 @@ class WasteDataTransformer:
             self._waste_data_custom,
             self._waste_types_custom,
         ) = self.__gen_sensor_waste_data()
-
-    ##########################################################################
-    # STRUCTURE ALL WASTE DATA IN CUSTOM FORMAT
-    #########################################################################
 
     def __structure_waste_data(self):
         try:
@@ -76,24 +70,17 @@ class WasteDataTransformer:
                 ):
                     waste_data_without_today[item_name] = item_date
 
-            try:
-                for item in self.waste_data_raw:
-                    item_name = item["type"].strip().lower()
-                    if item_name not in self.exclude_list:
-                        if item_name not in waste_data_with_today:
-                            waste_data_with_today[item_name] = self.default_label
-                        if item_name not in waste_data_without_today:
-                            waste_data_without_today[item_name] = self.default_label
-            except Exception as err:
-                _LOGGER.error(f"Other error occurred: {err}")
+            for item in self.waste_data_raw:
+                item_name = item["type"].strip().lower()
+                if item_name not in self.exclude_list:
+                    waste_data_with_today.setdefault(item_name, self.default_label)
+                    waste_data_without_today.setdefault(item_name, self.default_label)
 
             return waste_data_with_today, waste_data_without_today
         except Exception as err:
-            _LOGGER.error(f"Other error occurred: {err}")
+            _LOGGER.error("Other error occurred: %s", err)
+            return {}, {}
 
-    ##########################################################################
-    # GENERATE REQUIRED DATA FOR HASS SENSORS
-    ##########################################################################
     def __gen_sensor_waste_data(self):
         if self.exclude_pickup_today.casefold() in ("false", "no"):
             date_selected = self.DATE_TODAY
@@ -110,9 +97,9 @@ class WasteDataTransformer:
                     if waste["type"] not in self.exclude_list
                 }
             )
-
         except Exception as err:
-            _LOGGER.error(f"Other error occurred waste_types_provider: {err}")
+            _LOGGER.error("Other error occurred waste_types_provider: %s", err)
+            waste_types_provider = []
 
         try:
             waste_data_formatted = [
@@ -123,32 +110,42 @@ class WasteDataTransformer:
                 for waste in self.waste_data_raw
                 if waste["type"] in waste_types_provider
             ]
-
         except Exception as err:
-            _LOGGER.error(f"Other error occurred waste_data_formatted: {err}")
+            _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
+            waste_data_formatted = []
 
         days = DaySensorData(waste_data_formatted, self.default_label)
 
         try:
-            waste_data_after_date_selected = list(
-                filter(
-                    lambda waste: waste["date"] >= date_selected, waste_data_formatted
-                )
-            )
+            waste_data_after_date_selected = [
+                waste
+                for waste in waste_data_formatted
+                if waste["date"] >= date_selected
+            ]
         except Exception as err:
-            _LOGGER.error(f"Other error occurred waste_data_after_date_selected: {err}")
+            _LOGGER.error(
+                "Other error occurred waste_data_after_date_selected: %s", err
+            )
+            waste_data_after_date_selected = []
 
-        next_data = NextSensorData(waste_data_after_date_selected, self.default_label)
+        next_data = NextSensorData(
+            waste_data_after_date_selected, self.default_label
+        )
 
         try:
-            waste_data_custom = {**next_data.next_sensor_data, **days.day_sensor_data}
+            waste_data_custom = {
+                **next_data.next_sensor_data,
+                **days.day_sensor_data,
+            }
         except Exception as err:
-            _LOGGER.error(f"Other error occurred waste_data_custom: {err}")
+            _LOGGER.error("Other error occurred waste_data_custom: %s", err)
+            waste_data_custom = {}
 
         try:
             waste_types_custom = sorted(waste_data_custom.keys())
         except Exception as err:
-            _LOGGER.error(f"Other error occurred waste_types_custom: {err}")
+            _LOGGER.error("Other error occurred waste_types_custom: %s", err)
+            waste_types_custom = []
 
         return (
             waste_data_provider,
@@ -157,30 +154,32 @@ class WasteDataTransformer:
             waste_types_custom,
         )
 
-    ##########################################################################
-    #  PROPERTIES FOR EXECUTION
-    ##########################################################################
-
     @property
     def waste_data_with_today(self):
+        """Return waste data including today."""
         return self._waste_data_with_today
 
     @property
     def waste_data_without_today(self):
+        """Return waste data excluding today."""
         return self._waste_data_without_today
 
     @property
     def waste_data_provider(self):
+        """Return provider specific waste data."""
         return self._waste_data_provider
 
     @property
     def waste_types_provider(self):
+        """Return provider specific waste types."""
         return self._waste_types_provider
 
     @property
     def waste_data_custom(self):
+        """Return combined custom waste data."""
         return self._waste_data_custom
 
     @property
     def waste_types_custom(self):
+        """Return custom waste data keys."""
         return self._waste_types_custom

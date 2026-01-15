@@ -1,7 +1,4 @@
-"""Sensor component Afvalwijzer.
-
-Author: Bram van Dartel - xirixiz
-"""
+"""Afvalwijzer integration."""
 
 from datetime import timedelta
 

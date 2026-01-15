@@ -1,4 +1,4 @@
-DOMAIN = "afvalwijzer"
+"""Afvalwijzer integration."""
 
 import re
 
@@ -35,6 +35,8 @@ from .const.const import (
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
 
+DOMAIN = "afvalwijzer"
+
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 
 all_collectors = sorted(
@@ -56,7 +58,6 @@ all_collectors = sorted(
         + list(SENSOR_COLLECTORS_ROVA.keys())
         + list(SENSOR_COLLECTORS_STRAATBEELD.keys())
         + list(SENSOR_COLLECTORS_XIMMIO_IDS.keys())
-        + list(SENSOR_COLLECTORS_IRADO.keys())
         + ["rwm"]
     )
 )
@@ -89,11 +90,10 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             postal_code_raw = user_input.get(CONF_POSTAL_CODE, "")
             street_number_raw = user_input.get(CONF_STREET_NUMBER, "")
             suffix = user_input.get(CONF_SUFFIX, "")
+
             postal_code = postal_code_raw.replace(" ", "").upper()
             user_input[CONF_POSTAL_CODE] = postal_code
-            user_input[CONF_COLLECTOR] = (
-                collector  # keep case if your backend expects it
-            )
+            user_input[CONF_COLLECTOR] = collector
             user_input[CONF_EXCLUDE_LIST] = exclude_list.lower()
 
             if not self._validate_postal_code(postal_code):
