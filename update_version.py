@@ -5,6 +5,10 @@ from datetime import date
 import json
 from pathlib import Path
 import re
+import logging
+
+logging.basicConfig(level=logging.INFO)
+LOGGER = logging.getLogger(__name__)
 
 MANIFEST_PATH = Path("custom_components/afvalwijzer/manifest.json")
 CONST_PATH = Path("custom_components/afvalwijzer/const/const.py")
@@ -54,6 +58,8 @@ def main() -> None:
 
     if new_const_text != const_text:
         CONST_PATH.write_text(new_const_text, encoding="utf-8")
+
+    LOGGER.info("Updated version from %s to %s", old_version, new_version)
 
 
 if __name__ == "__main__":
