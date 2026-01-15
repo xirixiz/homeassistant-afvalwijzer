@@ -298,7 +298,7 @@ automation:
 ```yaml
 type: markdown
 content: >
-  {% for notif in state_attr('sensor.afvalwijzer_notifications', 'notifications') | sort(attribute='id', reverse=true %}
+  {% for notif in state_attr('sensor.afvalwijzer_notifications', 'notifications') | sort(attribute='id', reverse=true) %}
 
   ### {{ notif.title }}
 
