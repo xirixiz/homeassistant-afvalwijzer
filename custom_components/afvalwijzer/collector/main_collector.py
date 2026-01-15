@@ -1,4 +1,4 @@
-"""MainCollector for collecting waste data from various providers."""
+"""Afvalwijzer integration."""
 
 from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (

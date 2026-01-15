@@ -1,3 +1,5 @@
+"""Afvalwijzer integration."""
+
 from datetime import date, datetime
 
 from ..const.const import _LOGGER

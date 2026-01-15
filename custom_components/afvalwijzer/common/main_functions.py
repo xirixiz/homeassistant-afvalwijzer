@@ -1,3 +1,5 @@
+"""Afvalwijzer integration."""
+
 import re
 
 # Precompile the postal code pattern for better performance

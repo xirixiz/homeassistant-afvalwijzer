@@ -1,4 +1,4 @@
-"""Constants for the Afvalwijzer integration."""
+"""Afvalwijzer integration."""
 
 from datetime import timedelta
 import logging

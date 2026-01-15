@@ -1,1 +1,1 @@
-"""Collector package for the Afvalwijzer integration."""
+"""Afvalwijzer integration."""

@@ -1,3 +1,5 @@
+"""Afvalwijzer integration."""
+
 from datetime import datetime, timedelta
 
 from ..common.day_sensor_data import DaySensorData
