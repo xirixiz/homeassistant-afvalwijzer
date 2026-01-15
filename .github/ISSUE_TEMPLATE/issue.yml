@@ -40,6 +40,14 @@ body:
       placeholder: core-
       description: >
         Can be found in the Configuration panel -> Info.
+  - type: input
+    id: postal_code
+    validations:
+      required: true
+    attributes:
+      label: Your postacal code (area)?
+      description: >
+        Please share a valid postal code for sesting.
   - type: textarea
     attributes:
       label: Anything in the logs that might be useful for us?
