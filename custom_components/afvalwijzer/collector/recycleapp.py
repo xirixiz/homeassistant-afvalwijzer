@@ -2,15 +2,6 @@
 
 from __future__ import annotations
 
-"""
-RecycleApp collector (RECYCLEAPP) adapted to your project style.
-
-- entrypoint: get_waste_data_raw(provider, postal_code, street_number, suffix)
-- returns: waste_data_raw (list[{"type": <renamed_type>, "date": "YYYY-MM-DD"}])
-- naming: waste_data_raw_temp -> waste_data_raw
-- token handling: do not fetch a token if one is provided
-"""
-
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -24,7 +15,6 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
-# Keep the original constants; do not change functionality
 _BASE_URL = "https://www.recycleapp.be/api/app/v1/"
 _X_SECRET = "Op2tDi2pBmh1wzeC5TaN2U3knZan7ATcfOQgxh4vqC0mDKmnPP2qzoQusmInpglfIkxx8SZrasBqi5zgMSvyHggK9j6xCQNQ8xwPFY2o03GCcQfcXVOyKsvGWLze7iwcfcgk2Ujpl0dmrt3hSJMCDqzAlvTrsvAEiaSzC9hKRwhijQAFHuFIhJssnHtDSB76vnFQeTCCvwVB27DjSVpDmq8fWQKEmjEncdLqIsRnfxLcOjGIVwX5V0LBntVbeiBvcjyKF2nQ08rIxqHHGXNJ6SbnAmTgsPTg7k6Ejqa7dVfTmGtEPdftezDbuEc8DdK66KDecqnxwOOPSJIN0zaJ6k2Ye2tgMSxxf16gxAmaOUqHS0i7dtG5PgPSINti3qlDdw6DTKEPni7X0rxM"
 _X_CONSUMER = "recycleapp.be"

@@ -58,11 +58,9 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
         if not date_str or not waste_types:
             continue
 
-        # Keep original behavior: parse YYYY-MM-DD and output YYYY-MM-DD
         waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
 
-        # waste_types is typically a dict like {"gft": {...}, "rest": {...}}; keys are the codes we want
-        for waste_code in (waste_types or {}).keys():
+        for waste_code in waste_types:
             waste_type = waste_type_rename((waste_code or "").strip().lower())
             if not waste_type:
                 continue

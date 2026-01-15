@@ -2,14 +2,6 @@
 
 from __future__ import annotations
 
-"""
-Montferland collector (MONTFERLAND) adapted to your project style.
-
-- entrypoint: get_waste_data_raw(provider, postal_code, street_number, suffix)
-- returns: waste_data_raw (list[{"type": <renamed_type>, "date": "YYYY-MM-DD"}])
-- naming: waste_data_raw_temp -> waste_data_raw
-"""
-
 from datetime import datetime
 from typing import Any
 
@@ -27,9 +19,7 @@ _QUERY_START = "?Username=GSD&Password=gsd$2014"
 
 
 def _build_url(provider: str) -> str:
-    """Expects:
-    SENSOR_COLLECTORS_MONTFERLAND = {"montferland": "http://afvalwijzer.afvaloverzicht.nl"}
-    """
+    """Build the base URL for the Montferland collector."""
     url = SENSOR_COLLECTORS_MONTFERLAND.get(provider)
     if not url:
         raise ValueError(f"Invalid provider: {provider}, please verify")
@@ -46,7 +36,6 @@ def _fetch_address_data(
     timeout: tuple[float, float],
     verify: bool,
 ) -> list[dict[str, Any]]:
-    # Original used Toevoeging='' always; keep that behavior (but still accept suffix if you want later).
     response = session.get(
         f"{base_url}/Login.ashx{_QUERY_START}",
         params={
@@ -62,7 +51,7 @@ def _fetch_address_data(
 
 
 def _extract_ids(address_data: list[dict[str, Any]]) -> tuple[str | None, str | None]:
-    """Returns (administratie_id, adres_id)"""
+    """Extract administratie and adres identifiers."""
     if not address_data:
         return None, None
 
@@ -137,7 +126,6 @@ def get_waste_data_raw(
     verify: bool = False,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
-
     session = session or requests.Session()
     suffix = (suffix or "").strip()
     postal_code = format_postal_code(postal_code)
@@ -180,8 +168,7 @@ def get_waste_data_raw(
             _LOGGER.error("No Waste data found!")
             return []
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
-        return waste_data_raw
+        return _parse_waste_data_raw(waste_data_raw_temp)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("MONTFERLAND request error: %s", err)

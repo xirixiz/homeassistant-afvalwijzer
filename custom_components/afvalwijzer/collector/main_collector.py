@@ -124,7 +124,6 @@ class MainCollector:
                     return getter(
                         self.provider, self.postal_code, self.street_number, self.suffix
                     )
-            print(self.provider)
             _LOGGER.error(f"Unknown provider: {self.provider}")
             raise ValueError(f"Unknown provider: {self.provider}")
 
