@@ -46,6 +46,10 @@ provider = "mijnafvalwijzer"
 postal_code = "5146eg"
 street_number = "1"
 
+provider = "nijkerk"
+postal_code = "3861XJ"
+street_number = "1"
+
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
 # postal_code = "3192NC"
