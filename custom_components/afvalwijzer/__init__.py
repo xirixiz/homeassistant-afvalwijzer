@@ -17,10 +17,10 @@ try:
     PLATFORMS: list[Platform] = [Platform.SENSOR]
     CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-except ModuleNotFoundError:
+except ImportError:
+    # Standalone test run, no Home Assistant installed
     PLATFORMS = []
-    CONFIG_SCHEMA = None
-
+    CONFIG_SCHEMA = {}  # dummy, never used
 
 def _skip_runtime_setup() -> bool:
     return os.getenv("AFVALWIJZER_SKIP_INIT") == "1"

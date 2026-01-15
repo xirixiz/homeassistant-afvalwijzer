@@ -42,9 +42,9 @@ exclude_list = ""
 # street_number = "38"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
