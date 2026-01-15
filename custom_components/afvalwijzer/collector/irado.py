@@ -58,7 +58,6 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
     if not waste_data_raw_temp:
         return []
 
-    # Preserve original behavior: if invalid -> []
     if not waste_data_raw_temp.get("valid", False):
         return []
 
@@ -67,15 +66,15 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
     waste_data_raw: list[dict[str, str]] = []
 
     # Structure: {year: {month: {day: [ {date,type,...}, ... ]}}}
-    for _year, months in pickups.items():
+    for months in pickups.values():
         if not isinstance(months, dict):
             continue
 
-        for _month, days in months.items():
+        for days in months.values():
             if not isinstance(days, dict):
                 continue
 
-            for _day, items in days.items():
+            for items in days.values():
                 if not isinstance(items, list):
                     continue
 
