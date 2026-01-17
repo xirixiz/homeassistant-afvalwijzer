@@ -29,16 +29,6 @@ def _build_url(provider: str, postal_code: str, street_number: str, suffix: str)
     return f"{base_url}/{postal_code}/{street_number}{suffix}"
 
 
-def test_build_url():
-    with pytest.raises(ValueError):
-        _build_url("afvalwijzer", "1234AB", "1")
-    
-    url = _build_url("afvalalert", "1234AB", "1")
-    assert url = "https://www.afvalalert.nl/kalender/1234AB/1a"
-
-    url = _build_url("afvalalert", "1234AB", "1", "B")
-    assert url = "https://www.afvalalert.nl/kalender/1234AB/1a"
-
 def _fetch_waste_data_raw_temp(
     session: requests.Session,
     url: str,
