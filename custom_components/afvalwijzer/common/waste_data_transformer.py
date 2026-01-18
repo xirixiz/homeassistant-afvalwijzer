@@ -1,5 +1,7 @@
 """Afvalwijzer integration."""
 
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 
 from ..common.day_sensor_data import DaySensorData
@@ -21,22 +23,22 @@ class WasteDataTransformer:
 
         Prepare raw waste data and generate derived datasets for sensor use.
         """
-        waste_data_raw.sort(
-            key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d")
-        )
+        waste_data_raw.sort(key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d"))
         self.waste_data_raw = waste_data_raw
         self.exclude_pickup_today = exclude_pickup_today
         self.exclude_list = exclude_list.strip().lower()
+        self.exclude_set = {
+            x.strip().lower() for x in self.exclude_list.split(",") if x.strip()
+        }
         self.default_label = default_label
 
         today = datetime.now().strftime("%d-%m-%Y")
         self.DATE_TODAY = datetime.strptime(today, "%d-%m-%Y")
         self.DATE_TOMORROW = self.DATE_TODAY + timedelta(days=1)
 
-        (
-            self._waste_data_with_today,
-            self._waste_data_without_today,
-        ) = self.__structure_waste_data()  # type: ignore
+        self._waste_data_with_today, self._waste_data_without_today = (
+            self.__structure_waste_data()
+        )
 
         (
             self._waste_data_provider,
@@ -46,15 +48,15 @@ class WasteDataTransformer:
         ) = self.__gen_sensor_waste_data()
 
     def __structure_waste_data(self):
-        try:
-            waste_data_with_today = {}
-            waste_data_without_today = {}
+        waste_data_with_today = {}
+        waste_data_without_today = {}
 
+        try:
             for item in self.waste_data_raw:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"].strip().lower()
                 if (
-                    item_name not in self.exclude_list
+                    item_name not in self.exclude_set
                     and item_name not in waste_data_with_today
                     and item_date >= self.DATE_TODAY
                 ):
@@ -64,19 +66,21 @@ class WasteDataTransformer:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"].strip().lower()
                 if (
-                    item_name not in self.exclude_list
+                    item_name not in self.exclude_set
                     and item_name not in waste_data_without_today
                     and item_date > self.DATE_TODAY
                 ):
                     waste_data_without_today[item_name] = item_date
 
+            # Keep existing behavior: ensure every seen type exists with default label ("geen")
             for item in self.waste_data_raw:
                 item_name = item["type"].strip().lower()
-                if item_name not in self.exclude_list:
+                if item_name not in self.exclude_set:
                     waste_data_with_today.setdefault(item_name, self.default_label)
                     waste_data_without_today.setdefault(item_name, self.default_label)
 
             return waste_data_with_today, waste_data_without_today
+
         except Exception as err:
             _LOGGER.error("Other error occurred: %s", err)
             return {}, {}
@@ -94,7 +98,7 @@ class WasteDataTransformer:
                 {
                     waste["type"]
                     for waste in self.waste_data_raw
-                    if waste["type"] not in self.exclude_list
+                    if waste["type"] not in self.exclude_set
                 }
             )
         except Exception as err:
@@ -116,21 +120,14 @@ class WasteDataTransformer:
 
         days = DaySensorData(waste_data_formatted, self.default_label)
 
-        try:
-            waste_data_after_date_selected = [
-                waste
-                for waste in waste_data_formatted
-                if waste["date"] >= date_selected
-            ]
-        except Exception as err:
-            _LOGGER.error(
-                "Other error occurred waste_data_after_date_selected: %s", err
-            )
-            waste_data_after_date_selected = []
+        # Type-safe filter: waste["date"] is datetime here; date_selected is datetime too.
+        waste_data_after_date_selected = [
+            waste
+            for waste in waste_data_formatted
+            if isinstance(waste.get("date"), datetime) and waste["date"] >= date_selected
+        ]
 
-        next_data = NextSensorData(
-            waste_data_after_date_selected, self.default_label
-        )
+        next_data = NextSensorData(waste_data_after_date_selected, self.default_label)
 
         try:
             waste_data_custom = {

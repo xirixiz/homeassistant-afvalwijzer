@@ -15,7 +15,8 @@ class NextSensorData:
         until that date, and the corresponding waste type.
         """
         self.waste_data_after_date_selected = sorted(
-            waste_data_after_date_selected, key=lambda d: d["date"]
+            waste_data_after_date_selected,
+            key=lambda d: d["date"],
         )
         self.today_date = datetime.now()
         self.default_label = default_label
@@ -27,61 +28,47 @@ class NextSensorData:
         self.data = self._gen_next_sensor_data()
 
     def __get_next_waste_date(self):
-        try:
-            for item in self.waste_data_after_date_selected:
-                value = item.get("date")
-                if isinstance(value, datetime):
-                    return value
-                if isinstance(value, date):
-                    # normalize to datetime for the rest of your codebase
-                    return datetime.combine(value, datetime.min.time())
+        for item in self.waste_data_after_date_selected:
+            value = item.get("date")
+            if isinstance(value, datetime):
+                return value
+            if isinstance(value, date):
+                return datetime.combine(value, datetime.min.time())
 
-            # 2) Fallback: first valid date from all waste data (sorted list)
-            for item in getattr(self, "waste_data", []):
-                value = item.get("date")
-                if isinstance(value, datetime):
-                    return value
-                if isinstance(value, date):
-                    return datetime.combine(value, datetime.min.time())
-        except IndexError:
-            _LOGGER.error("No waste data found after the selected date.")
-            return self.default_label
+        _LOGGER.error("No waste data found after the selected date.")
+        return self.default_label
 
     def __get_next_waste_in_days(self):
-        try:
-            next_date = self.next_waste_date
+        next_date = self.next_waste_date
 
-            if isinstance(next_date, datetime):
-                return abs(next_date.date() - date.today()).days
+        if isinstance(next_date, datetime):
+            return abs(next_date.date() - date.today()).days
 
-            if isinstance(next_date, date):
-                return abs(next_date - date.today()).days
-        except Exception as err:
-            _LOGGER.error("Error occurred in __get_next_waste_in_days: %s", err)
-            return self.default_label
+        if isinstance(next_date, date):
+            return abs(next_date - date.today()).days
+
+        return self.default_label
 
     def __get_next_waste_type(self):
-        try:
-            return [
-                waste["type"]
-                for waste in self.waste_data_after_date_selected
-                if waste["date"] == self.next_waste_date
-            ] or [self.default_label]
-        except Exception as err:
-            _LOGGER.error("Error occurred in __get_next_waste_type: %s", err)
+        next_date = self.next_waste_date
+
+        if not isinstance(next_date, datetime):
             return [self.default_label]
+
+        types = [
+            waste["type"]
+            for waste in self.waste_data_after_date_selected
+            if waste.get("date") == next_date
+        ]
+        return types or [self.default_label]
 
     def _gen_next_sensor_data(self):
         """Generate the next sensor data dictionary."""
-        try:
-            return {
-                "next_date": self.next_waste_date,
-                "next_in_days": self.next_waste_in_days,
-                "next_type": ", ".join(self.next_waste_type),
-            }
-        except Exception as err:
-            _LOGGER.error("Error occurred in _gen_next_sensor_data: %s", err)
-            return {}
+        return {
+            "next_date": self.next_waste_date,
+            "next_in_days": self.next_waste_in_days,
+            "next_type": ", ".join(self.next_waste_type),
+        }
 
     @property
     def next_sensor_data(self):
