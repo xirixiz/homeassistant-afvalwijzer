@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from contextlib import suppress
 from datetime import datetime
-from typing import Any
+import io
 import re
+from typing import Any
 import uuid
 
 import requests
@@ -66,9 +68,10 @@ def _login(
     verify: bool,
     device_id: str | None = None,
 ) -> str:
-    """
-    Kept for compatibility with existing config/usage.
-    Omrin seems to have changed/blocked the old flow; we now parse the PDF endpoint instead.
+    """Login to Omrin (legacy).
+
+    Kept for compatibility with existing config/usage. Omrin changed/blocked the old flow;
+    we now parse the PDF endpoint instead, so this is typically not used.
     """
     payload = {
         "Email": None,
@@ -114,38 +117,348 @@ def _fetch_calendar(
     timeout: tuple[float, float],
     verify: bool,
 ) -> Sequence[dict[str, Any]]:
-    """
-    Kept signature/name for minimal churn, but no longer uses GraphQL.
-    The caller now provides 'token' as a carrier for the year (string/int) if needed,
-    otherwise we default to current year.
+    """Fetch calendar (legacy GraphQL path).
 
-    Returns: [{"date": "YYYY-MM-DD", "type": "<raw label>"}]
+    Kept only to minimize churn: the integration now uses the CalendarPdf endpoint.
     """
-    # token is ignored as auth, but kept to avoid breaking call sites.
-    # If someone passed token="2026", we treat that as year override.
-    year = datetime.now().year
-    try:
-        year = int(str(token).strip())
-    except Exception:
-        pass
-
-    # url is expected to be something like "https://www.omrin.nl" (depends on your mapping)
-    # Build the new PDF endpoint URL:
-    # https://www.omrin.nl/api/CalendarPdf?zipCode=8085%20RT&houseNumber=11&year=2026
-    #
-    # We do NOT have postal_code/houseNumber here (signature kept), so get_waste_data_raw
-    # now calls the PDF fetcher directly (see below).
-    raise RuntimeError("Internal: _fetch_calendar should not be called directly anymore")
+    raise RuntimeError("Internal: _fetch_calendar is no longer used; CalendarPdf is used instead.")
 
 
 def _extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
-    if PdfReader is None:
+    """Extract text from PDF bytes using pypdf."""
+    if PdfC:=(PdfReader is None):
         return ""
-    try:
-        reader = PdfReader(io.BytesIO(pdf_bytes))  # type: ignore[name-defined]
+    with suppress(Exception):
+        reader = PdfReader(io.BytesIO(pdf_bytes))
         return "\n".join((p.extract_text() or "") for p in reader.pages)
-    except Exception:
-        return ""
+    return ""
+
+
+# -------------------------
+# PDF parsing helper funcs
+# -------------------------
+
+_MONTH_MAP: dict[str, int] = {
+    "JAN": 1,
+    "FEB": 2,
+    "MRT": 3,
+    "APR": 4,
+    "MEI": 5,
+    "JUNI": 6,
+    "JULI": 7,
+    "AUG": 8,
+    "SEPT": 9,
+    "OKT": 10,
+    "NOV": 11,
+    "DEC": 12,
+}
+_MONTH_SET = set(_MONTH_MAP.keys())
+
+
+def _is_day_token(txt: str) -> bool:
+    return bool(re.fullmatch(r"\d{1,2}(\*)?", txt.strip()))
+
+
+def _has_letters(txt: str) -> bool:
+    return bool(re.search(r"[A-Za-zÀ-ÿ]", txt))
+
+
+def _looks_like_url(text: str) -> bool:
+    t = text.strip().lower()
+    if "http://" in t or "https://" in t or "www." in t:
+        return True
+    if re.search(r"\b[a-z0-9.-]+\.(nl|com|net|org|eu)\b", t):
+        return True
+    if "/" in t and re.search(r"\.[a-z]{2,4}/", t):
+        return True
+    return False
+
+
+def _clean_row_label(label: str) -> str:
+    parts = [p for p in re.split(r"\s+", label.strip()) if p]
+    cleaned: list[str] = []
+    prev = None
+    for p in parts:
+        pl = p.lower()
+        if pl == prev:
+            continue
+        cleaned.append(p)
+        prev = pl
+    return " ".join(cleaned).strip()
+
+
+def _cluster_lines(ws: list[dict[str, Any]], *, y_tol: float) -> list[list[dict[str, Any]]]:
+    ws = sorted(ws, key=lambda w: float(w["top"]))
+    lines: list[list[dict[str, Any]]] = []
+    last_y: float | None = None
+    for w in ws:
+        y = float(w["top"])
+        if last_y is None or abs(y - last_y) > y_tol:
+            lines.append([w])
+            last_y = y
+        else:
+            lines[-1].append(w)
+    return lines
+
+
+def _line_text(line: list[dict[str, Any]]) -> str:
+    ws = sorted(line, key=lambda w: float(w["x0"]))
+    return " ".join(((w.get("text") or "").strip()) for w in ws).strip()
+
+
+def _build_label_from_line(line: list[dict[str, Any]]) -> str:
+    """Build a row label from a line by stopping at the first day-number token."""
+    ws = sorted(line, key=lambda w: float(w["x0"]))
+    parts: list[str] = []
+    prev = None
+    for w in ws:
+        t = (w.get("text") or "").strip()
+        if not t:
+            continue
+        if t.upper() in _MONTH_SET:
+            continue
+        if _is_day_token(t):
+            break
+        tl = t.lower()
+        if tl == prev:
+            continue
+        parts.append(t)
+        prev = tl
+    return _clean_row_label(" ".join(parts))
+
+
+def _extract_ophaaldata_dates(text: str) -> list[tuple[int, int]]:
+    m = re.search(r"Ophaaldata:\s*([^.\n]+)", text, flags=re.IGNORECASE)
+    if not m:
+        return []
+    raw = m.group(1).replace(",,", ",")
+    items: list[tuple[int, int]] = []
+    for part in raw.split(","):
+        part = part.strip()
+        dm = re.fullmatch(r"(\d{1,2})/(\d{1,2})", part)
+        if not dm:
+            continue
+        items.append((int(dm.group(1)), int(dm.group(2))))
+    return items
+
+
+def _month_boundaries(words: list[dict[str, Any]], *, page_w: float, page_h: float) -> tuple[
+    list[tuple[str, float, float]],
+    float,
+    float,
+]:
+    month_words: list[tuple[str, float, float]] = []
+    for w in words:
+        t = (w.get("text") or "").strip().upper()
+        if t in _MONTH_SET:
+            cx = (float(w["x0"]) + float(w["x1"])) / 2.0
+            month_words.append((t, cx, float(w["top"])))
+    month_words.sort(key=lambda x: x[1])
+
+    table_top = page_h * 0.15
+    table_bottom = page_h * 0.70
+    boundaries: list[tuple[str, float, float]] = []
+
+    if len(month_words) >= 10:
+        centers = [cx for _, cx, _ in month_words]
+        month_keys = [k for k, _, _ in month_words]
+        month_tops = [top for _, _, top in month_words]
+        table_top = min(month_tops) + 8.0
+
+        for i, c in enumerate(centers):
+            left = 0.0 if i == 0 else (centers[i - 1] + c) / 2.0
+            right = page_w if i == len(centers) - 1 else (c + centers[i + 1]) / 2.0
+            boundaries.append((month_keys[i], left, right))
+
+    return boundaries, table_top, table_bottom
+
+
+def _parse_grid_rows(
+    words: list[dict[str, Any]],
+    *,
+    boundaries: list[tuple[str, float, float]],
+    table_top: float,
+    table_bottom: float,
+    page_w: float,
+    year: int,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    if not boundaries:
+        return out
+
+    label_x_limit = page_w * 0.30
+    label_candidates: list[dict[str, Any]] = []
+    for w in words:
+        txt = (w.get("text") or "").strip()
+        if not txt:
+            continue
+        x0 = float(w["x0"])
+        y = float(w["top"])
+        if x0 > label_x_limit:
+            continue
+        if y < table_top or y > table_bottom:
+            continue
+        if txt.upper() in _MONTH_SET:
+            continue
+        if _is_day_token(txt):
+            continue
+        label_candidates.append(w)
+
+    lines = _cluster_lines(label_candidates, y_tol=3.0)
+    row_anchors: list[tuple[str, float]] = []
+    for line in lines:
+        label = _build_label_from_line(line)
+        if not label:
+            continue
+        if len(label.split()) > 6:
+            continue
+        if not _has_letters(label):
+            continue
+        if label.lower().startswith(("zet ", "plaats ", "aanbied", "kijk ")):
+            continue
+        y = float(min(float(w["top"]) for w in line))
+        row_anchors.append((label, y))
+
+    row_anchors.sort(key=lambda x: x[1])
+
+    for i, (label, y) in enumerate(row_anchors):
+        y0 = y - 2.0
+        y1 = (row_anchors[i + 1][1] - 2.0) if i + 1 < len(row_anchors) else table_bottom
+        if y1 <= y0:
+            continue
+
+        row_items: list[dict[str, Any]] = []
+        for (mkey, x0, x1) in boundaries:
+            m = _MONTH_MAP[mkey]
+            for w in words:
+                txt = (w.get("text") or "").strip()
+                md = re.fullmatch(r"(\d{1,2})(\*)?", txt)
+                if not md:
+                    continue
+                day = int(md.group(1))
+
+                wy = float(w["top"])
+                if wy < y0 or wy > y1:
+                    continue
+
+                wc = (float(w["x0"]) + float(w["x1"])) / 2.0
+                if wc < x0 or wc > x1:
+                    continue
+
+                with suppress(ValueError):
+                    d = datetime(year, m, day).strftime("%Y-%m-%d")
+                    row_items.append({"type": label, "date": d})
+
+        if row_items:
+            out.extend(row_items)
+
+    return out
+
+
+def _parse_ophaaldata_sections(
+    words: list[dict[str, Any]],
+    *,
+    page_w: float,
+    page_h: float,
+    year: int,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+
+    left_limit = page_w * 0.55  # iets ruimer zodat "Ophaaldata:" regel altijd mee is
+    left_words: list[dict[str, Any]] = []
+    for w in words:
+        txt = (w.get("text") or "").strip()
+        if not txt:
+            continue
+        if float(w["x0"]) > left_limit:
+            continue
+        left_words.append(w)
+
+    left_lines = _cluster_lines(left_words, y_tol=3.0)
+
+    # maak (y, text) regels
+    lines: list[tuple[float, str]] = []
+    for line in left_lines:
+        y = float(min(float(w["top"]) for w in line))
+        text = _clean_row_label(_line_text(line))
+        if text:
+            lines.append((y, text))
+    lines.sort(key=lambda x: x[0])
+
+    def _is_bad_header(text: str) -> bool:
+        tl = text.lower().strip()
+
+        if "ophaaldata" in tl:
+            return True
+        if _looks_like_url(text):
+            return True
+
+        # typische toelichting/instructie-zinnen die nu fout gaan
+        bad_starts = (
+            "kijk",
+            "meer",
+            "informatie",
+            "info",
+            "aanmelden",
+            "betaling",
+            "ophalen",
+            "breng",
+            "let op",
+            "zet ",
+            "plaats ",
+        )
+        if tl.startswith(bad_starts):
+            return True
+
+        # bevat vaak punt + zin => toelichting, niet kop
+        # (koppen zijn meestal woorden zonder punt)
+        if "." in tl and len(tl.split()) >= 3:
+            return True
+
+        return False
+
+    # 1) vind alle Ophaaldata-regels
+    ophaal_lines: list[tuple[float, str]] = []
+    for y, text in lines:
+        if "ophaaldata" in text.lower():
+            ophaal_lines.append((y, text))
+
+    # 2) per Ophaaldata regel: zoek kopregel erboven
+    for oy, otext in ophaal_lines:
+        pairs = _extract_ophaaldata_dates(otext)
+        if not pairs:
+            # soms staat de lijst op de volgende regel(s); pak klein window
+            window_text = otext
+            for y, text in lines:
+                if y > oy and y < oy + 30:  # ~30pt onder de regel
+                    window_text = f"{window_text} {text}"
+            pairs = _extract_ophaaldata_dates(window_text)
+            if not pairs:
+                continue
+
+        header: str | None = None
+        # zoek omhoog: eerste geldige kopregel
+        for y, text in reversed(lines):
+            if y >= oy:
+                continue
+            if len(text) < 2 or len(text.split()) > 6:
+                continue
+            if not _has_letters(text):
+                continue
+            if _is_bad_header(text):
+                continue
+            header = text
+            break
+
+        if not header:
+            continue  # geen kop gevonden => liever overslaan dan rommel-type
+
+        for day, month in pairs:
+            with suppress(ValueError):
+                d = datetime(year, month, day).strftime("%Y-%m-%d")
+                out.append({"type": header, "date": d})
+
+    return out
 
 
 def _parse_calendar_pdf(
@@ -153,48 +466,14 @@ def _parse_calendar_pdf(
     *,
     year: int,
 ) -> list[dict[str, Any]]:
-    """
-    Parse the Omrin CalendarPdf into [{"date": "YYYY-MM-DD", "type": "<raw label>"}]
-    so _parse_waste_data_raw stays unchanged.
+    """Parse the Omrin CalendarPdf.
 
-    Generic:
-    - Detects month columns (JAN..DEC)
-    - Detects table rows by layout (left label column), without hardcoded row names
-    - Builds row labels by taking words until the first day-number token in that line
-    - Keeps only rows that actually contain day numbers in month columns
-    - Also parses "Ophaaldata: dd/mm, ..." blocks and uses the nearest section header as type
+    Returns a list like: [{"date": "YYYY-MM-DD", "type": "<raw label>"}]
     """
     out: list[dict[str, Any]] = []
 
-    month_map = {
-        "JAN": 1,
-        "FEB": 2,
-        "MRT": 3,
-        "APR": 4,
-        "MEI": 5,
-        "JUNI": 6,
-        "JULI": 7,
-        "AUG": 8,
-        "SEPT": 9,
-        "OKT": 10,
-        "NOV": 11,
-        "DEC": 12,
-    }
-    month_set = set(month_map.keys())
-
     if pdfplumber is None:
-        # Without pdfplumber we can't do robust layout parsing.
-        # We keep at least the "Ophaaldata:" fallback using extracted text if available.
-        text_all = ""
-        try:
-            if PdfReader is not None:
-                import io
-                reader = PdfReader(io.BytesIO(pdf_bytes))
-                text_all = "\n".join((p.extract_text() or "") for p in reader.pages)
-        except Exception:
-            text_all = ""
-
-        # Very basic generic "Ophaaldata:" fallback (no section header association)
+        text_all = _extract_text_from_pdf_bytes(pdf_bytes)
         m = re.search(r"Ophaaldata:\s*([0-9/,\s]+)\.", text_all, flags=re.IGNORECASE)
         if m:
             raw = m.group(1)
@@ -205,97 +484,10 @@ def _parse_calendar_pdf(
                     continue
                 day = int(dm.group(1))
                 month = int(dm.group(2))
-                try:
+                with suppress(ValueError):
                     d = datetime(year, month, day).strftime("%Y-%m-%d")
-                except ValueError:
-                    continue
-                out.append({"type": "ophaaldata", "date": d})
-
-        # dedupe
-        seen = set()
-        deduped: list[dict[str, Any]] = []
-        for item in out:
-            key = (item.get("type"), item.get("date"))
-            if key in seen:
-                continue
-            seen.add(key)
-            deduped.append(item)
-        return deduped
-
-    def _is_day_token(txt: str) -> bool:
-        return bool(re.fullmatch(r"\d{1,2}(\*)?", txt.strip()))
-
-    def _has_letters(txt: str) -> bool:
-        return bool(re.search(r"[A-Za-zÀ-ÿ]", txt))
-
-    def _clean_row_label(label: str) -> str:
-        parts = [p for p in re.split(r"\s+", label.strip()) if p]
-        cleaned: list[str] = []
-        prev = None
-        for p in parts:
-            pl = p.lower()
-            if pl == prev:
-                continue
-            cleaned.append(p)
-            prev = pl
-        return " ".join(cleaned).strip()
-
-    def _cluster_lines(ws: list[dict[str, Any]], *, y_tol: float) -> list[list[dict[str, Any]]]:
-        ws = sorted(ws, key=lambda w: float(w["top"]))
-        lines: list[list[dict[str, Any]]] = []
-        last_y: float | None = None
-        for w in ws:
-            y = float(w["top"])
-            if last_y is None or abs(y - last_y) > y_tol:
-                lines.append([w])
-                last_y = y
-            else:
-                lines[-1].append(w)
-        return lines
-
-    def _line_text(line: list[dict[str, Any]]) -> str:
-        # left-to-right
-        ws = sorted(line, key=lambda w: float(w["x0"]))
-        return " ".join(((w.get("text") or "").strip()) for w in ws).strip()
-
-    def _build_label_from_line(line: list[dict[str, Any]]) -> str:
-        # Build label using words until the first day token appears.
-        ws = sorted(line, key=lambda w: float(w["x0"]))
-        parts: list[str] = []
-        prev = None
-        for w in ws:
-            t = (w.get("text") or "").strip()
-            if not t:
-                continue
-            if t.upper() in month_set:
-                continue
-            if _is_day_token(t):
-                break
-            tl = t.lower()
-            if tl == prev:
-                continue
-            parts.append(t)
-            prev = tl
-        return _clean_row_label(" ".join(parts))
-
-    def _extract_ophaaldata_dates(text: str) -> list[tuple[int, int]]:
-        # returns [(day, month), ...]
-        # tolerate double commas and extra spaces
-        m = re.search(r"Ophaaldata:\s*([^.\n]+)", text, flags=re.IGNORECASE)
-        if not m:
-            return []
-        raw = m.group(1)
-        raw = raw.replace(",,", ",")
-        items: list[tuple[int, int]] = []
-        for part in raw.split(","):
-            part = part.strip()
-            dm = re.fullmatch(r"(\d{1,2})/(\d{1,2})", part)
-            if not dm:
-                continue
-            items.append((int(dm.group(1)), int(dm.group(2))))
-        return items
-
-    import io
+                    out.append({"type": "ophaaldata", "date": d})
+        return _dedupe_type_date(out)
 
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         for page in pdf.pages:
@@ -306,205 +498,42 @@ def _parse_calendar_pdf(
             page_w = float(page.width)
             page_h = float(page.height)
 
-            # -------------------------
-            # 1) Month header detection
-            # -------------------------
-            month_words = []
-            for w in words:
-                t = (w.get("text") or "").strip().upper()
-                if t in month_set:
-                    cx = (float(w["x0"]) + float(w["x1"])) / 2.0
-                    month_words.append((t, cx, float(w["top"])))
+            boundaries, table_top, table_bottom = _month_boundaries(
+                words, page_w=page_w, page_h=page_h
+            )
 
-            month_words.sort(key=lambda x: x[1])
+            out.extend(
+                _parse_grid_rows(
+                    words,
+                    boundaries=boundaries,
+                    table_top=table_top,
+                    table_bottom=table_bottom,
+                    page_w=page_w,
+                    year=year,
+                )
+            )
 
-            boundaries: list[tuple[str, float, float]] = []
-            table_top = page_h * 0.15
-            table_bottom = page_h * 0.70
+            out.extend(
+                _parse_ophaaldata_sections(
+                    words,
+                    page_w=page_w,
+                    page_h=page_h,
+                    year=year,
+                )
+            )
 
-            if len(month_words) >= 10:
-                centers = [cx for _, cx, _ in month_words]
-                month_keys = [k for k, _, _ in month_words]
-                month_tops = [top for _, _, top in month_words]
-                # table starts shortly under month header row
-                table_top = min(month_tops) + 8.0
-                table_bottom = page_h * 0.70
+    return _dedupe_type_date(out)
 
-                for i, c in enumerate(centers):
-                    left = 0.0 if i == 0 else (centers[i - 1] + c) / 2.0
-                    right = page_w if i == len(centers) - 1 else (c + centers[i + 1]) / 2.0
-                    boundaries.append((month_keys[i], left, right))
 
-            # ---------------------------------------------
-            # 2) GRID/TABLE parsing (if we found month cols)
-            # ---------------------------------------------
-            if boundaries:
-                # Candidate label words: left-ish, within table vertical span, not numbers/month headers
-                # Keep a tighter left zone to avoid grabbing column day numbers
-                label_x_limit = page_w * 0.30
-
-                label_candidates = []
-                for w in words:
-                    txt = (w.get("text") or "").strip()
-                    if not txt:
-                        continue
-                    x0 = float(w["x0"])
-                    y = float(w["top"])
-                    if x0 > label_x_limit:
-                        continue
-                    if y < table_top or y > table_bottom:
-                        continue
-                    if txt.upper() in month_set:
-                        continue
-                    if _is_day_token(txt):
-                        continue
-                    label_candidates.append(w)
-
-                # Cluster into lines and build row anchors (label, y)
-                lines = _cluster_lines(label_candidates, y_tol=3.0)
-                row_anchors: list[tuple[str, float]] = []
-                for line in lines:
-                    label = _build_label_from_line(line)
-                    if not label:
-                        continue
-                    # avoid clearly long sentences; labels are typically short
-                    if len(label.split()) > 6:
-                        continue
-                    if not _has_letters(label):
-                        continue
-                    # reject obvious instruction lines even if short-ish
-                    if label.lower().startswith(("zet ", "plaats ", "aanbied", "kijk ")):
-                        continue
-                    y = float(min(float(w["top"]) for w in line))
-                    row_anchors.append((label, y))
-
-                row_anchors.sort(key=lambda x: x[1])
-
-                # Make y-bands and collect day numbers; keep only rows with days
-                for i, (label, y) in enumerate(row_anchors):
-                    y0 = y - 2.0
-                    y1 = (row_anchors[i + 1][1] - 2.0) if i + 1 < len(row_anchors) else table_bottom
-                    if y1 <= y0:
-                        continue
-
-                    row_items: list[dict[str, Any]] = []
-
-                    for (mkey, x0, x1) in boundaries:
-                        m = month_map[mkey]
-                        for w in words:
-                            txt = (w.get("text") or "").strip()
-                            md = re.fullmatch(r"(\d{1,2})(\*)?", txt)
-                            if not md:
-                                continue
-                            day = int(md.group(1))
-
-                            wy = float(w["top"])
-                            if wy < y0 or wy > y1:
-                                continue
-
-                            wc = (float(w["x0"]) + float(w["x1"])) / 2.0
-                            if wc < x0 or wc > x1:
-                                continue
-
-                            try:
-                                d = datetime(year, m, day).strftime("%Y-%m-%d")
-                            except ValueError:
-                                continue
-
-                            row_items.append({"type": label, "date": d})
-
-                    # Only keep rows that actually have day numbers
-                    if row_items:
-                        out.extend(row_items)
-
-            # --------------------------------------------------
-            # 3) "Ophaaldata:" sections (Textiel / Grofvuil / ...)
-            # --------------------------------------------------
-            # Strategy:
-            # - Build left-column lines for the whole page (not only the table)
-            # - Treat a line as a "section header" if it's short, has letters, and not "Ophaaldata:"
-            # - For each header, look down until next header; if within that band there's Ophaaldata: parse dd/mm list
-            left_limit = page_w * 0.45
-            left_words = []
-            for w in words:
-                txt = (w.get("text") or "").strip()
-                if not txt:
-                    continue
-                if float(w["x0"]) > left_limit:
-                    continue
-                # keep also lower part of page (instructions), we'll filter by "has Ophaaldata" later
-                left_words.append(w)
-
-            left_lines = _cluster_lines(left_words, y_tol=3.0)
-            # make (y, text)
-            left_line_items: list[tuple[float, str]] = []
-            for line in left_lines:
-                y = float(min(float(w["top"]) for w in line))
-                text = _clean_row_label(_line_text(line))
-                if text:
-                    left_line_items.append((y, text))
-            left_line_items.sort(key=lambda x: x[0])
-
-            # pick headers
-            headers: list[tuple[str, float]] = []
-            for y, text in left_line_items:
-                tl = text.lower()
-                if "ophaaldata" in tl:
-                    continue
-                if len(text) < 2:
-                    continue
-                if len(text.split()) > 6:
-                    continue
-                if not _has_letters(text):
-                    continue
-                # skip address-like single words if they never get dates (will be filtered anyway)
-                headers.append((text, y))
-
-            # De-dup headers very close together (pdf duplication)
-            dedup_headers: list[tuple[str, float]] = []
-            last_y = None
-            last_t = None
-            for t, y in headers:
-                if last_y is not None and abs(y - last_y) < 2.5 and last_t and t.lower() == last_t.lower():
-                    continue
-                dedup_headers.append((t, y))
-                last_y = y
-                last_t = t
-
-            # Now for each header band, search for an Ophaaldata line in that band
-            for i, (header, hy) in enumerate(dedup_headers):
-                band_top = hy - 2.0
-                band_bottom = (dedup_headers[i + 1][1] - 2.0) if i + 1 < len(dedup_headers) else page_h
-
-                # collect all left-line texts in the band and join them
-                band_text_parts = []
-                for y, text in left_line_items:
-                    if y < band_top or y > band_bottom:
-                        continue
-                    band_text_parts.append(text)
-                band_text = " ".join(band_text_parts)
-
-                pairs = _extract_ophaaldata_dates(band_text)
-                if not pairs:
-                    continue
-
-                for day, month in pairs:
-                    try:
-                        d = datetime(year, month, day).strftime("%Y-%m-%d")
-                    except ValueError:
-                        continue
-                    out.append({"type": header, "date": d})
-
-    # Deduplicate (PDF extraction can yield duplicates)
-    seen = set()
+def _dedupe_type_date(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[tuple[str | None, str | None]] = set()
     deduped: list[dict[str, Any]] = []
-    for item in out:
+    for item in items:
         key = (item.get("type"), item.get("date"))
         if key in seen:
             continue
         seen.add(key)
         deduped.append(item)
-
     return deduped
 
 
@@ -541,27 +570,25 @@ def get_waste_data_raw(
     device_id: str | None = None,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
-
-    url = _build_url(provider, postal_code, street_number, suffix)
     session = session or requests.Session()
 
     try:
         token = _normalize_token(token)
 
-        # New behavior: parse the PDF calendar.
         corrected_postal_code = format_postal_code_omrin(postal_code)
-        year = datetime.now().year
-        # Allow token to act as a year override if user passes "2026"
-        if token:
-            try:
-                year = int(token)
-            except Exception:
-                pass
 
+        year = datetime.now().year
+        if token:
+            with suppress(ValueError, TypeError):
+                year = int(token)
+
+        # IMPORTANT:
+        # format_postal_code_omrin should already yield the Omrin-required format, e.g. "8085%20RT".
+        # Do NOT quote() again, otherwise % becomes %25.
         pdf_url = (
             "https://www.omrin.nl/api/CalendarPdf"
-            f"?zipCode={requests.utils.quote(corrected_postal_code)}"
-            f"&houseNumber={requests.utils.quote(str(street_number))}"
+            f"?zipCode={corrected_postal_code}"
+            f"&houseNumber={street_number}"
             f"&year={year}"
         )
 
@@ -579,8 +606,7 @@ def get_waste_data_raw(
         resp.raise_for_status()
 
         waste_data_raw_temp = _parse_calendar_pdf(resp.content, year=year)
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
-        return waste_data_raw
+        return _parse_waste_data_raw(waste_data_raw_temp)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("Omrin request error: %s", err)
