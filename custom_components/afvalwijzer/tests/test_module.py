@@ -1,3 +1,5 @@
+# ruff: noqa: D205,D400,D415,T201
+
 """Sensor component for AfvalWijzer.
 
 Author: Bram van Dartel - xirixiz
