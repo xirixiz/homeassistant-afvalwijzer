@@ -35,7 +35,13 @@ class NextSensorData:
 
     def __get_next_waste_in_days(self):
         try:
-            return abs(self.next_waste_date.date() - date.today()).days
+            next_date = self.next_waste_date
+
+            if isinstance(next_date, datetime):
+                return abs(next_date.date() - date.today()).days
+
+            if isinstance(next_date, date):
+                return abs(next_date - date.today()).days
         except Exception as err:
             _LOGGER.error("Error occurred in __get_next_waste_in_days: %s", err)
             return self.default_label
