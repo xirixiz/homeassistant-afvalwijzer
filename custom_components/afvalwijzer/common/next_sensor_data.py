@@ -28,7 +28,21 @@ class NextSensorData:
 
     def __get_next_waste_date(self):
         try:
-            return self.waste_data_after_date_selected[0]["date"]
+            for item in self.waste_data_after_date_selected:
+                value = item.get("date")
+                if isinstance(value, datetime):
+                    return value
+                if isinstance(value, date):
+                    # normalize to datetime for the rest of your codebase
+                    return datetime.combine(value, datetime.min.time())
+
+            # 2) Fallback: first valid date from all waste data (sorted list)
+            for item in getattr(self, "waste_data", []):
+                value = item.get("date")
+                if isinstance(value, datetime):
+                    return value
+                if isinstance(value, date):
+                    return datetime.combine(value, datetime.min.time())
         except IndexError:
             _LOGGER.error("No waste data found after the selected date.")
             return self.default_label
