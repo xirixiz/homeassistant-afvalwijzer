@@ -126,11 +126,13 @@ def _fetch_calendar(
 
 def _extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
     """Extract text from PDF bytes using pypdf."""
-    if PdfC:=(PdfReader is None):
+    if PdfReader is None:
         return ""
+
     with suppress(Exception):
         reader = PdfReader(io.BytesIO(pdf_bytes))
         return "\n".join((p.extract_text() or "") for p in reader.pages)
+
     return ""
 
 
@@ -165,13 +167,13 @@ def _has_letters(txt: str) -> bool:
 
 def _looks_like_url(text: str) -> bool:
     t = text.strip().lower()
-    if "http://" in t or "https://" in t or "www." in t:
-        return True
-    if re.search(r"\b[a-z0-9.-]+\.(nl|com|net|org|eu)\b", t):
-        return True
-    if "/" in t and re.search(r"\.[a-z]{2,4}/", t):
-        return True
-    return False
+    return (
+        "http://" in t
+        or "https://" in t
+        or "www." in t
+        or bool(re.search(r"\b[a-z0-9.-]+\.(nl|com|net|org|eu)\b", t))
+        or bool("/" in t and re.search(r"\.[a-z]{2,4}/", t))
+    )
 
 
 def _clean_row_label(label: str) -> str:
@@ -388,12 +390,6 @@ def _parse_ophaaldata_sections(
     def _is_bad_header(text: str) -> bool:
         tl = text.lower().strip()
 
-        if "ophaaldata" in tl:
-            return True
-        if _looks_like_url(text):
-            return True
-
-        # typische toelichting/instructie-zinnen die nu fout gaan
         bad_starts = (
             "kijk",
             "meer",
@@ -407,15 +403,13 @@ def _parse_ophaaldata_sections(
             "zet ",
             "plaats ",
         )
-        if tl.startswith(bad_starts):
-            return True
 
-        # bevat vaak punt + zin => toelichting, niet kop
-        # (koppen zijn meestal woorden zonder punt)
-        if "." in tl and len(tl.split()) >= 3:
-            return True
-
-        return False
+        return (
+            "ophaaldata" in tl
+            or _looks_like_url(text)
+            or tl.startswith(bad_starts)
+            or bool("." in tl and len(tl.split()) >= 3)
+        )
 
     # 1) vind alle Ophaaldata-regels
     ophaal_lines: list[tuple[float, str]] = []
