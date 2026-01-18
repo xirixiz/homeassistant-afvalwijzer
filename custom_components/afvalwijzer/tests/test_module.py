@@ -45,9 +45,9 @@ exclude_list = ""
 # street_number = "38"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
 
 # provider = "nijkerk"
 # postal_code = "3861XJ"
@@ -216,13 +216,17 @@ exclude_list = ""
 # postal_code = "3209BS"
 # street_number = "14"
 
-provider = "omrin"
-postal_code = "8085RT"
-street_number = "11"
+# provider = "omrin"
+# postal_code = "8085RT"
+# street_number = "11"
+
+# provider = "omrin"
+# postal_code = "8096RL"
+# street_number = "7"
 
 provider = "omrin"
-postal_code = "8096RL"
-street_number = "7"
+postal_code = "3845JG"
+street_number = "80"
 
 # DAR
 # provider = "dar"

@@ -541,6 +541,10 @@ def _parse_waste_data_raw(
         if not date_str:
             continue
 
+        # Extra safety: skip any non-ISO date strings (e.g. "geen")
+        if not isinstance(date_str, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date_str):
+            continue
+
         waste_type = waste_type_rename((item.get("type") or "").strip().lower())
         if not waste_type:
             continue
