@@ -72,7 +72,6 @@ class WasteDataTransformer:
                 ):
                     waste_data_without_today[item_name] = item_date
 
-            # Keep existing behavior: ensure every seen type exists with default label ("geen")
             for item in self.waste_data_raw:
                 item_name = item["type"].strip().lower()
                 if item_name not in self.exclude_set:
@@ -82,6 +81,7 @@ class WasteDataTransformer:
             return waste_data_with_today, waste_data_without_today
 
         except Exception as err:
+            # If your ruff config has BLE001, change this to except (ValueError, KeyError) as err:
             _LOGGER.error("Other error occurred: %s", err)
             return {}, {}
 
@@ -120,7 +120,6 @@ class WasteDataTransformer:
 
         days = DaySensorData(waste_data_formatted, self.default_label)
 
-        # Type-safe filter: waste["date"] is datetime here; date_selected is datetime too.
         waste_data_after_date_selected = [
             waste
             for waste in waste_data_formatted
@@ -130,10 +129,7 @@ class WasteDataTransformer:
         next_data = NextSensorData(waste_data_after_date_selected, self.default_label)
 
         try:
-            waste_data_custom = {
-                **next_data.next_sensor_data,
-                **days.day_sensor_data,
-            }
+            waste_data_custom = {**next_data.next_sensor_data, **days.day_sensor_data}
         except Exception as err:
             _LOGGER.error("Other error occurred waste_data_custom: %s", err)
             waste_data_custom = {}

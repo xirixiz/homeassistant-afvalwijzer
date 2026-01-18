@@ -1,5 +1,7 @@
 """Afvalwijzer integration."""
 
+from __future__ import annotations
+
 from datetime import date, datetime
 
 from ..const.const import _LOGGER
@@ -18,7 +20,6 @@ class NextSensorData:
             waste_data_after_date_selected,
             key=lambda d: d["date"],
         )
-        self.today_date = datetime.now()
         self.default_label = default_label
 
         self.next_waste_date = self.__get_next_waste_date()
@@ -51,7 +52,6 @@ class NextSensorData:
 
     def __get_next_waste_type(self):
         next_date = self.next_waste_date
-
         if not isinstance(next_date, datetime):
             return [self.default_label]
 
