@@ -21,8 +21,27 @@ def format_postal_code(postal_code: str) -> str:
     match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
         return f"{match.group(1)}{match.group(2).upper()}"
+
     return postal_code
 
+def format_postal_code_omrin(postal_code: str) -> str:
+    """Format a postal code string.
+
+    Remove spaces and convert letters to uppercase.
+
+    Args:
+        postal_code: The input postal code.
+
+    Returns:
+        A formatted postal code (for example "1234AB"). If no match is found,
+        return the original string.
+
+    """
+    match = POSTAL_CODE_PATTERN.search(postal_code)
+    if match:
+        return f"{match.group(1)} {match.group(2).upper()}"
+
+    return postal_code
 
 def waste_type_rename(item_name: str) -> str:
     """Rename a waste type to a standardized value.
@@ -38,8 +57,11 @@ def waste_type_rename(item_name: str) -> str:
     """
     cleaned_item_name = item_name.strip().lower()
 
+    if "www." in cleaned_item_name or ".nl" in cleaned_item_name or "http" in cleaned_item_name:
+        return ""
+
     waste_mapping = {
-        "branches": "takken",
+        "branches": "snoeiafval",
         "best_bag": "best-tas",
         "biobak op afroep": "gft",
         "biobak": "gft",
@@ -54,6 +76,7 @@ def waste_type_rename(item_name: str) -> str:
         "gft & etensresten": "gft",
         "glass": "glas",
         "gft afval": "gft",
+        "gfte afval": "gft",
         "gft+e": "gft",
         "green": "gft",
         "groene container": "gft",
@@ -61,7 +84,7 @@ def waste_type_rename(item_name: str) -> str:
         "groente-, fruit en tuinafval": "gft",
         "groente, fruit- en tuinafval": "gft",
         "groente, fruit en tuinafval + etensresten": "gft",
-        "grof tuinafval": "takken",
+        "grof tuinafval": "snoeiafval",
         "grofvuil": "grofvuil",
         "grofvuil en elektrische apparaten": "grofvuil",
         "grey": "restafval",
@@ -98,7 +121,7 @@ def waste_type_rename(item_name: str) -> str:
         "rst": "restafval",
         "sloop": "grofvuil",
         "sortibak": "sorti",
-        "snoeiafval": "takken",
+        "takken en snoeiafval": "snoeiafval",
         "tariefzak restafval": "restafvalzakken",
         "textile": "textiel",
         "tree": "kerstbomen",

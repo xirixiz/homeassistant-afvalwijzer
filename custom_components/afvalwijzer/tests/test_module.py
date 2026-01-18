@@ -1,5 +1,6 @@
-"""Sensor component for AfvalWijzer.
+# ruff: noqa: D205,D400,D415,T201
 
+"""Sensor component for AfvalWijzer
 Author: Bram van Dartel - xirixiz
 
 import afvalwijzer
@@ -9,9 +10,9 @@ AfvalWijzer().get_data('','','')
 Obs
 - Update this file with your information (or the information you would like to test with, examples are in that file)
 - Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
+
 """
 
-import logging
 import os
 
 # skip init, required for this test module
@@ -43,9 +44,9 @@ exclude_list = ""
 # street_number = "38"
 
 # Afvalwijzer
-# provider = "mijnafvalwijzer"
-# postal_code = "5146eg"
-# street_number = "1"
+provider = "mijnafvalwijzer"
+postal_code = "5146eg"
+street_number = "1"
 
 provider = "nijkerk"
 postal_code = "3861XJ"
@@ -214,15 +215,9 @@ street_number = "1"
 # postal_code = "3209BS"
 # street_number = "14"
 
-# Omrin
 # provider = "omrin"
 # postal_code = "8085RT"
 # street_number = "11"
-
-# DAR
-# provider = "dar"
-# postal_code = "6532AJ"
-# street_number = "1"
 
 postal_code = postal_code.strip().upper()
 
@@ -237,16 +232,40 @@ collector = MainCollector(
     default_label,
 )
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
+# MainCollector(
+#     provider,
+#     postal_code,
+#     street_number,
+#     suffix,
+#     exclude_pickup_today,
+#     exclude_list,
+#     default_label,
+# )
 
-logger.info(
-    "Data collected from: %s with postcal code: %s and street number: %s\n",
-    provider, postal_code, street_number
+# data = XimmioCollector().get_waste_data_provider("meerlanden", postal_code2, street_number2, suffix, default_label, exclude_list)
+# data2 = MijnAfvalWijzerCollector().get_waste_data_provider("mijnafvalwijzer", postal_code, street_number, suffix, default_label, exclude_list)
+
+
+#########################################################################################################
+print("\n")
+
+print(
+    f"Data collected from: {provider} with postcal code: {postal_code} and street number: {street_number}"
 )
-logger.info("Waste data with today: %s", collector.waste_data_with_today)
-logger.info("Waste data without today: %s", collector.waste_data_without_today)
-logger.info("Waste data custom: %s", collector.waste_data_custom)
-logger.info("Waste types provider: %s", collector.waste_types_provider)
-logger.info("Waste types custom: %s", collector.waste_types_custom)
-logger.info("Waste notifications: %s", collector.notification_data)
+print("\n")
+
+print(collector.waste_data_with_today)
+print(collector.waste_data_without_today)
+print(collector.waste_data_custom)
+print(collector.waste_types_provider)
+print(collector.waste_types_custom)
+
+print("\n")
+
+# for key, value in afval1.items():
+#     print(key, value)
+
+# print("\n")
+
+# for key, value in afval2.items():
+#     print(key, value)

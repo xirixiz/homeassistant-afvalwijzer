@@ -8,3 +8,4 @@ requests
 rsa
 ruff
 urllib3
+pdfplumber
