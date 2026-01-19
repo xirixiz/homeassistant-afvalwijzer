@@ -8,7 +8,6 @@ from datetime import datetime
 import io
 import re
 from typing import Any
-import uuid
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -55,73 +54,6 @@ def _normalize_token(token: str | None) -> str | None:
     if token.lower().startswith("bearer "):
         token = token[7:].strip()
     return token or None
-
-
-def _login(
-    session: requests.Session,
-    url: str,
-    postal_code: str,
-    street_number: str,
-    suffix: str,
-    *,
-    timeout: tuple[float, float],
-    verify: bool,
-    device_id: str | None = None,
-) -> str:
-    """Login to Omrin (legacy).
-
-    Kept for compatibility with existing config/usage. Omrin changed/blocked the old flow;
-    we now parse the PDF endpoint instead, so this is typically not used.
-    """
-    payload = {
-        "Email": None,
-        "Password": None,
-        # keep original behavior: use raw input postal_code here
-        "PostalCode": postal_code,
-        "HouseNumber": int(street_number),
-        "HouseNumberExtension": suffix,
-        "DeviceId": device_id or str(uuid.uuid4()),
-        "Platform": "HomeAssistant",
-        "AppVersion": "4.0.3.273",
-        "OsVersion": "HomeAssistant 2024.1",
-    }
-
-    response = session.post(
-        f"{url}/api/auth/login",
-        json=payload,
-        headers={
-            "User-Agent": "Omrin.Afvalapp.Client/1.0",
-            "Accept": "application/json",
-        },
-        timeout=timeout,
-        verify=verify,
-    )
-    response.raise_for_status()
-
-    data = response.json() if response.content else {}
-    if not (data.get("success") and data.get("data")):
-        raise ValueError(f"Login failed: {data.get('errors', 'Unknown error')}")
-
-    token = (data.get("data") or {}).get("accessToken")
-    if not token:
-        raise ValueError("Not logged in")
-
-    return token
-
-
-def _fetch_calendar(
-    session: requests.Session,
-    url: str,
-    token: str,
-    *,
-    timeout: tuple[float, float],
-    verify: bool,
-) -> Sequence[dict[str, Any]]:
-    """Fetch calendar (legacy GraphQL path).
-
-    Kept only to minimize churn: the integration now uses the CalendarPdf endpoint.
-    """
-    raise RuntimeError("Internal: _fetch_calendar is no longer used; CalendarPdf is used instead.")
 
 
 def _extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
@@ -555,6 +487,9 @@ def _parse_waste_data_raw(
     return waste_data_raw
 
 
+_LAST_GOOD_WASTE_DATA_RAW: list[dict[str, str]] = []
+
+
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
@@ -568,21 +503,25 @@ def get_waste_data_raw(
     device_id: str | None = None,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
+    del device_id  # not used in CalendarPdf flow; keep signature stable
+
     session = session or requests.Session()
+    token = _normalize_token(token)
+
+    # Always set year first (fixes "cannot access local variable 'year'")
+    year = datetime.now().year
+    if token:
+        with suppress(ValueError, TypeError):
+            year = int(token)
 
     try:
-        token = _normalize_token(token)
-
         corrected_postal_code = format_postal_code_omrin(postal_code)
-
-        year = datetime.now().year
-        if token:
-            with suppress(ValueError, TypeError):
-                year = int(token)
+        corrected_postal_code = (
+            corrected_postal_code.strip().upper().replace(" ", "%20")
+        )
 
         # IMPORTANT:
-        # format_postal_code_omrin should already yield the Omrin-required format, e.g. "8085%20RT".
-        # Do NOT quote() again, otherwise % becomes %25.
+        # Do NOT quote() this again; %20 would become %2520.
         pdf_url = (
             "https://www.omrin.nl/api/CalendarPdf"
             f"?zipCode={corrected_postal_code}"
@@ -590,7 +529,12 @@ def get_waste_data_raw(
             f"&year={year}"
         )
 
-        _LOGGER.debug("Omrin: fetching CalendarPdf: %s", pdf_url)
+        _LOGGER.debug(
+            "Omrin: fetching CalendarPdf: %s (raw_zip=%s normalized_zip=%s)",
+            pdf_url,
+            postal_code,
+            corrected_postal_code,
+        )
 
         resp = session.get(
             pdf_url,

@@ -1,5 +1,3 @@
-# ruff: noqa: D205,D400,D415,T201
-
 """Sensor component for AfvalWijzer.
 
 Author: Bram van Dartel - xirixiz
@@ -45,13 +43,13 @@ exclude_list = ""
 # street_number = "38"
 
 # Afvalwijzer
-provider = "mijnafvalwijzer"
-postal_code = "5146eg"
-street_number = "1"
-
-# provider = "nijkerk"
-# postal_code = "3861XJ"
+# provider = "mijnafvalwijzer"
+# postal_code = "5146eg"
 # street_number = "1"
+
+provider = "nijkerk"
+postal_code = "3861XJ"
+street_number = "1"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
@@ -216,17 +214,10 @@ street_number = "1"
 # postal_code = "3209BS"
 # street_number = "14"
 
-# provider = "omrin"
-# postal_code = "8085RT"
-# street_number = "11"
-
-# provider = "omrin"
-# postal_code = "8096RL"
-# street_number = "7"
-
+# Omrin
 provider = "omrin"
-postal_code = "3845JG"
-street_number = "80"
+postal_code = "8085RT"
+street_number = "11"
 
 # DAR
 # provider = "dar"

@@ -73,7 +73,7 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
 }
 
 SENSOR_COLLECTORS_OMRIN = {
-    "omrin": "https://api.omrinafvalapp.nl",
+    "omrin": "https://www.omrin.nl/api/CalendarPdf",
 }
 
 SENSOR_COLLECTORS_OPZET = {

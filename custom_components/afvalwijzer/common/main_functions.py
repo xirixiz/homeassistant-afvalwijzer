@@ -1,67 +1,57 @@
-"""Afvalwijzer integration."""
-
 import re
 
+# Precompile the postal code pattern for better performance
 POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")
 
-
 def format_postal_code(postal_code: str) -> str:
-    """Format a postal code string.
+    """
+    Formats a postal code string by removing any spaces and converting letters to uppercase.
 
-    Remove spaces and convert letters to uppercase.
-
-    Args:
-        postal_code: The input postal code.
+    Parameters:
+        postal_code (str): The input postal code.
 
     Returns:
-        A formatted postal code (for example "1234AB"). If no match is found,
-        return the original string.
-
+        str: A formatted postal code (e.g., "1234AB"). If no match is found, returns the original string.
     """
     match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
         return f"{match.group(1)}{match.group(2).upper()}"
-
     return postal_code
 
 def format_postal_code_omrin(postal_code: str) -> str:
-    """Format a postal code string.
+    """
+    Formats a postal code string by removing any spaces and converting letters to uppercase.
 
-    Remove spaces and convert letters to uppercase.
-
-    Args:
-        postal_code: The input postal code.
+    Parameters:
+        postal_code (str): The input postal code.
 
     Returns:
-        A formatted postal code (for example "1234AB"). If no match is found,
-        return the original string.
-
+        str: A formatted postal code (e.g., "1234AB"). If no match is found, returns the original string.
     """
     match = POSTAL_CODE_PATTERN.search(postal_code)
     if match:
         return f"{match.group(1)} {match.group(2).upper()}"
-
     return postal_code
 
 def waste_type_rename(item_name: str) -> str:
-    """Rename a waste type to a standardized value.
+    """
+    Cleans and renames the waste type based on a mapping dictionary.
 
-    Clean the input value and map it to a standardized waste type when possible.
+    It removes escape sequences and anything after a '/', then trims and lowercases the result
+    before mapping it to the standardized waste type.
 
-    Args:
-        item_name: The original waste type string.
+    Parameters:
+        item_name (str): The original waste type string.
 
     Returns:
-        The standardized waste type.
-
+        str: The standardized waste type.
     """
+    # Remove escape sequences and text after '/'
     cleaned_item_name = item_name.strip().lower()
 
-    if "www." in cleaned_item_name or ".nl" in cleaned_item_name or "http" in cleaned_item_name:
-        return ""
-
+    # Mapping of waste types to standardized names
     waste_mapping = {
-        "branches": "snoeiafval",
+        "branches": "takken",
         "best_bag": "best-tas",
         "biobak op afroep": "gft",
         "biobak": "gft",
@@ -76,7 +66,6 @@ def waste_type_rename(item_name: str) -> str:
         "gft & etensresten": "gft",
         "glass": "glas",
         "gft afval": "gft",
-        "gfte afval": "gft",
         "gft+e": "gft",
         "green": "gft",
         "groene container": "gft",
@@ -84,11 +73,13 @@ def waste_type_rename(item_name: str) -> str:
         "groente-, fruit en tuinafval": "gft",
         "groente, fruit- en tuinafval": "gft",
         "groente, fruit en tuinafval + etensresten": "gft",
-        "grof tuinafval": "snoeiafval",
+        "grof tuinafval": "takken",
         "grofvuil": "grofvuil",
         "grofvuil en elektrische apparaten": "grofvuil",
         "grey": "restafval",
         "grijze container": "restafval",
+        "kca": "chemisch",
+        "kca": "kca",
         "kerstb": "kerstboom",
         "kerstboom": "kerstbomen",
         "opk": "papier",
@@ -121,7 +112,7 @@ def waste_type_rename(item_name: str) -> str:
         "rst": "restafval",
         "sloop": "grofvuil",
         "sortibak": "sorti",
-        "takken en snoeiafval": "snoeiafval",
+        "snoeiafval": "takken",
         "tariefzak restafval": "restafvalzakken",
         "textile": "textiel",
         "tree": "kerstbomen",
