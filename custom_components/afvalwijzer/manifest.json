@@ -1,12 +1,19 @@
 {
   "domain": "afvalwijzer",
   "name": "Afvalwijzer",
-  "codeowners": ["@xirixiz"],
+  "codeowners": [
+    "@xirixiz"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer/blob/main/README.md",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
-  "requirements": ["rsa", "pycryptodome", "pdfplumber", "pypdf"],
+  "requirements": [
+    "rsa",
+    "pycryptodome",
+    "pdfplumber",
+    "pypdf"
+  ],
   "version": "2026.1006"
 }

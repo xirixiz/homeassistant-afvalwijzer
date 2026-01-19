@@ -121,7 +121,9 @@ def _clean_row_label(label: str) -> str:
     return " ".join(cleaned).strip()
 
 
-def _cluster_lines(ws: list[dict[str, Any]], *, y_tol: float) -> list[list[dict[str, Any]]]:
+def _cluster_lines(
+    ws: list[dict[str, Any]], *, y_tol: float
+) -> list[list[dict[str, Any]]]:
     ws = sorted(ws, key=lambda w: float(w["top"]))
     lines: list[list[dict[str, Any]]] = []
     last_y: float | None = None
@@ -176,7 +178,9 @@ def _extract_ophaaldata_dates(text: str) -> list[tuple[int, int]]:
     return items
 
 
-def _month_boundaries(words: list[dict[str, Any]], *, page_w: float, page_h: float) -> tuple[
+def _month_boundaries(
+    words: list[dict[str, Any]], *, page_w: float, page_h: float
+) -> tuple[
     list[tuple[str, float, float]],
     float,
     float,
@@ -262,7 +266,7 @@ def _parse_grid_rows(
             continue
 
         row_items: list[dict[str, Any]] = []
-        for (mkey, x0, x1) in boundaries:
+        for mkey, x0, x1 in boundaries:
             m = _MONTH_MAP[mkey]
             for w in words:
                 txt = (w.get("text") or "").strip()
@@ -474,7 +478,9 @@ def _parse_waste_data_raw(
             continue
 
         # Extra safety: skip any non-ISO date strings (e.g. "geen")
-        if not isinstance(date_str, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date_str):
+        if not isinstance(date_str, str) or not re.fullmatch(
+            r"\d{4}-\d{2}-\d{2}", date_str
+        ):
             continue
 
         waste_type = waste_type_rename((item.get("type") or "").strip().lower())

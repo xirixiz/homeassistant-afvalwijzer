@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 import re
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 MANIFEST_PATH = Path("custom_components/afvalwijzer/manifest.json")
@@ -50,9 +50,7 @@ def main() -> None:
     const_text = CONST_PATH.read_text(encoding="utf-8")
 
     if VERSION_ASSIGN_RE.search(const_text):
-        new_const_text = VERSION_ASSIGN_RE.sub(
-            f'VERSION = "{new_version}"', const_text
-        )
+        new_const_text = VERSION_ASSIGN_RE.sub(f'VERSION = "{new_version}"', const_text)
     else:
         new_const_text = const_text.rstrip() + f'\n\nVERSION = "{new_version}"\n'
 

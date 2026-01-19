@@ -237,12 +237,14 @@ collector = MainCollector(
     default_label,
 )
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 logger.info(
     "Data collected from: %s with postcal code: %s and street number: %s\n",
-    provider, postal_code, street_number
+    provider,
+    postal_code,
+    street_number,
 )
 logger.info("Waste data with today: %s", collector.waste_data_with_today)
 logger.info("Waste data without today: %s", collector.waste_data_without_today)
