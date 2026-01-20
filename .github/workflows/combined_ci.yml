@@ -51,6 +51,4 @@ jobs:
           python3 -m pip install -r requirements
           python3 -m pip install pytest pytest-timeout pytest-cov
       - run: scripts/test
-      - run: |
-          scripts/coverage
-          curl -sfSL https://codecov.io/bash | bash -
+      - run: scripts/coverage

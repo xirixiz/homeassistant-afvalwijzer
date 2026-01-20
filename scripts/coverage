@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")/.."
 
 bash scripts/test > /dev/null
-pytest \
+python3 -m pytest \
     -qq \
     --timeout=9 \
     --durations=10 \
