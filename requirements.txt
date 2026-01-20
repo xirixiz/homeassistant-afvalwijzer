@@ -8,5 +8,3 @@ requests
 rsa
 ruff
 urllib3
-pypdf
-pdfplumber
