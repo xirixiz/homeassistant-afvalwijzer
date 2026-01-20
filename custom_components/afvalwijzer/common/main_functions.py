@@ -29,23 +29,6 @@ def format_postal_code(postal_code: str) -> str:
     return f"{match.group(1)}{match.group(2).upper()}"
 
 
-def format_postal_code_omrin(postal_code: str) -> str:
-    """Format a Dutch postal code as `1234 AB` (Omrin-style).
-
-    Args:
-        postal_code: Input postal code, optionally containing spaces and lowercase letters.
-
-    Returns:
-        The formatted postal code with a single space between digits and letters (e.g. `1234 AB`).
-        If the input does not match the expected Dutch format, return the original value unchanged.
-
-    """
-    match = POSTAL_CODE_PATTERN.search(postal_code)
-    if not match:
-        return postal_code
-    return f"{match.group(1)} {match.group(2).upper()}"
-
-
 def waste_type_rename(item_name: str) -> str:
     """Normalize a provider waste type label to a standardized key.
 

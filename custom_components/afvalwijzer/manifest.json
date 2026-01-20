@@ -11,9 +11,7 @@
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "requirements": [
     "rsa",
-    "pycryptodome",
-    "pdfplumber",
-    "pypdf"
+    "pycryptodome"
   ],
   "version": "2026.1006"
 }
