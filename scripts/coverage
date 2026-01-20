@@ -4,12 +4,10 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-bash scripts/test > /dev/null
+bash scripts/test
 python3 -m pytest \
-    -qq \
-    --timeout=9 \
-    --durations=10 \
-    --cov custom_components.afvalwijzer \
+    --junitxml=pytest.xml \
+    --cov=custom_components.afvalwijzer \
+    --cov-report=term \
     -o console_output_style=count \
-    -p no:sugar \
     custom_components/afvalwijzer/tests
