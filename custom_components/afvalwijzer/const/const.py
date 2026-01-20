@@ -19,27 +19,6 @@ SENSOR_COLLECTORS_AMSTERDAM = {
     "amsterdam": "https://api.data.amsterdam.nl/v1/afvalwijzer/afvalwijzer",
 }
 
-SENSOR_COLLECTORS_LIMBURG_NET = {
-    "limburg_net": {"city": "Hasselt", "street": "Kerkstraat"},
-    "LIMBURG_NET": {"city": "Hasselt", "street": "Kerkstraat"},
-}
-
-SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
-    "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&langs=nl",
-}
-
-SENSOR_COLLECTORS_MONTFERLAND = {
-    "montferland": "http://afvalwijzer.afvaloverzicht.nl",
-}
-
-SENSOR_COLLECTORS_STRAATBEELD = {
-    "straatbeeld": "https://drimmelen.api.straatbeeld.online",
-}
-
-SENSOR_COLLECTORS_RECYCLEAPP = {
-    "recycleapp": "https://www.recycleapp.be/api/app/v1/",
-}
-
 SENSOR_COLLECTORS_BURGERPORTAAL = {
     "assen": "138204213565303512",
     "bar": "138204213564933497",
@@ -70,6 +49,14 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
         "id": "505",
         "url": "cp-maassluis.klikocontainermanager.com",
     },
+}
+
+SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
+    "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&langs=nl",
+}
+
+SENSOR_COLLECTORS_MONTFERLAND = {
+    "montferland": "http://afvalwijzer.afvaloverzicht.nl",
 }
 
 SENSOR_COLLECTORS_OMRIN = {
@@ -116,8 +103,17 @@ SENSOR_COLLECTORS_RD4 = {
     "rd4": "https://data.rd4.nl/api/v1/waste-calendar?postal_code={0}&house_number={1}&house_number_extension={2}&year={3}",
 }
 
+SENSOR_COLLECTORS_RECYCLEAPP = {
+    "recycleapp": "https://www.recycleapp.be/api/app/v1/",
+}
+
+
 SENSOR_COLLECTORS_REINIS = {
     "reinis": "https://reinis.nl",
+}
+
+SENSOR_COLLECTORS_ROVA = {
+    "rova": "https://www.rova.nl",
 }
 
 SENSOR_COLLECTORS_RWM = {
@@ -125,8 +121,8 @@ SENSOR_COLLECTORS_RWM = {
     "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen",
 }
 
-SENSOR_COLLECTORS_ROVA = {
-    "rova": "https://www.rova.nl",
+SENSOR_COLLECTORS_STRAATBEELD = {
+    "straatbeeld": "https://drimmelen.api.straatbeeld.online",
 }
 
 SENSOR_COLLECTORS_XIMMIO = {
@@ -158,11 +154,9 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
 }
 
 CONF_COLLECTOR = "provider"
-CONF_API_TOKEN = "api_token"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
-CONF_DATE_FORMAT = "date_format"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_ID = "id"
