@@ -47,9 +47,9 @@ exclude_list = ""
 # postal_code = "5146eg"
 # street_number = "1"
 
-provider = "nijkerk"
-postal_code = "3861XJ"
-street_number = "1"
+# provider = "nijkerk"
+# postal_code = "3861XJ"
+# street_number = "1"
 
 # Afvalwijzer
 # provider = "mijnafvalwijzer"
@@ -215,16 +215,18 @@ street_number = "1"
 # street_number = "14"
 
 # Omrin
-provider = "omrin"
-postal_code = "8085RT"
-street_number = "11"
+# provider = "omrin"
+# postal_code = "8085RT"
+# street_number = "11"
+
+# provider = "meerlanden"
+# postal_code = "2161LN"
+# street_number = "55"
 
 # DAR
 # provider = "dar"
 # postal_code = "6532AJ"
 # street_number = "1"
-
-postal_code = postal_code.strip().upper()
 
 collector = MainCollector(
     provider,

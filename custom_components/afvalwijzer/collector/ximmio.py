@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import socket
+from datetime import datetime, timedelta
 from typing import Any
 
 import requests
@@ -34,35 +34,45 @@ def _post_ipv4_then_ipv6(
     try:
         urllib3_connection.allowed_gai_family = lambda: socket.AF_INET
         return session.post(url=url, **kwargs)
-    except requests.exceptions.RequestException as e_v4:
-        last_err = e_v4
+    except requests.exceptions.RequestException as err_v4:
+        last_err = err_v4
     finally:
         urllib3_connection.allowed_gai_family = original_allowed
 
     try:
         urllib3_connection.allowed_gai_family = lambda: socket.AF_INET6
         return session.post(url=url, **kwargs)
-    except requests.exceptions.RequestException as e_v6:
-        raise ValueError(f"POST failed (IPv4 then IPv6): {last_err}") from e_v6
+    except requests.exceptions.RequestException as err_v6:
+        raise ValueError(f"POST failed (IPv4 then IPv6): {last_err}") from err_v6
     finally:
         urllib3_connection.allowed_gai_family = original_allowed
 
 
 def _build_url(provider: str) -> str:
-    # Provider must be present in IDS for this collector
     if provider not in SENSOR_COLLECTORS_XIMMIO_IDS:
-        raise ValueError(f"Invalid provider: {provider} for XIMMIO, please verify")
+        raise ValueError(
+            f"Invalid provider: {provider} for XIMMIO, please verify",
+        )
 
-    # Provider may have an override base URL, else fallback to "ximmio"
-    if provider in SENSOR_COLLECTORS_XIMMIO:
-        url = SENSOR_COLLECTORS_XIMMIO[provider]
-    else:
-        url = SENSOR_COLLECTORS_XIMMIO.get("ximmio")
-
+    url = (
+        SENSOR_COLLECTORS_XIMMIO.get(provider)
+        or SENSOR_COLLECTORS_XIMMIO.get("ximmio")
+    )
     if not url:
-        raise ValueError(f"Invalid provider: {provider} for XIMMIO, please verify")
+        raise ValueError(
+            f"Invalid provider: {provider} for XIMMIO, please verify",
+        )
 
     return url
+
+
+def _get_data_list(response: dict[str, Any]) -> list[Any]:
+    """Return response list under either dataList or datalist, else empty list."""
+    for key in ("dataList", "datalist"):
+        value = response.get(key)
+        if isinstance(value, list):
+            return value
+    return []
 
 
 def _fetch_address_data(
@@ -81,7 +91,6 @@ def _fetch_address_data(
         "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
     }
 
-    # Keep original key casing to avoid breaking providers that depend on it
     if suffix:
         data["HouseLetter"] = suffix
 
@@ -106,10 +115,12 @@ def _fetch_waste_data_raw_temp(
     *,
     timeout: tuple[float, float],
 ) -> dict[str, Any]:
-    data = {
+    start_date_str = start_date.strftime("%Y-%m-%d")
+
+    data: dict[str, Any] = {
         "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
-        "startDate": start_date.date(),  # original behavior: a date object
-        "endDate": end_date,  # original behavior: yyyy-mm-dd string
+        "startDate": start_date_str,
+        "endDate": end_date,
         "community": community,
         "uniqueAddressID": unique_id,
     }
@@ -124,23 +135,46 @@ def _fetch_waste_data_raw_temp(
     return response.json() or {}
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
+def _parse_ximmio_date(value: str) -> str | None:
+    """Parse Ximmio pickup date strings into yyyy-mm-dd."""
+    if not value:
+        return None
+
+    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(value, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+
+    try:
+        cleaned = value.replace("Z", "")
+        return datetime.fromisoformat(cleaned).strftime("%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def _parse_waste_data_raw(
+    waste_data_raw_temp: dict[str, Any],
+) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
-    for item in waste_data_raw_temp.get("datalist") or []:
+    for item in _get_data_list(waste_data_raw_temp):
+        if not isinstance(item, dict):
+            continue
+
         pickup_dates = sorted(item.get("pickupDates") or [])
         if not pickup_dates:
             continue
 
-        waste_type = waste_type_rename(
-            (item.get("_pickupTypeText") or "").strip().lower()
-        )
+        waste_type_text = (item.get("_pickupTypeText") or "").strip().lower()
+        waste_type = waste_type_rename(waste_type_text)
         if not waste_type:
             continue
 
-        waste_date = datetime.strptime(pickup_dates[0], "%Y-%m-%dT%H:%M:%S").strftime(
-            "%Y-%m-%d"
-        )
+        waste_date = _parse_ximmio_date(pickup_dates[0])
+        if not waste_date:
+            continue
+
         waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     return waste_data_raw
@@ -156,7 +190,6 @@ def get_waste_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
-
     session = session or requests.Session()
     suffix = (suffix or "").strip().upper()
 
@@ -166,7 +199,6 @@ def get_waste_data_raw(
         now = datetime.now()
         end_date = (now.date() + timedelta(days=365)).strftime("%Y-%m-%d")
 
-        # 1) address lookup
         response_address = _fetch_address_data(
             session,
             url,
@@ -177,19 +209,19 @@ def get_waste_data_raw(
             timeout=timeout,
         )
 
-        data_list = response_address.get("datalist") or []
+        data_list = _get_data_list(response_address)
         if not data_list:
             _LOGGER.error("Address not found!")
             return []
 
-        unique_id = data_list[0].get("UniqueId")
-        community = data_list[0].get("Community")
+        first = data_list[0] if isinstance(data_list[0], dict) else {}
+        unique_id = first.get("UniqueId")
+        community = first.get("Community")
 
-        if not unique_id:
-            _LOGGER.error("Address response missing UniqueId/Community!")
+        if not unique_id or not community:
+            _LOGGER.error("Address response missing UniqueId and or Community!")
             return []
 
-        # 2) calendar lookup
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
             session,
             url,
@@ -205,12 +237,11 @@ def get_waste_data_raw(
             _LOGGER.error("Could not retrieve trash schedule!")
             return []
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
-        return waste_data_raw
+        return _parse_waste_data_raw(waste_data_raw_temp)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("XIMMIO request error: %s", err)
         raise ValueError(err) from err
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error("XIMMIO: Invalid and/or no data received")
+        _LOGGER.error("XIMMIO: Invalid and/or no data received: %s", err)
         raise ValueError("Invalid and/or no data received from XIMMIO") from err
