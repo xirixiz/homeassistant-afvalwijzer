@@ -57,6 +57,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
     _attr_icon = SENSOR_ICON
 
     def __init__(
+        """Initialize a custom Afvalwijzer sensor."""
         self,
         hass: Any,
         waste_type: str,
@@ -116,6 +117,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Apply the fetched value to the sensor state."""
         attrs: dict[str, Any] = {ATTR_LAST_UPDATE: self._last_update}
         if "next_date" in (self._attr_name or "").lower():
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
