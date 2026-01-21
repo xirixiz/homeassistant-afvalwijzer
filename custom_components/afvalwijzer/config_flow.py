@@ -110,6 +110,16 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @staticmethod
+    def _validate_postal_code(postal_code: str) -> bool:
+        """Validate Dutch postal code format (e.g., 1234AB)."""
+        return _validate_postal_code(postal_code)
+
+    @staticmethod
+    def _validate_street_number(street_number: str) -> bool:
+        """Validate that the street number is a positive integer."""
+        return _validate_street_number(street_number)
+
+    @staticmethod
     @callback
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
@@ -130,9 +140,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             street_number = str(cleaned[CONF_STREET_NUMBER])
 
-            if not _validate_postal_code(postal_code):
+            if not self._validate_postal_code(postal_code):
                 errors["base"] = "invalid_postal_code"
-            elif not _validate_street_number(street_number):
+            elif not self._validate_street_number(street_number):
                 errors["base"] = "invalid_street_number"
             else:
                 await self.async_set_unique_id(_unique_id_from(cleaned))
