@@ -24,7 +24,6 @@ jobs:
         with:
           category: "integration"
           ignore: "brands"
-
       - name: Hassfest validation
         uses: "home-assistant/actions/hassfest@master"
 
@@ -36,31 +35,28 @@ jobs:
       - uses: "actions/setup-python@v6"
         with:
           python-version: "3.x"
+          cache: "pip"
+      - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install ruff
       - run: ruff check --output-format github .
 
-  # Tests still need to be implemented
-  # tests:
-  #   runs-on: "ubuntu-latest"
-  #   name: Run tests
-  #   steps:
-  #     - name: Check out code from GitHub
-  #       uses: "actions/checkout@v6"
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v6
-  #       with:
-  #         python-version: "3.9"
-  #         cache: "pip" # caching pip dependencies
-  #     - name: Install requirements
-  #       run: python3 -m pip install -r requirements_test.txt
-  #     - name: Run tests
-  #       run: |
-  #         pytest \
-  #           -qq \
-  #           --timeout=9 \
-  #           --durations=10 \
-  #           -n auto \
-  #           --cov custom_components.afvalwijzer \
-  #           -o console_output_style=count \
-  #           -p no:sugar \
-  #           tests
+  tests:
+    runs-on: "ubuntu-latest"
+    name: Run tests
+    steps:
+      - uses: "actions/checkout@v6"
+      - uses: "actions/setup-python@v6"
+        with:
+          python-version: "3.x"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+            requirements_test.txt
+      - run: python3 -m pip install --upgrade pip
+      - run: python3 -m pip install -r requirements.txt -r requirements_test.txt
+      - run: scripts/coverage
+      - uses: dorny/test-reporter@v2.5.0
+        with:
+          name: Test Results
+          path: pytest.xml
+          reporter: java-junit

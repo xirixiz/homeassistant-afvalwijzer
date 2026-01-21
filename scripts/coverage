@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+bash scripts/test
+python3 -m pytest \
+    --junitxml=pytest.xml \
+    --cov=custom_components.afvalwijzer \
+    --cov-report=term \
+    -o console_output_style=count \
+    custom_components/afvalwijzer/tests

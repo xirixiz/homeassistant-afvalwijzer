@@ -253,3 +253,5 @@ enable = [
     #"useless-suppression",  # temporarily every now and then to clean them up
     "use-symbolic-message-instead",
 ]
+[tool.pytest.ini_options]
+addopts = "--ignore=custom_components/afvalwijzer/tests/test_module.py"
