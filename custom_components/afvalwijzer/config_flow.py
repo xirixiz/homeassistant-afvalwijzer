@@ -50,8 +50,9 @@ DEFAULT_LANGUAGE = "nl"
 DEFAULT_INCLUDE_TODAY = True
 
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
-
 _ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
+
+_RECONFIGURE_STEP_ID = "reconfigure"
 
 
 def _build_all_collectors() -> list[str]:
@@ -109,6 +110,10 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def __init__(self) -> None:
+        """Initialize config flow."""
+        self._reconfigure_entry: config_entries.ConfigEntry | None = None
+
     @staticmethod
     def _validate_postal_code(postal_code: str) -> bool:
         """Validate Dutch postal code format (e.g., 1234AB)."""
@@ -153,6 +158,65 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         schema = self.add_suggested_values_to_schema(BASE_SCHEMA, user_input or {})
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+    async def async_step_reconfigure(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.FlowResult:
+        """Handle reconfiguration of an existing config entry."""
+        self._reconfigure_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
+
+        if self._reconfigure_entry is None:
+            return self.async_abort(reason="reconfigure_failed")
+
+        # Pre-fill with current data
+        current = dict(self._reconfigure_entry.data)
+        return await self._async_show_reconfigure_form(user_input, current)
+
+    async def _async_show_reconfigure_form(
+        self,
+        user_input: dict[str, Any] | None,
+        current: dict[str, Any],
+    ) -> config_entries.FlowResult:
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            cleaned = _clean_user_input(user_input)
+            postal_code = str(cleaned[CONF_POSTAL_CODE])
+            street_number = str(cleaned[CONF_STREET_NUMBER])
+
+            if not self._validate_postal_code(postal_code):
+                errors["base"] = "invalid_postal_code"
+            elif not self._validate_street_number(street_number):
+                errors["base"] = "invalid_street_number"
+            else:
+                assert self._reconfigure_entry is not None
+
+                new_unique_id = _unique_id_from(cleaned)
+                await self.async_set_unique_id(new_unique_id)
+
+                # When reconfiguring, allow changing unique id by updating the entry.
+                self.hass.config_entries.async_update_entry(
+                    self._reconfigure_entry,
+                    data=cleaned,
+                )
+                await self.hass.config_entries.async_reload(self._reconfigure_entry.entry_id)
+                return self.async_abort(reason="reconfigure_successful")
+
+            user_input = cleaned
+
+        suggested = current.copy()
+        if user_input:
+            suggested.update(user_input)
+
+        schema = self.add_suggested_values_to_schema(BASE_SCHEMA, suggested)
+        return self.async_show_form(
+            step_id=_RECONFIGURE_STEP_ID,
+            data_schema=schema,
+            errors=errors,
+        )
 
 
 class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
