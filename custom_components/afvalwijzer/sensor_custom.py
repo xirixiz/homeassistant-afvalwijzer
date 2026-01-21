@@ -111,7 +111,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
     def native_value(self) -> datetime | str | None:
         """Return the native value of the sensor."""
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return self._native_value if isinstance(self._native_value, datetime) else None
+            return (
+                self._native_value if isinstance(self._native_value, datetime) else None
+            )
         return self._fallback_state
 
     @property
@@ -162,12 +164,16 @@ class CustomSensor(RestoreEntity, SensorEntity):
         # other values
         self._fallback_state = str(value)
 
-    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
+    def _set_timestamp(
+        self, aware_utc: datetime, *, date_value: date | None = None
+    ) -> None:
         """Set the sensor as a timestamp sensor."""
         self._attr_device_class = SensorDeviceClass.TIMESTAMP
 
         today = dt_util.now().date()
-        effective_date = date_value or aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date()
+        effective_date = (
+            date_value or aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date()
+        )
         self._days_until_collection_date = (effective_date - today).days
 
         if self._cfg.show_full_timestamp:

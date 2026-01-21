@@ -93,7 +93,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._attr_unique_id = self._make_unique_id(config, waste_type)
 
         self._is_notification_sensor = waste_type == "notifications"
-        self._attr_icon = "mdi:bell-outline" if self._is_notification_sensor else SENSOR_ICON
+        self._attr_icon = (
+            "mdi:bell-outline" if self._is_notification_sensor else SENSOR_ICON
+        )
 
         self._last_update: str | None = None
         self._days_until_collection_date: int | None = None
@@ -136,7 +138,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             return self._native_value if isinstance(self._native_value, int) else 0
 
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return self._native_value if isinstance(self._native_value, datetime) else None
+            return (
+                self._native_value if isinstance(self._native_value, datetime) else None
+            )
 
         return self._fallback_state
 
@@ -206,7 +210,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
 
-    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
+    def _set_timestamp(
+        self, aware_utc: datetime, *, date_value: date | None = None
+    ) -> None:
         local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
         collection_date = date_value or local_dt.date()
 
@@ -230,9 +236,11 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     def _update_collection_date_flags(self, collection_date: date) -> None:
         today = dt_util.now().date()
         self._is_collection_date_today = collection_date == today
-        self._is_collection_date_tomorrow = collection_date == (today + timedelta(days=1))
-        self._is_collection_date_day_after_tomorrow = (
-            collection_date == (today + timedelta(days=2))
+        self._is_collection_date_tomorrow = collection_date == (
+            today + timedelta(days=1)
+        )
+        self._is_collection_date_day_after_tomorrow = collection_date == (
+            today + timedelta(days=2)
         )
 
     def _update_notification_sensor(self) -> None:
