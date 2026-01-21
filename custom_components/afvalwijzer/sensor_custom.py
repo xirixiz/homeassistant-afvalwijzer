@@ -40,8 +40,8 @@ class _Config:
 
 
 def _as_utc_aware(value: datetime) -> datetime:
-    """Return timezone aware datetime in UTC."""
-    if dt_util.is_naive(value):
+    """Return timezone-aware datetime in UTC."""
+    if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
         value = dt_util.DEFAULT_TIME_ZONE.localize(value)
     return dt_util.as_utc(value)
 
