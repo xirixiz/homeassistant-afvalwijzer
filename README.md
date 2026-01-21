@@ -107,8 +107,7 @@ This yaml uses a custom card being [auto-entities](https://github.com/thomaslove
 
 Keep in mind your sensor might differ from the example due to different waste naming or different types of waste in your area.
 
-
-Example yaml (same look as shown in the screenshot). This yaml uses a custom card being [stack-in-card](https://github.com/custom-cards/stack-in-card), make sure its installed***
+**Example yaml (same look as shown in the screenshot). This yaml uses a custom card being [stack-in-card](https://github.com/custom-cards/stack-in-card), make sure its installed**
 
 Keep in mind your sensor might differ from the example due to different waste naming or different types of waste in your area.
 
