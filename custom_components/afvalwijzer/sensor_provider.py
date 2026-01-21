@@ -63,6 +63,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     """Representation of a provider based waste sensor."""
 
     def __init__(
+        """Initialize a provider-based Afvalwijzer sensor."""
         self,
         hass: Any,
         waste_type: str,
@@ -132,6 +133,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     @property
     def native_value(self) -> datetime | int | str | None:
+        """Return provider data based on include_today setting."""
         if self._is_notification_sensor:
             return self._native_value if isinstance(self._native_value, int) else 0
 
@@ -144,6 +146,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Apply provider data to the sensor state."""
         if self._is_notification_sensor:
             notifications = self.fetch_data.notification_data or []
             return {
@@ -163,6 +166,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         }
 
     async def async_update(self) -> None:
+        """Set the sensor state as a timestamp value."""
         _LOGGER.debug("Updating sensor: %s", self.name)
 
         try:
@@ -223,7 +227,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             self._attr_device_class = SensorDeviceClass.TIMESTAMP
             self._native_value = local_dt
             return
-        
+
         # If not showing full timestamp, expose date as string instead
         self._attr_device_class = None
         if self._cfg.date_isoformat:
