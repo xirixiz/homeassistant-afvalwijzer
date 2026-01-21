@@ -207,7 +207,6 @@ def get_waste_data_raw(
             suffix,
             timeout=timeout,
         )
-
         data_list = _get_data_list(response_address)
         if not data_list:
             _LOGGER.error("Address not found!")
@@ -217,7 +216,7 @@ def get_waste_data_raw(
         unique_id = first.get("UniqueId")
         community = first.get("Community")
 
-        if not unique_id or not community:
+        if not unique_id:
             _LOGGER.error("Address response missing UniqueId and or Community!")
             return []
 
