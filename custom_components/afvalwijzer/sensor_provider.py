@@ -221,9 +221,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
         if self._cfg.show_full_timestamp:
             self._attr_device_class = SensorDeviceClass.TIMESTAMP
-            self._native_value = aware_utc
+            self._native_value = local_dt
             return
-
+        
         # If not showing full timestamp, expose date as string instead
         self._attr_device_class = None
         if self._cfg.date_isoformat:
