@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import socket
 from datetime import datetime, timedelta
+import socket
 from typing import Any
 
 import requests
@@ -54,9 +54,8 @@ def _build_url(provider: str) -> str:
             f"Invalid provider: {provider} for XIMMIO, please verify",
         )
 
-    url = (
-        SENSOR_COLLECTORS_XIMMIO.get(provider)
-        or SENSOR_COLLECTORS_XIMMIO.get("ximmio")
+    url = SENSOR_COLLECTORS_XIMMIO.get(provider) or SENSOR_COLLECTORS_XIMMIO.get(
+        "ximmio"
     )
     if not url:
         raise ValueError(

@@ -94,9 +94,9 @@ exclude_list = ""
 # street_number = "4"
 
 # ACV
-# provider = "acv"
-# postal_code = "6714KK"
-# street_number = "20"
+provider = "acv"
+postal_code = "6714KK"
+street_number = "20"
 
 # iCalendar file
 # provider = "veldhoven"
