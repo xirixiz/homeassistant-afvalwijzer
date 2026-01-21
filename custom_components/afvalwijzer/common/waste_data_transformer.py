@@ -128,9 +128,7 @@ class WasteDataTransformer:
             )
             waste_data_after_date_selected = []
 
-        next_data = NextSensorData(
-            waste_data_after_date_selected, self.default_label
-        )
+        next_data = NextSensorData(waste_data_after_date_selected, self.default_label)
 
         try:
             waste_data_custom = {

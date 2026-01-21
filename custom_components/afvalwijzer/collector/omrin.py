@@ -62,7 +62,7 @@ def _login(
         "HouseNumber": int(street_number),
         "HouseNumberExtension": suffix,
         "DeviceId": device_id or str(uuid.uuid4()),
-        "Platform": "HomeAssistant",
+        "Platform": "Android",
         "AppVersion": "4.0.3.273",
         "OsVersion": "HomeAssistant 2024.1",
     }

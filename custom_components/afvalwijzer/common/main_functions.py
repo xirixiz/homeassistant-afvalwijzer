@@ -1,45 +1,49 @@
-"""Afvalwijzer integration."""
+"""Common helper functions for the Afvalwijzer integration.
+
+This module provides small, reusable helpers for normalizing user input (postal
+codes) and mapping provider-specific waste type labels to standardized keys.
+"""
+
+from __future__ import annotations
 
 import re
 
+# Precompile the postal code pattern for better performance.
 POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")
 
 
 def format_postal_code(postal_code: str) -> str:
-    """Format a postal code string.
-
-    Remove spaces and convert letters to uppercase.
+    """Format a Dutch postal code as `1234AB`.
 
     Args:
-        postal_code: The input postal code.
+        postal_code: Input postal code, optionally containing spaces and lowercase letters.
 
     Returns:
-        A formatted postal code (for example "1234AB"). If no match is found,
-        return the original string.
+        The formatted postal code (e.g. `1234AB`). If the input does not match the expected
+        Dutch format, return the original value unchanged.
 
     """
     match = POSTAL_CODE_PATTERN.search(postal_code)
-    if match:
-        return f"{match.group(1)}{match.group(2).upper()}"
-    return postal_code
+    if not match:
+        return postal_code
+    return f"{match.group(1)}{match.group(2).upper()}"
 
 
 def waste_type_rename(item_name: str) -> str:
-    """Rename a waste type to a standardized value.
-
-    Clean the input value and map it to a standardized waste type when possible.
+    """Normalize a provider waste type label to a standardized key.
 
     Args:
-        item_name: The original waste type string.
+        item_name: Raw waste type label as provided by a collector/provider.
 
     Returns:
-        The standardized waste type.
+        A standardized waste type key (lowercase). If no mapping exists, return the
+        cleaned input.
 
     """
     cleaned_item_name = item_name.strip().lower()
 
-    waste_mapping = {
-        "branches": "takken",
+    waste_mapping: dict[str, str] = {
+        "branches": "snoeiafval",
         "best_bag": "best-tas",
         "biobak op afroep": "gft",
         "biobak": "gft",
@@ -54,6 +58,7 @@ def waste_type_rename(item_name: str) -> str:
         "gft & etensresten": "gft",
         "glass": "glas",
         "gft afval": "gft",
+        "gfte afval": "gft",
         "gft+e": "gft",
         "green": "gft",
         "groene container": "gft",
@@ -61,7 +66,7 @@ def waste_type_rename(item_name: str) -> str:
         "groente-, fruit en tuinafval": "gft",
         "groente, fruit- en tuinafval": "gft",
         "groente, fruit en tuinafval + etensresten": "gft",
-        "grof tuinafval": "takken",
+        "grof tuinafval": "snoeiafval",
         "grofvuil": "grofvuil",
         "grofvuil en elektrische apparaten": "grofvuil",
         "grey": "restafval",
@@ -98,7 +103,7 @@ def waste_type_rename(item_name: str) -> str:
         "rst": "restafval",
         "sloop": "grofvuil",
         "sortibak": "sorti",
-        "snoeiafval": "takken",
+        "takken en snoeiafval": "snoeiafval",
         "tariefzak restafval": "restafvalzakken",
         "textile": "textiel",
         "tree": "kerstbomen",
