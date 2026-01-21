@@ -1,7 +1,11 @@
 """Afvalwijzer integration."""
 
-from datetime import datetime, timedelta
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date, datetime, time, timedelta
 import hashlib
+from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -26,65 +30,118 @@ from .const.const import (
     SENSOR_PREFIX,
 )
 
+# Options keys from config flow
+CONF_INCLUDE_TODAY = "include_today"
+CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
+
+DEFAULT_INCLUDE_TODAY = True
+DEFAULT_SHOW_FULL_TIMESTAMP = True
+
+
+@dataclass(slots=True)
+class _Config:
+    default_label: str
+    date_isoformat: bool
+    include_today: bool
+    show_full_timestamp: bool
+    id_name: str
+
+
+def _as_utc_aware(value: datetime) -> datetime:
+    """Return timezone aware datetime in UTC."""
+    if dt_util.is_naive(value):
+        value = dt_util.DEFAULT_TIME_ZONE.localize(value)
+    return dt_util.as_utc(value)
+
+
+def _date_to_utc_midnight(value: date) -> datetime:
+    """Convert a date into UTC midnight for that local day."""
+    local_dt = datetime.combine(value, time.min)
+    local_dt = dt_util.DEFAULT_TIME_ZONE.localize(local_dt)
+    return dt_util.as_utc(local_dt)
+
 
 class ProviderSensor(RestoreEntity, SensorEntity):
-    """Representation of a provider-based waste sensor."""
+    """Representation of a provider based waste sensor."""
 
-    def __init__(self, hass, waste_type, fetch_data, config):
-        """Initialize the sensor."""
+    def __init__(
+        self,
+        hass: Any,
+        waste_type: str,
+        fetch_data: Any,
+        config: dict[str, Any],
+    ) -> None:
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
-        self.config = config
-        self._id_name = config.get(CONF_ID)
-        self._default_label = config.get(CONF_DEFAULT_LABEL)
-        self._exclude_pickup_today = str(config.get(CONF_EXCLUDE_PICKUP_TODAY)).lower()
-        self._name = (
-            SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
+
+        id_name = str(config.get(CONF_ID, "") or "")
+        self._cfg = _Config(
+            default_label=str(config.get(CONF_DEFAULT_LABEL, "geen")),
+            date_isoformat=bool(config.get(CONF_DATE_ISOFORMAT, False)),
+            include_today=self._resolve_include_today(config),
+            show_full_timestamp=bool(
+                config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
+            ),
+            id_name=id_name,
+        )
+
+        self._attr_name = (
+            SENSOR_PREFIX + (f"{self._cfg.id_name} " if self._cfg.id_name else "")
         ) + waste_type
-        self._last_update = None
-        self._days_until_collection_date = None
-        self._is_collection_date_today = False
-        self._is_collection_date_tomorrow = False
-        self._is_collection_date_day_after_tomorrow = False
+
+        self._attr_unique_id = self._make_unique_id(config, waste_type)
+
         self._is_notification_sensor = waste_type == "notifications"
-        self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
-        self._state = self._default_label if not self._is_notification_sensor else 0
-        self._icon = "mdi:bell-outline" if self._is_notification_sensor else SENSOR_ICON
-        self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode()
-        ).hexdigest()
-        self._device_class = None
+        self._attr_icon = "mdi:bell-outline" if self._is_notification_sensor else SENSOR_ICON
+
+        self._last_update: str | None = None
+        self._days_until_collection_date: int | None = None
+        self._is_collection_date_today: bool = False
+        self._is_collection_date_tomorrow: bool = False
+        self._is_collection_date_day_after_tomorrow: bool = False
+
+        self._attr_device_class: SensorDeviceClass | None = None
+        self._native_value: datetime | int | None = None
+        self._fallback_state: str = (
+            "0" if self._is_notification_sensor else self._cfg.default_label
+        )
+
+    @staticmethod
+    def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
+        unique_source = (
+            f"{waste_type}"
+            f"{config.get(CONF_ID)}"
+            f"{config.get(CONF_COLLECTOR)}"
+            f"{config.get(CONF_POSTAL_CODE)}"
+            f"{config.get(CONF_STREET_NUMBER)}"
+            f"{config.get(CONF_SUFFIX, '')}"
+        )
+        return hashlib.sha1(unique_source.encode()).hexdigest()
+
+    @staticmethod
+    def _resolve_include_today(config: dict[str, Any]) -> bool:
+        """Resolve include_today from options, else fall back to legacy setting."""
+        if CONF_INCLUDE_TODAY in config:
+            return bool(config.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
+
+        # Backward compatible: exclude_pickup_today True means do NOT include today
+        raw = str(config.get(CONF_EXCLUDE_PICKUP_TODAY, "true")).lower()
+        exclude_today = raw in ("true", "yes", "1", "on")
+        return not exclude_today
 
     @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
+    def native_value(self) -> datetime | int | str | None:
+        if self._is_notification_sensor:
+            return self._native_value if isinstance(self._native_value, int) else 0
+
+        if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
+            return self._native_value if isinstance(self._native_value, datetime) else None
+
+        return self._fallback_state
 
     @property
-    def unique_id(self):
-        """Return a unique ID for the sensor."""
-        return self._unique_id
-
-    @property
-    def icon(self):
-        """Return the icon of the sensor."""
-        return self._icon
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
-
-    @property
-    def device_class(self):
-        """Return the device class of the sensor."""
-        return self._device_class
-
-    @property
-    def state_attributes(self):
-        """Return the attributes of the sensor."""
-        # Special attributes for notification sensor
+    def extra_state_attributes(self) -> dict[str, Any]:
         if self._is_notification_sensor:
             notifications = self.fetch_data.notification_data or []
             return {
@@ -98,95 +155,109 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
             ATTR_IS_COLLECTION_DATE_TODAY: self._is_collection_date_today,
             ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
-            ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
+            ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: (
+                self._is_collection_date_day_after_tomorrow
+            ),
         }
 
-    async def async_update(self):
-        """Fetch the latest data and update the state."""
-        _LOGGER.debug(f"Updating sensor: {self.name}")
+    async def async_update(self) -> None:
+        _LOGGER.debug("Updating sensor: %s", self.name)
 
         try:
-            # Call update method from fetch_data
             await self.hass.async_add_executor_job(self.fetch_data.update)
 
-            # Select the correct waste data based on exclude_pickup_today
-            waste_data_provider = (
-                self.fetch_data.waste_data_with_today
-                if self._exclude_pickup_today in ("false", "no")
-                else self.fetch_data.waste_data_without_today
-            )
-
-            # handling for notification sensor
             if self._is_notification_sensor:
                 self._update_notification_sensor()
                 return
 
-            if not waste_data_provider or self.waste_type not in waste_data_provider:
+            waste_data_provider = self._select_provider_data()
+            if self.waste_type not in waste_data_provider:
                 raise ValueError(f"No data for waste type: {self.waste_type}")
 
-            # Update attributes and state based on the waste data
-            collection_date = waste_data_provider[self.waste_type]
-            if isinstance(collection_date, datetime):
-                self._update_attributes_date(collection_date)
-            else:
-                self._update_attributes_non_date(collection_date)
-
-            # Update last_update timestamp
+            self._apply_value(waste_data_provider[self.waste_type])
             self._last_update = dt_util.now().isoformat()
 
         except Exception as err:
-            _LOGGER.error(f"Error updating sensor {self.name}: {err}")
-            self._handle_value_error()
+            _LOGGER.error("Error updating sensor %s: %s", self.name, err)
+            self._set_error_state()
 
-    def _update_attributes_date(self, collection_date):
-        """Update attributes for a datetime value."""
-        collection_date_object = (
-            collection_date.isoformat()
-            if self._date_isoformat in ("true", "yes")
-            else collection_date.date()
-        )
-        collection_date_delta = collection_date.date()
-        delta = collection_date_delta - dt_util.now().date()
+    def _select_provider_data(self) -> dict[str, Any]:
+        if self._cfg.include_today:
+            return self.fetch_data.waste_data_with_today or {}
+        return self.fetch_data.waste_data_without_today or {}
 
-        self._days_until_collection_date = delta.days
-        self._update_collection_date_flags(collection_date_delta)
-        self._device_class = SensorDeviceClass.TIMESTAMP
-        self._state = collection_date_object
-
-    def _update_attributes_non_date(self, value):
-        """Update attributes for a non-datetime value."""
-        self._state = str(value)
+    def _apply_value(self, value: Any) -> None:
         self._days_until_collection_date = None
-        self._device_class = None
+        self._attr_device_class = None
+        self._native_value = None
 
-    def _update_collection_date_flags(self, collection_date_delta):
-        """Update flags for collection date."""
+        if isinstance(value, datetime):
+            aware = _as_utc_aware(value)
+            self._set_timestamp(aware)
+            return
+
+        if isinstance(value, date):
+            aware = _date_to_utc_midnight(value)
+            self._set_timestamp(aware, date_value=value)
+            return
+
+        self._fallback_state = str(value)
+        self._is_collection_date_today = False
+        self._is_collection_date_tomorrow = False
+        self._is_collection_date_day_after_tomorrow = False
+
+    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
+        local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
+        collection_date = date_value or local_dt.date()
+
+        self._update_collection_date_flags(collection_date)
+
         today = dt_util.now().date()
-        self._is_collection_date_today = collection_date_delta == today
-        self._is_collection_date_tomorrow = collection_date_delta == today + timedelta(
-            days=1
-        )
+        self._days_until_collection_date = (collection_date - today).days
+
+        if self._cfg.show_full_timestamp:
+            self._attr_device_class = SensorDeviceClass.TIMESTAMP
+            self._native_value = aware_utc
+            return
+
+        # If not showing full timestamp, expose date as string instead
+        self._attr_device_class = None
+        if self._cfg.date_isoformat:
+            self._fallback_state = collection_date.isoformat()
+        else:
+            self._fallback_state = str(collection_date)
+
+    def _update_collection_date_flags(self, collection_date: date) -> None:
+        today = dt_util.now().date()
+        self._is_collection_date_today = collection_date == today
+        self._is_collection_date_tomorrow = collection_date == (today + timedelta(days=1))
         self._is_collection_date_day_after_tomorrow = (
-            collection_date_delta == today + timedelta(days=2)
+            collection_date == (today + timedelta(days=2))
         )
 
-    def _update_notification_sensor(self):
-        """Update notification sensor state and attributes."""
+    def _update_notification_sensor(self) -> None:
         notifications = self.fetch_data.notification_data or []
-        self._state = len(notifications)
+        count = len(notifications)
 
-        # Update icon based on notification count
-        self._icon = "mdi:bell-alert" if len(notifications) > 0 else "mdi:bell-outline"
+        self._native_value = count
+        self._fallback_state = str(count)
 
+        self._attr_icon = "mdi:bell-alert" if count > 0 else "mdi:bell-outline"
         self._last_update = dt_util.now().isoformat()
-        _LOGGER.debug(f"Notification sensor updated: {self._state} notification(s)")
 
-    def _handle_value_error(self):
-        """Handle errors in fetching data."""
-        self._state = self._default_label
-        self._is_collection_date_today = None
-        self._is_collection_date_tomorrow = None
-        self._is_collection_date_day_after_tomorrow = None
+        _LOGGER.debug("Notification sensor updated: %s notification(s)", count)
+
+    def _set_error_state(self) -> None:
+        if self._is_notification_sensor:
+            self._native_value = 0
+            self._fallback_state = "0"
+        else:
+            self._fallback_state = self._cfg.default_label
+            self._native_value = None
+
         self._days_until_collection_date = None
-        self._device_class = None
+        self._attr_device_class = None
+        self._is_collection_date_today = False
+        self._is_collection_date_tomorrow = False
+        self._is_collection_date_day_after_tomorrow = False
         self._last_update = dt_util.now().isoformat()

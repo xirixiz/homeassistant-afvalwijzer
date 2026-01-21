@@ -14,15 +14,16 @@ if TYPE_CHECKING:
 
 try:
     from homeassistant.const import Platform
+    from homeassistant.core import callback
     from homeassistant.helpers import config_validation as cv
 
     PLATFORMS: list[Platform] = [Platform.SENSOR]
     CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-except ImportError:
+except ImportError:  # pragma: no cover
     # Standalone test run, no Home Assistant installed
     PLATFORMS = []
-    CONFIG_SCHEMA = {}  # dummy, never used
+    CONFIG_SCHEMA = {}  # type: ignore[assignment]
 
 
 def _skip_runtime_setup() -> bool:
@@ -35,8 +36,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if _skip_runtime_setup():
         return True
 
-    if PLATFORMS:
-        hass.data.setdefault(DOMAIN, {})
+    hass.data.setdefault(DOMAIN, {})
     return True
 
 
@@ -46,12 +46,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = entry.data
+    hass.data[DOMAIN][entry.entry_id] = {
+        "data": dict(entry.data),
+        "options": dict(entry.options),
+    }
+
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     if PLATFORMS:
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+
+@callback
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update."""
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = {
+        "data": dict(entry.data),
+        "options": dict(entry.options),
+    }
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -60,6 +76,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     if not PLATFORMS:
+        hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
         return True
 
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

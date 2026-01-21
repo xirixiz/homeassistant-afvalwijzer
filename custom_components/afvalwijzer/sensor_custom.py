@@ -1,7 +1,11 @@
 """Afvalwijzer integration."""
 
-from datetime import datetime
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date, datetime, time
 import hashlib
+from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -22,119 +26,167 @@ from .const.const import (
     SENSOR_PREFIX,
 )
 
+# Options keys from your config flow
+CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
+DEFAULT_SHOW_FULL_TIMESTAMP = True
+
+
+@dataclass(slots=True)
+class _Config:
+    default_label: str
+    date_isoformat: bool
+    show_full_timestamp: bool
+    id_name: str
+
+
+def _as_utc_aware(value: datetime) -> datetime:
+    """Return timezone aware datetime in UTC."""
+    if dt_util.is_naive(value):
+        value = dt_util.DEFAULT_TIME_ZONE.localize(value)
+    return dt_util.as_utc(value)
+
+
+def _date_to_utc_midnight(value: date) -> datetime:
+    """Convert a date into UTC midnight for that local day."""
+    local_dt = datetime.combine(value, time.min)
+    local_dt = dt_util.DEFAULT_TIME_ZONE.localize(local_dt)
+    return dt_util.as_utc(local_dt)
+
 
 class CustomSensor(RestoreEntity, SensorEntity):
-    """Representation of a custom-based waste sensor."""
+    """Representation of a custom based waste sensor."""
 
-    def __init__(self, hass, waste_type, fetch_data, config):
-        """Initialize the sensor."""
+    _attr_icon = SENSOR_ICON
+
+    def __init__(
+        self,
+        hass: Any,
+        waste_type: str,
+        fetch_data: Any,
+        config: dict[str, Any],
+    ) -> None:
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
-        self.config = config
-        self._id_name = config.get(CONF_ID)
-        self._default_label = config.get(CONF_DEFAULT_LABEL)
-        self._date_isoformat = str(config.get(CONF_DATE_ISOFORMAT)).lower()
-        self._last_update = None
-        self._days_until_collection_date = None
-        self._name = (
-            SENSOR_PREFIX + (f"{self._id_name} " if self._id_name else "")
+
+        id_name = str(config.get(CONF_ID, "") or "")
+        self._cfg = _Config(
+            default_label=str(config.get(CONF_DEFAULT_LABEL, "geen")),
+            date_isoformat=bool(config.get(CONF_DATE_ISOFORMAT, False)),
+            show_full_timestamp=bool(
+                config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
+            ),
+            id_name=id_name,
+        )
+
+        self._last_update: str | None = None
+        self._days_until_collection_date: int | None = None
+
+        self._attr_name = (
+            SENSOR_PREFIX + (f"{self._cfg.id_name} " if self._cfg.id_name else "")
         ) + waste_type
-        self._state = self._default_label
-        self._icon = SENSOR_ICON
-        self._unique_id = hashlib.sha1(
-            f"{waste_type}{config.get(CONF_ID)}{config.get(CONF_COLLECTOR)}{config.get(CONF_POSTAL_CODE)}{config.get(CONF_STREET_NUMBER)}{config.get(CONF_SUFFIX, '')}".encode()
-        ).hexdigest()
-        self._device_class = None
+
+        self._attr_unique_id = self._make_unique_id(config, waste_type)
+
+        # For HA timestamp device class, prefer native_value
+        self._attr_device_class: SensorDeviceClass | None = None
+        self._native_value: datetime | str | None = None
+
+        # Keep a string state for non timestamp values
+        self._fallback_state: str = self._cfg.default_label
+
+    @staticmethod
+    def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
+        unique_source = (
+            f"{waste_type}"
+            f"{config.get(CONF_ID)}"
+            f"{config.get(CONF_COLLECTOR)}"
+            f"{config.get(CONF_POSTAL_CODE)}"
+            f"{config.get(CONF_STREET_NUMBER)}"
+            f"{config.get(CONF_SUFFIX, '')}"
+        )
+        return hashlib.sha1(unique_source.encode()).hexdigest()
 
     @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
+    def native_value(self) -> datetime | str | None:
+        """Return the native value of the sensor."""
+        if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
+            return self._native_value if isinstance(self._native_value, datetime) else None
+        return self._fallback_state
 
     @property
-    def unique_id(self):
-        """Return a unique ID for the sensor."""
-        return self._unique_id
-
-    @property
-    def icon(self):
-        """Return the icon of the sensor."""
-        return self._icon
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
-        return self._state
-
-    @property
-    def device_class(self):
-        """Return the device class of the sensor."""
-        return self._device_class
-
-    @property
-    def state_attributes(self):
-        """Return the attributes of the sensor."""
-        attrs = {
-            ATTR_LAST_UPDATE: self._last_update,
-        }
-        if "next_date" in self.name.lower():
+    def extra_state_attributes(self) -> dict[str, Any]:
+        attrs: dict[str, Any] = {ATTR_LAST_UPDATE: self._last_update}
+        if "next_date" in (self._attr_name or "").lower():
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
-        if isinstance(self._state, datetime):
-            attrs["device_class"] = self._device_class
         return attrs
 
-    async def async_update(self):
+    async def async_update(self) -> None:
         """Fetch the latest data and update the state."""
-        _LOGGER.debug(f"Updating custom sensor: {self.name}")
+        _LOGGER.debug("Updating custom sensor: %s", self.name)
 
         try:
-            # Call update method from fetch_data
             await self.hass.async_add_executor_job(self.fetch_data.update)
+            waste_data_custom = self.fetch_data.waste_data_custom or {}
 
-            # Get waste data for custom sensors
-            waste_data_custom = self.fetch_data.waste_data_custom
-
-            if not waste_data_custom or self.waste_type not in waste_data_custom:
+            if self.waste_type not in waste_data_custom:
                 raise ValueError(f"No data for waste type: {self.waste_type}")
 
-            # Update attributes and state based on waste data
-            collection_date = waste_data_custom[self.waste_type]
-            if isinstance(collection_date, datetime):
-                self._update_attributes_date(collection_date)
-            else:
-                self._update_attributes_non_date(collection_date)
+            value = waste_data_custom[self.waste_type]
+            self._apply_value(value)
 
-            # Update last_update timestamp
             self._last_update = dt_util.now().isoformat()
 
         except Exception as err:
-            _LOGGER.error(f"Error updating custom sensor {self.name}: {err}")
-            self._handle_value_error()
+            _LOGGER.error("Error updating custom sensor %s: %s", self.name, err)
+            self._set_error_state()
 
-    def _update_attributes_date(self, collection_date):
-        """Update attributes for a datetime value."""
-        collection_date_object = (
-            collection_date.isoformat()
-            if self._date_isoformat in ("true", "yes")
-            else collection_date.date()
+    def _apply_value(self, value: Any) -> None:
+        """Apply collector output to sensor state."""
+        self._days_until_collection_date = None
+        self._attr_device_class = None
+        self._native_value = None
+
+        # datetime value
+        if isinstance(value, datetime):
+            aware = _as_utc_aware(value)
+            self._set_timestamp(aware)
+            return
+
+        # date value
+        if isinstance(value, date):
+            aware = _date_to_utc_midnight(value)
+            self._set_timestamp(aware, date_value=value)
+            return
+
+        # other values
+        self._fallback_state = str(value)
+
+    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
+        """Set the sensor as a timestamp sensor."""
+        self._attr_device_class = SensorDeviceClass.TIMESTAMP
+
+        today = dt_util.now().date()
+        effective_date = date_value or aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date()
+        self._days_until_collection_date = (effective_date - today).days
+
+        if self._cfg.show_full_timestamp:
+            self._native_value = aware_utc
+            return
+
+        # If user does not want full timestamp, expose a plain string date
+        # Device class must be unset in that case to avoid HA expecting a datetime
+        self._attr_device_class = None
+        self._native_value = None
+        self._fallback_state = (
+            aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date().isoformat()
+            if self._cfg.date_isoformat
+            else str(aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date())
         )
-        collection_date_delta = collection_date.date()
-        delta = collection_date_delta - dt_util.now().date()
 
-        self._days_until_collection_date = delta.days
-        self._device_class = SensorDeviceClass.TIMESTAMP
-        self._state = collection_date_object
-
-    def _update_attributes_non_date(self, value):
-        """Update attributes for a non-datetime value."""
-        self._state = str(value)
+    def _set_error_state(self) -> None:
+        self._fallback_state = self._cfg.default_label
         self._days_until_collection_date = None
-        self._device_class = None
-
-    def _handle_value_error(self):
-        """Handle errors in fetching data."""
-        self._state = self._default_label
-        self._days_until_collection_date = None
-        self._device_class = None
+        self._attr_device_class = None
+        self._native_value = None
         self._last_update = dt_util.now().isoformat()
