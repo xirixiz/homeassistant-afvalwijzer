@@ -217,7 +217,7 @@ def get_waste_data_raw(
         unique_id = first.get("UniqueId")
         community = first.get("Community")
 
-        if not unique_id or not community:
+        if not unique_id:
             _LOGGER.error("Address response missing UniqueId and or Community!")
             return []
 
