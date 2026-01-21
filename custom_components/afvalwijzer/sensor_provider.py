@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
-import hashlib
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
@@ -53,6 +53,7 @@ def _as_utc_aware(value: datetime) -> datetime:
         value = dt_util.DEFAULT_TIME_ZONE.localize(value)
     return dt_util.as_utc(value)
 
+
 def _date_to_local_midnight(value: date) -> datetime:
     """Convert a date into a timezone-aware local midnight datetime."""
     local_dt = datetime.combine(value, time.min)
@@ -63,13 +64,13 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     """Representation of a provider based waste sensor."""
 
     def __init__(
-        """Initialize a provider-based Afvalwijzer sensor."""
         self,
         hass: Any,
         waste_type: str,
         fetch_data: Any,
         config: dict[str, Any],
     ) -> None:
+        """Initialize a provider-based Afvalwijzer sensor."""
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
@@ -98,15 +99,13 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
         self._last_update: str | None = None
         self._days_until_collection_date: int | None = None
-        self._is_collection_date_today: bool = False
-        self._is_collection_date_tomorrow: bool = False
-        self._is_collection_date_day_after_tomorrow: bool = False
+        self._is_collection_date_today = False
+        self._is_collection_date_tomorrow = False
+        self._is_collection_date_day_after_tomorrow = False
 
         self._attr_device_class: SensorDeviceClass | None = None
         self._native_value: datetime | int | None = None
-        self._fallback_state: str = (
-            "0" if self._is_notification_sensor else self._cfg.default_label
-        )
+        self._fallback_state = "0" if self._is_notification_sensor else self._cfg.default_label
 
     @staticmethod
     def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
@@ -118,7 +117,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             f"{config.get(CONF_STREET_NUMBER)}"
             f"{config.get(CONF_SUFFIX, '')}"
         )
-        return hashlib.sha1(unique_source.encode()).hexdigest()
+        return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
 
     @staticmethod
     def _resolve_include_today(config: dict[str, Any]) -> bool:
@@ -126,7 +125,6 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         if CONF_INCLUDE_TODAY in config:
             return bool(config.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
 
-        # Backward compatible: exclude_pickup_today True means do NOT include today
         raw = str(config.get(CONF_EXCLUDE_PICKUP_TODAY, "true")).lower()
         exclude_today = raw in ("true", "yes", "1", "on")
         return not exclude_today
@@ -138,9 +136,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             return self._native_value if isinstance(self._native_value, int) else 0
 
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return (
-                self._native_value if isinstance(self._native_value, datetime) else None
-            )
+            return self._native_value if isinstance(self._native_value, datetime) else None
 
         return self._fallback_state
 
@@ -160,9 +156,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             ATTR_DAYS_UNTIL_COLLECTION_DATE: self._days_until_collection_date,
             ATTR_IS_COLLECTION_DATE_TODAY: self._is_collection_date_today,
             ATTR_IS_COLLECTION_DATE_TOMORROW: self._is_collection_date_tomorrow,
-            ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: (
-                self._is_collection_date_day_after_tomorrow
-            ),
+            ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW: self._is_collection_date_day_after_tomorrow,
         }
 
     async def async_update(self) -> None:
@@ -212,9 +206,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
 
-    def _set_timestamp(
-        self, aware_utc: datetime, *, date_value: date | None = None
-    ) -> None:
+    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
         local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
         collection_date = date_value or local_dt.date()
 
@@ -228,7 +220,6 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             self._native_value = local_dt
             return
 
-        # If not showing full timestamp, expose date as string instead
         self._attr_device_class = None
         if self._cfg.date_isoformat:
             self._fallback_state = collection_date.isoformat()
@@ -238,12 +229,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     def _update_collection_date_flags(self, collection_date: date) -> None:
         today = dt_util.now().date()
         self._is_collection_date_today = collection_date == today
-        self._is_collection_date_tomorrow = collection_date == (
-            today + timedelta(days=1)
-        )
-        self._is_collection_date_day_after_tomorrow = collection_date == (
-            today + timedelta(days=2)
-        )
+        self._is_collection_date_tomorrow = collection_date == (today + timedelta(days=1))
+        self._is_collection_date_day_after_tomorrow = collection_date == (today + timedelta(days=2))
 
     def _update_notification_sensor(self) -> None:
         notifications = self.fetch_data.notification_data or []

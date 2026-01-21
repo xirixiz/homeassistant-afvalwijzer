@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from datetime import date, datetime, time
-import hashlib
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
@@ -45,6 +45,7 @@ def _as_utc_aware(value: datetime) -> datetime:
         value = dt_util.DEFAULT_TIME_ZONE.localize(value)
     return dt_util.as_utc(value)
 
+
 def _date_to_local_midnight(value: date) -> datetime:
     """Convert a date into local midnight with timezone."""
     local_dt = datetime.combine(value, time.min)
@@ -57,13 +58,13 @@ class CustomSensor(RestoreEntity, SensorEntity):
     _attr_icon = SENSOR_ICON
 
     def __init__(
-        """Initialize a custom Afvalwijzer sensor."""
         self,
         hass: Any,
         waste_type: str,
         fetch_data: Any,
         config: dict[str, Any],
     ) -> None:
+        """Initialize a custom Afvalwijzer sensor."""
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
@@ -92,7 +93,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self._native_value: datetime | str | None = None
 
         # Keep a string state for non timestamp values
-        self._fallback_state: str = self._cfg.default_label
+        self._fallback_state = self._cfg.default_label
 
     @staticmethod
     def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
@@ -110,9 +111,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
     def native_value(self) -> datetime | str | None:
         """Return the native value of the sensor."""
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return (
-                self._native_value if isinstance(self._native_value, datetime) else None
-            )
+            return self._native_value if isinstance(self._native_value, datetime) else None
         return self._fallback_state
 
     @property
@@ -134,9 +133,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
             if self.waste_type not in waste_data_custom:
                 raise ValueError(f"No data for waste type: {self.waste_type}")
 
-            value = waste_data_custom[self.waste_type]
-            self._apply_value(value)
-
+            self._apply_value(waste_data_custom[self.waste_type])
             self._last_update = dt_util.now().isoformat()
 
         except Exception as err:
@@ -149,48 +146,41 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self._attr_device_class = None
         self._native_value = None
 
-        # datetime value
         if isinstance(value, datetime):
             aware = _as_utc_aware(value)
             self._set_timestamp(aware)
             return
 
-        # date value
         if isinstance(value, date):
             aware = _date_to_local_midnight(value)
             self._set_timestamp(aware, date_value=value)
             return
 
-        # other values
         self._fallback_state = str(value)
 
-    def _set_timestamp(
-        self, aware_utc: datetime, *, date_value: date | None = None
-    ) -> None:
+    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
         """Set the sensor as a timestamp sensor."""
-        self._attr_device_class = SensorDeviceClass.TIMESTAMP
+        local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
+        effective_date = date_value or local_dt.date()
 
         today = dt_util.now().date()
-        effective_date = (
-            date_value or aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date()
-        )
         self._days_until_collection_date = (effective_date - today).days
 
         if self._cfg.show_full_timestamp:
-            self._native_value = aware_utc
+            self._attr_device_class = SensorDeviceClass.TIMESTAMP
+            self._native_value = local_dt
             return
 
-        # If user does not want full timestamp, expose a plain string date
-        # Device class must be unset in that case to avoid HA expecting a datetime
+        # If user does not want full timestamp, expose a plain string date.
+        # Device class must be unset in that case to avoid HA expecting a datetime.
         self._attr_device_class = None
         self._native_value = None
         self._fallback_state = (
-            aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date().isoformat()
-            if self._cfg.date_isoformat
-            else str(aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE).date())
+            effective_date.isoformat() if self._cfg.date_isoformat else str(effective_date)
         )
 
     def _set_error_state(self) -> None:
+        """Set a safe fallback state on errors."""
         self._fallback_state = self._cfg.default_label
         self._days_until_collection_date = None
         self._attr_device_class = None

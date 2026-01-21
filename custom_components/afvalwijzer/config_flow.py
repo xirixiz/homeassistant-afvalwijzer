@@ -51,6 +51,8 @@ DEFAULT_INCLUDE_TODAY = True
 
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 
+_ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
+
 
 def _build_all_collectors() -> list[str]:
     """Return a sorted list of all supported collectors."""
@@ -95,18 +97,9 @@ BASE_SCHEMA = vol.Schema(
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Optional(
-            CONF_SHOW_FULL_TIMESTAMP,
-            default=DEFAULT_SHOW_FULL_TIMESTAMP,
-        ): cv.boolean,
-        vol.Optional(
-            CONF_INCLUDE_TODAY,
-            default=DEFAULT_INCLUDE_TODAY,
-        ): cv.boolean,
-        vol.Optional(
-            CONF_LANGUAGE,
-            default=DEFAULT_LANGUAGE,
-        ): vol.In(["nl", "en"]),
+        vol.Optional(CONF_SHOW_FULL_TIMESTAMP, default=DEFAULT_SHOW_FULL_TIMESTAMP): cv.boolean,
+        vol.Optional(CONF_INCLUDE_TODAY, default=DEFAULT_INCLUDE_TODAY): cv.boolean,
+        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(_ALL_LANGUAGES),
     }
 )
 
@@ -134,16 +127,15 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             cleaned = _clean_user_input(user_input)
 
-            postal_code = cleaned[CONF_POSTAL_CODE]
-            street_number = cleaned[CONF_STREET_NUMBER]
+            postal_code = str(cleaned[CONF_POSTAL_CODE])
+            street_number = str(cleaned[CONF_STREET_NUMBER])
 
             if not _validate_postal_code(postal_code):
                 errors["base"] = "invalid_postal_code"
             elif not _validate_street_number(street_number):
                 errors["base"] = "invalid_street_number"
             else:
-                unique = _unique_id_from(cleaned)
-                await self.async_set_unique_id(unique)
+                await self.async_set_unique_id(_unique_id_from(cleaned))
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title="Afvalwijzer", data=cleaned)
 
@@ -189,7 +181,7 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(
                     CONF_LANGUAGE,
                     default=current.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
-                ): vol.In(["nl", "en"]),
+                ): vol.In(_ALL_LANGUAGES),
             }
         )
 
