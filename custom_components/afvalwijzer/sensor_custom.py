@@ -45,12 +45,10 @@ def _as_utc_aware(value: datetime) -> datetime:
         value = dt_util.DEFAULT_TIME_ZONE.localize(value)
     return dt_util.as_utc(value)
 
-
-def _date_to_utc_midnight(value: date) -> datetime:
-    """Convert a date into UTC midnight for that local day."""
+def _date_to_local_midnight(value: date) -> datetime:
+    """Convert a date into local midnight with timezone."""
     local_dt = datetime.combine(value, time.min)
-    local_dt = dt_util.DEFAULT_TIME_ZONE.localize(local_dt)
-    return dt_util.as_utc(local_dt)
+    return dt_util.DEFAULT_TIME_ZONE.localize(local_dt)
 
 
 class CustomSensor(RestoreEntity, SensorEntity):
@@ -157,7 +155,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
         # date value
         if isinstance(value, date):
-            aware = _date_to_utc_midnight(value)
+            aware = _date_to_local_midnight(value)
             self._set_timestamp(aware, date_value=value)
             return
 
