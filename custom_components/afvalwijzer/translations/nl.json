@@ -10,7 +10,6 @@
           "street_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
           "exclude_pickup_today": "Sluit ophalen van vandaag uit",
-          "date_isoformat": "Gebruik ISO-datumformaat",
           "default_label": "Standaard label bij geen datum bekend",
           "exclude_list": "Afvaltype uitsluiten"
         }
@@ -31,7 +30,6 @@
         "description": "Pas extra opties aan voor de Afvalwijzer-integratie.",
         "data": {
           "exclude_pickup_today": "Sluit ophalen van vandaag uit",
-          "date_isoformat": "Gebruik ISO-datumformaat",
           "default_label": "Standaard label bij geen datum bekend",
           "exclude_list": "Afvaltype uitsluiten"
         }

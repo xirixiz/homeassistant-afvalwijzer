@@ -16,7 +16,6 @@ from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_LAST_UPDATE,
     CONF_COLLECTOR,
-    CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_ID,
     CONF_POSTAL_CODE,
@@ -34,7 +33,6 @@ DEFAULT_SHOW_FULL_TIMESTAMP = True
 @dataclass(slots=True)
 class _Config:
     default_label: str
-    date_isoformat: bool
     show_full_timestamp: bool
     id_name: str
 
@@ -75,7 +73,6 @@ class CustomSensor(RestoreEntity, SensorEntity):
         id_name = str(config.get(CONF_ID, "") or "")
         self._cfg = _Config(
             default_label=str(config.get(CONF_DEFAULT_LABEL, "geen")),
-            date_isoformat=bool(config.get(CONF_DATE_ISOFORMAT, False)),
             show_full_timestamp=bool(
                 config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
             ),
@@ -164,10 +161,10 @@ class CustomSensor(RestoreEntity, SensorEntity):
     def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
         """Set the sensor as a timestamp sensor."""
         local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
-        effective_date = date_value or local_dt.date()
+        collection_date = date_value or local_dt.date()
 
         today = dt_util.now().date()
-        self._days_until_collection_date = (effective_date - today).days
+        self._days_until_collection_date = (collection_date - today).days
 
         if self._cfg.show_full_timestamp:
             self._attr_device_class = SensorDeviceClass.TIMESTAMP
@@ -178,9 +175,8 @@ class CustomSensor(RestoreEntity, SensorEntity):
         # Device class must be unset in that case to avoid HA expecting a datetime.
         self._attr_device_class = None
         self._native_value = None
-        self._fallback_state = (
-            effective_date.isoformat() if self._cfg.date_isoformat else str(effective_date)
-        )
+        self._fallback_state = collection_date.isoformat()
+
 
     def _set_error_state(self) -> None:
         """Set a safe fallback state on errors."""

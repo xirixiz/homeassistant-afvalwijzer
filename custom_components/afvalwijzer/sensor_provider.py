@@ -19,7 +19,6 @@ from .const.const import (
     ATTR_IS_COLLECTION_DATE_TOMORROW,
     ATTR_LAST_UPDATE,
     CONF_COLLECTOR,
-    CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_ID,
@@ -41,7 +40,6 @@ DEFAULT_SHOW_FULL_TIMESTAMP = True
 @dataclass(slots=True)
 class _Config:
     default_label: str
-    date_isoformat: bool
     include_today: bool
     show_full_timestamp: bool
     id_name: str
@@ -82,7 +80,6 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         id_name = str(config.get(CONF_ID, "") or "")
         self._cfg = _Config(
             default_label=str(config.get(CONF_DEFAULT_LABEL, "geen")),
-            date_isoformat=bool(config.get(CONF_DATE_ISOFORMAT, False)),
             include_today=self._resolve_include_today(config),
             show_full_timestamp=bool(
                 config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
@@ -225,10 +222,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             return
 
         self._attr_device_class = None
-        if self._cfg.date_isoformat:
-            self._fallback_state = collection_date.isoformat()
-        else:
-            self._fallback_state = str(collection_date)
+        self._fallback_state = collection_date.isoformat()
+
 
     def _update_collection_date_flags(self, collection_date: date) -> None:
         today = dt_util.now().date()

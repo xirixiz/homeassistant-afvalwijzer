@@ -161,7 +161,6 @@ CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_ID = "id"
 CONF_EXCLUDE_LIST = "exclude_list"
-CONF_DATE_ISOFORMAT = "date_isoformat"
 
 SENSOR_PREFIX = "afvalwijzer "
 SENSOR_ICON = "mdi:recycle"

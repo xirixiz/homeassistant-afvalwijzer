@@ -10,7 +10,6 @@
           "street_number": "Street number",
           "suffix": "Address suffix",
           "exclude_pickup_today": "Exclude today's pickup",
-          "date_isoformat": "Use ISO date format",
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list"
         }
@@ -31,7 +30,6 @@
         "description": "Configure options for afvalwijzer integration.",
         "data": {
           "exclude_pickup_today": "Exclude today's pickup",
-          "date_isoformat": "Use ISO date format",
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list"
         }

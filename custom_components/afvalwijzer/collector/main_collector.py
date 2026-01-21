@@ -58,7 +58,6 @@ class MainCollector:
         street_number: str,
         suffix: str,
         exclude_pickup_today,
-        date_isoformat,
         exclude_list: str,
         default_label: str,
     ):
@@ -69,7 +68,6 @@ class MainCollector:
         self.street_number = str(street_number).strip()
         self.suffix = str(suffix).strip().lower()
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
-        self.date_isoformat = self._normalize_bool_param(date_isoformat)
         self.exclude_list = str(exclude_list).strip().lower()
         self.default_label = str(default_label).strip()
 

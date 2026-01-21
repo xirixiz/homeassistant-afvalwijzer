@@ -13,7 +13,6 @@ from homeassistant.helpers import config_validation as cv
 
 from .const.const import (
     CONF_COLLECTOR,
-    CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
@@ -90,7 +89,6 @@ BASE_SCHEMA = vol.Schema(
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
-        vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
     }
@@ -98,9 +96,18 @@ BASE_SCHEMA = vol.Schema(
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Optional(CONF_SHOW_FULL_TIMESTAMP, default=DEFAULT_SHOW_FULL_TIMESTAMP): cv.boolean,
-        vol.Optional(CONF_INCLUDE_TODAY, default=DEFAULT_INCLUDE_TODAY): cv.boolean,
-        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(_ALL_LANGUAGES),
+        vol.Optional(
+            CONF_SHOW_FULL_TIMESTAMP,
+            default=DEFAULT_SHOW_FULL_TIMESTAMP,
+        ): cv.boolean,
+        vol.Optional(
+            CONF_INCLUDE_TODAY,
+            default=DEFAULT_INCLUDE_TODAY,
+        ): cv.boolean,
+        vol.Optional(
+            CONF_LANGUAGE,
+            default=DEFAULT_LANGUAGE,
+        ): vol.In(_ALL_LANGUAGES),
     }
 )
 
@@ -167,11 +174,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._reconfigure_entry = self.hass.config_entries.async_get_entry(
             self.context["entry_id"]
         )
-
         if self._reconfigure_entry is None:
             return self.async_abort(reason="reconfigure_failed")
 
-        # Pre-fill with current data
         current = dict(self._reconfigure_entry.data)
         return await self._async_show_reconfigure_form(user_input, current)
 
@@ -194,10 +199,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 assert self._reconfigure_entry is not None
 
-                new_unique_id = _unique_id_from(cleaned)
-                await self.async_set_unique_id(new_unique_id)
-
-                # When reconfiguring, allow changing unique id by updating the entry.
+                await self.async_set_unique_id(_unique_id_from(cleaned))
                 self.hass.config_entries.async_update_entry(
                     self._reconfigure_entry,
                     data=cleaned,
@@ -224,7 +226,7 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize the options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self,
@@ -232,9 +234,13 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
     ) -> config_entries.FlowResult:
         """Handle the options step."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            result = self.async_create_entry(title="", data=user_input)
+            self.hass.async_create_task(
+                self.hass.config_entries.async_reload(self._config_entry.entry_id)
+            )
+            return result
 
-        current = dict(self.config_entry.options)
+        current = dict(self._config_entry.options)
 
         schema = vol.Schema(
             {

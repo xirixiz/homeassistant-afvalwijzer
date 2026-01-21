@@ -18,7 +18,6 @@ from .collector.main_collector import MainCollector
 from .const.const import (
     _LOGGER,
     CONF_COLLECTOR,
-    CONF_DATE_ISOFORMAT,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
@@ -38,7 +37,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
-        vol.Optional(CONF_DATE_ISOFORMAT, default=False): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
         vol.Optional(CONF_ID, default=""): cv.string,
@@ -163,7 +161,6 @@ class AfvalwijzerData:
                 self.config.get(CONF_STREET_NUMBER),
                 self.config.get(CONF_SUFFIX),
                 self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
-                self.config.get(CONF_DATE_ISOFORMAT),
                 self.config.get(CONF_EXCLUDE_LIST),
                 self.config.get(CONF_DEFAULT_LABEL),
             )
