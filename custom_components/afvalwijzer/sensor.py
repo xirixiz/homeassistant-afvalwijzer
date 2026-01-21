@@ -146,6 +146,7 @@ class AfvalwijzerData:
     """Handles fetching and storing Afvalwijzer data."""
 
     def __init__(self, hass: HomeAssistant, config: dict[str, Any]) -> None:
+        """Initialize the Afvalwijzer base sensor."""
         self.hass = hass
         self.config = config
         self.waste_data_with_today: dict[str, Any] | None = None
