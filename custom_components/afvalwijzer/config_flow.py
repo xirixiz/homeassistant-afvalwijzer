@@ -16,6 +16,7 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_ID,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -47,6 +48,9 @@ CONF_INCLUDE_TODAY = "include_today"
 DEFAULT_SHOW_FULL_TIMESTAMP = True
 DEFAULT_LANGUAGE = "nl"
 DEFAULT_INCLUDE_TODAY = True
+
+DEFAULT_DEFAULT_LABEL = "geen"
+DEFAULT_EXCLUDE_LIST = ""
 
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 _ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
@@ -82,32 +86,24 @@ def _build_all_collectors() -> list[str]:
 
 ALL_COLLECTORS = _build_all_collectors()
 
-BASE_SCHEMA = vol.Schema(
+# New installs: only identity and address belong in the entry data.
+USER_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS),
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
-        vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
-        vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
-        vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
+        vol.Optional(CONF_ID, default=""): cv.string,
     }
 )
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Optional(
-            CONF_SHOW_FULL_TIMESTAMP,
-            default=DEFAULT_SHOW_FULL_TIMESTAMP,
-        ): cv.boolean,
-        vol.Optional(
-            CONF_INCLUDE_TODAY,
-            default=DEFAULT_INCLUDE_TODAY,
-        ): cv.boolean,
-        vol.Optional(
-            CONF_LANGUAGE,
-            default=DEFAULT_LANGUAGE,
-        ): vol.In(_ALL_LANGUAGES),
+        vol.Optional(CONF_SHOW_FULL_TIMESTAMP, default=DEFAULT_SHOW_FULL_TIMESTAMP): cv.boolean,
+        vol.Optional(CONF_INCLUDE_TODAY, default=DEFAULT_INCLUDE_TODAY): cv.boolean,
+        vol.Optional(CONF_DEFAULT_LABEL, default=DEFAULT_DEFAULT_LABEL): cv.string,
+        vol.Optional(CONF_EXCLUDE_LIST, default=DEFAULT_EXCLUDE_LIST): cv.string,
+        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(_ALL_LANGUAGES),
     }
 )
 
@@ -163,7 +159,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             user_input = cleaned
 
-        schema = self.add_suggested_values_to_schema(BASE_SCHEMA, user_input or {})
+        schema = self.add_suggested_values_to_schema(USER_SCHEMA, user_input or {})
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     async def async_step_reconfigure(
@@ -189,6 +185,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             cleaned = _clean_user_input(user_input)
+
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             street_number = str(cleaned[CONF_STREET_NUMBER])
 
@@ -213,7 +210,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input:
             suggested.update(user_input)
 
-        schema = self.add_suggested_values_to_schema(BASE_SCHEMA, suggested)
+        schema = self.add_suggested_values_to_schema(USER_SCHEMA, suggested)
         return self.async_show_form(
             step_id=_RECONFIGURE_STEP_ID,
             data_schema=schema,
@@ -234,30 +231,35 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
     ) -> config_entries.FlowResult:
         """Handle the options step."""
         if user_input is not None:
-            result = self.async_create_entry(title="", data=user_input)
+            cleaned = _clean_options_input(user_input)
+
+            result = self.async_create_entry(title="", data=cleaned)
             self.hass.async_create_task(
                 self.hass.config_entries.async_reload(self._config_entry.entry_id)
             )
             return result
 
         current = dict(self._config_entry.options)
+        include_today = bool(current.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
 
         schema = vol.Schema(
             {
                 vol.Optional(
                     CONF_SHOW_FULL_TIMESTAMP,
-                    default=current.get(
-                        CONF_SHOW_FULL_TIMESTAMP,
-                        DEFAULT_SHOW_FULL_TIMESTAMP,
-                    ),
+                    default=current.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP),
                 ): cv.boolean,
                 vol.Optional(
                     CONF_INCLUDE_TODAY,
-                    default=current.get(
-                        CONF_INCLUDE_TODAY,
-                        DEFAULT_INCLUDE_TODAY,
-                    ),
+                    default=include_today,
                 ): cv.boolean,
+                vol.Optional(
+                    CONF_DEFAULT_LABEL,
+                    default=current.get(CONF_DEFAULT_LABEL, DEFAULT_DEFAULT_LABEL),
+                ): cv.string,
+                vol.Optional(
+                    CONF_EXCLUDE_LIST,
+                    default=current.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST),
+                ): cv.string,
                 vol.Optional(
                     CONF_LANGUAGE,
                     default=current.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
@@ -275,11 +277,29 @@ def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:
     postal_code_raw = str(cleaned.get(CONF_POSTAL_CODE, ""))
     cleaned[CONF_POSTAL_CODE] = postal_code_raw.replace(" ", "").upper()
 
-    exclude_list_raw = str(cleaned.get(CONF_EXCLUDE_LIST, ""))
-    cleaned[CONF_EXCLUDE_LIST] = exclude_list_raw.lower()
-
     suffix_raw = str(cleaned.get(CONF_SUFFIX, ""))
     cleaned[CONF_SUFFIX] = suffix_raw.strip().upper()
+
+    id_raw = str(cleaned.get(CONF_ID, ""))
+    cleaned[CONF_ID] = id_raw.strip()
+
+    return cleaned
+
+
+def _clean_options_input(options_input: dict[str, Any]) -> dict[str, Any]:
+    """Normalize options and keep backward compatible legacy keys."""
+    cleaned = dict(options_input)
+
+    exclude_list_raw = str(cleaned.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST))
+    cleaned[CONF_EXCLUDE_LIST] = exclude_list_raw.lower()
+
+    default_label_raw = str(cleaned.get(CONF_DEFAULT_LABEL, DEFAULT_DEFAULT_LABEL))
+    cleaned[CONF_DEFAULT_LABEL] = default_label_raw.strip() or DEFAULT_DEFAULT_LABEL
+
+    include_today = bool(cleaned.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
+
+    # Backward compatibility: MainCollector expects exclude_pickup_today.
+    cleaned[CONF_EXCLUDE_PICKUP_TODAY] = not include_today
 
     return cleaned
 

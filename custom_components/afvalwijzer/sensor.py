@@ -11,7 +11,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
-import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_track_time_interval
 
 from .collector.main_collector import MainCollector
@@ -65,7 +65,6 @@ async def async_setup_entry(
     async_add_entities,
 ) -> None:
     """Set up sensors from a config entry (config flow)."""
-    # Options override data per entry
     config: dict[str, Any] = {**entry.data, **entry.options}
 
     data = AfvalwijzerData(hass, config)
@@ -75,9 +74,7 @@ async def async_setup_entry(
         _LOGGER.warning("Afvalwijzer backend not ready yet; will retry setup.")
         raise ConfigEntryNotReady from transient_error
     if not ok:
-        _LOGGER.error(
-            "Afvalwijzer initial update failed; aborting setup for this entry."
-        )
+        _LOGGER.error("Afvalwijzer initial update failed; aborting setup for this entry.")
         return
 
     await _setup_sensors(hass, config, async_add_entities, data)
@@ -87,7 +84,7 @@ async def _setup_sensors(
     hass: HomeAssistant,
     config: dict[str, Any],
     async_add_entities,
-    data: AfvalwijzerData | None = None,
+    data: "AfvalwijzerData | None" = None,
 ) -> None:
     """General setup logic for platform and config entry."""
     _LOGGER.debug(
@@ -118,15 +115,10 @@ async def _setup_sensors(
     waste_data_with_today = data.waste_data_with_today or {}
     waste_data_custom = data.waste_data_custom or {}
 
-    waste_types_provider = list(waste_data_with_today.keys())
-    waste_types_custom = list(waste_data_custom.keys())
-
     entities: list[Any] = [
-        ProviderSensor(hass, wtype, data, config) for wtype in waste_types_provider
+        ProviderSensor(hass, wtype, data, config) for wtype in waste_data_with_today
     ]
-    entities.extend(
-        CustomSensor(hass, wtype, data, config) for wtype in waste_types_custom
-    )
+    entities.extend(CustomSensor(hass, wtype, data, config) for wtype in waste_data_custom)
 
     if data.notification_data is not None:
         entities.append(ProviderSensor(hass, "notifications", data, config))
