@@ -53,6 +53,7 @@ _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 
 
 def _build_all_collectors() -> list[str]:
+    """Return a sorted list of all supported collectors."""
     return sorted(
         {
             *SENSOR_COLLECTORS_MIJNAFVALWIJZER,
@@ -120,6 +121,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
+        """Return the options flow handler."""
         return AfvalwijzerOptionsFlow(config_entry)
 
     async def async_step_user(
@@ -155,16 +157,17 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
     """Handle Afvalwijzer options."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize the options flow."""
         self.config_entry = config_entry
 
     async def async_step_init(
         self,
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.FlowResult:
+        """Handle the options step."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        # Per entry defaults
         current = dict(self.config_entry.options)
 
         schema = vol.Schema(
@@ -194,6 +197,7 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
 
 
 def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:
+    """Normalize and sanitize user input."""
     cleaned = dict(user_input)
 
     postal_code_raw = str(cleaned.get(CONF_POSTAL_CODE, ""))
@@ -209,6 +213,7 @@ def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:
 
 
 def _unique_id_from(cleaned: dict[str, Any]) -> str:
+    """Return a unique ID based on collector and address."""
     collector = str(cleaned.get(CONF_COLLECTOR, "")).strip()
     postal_code = str(cleaned.get(CONF_POSTAL_CODE, "")).strip()
     street_number = str(cleaned.get(CONF_STREET_NUMBER, "")).strip()
@@ -217,8 +222,10 @@ def _unique_id_from(cleaned: dict[str, Any]) -> str:
 
 
 def _validate_postal_code(postal_code: str) -> bool:
+    """Validate Dutch postal code format (e.g., 1234AB)."""
     return bool(_POSTAL_RE.match(postal_code.strip()))
 
 
 def _validate_street_number(street_number: str) -> bool:
+    """Validate that the street number is a positive integer."""
     return street_number.strip().isdigit()
