@@ -4,6 +4,7 @@ This verifies that constants defined in `custom_components/afvalwijzer/const/con
 are used somewhere outside that file. It ignores a small set of known
 exceptions.
 """
+
 import ast
 from pathlib import Path
 import re
@@ -45,7 +46,9 @@ def test_constants_are_used_somewhere():
 
     constants = _collect_constants(const_path)
     constants = [c for c in constants if c not in IGNORED]
-    unused = [name for name in constants if not _is_referenced(repo_root, name, const_path)]
+    unused = [
+        name for name in constants if not _is_referenced(repo_root, name, const_path)
+    ]
 
     if unused:
         unused.sort()
