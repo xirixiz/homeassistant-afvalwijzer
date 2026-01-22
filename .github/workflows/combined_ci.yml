@@ -5,13 +5,7 @@ on:
     branches:
       - main
   pull_request:
-  schedule:
-    - cron: "0 0 * * *"
   workflow_dispatch:
-
-concurrency:
-  group: afvalwijzer-validation-and-formatting
-  cancel-in-progress: false
 
 jobs:
   hassfest:
