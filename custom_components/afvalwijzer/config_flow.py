@@ -51,6 +51,7 @@ DEFAULT_INCLUDE_TODAY = True
 
 DEFAULT_DEFAULT_LABEL = "geen"
 DEFAULT_EXCLUDE_LIST = ""
+DEFAULT_FRIENDLY_NAME = ""
 
 _POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 _ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
