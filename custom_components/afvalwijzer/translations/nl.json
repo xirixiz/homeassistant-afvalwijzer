@@ -5,7 +5,7 @@
         "title": "Configureer Afvalwijzer",
         "description": "Stel de Afvalwijzer-integratie in.",
         "data": {
-          "collector": "Collector (bijv. mijnafvalwijzer)",
+          "collector": "Afval-inzamelaar (bijv. mijnafvalwijzer)",
           "postal_code": "Postcode (bijv. 1234AB)",
           "street_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
@@ -16,7 +16,7 @@
         "title": "Afvalwijzer herconfigureren",
         "description": "Pas de adresgegevens voor deze Afvalwijzer-configuratie aan.",
         "data": {
-          "collector": "Collector",
+          "collector": "Afval-inzamelaar",
           "postal_code": "Postcode",
           "street_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
@@ -25,12 +25,12 @@
       }
     },
     "error": {
-      "invalid_postal_code": "Ongeldig postcodeformaat",
+      "invalid_postal_code": "Ongeldig postcode formaat",
       "invalid_street_number": "Huisnummer moet numeriek zijn"
     },
     "abort": {
       "already_configured": "Afvalwijzer is al geconfigureerd",
-      "reconfigure_successful": "Afvalwijzer is succesvol hergeconfigureerd"
+      "reconfigure_successful": "Afvalwijzer is succesvol geherconfigureerd"
     }
   },
   "options": {
@@ -40,9 +40,9 @@
         "description": "Pas extra instellingen voor de Afvalwijzer-integratie aan.",
         "data": {
           "show_full_timestamp": "Volledige datum en tijd tonen",
-          "include_today": "Ophaling van vandaag meenemen",
-          "default_label": "Standaard label wanneer geen datum bekend is",
-          "exclude_list": "Afvaltypes uitsluiten",
+          "include_today": "Ophalen van vandaag meenemen",
+          "default_label": "Standaard label wanneer geen data bekend is",
+          "exclude_list": "Afval-types uitsluiten",
           "language": "Taal"
         }
       }
