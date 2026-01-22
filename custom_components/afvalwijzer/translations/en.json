@@ -8,7 +8,8 @@
           "collector": "Collector (e.g. mijnafvalwijzer)",
           "postal_code": "Postal code (e.g. 1234AB)",
           "street_number": "Street number",
-          "suffix": "Address suffix"
+          "suffix": "Address suffix",
+          "friendly_name": "Friendly name (optional)"
         }
       },
       "reconfigure": {
@@ -18,7 +19,8 @@
           "collector": "Collector",
           "postal_code": "Postal code",
           "street_number": "Street number",
-          "suffix": "Address suffix"
+          "suffix": "Address suffix",
+          "friendly_name": "Friendly name (optional)"
         }
       }
     },

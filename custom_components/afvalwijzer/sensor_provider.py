@@ -22,6 +22,7 @@ from .const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_FRIENDLY_NAME,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -57,7 +58,9 @@ def _as_utc_aware(value: datetime) -> datetime:
 
 def _date_to_local_midnight(value: date) -> datetime:
     """Convert a date into a timezone-aware local midnight datetime."""
-    local_dt = datetime.combine(value, time.min).replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+    local_dt = datetime.combine(value, time.min).replace(
+        tzinfo=dt_util.DEFAULT_TIME_ZONE
+    )
     return local_dt
 
 
@@ -115,23 +118,23 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
         self._attr_device_class: SensorDeviceClass | None = None
         self._native_value: datetime | int | None = None
-        self._fallback_state = "0" if self._is_notification_sensor else self._cfg.default_label
+        self._fallback_state = (
+            "0" if self._is_notification_sensor else self._cfg.default_label
+        )
 
     @property
     def device_info(self) -> DeviceInfo:
         """Group all sensors for the same address under one device."""
         return DeviceInfo(
             identifiers={(DOMAIN, _address_key(self._config))},
-            name=f"Afvalwijzer {_address_label(self._config)}",
+            name=f"Afvalwijzer {self._config.get(CONF_FRIENDLY_NAME) or _address_label(self._config)}",
             manufacturer="Afvalwijzer",
         )
 
     @staticmethod
     def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
         unique_source = (
-            f"{waste_type}|"
-            f"{config.get(CONF_COLLECTOR)}|"
-            f"{_address_key(config)}"
+            f"{waste_type}|{config.get(CONF_COLLECTOR)}|{_address_key(config)}"
         )
         return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
 
@@ -152,7 +155,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             return self._native_value if isinstance(self._native_value, int) else 0
 
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return self._native_value if isinstance(self._native_value, datetime) else None
+            return (
+                self._native_value if isinstance(self._native_value, datetime) else None
+            )
 
         return self._fallback_state
 
@@ -230,7 +235,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
 
-    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
+    def _set_timestamp(
+        self, aware_utc: datetime, *, date_value: date | None = None
+    ) -> None:
         local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
         collection_date = date_value or local_dt.date()
 
@@ -250,8 +257,12 @@ class ProviderSensor(RestoreEntity, SensorEntity):
     def _update_collection_date_flags(self, collection_date: date) -> None:
         today = dt_util.now().date()
         self._is_collection_date_today = collection_date == today
-        self._is_collection_date_tomorrow = collection_date == (today + timedelta(days=1))
-        self._is_collection_date_day_after_tomorrow = collection_date == (today + timedelta(days=2))
+        self._is_collection_date_tomorrow = collection_date == (
+            today + timedelta(days=1)
+        )
+        self._is_collection_date_day_after_tomorrow = collection_date == (
+            today + timedelta(days=2)
+        )
 
     def _update_notification_sensor(self) -> None:
         notifications = self.fetch_data.notification_data or []

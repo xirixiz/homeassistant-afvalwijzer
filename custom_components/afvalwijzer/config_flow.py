@@ -16,6 +16,7 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_FRIENDLY_NAME,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -91,12 +92,15 @@ USER_SCHEMA = vol.Schema(
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
+        vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
     }
 )
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Optional(CONF_SHOW_FULL_TIMESTAMP, default=DEFAULT_SHOW_FULL_TIMESTAMP): cv.boolean,
+        vol.Optional(
+            CONF_SHOW_FULL_TIMESTAMP, default=DEFAULT_SHOW_FULL_TIMESTAMP
+        ): cv.boolean,
         vol.Optional(CONF_INCLUDE_TODAY, default=DEFAULT_INCLUDE_TODAY): cv.boolean,
         vol.Optional(CONF_DEFAULT_LABEL, default=DEFAULT_DEFAULT_LABEL): cv.string,
         vol.Optional(CONF_EXCLUDE_LIST, default=DEFAULT_EXCLUDE_LIST): cv.string,
@@ -199,7 +203,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._reconfigure_entry,
                     data=cleaned,
                 )
-                await self.hass.config_entries.async_reload(self._reconfigure_entry.entry_id)
+                await self.hass.config_entries.async_reload(
+                    self._reconfigure_entry.entry_id
+                )
                 return self.async_abort(reason="reconfigure_successful")
 
             user_input = cleaned
@@ -244,7 +250,9 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
             {
                 vol.Optional(
                     CONF_SHOW_FULL_TIMESTAMP,
-                    default=current.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP),
+                    default=current.get(
+                        CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP
+                    ),
                 ): cv.boolean,
                 vol.Optional(
                     CONF_INCLUDE_TODAY,

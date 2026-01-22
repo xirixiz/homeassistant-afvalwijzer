@@ -18,6 +18,7 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
+    CONF_FRIENDLY_NAME,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -49,7 +50,9 @@ def _as_utc_aware(value: datetime) -> datetime:
 
 def _date_to_local_midnight(value: date) -> datetime:
     """Convert a date into a timezone-aware local midnight datetime."""
-    local_dt = datetime.combine(value, time.min).replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+    local_dt = datetime.combine(value, time.min).replace(
+        tzinfo=dt_util.DEFAULT_TIME_ZONE
+    )
     return local_dt
 
 
@@ -107,16 +110,14 @@ class CustomSensor(RestoreEntity, SensorEntity):
         """Group all sensors for the same address under one device."""
         return DeviceInfo(
             identifiers={(DOMAIN, _address_key(self._config))},
-            name=f"Afvalwijzer {_address_label(self._config)}",
+            name=f"Afvalwijzer {self._config.get(CONF_FRIENDLY_NAME) or _address_label(self._config)}",
             manufacturer="Afvalwijzer",
         )
 
     @staticmethod
     def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
         unique_source = (
-            f"{waste_type}|"
-            f"{config.get(CONF_COLLECTOR)}|"
-            f"{_address_key(config)}"
+            f"{waste_type}|{config.get(CONF_COLLECTOR)}|{_address_key(config)}"
         )
         return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
 
@@ -124,7 +125,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
     def native_value(self) -> datetime | str | None:
         """Return the native value of the sensor."""
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return self._native_value if isinstance(self._native_value, datetime) else None
+            return (
+                self._native_value if isinstance(self._native_value, datetime) else None
+            )
         return self._fallback_state
 
     @property
@@ -177,7 +180,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
         self._fallback_state = str(value)
 
-    def _set_timestamp(self, aware_utc: datetime, *, date_value: date | None = None) -> None:
+    def _set_timestamp(
+        self, aware_utc: datetime, *, date_value: date | None = None
+    ) -> None:
         """Set the sensor as a timestamp sensor."""
         local_dt = aware_utc.astimezone(dt_util.DEFAULT_TIME_ZONE)
         collection_date = date_value or local_dt.date()

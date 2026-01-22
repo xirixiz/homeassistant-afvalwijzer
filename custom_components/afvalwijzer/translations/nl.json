@@ -8,7 +8,8 @@
           "collector": "Collector (bijv. mijnafvalwijzer)",
           "postal_code": "Postcode (bijv. 1234AB)",
           "street_number": "Huisnummer",
-          "suffix": "Huisnummer toevoeging"
+          "suffix": "Huisnummer toevoeging",
+          "friendly_name": "Vriendelijke naam (optioneel)"
         }
       },
       "reconfigure": {
@@ -18,7 +19,8 @@
           "collector": "Collector",
           "postal_code": "Postcode",
           "street_number": "Huisnummer",
-          "suffix": "Huisnummer toevoeging"
+          "suffix": "Huisnummer toevoeging",
+          "friendly_name": "Vriendelijke naam (optioneel)"
         }
       }
     },

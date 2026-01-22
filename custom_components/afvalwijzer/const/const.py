@@ -154,6 +154,7 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
 }
 
 CONF_COLLECTOR = "provider"
+CONF_FRIENDLY_NAME = "friendly_name"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"

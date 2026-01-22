@@ -21,6 +21,7 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_FRIENDLY_NAME,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -38,6 +39,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
+        vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
     }
 )
 
@@ -72,7 +74,9 @@ async def async_setup_entry(
         _LOGGER.warning("Afvalwijzer backend not ready yet; will retry setup.")
         raise ConfigEntryNotReady from transient_error
     if not ok:
-        _LOGGER.error("Afvalwijzer initial update failed; aborting setup for this entry.")
+        _LOGGER.error(
+            "Afvalwijzer initial update failed; aborting setup for this entry."
+        )
         return
 
     await _setup_sensors(hass, config, async_add_entities, data)
@@ -116,7 +120,9 @@ async def _setup_sensors(
     entities: list[Any] = [
         ProviderSensor(hass, wtype, data, config) for wtype in waste_data_with_today
     ]
-    entities.extend(CustomSensor(hass, wtype, data, config) for wtype in waste_data_custom)
+    entities.extend(
+        CustomSensor(hass, wtype, data, config) for wtype in waste_data_custom
+    )
 
     if data.notification_data is not None:
         entities.append(ProviderSensor(hass, "notifications", data, config))
