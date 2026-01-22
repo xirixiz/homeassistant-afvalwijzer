@@ -20,7 +20,6 @@ from ..collector.main_collector import MainCollector
 
 # Common parameters for all tests
 exclude_pickup_today = "True"
-date_isoformat = "True"
 exclude_list = ""
 default_label = "geen"
 
@@ -473,7 +472,6 @@ def _run_for_entry(entry: dict) -> None:
         street_number,
         suffix,
         exclude_pickup_today,
-        date_isoformat,
         exclude_list,
         default_label,
     )
