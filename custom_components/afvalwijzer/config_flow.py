@@ -16,7 +16,6 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
-    CONF_ID,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -86,14 +85,12 @@ def _build_all_collectors() -> list[str]:
 
 ALL_COLLECTORS = _build_all_collectors()
 
-# New installs: only identity and address belong in the entry data.
 USER_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS),
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
-        vol.Optional(CONF_ID, default=""): cv.string,
     }
 )
 
@@ -174,6 +171,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="reconfigure_failed")
 
         current = dict(self._reconfigure_entry.data)
+        current.pop("id", None)
         return await self._async_show_reconfigure_form(user_input, current)
 
     async def _async_show_reconfigure_form(
@@ -280,9 +278,6 @@ def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:
     suffix_raw = str(cleaned.get(CONF_SUFFIX, ""))
     cleaned[CONF_SUFFIX] = suffix_raw.strip().upper()
 
-    id_raw = str(cleaned.get(CONF_ID, ""))
-    cleaned[CONF_ID] = id_raw.strip()
-
     return cleaned
 
 
@@ -298,7 +293,6 @@ def _clean_options_input(options_input: dict[str, Any]) -> dict[str, Any]:
 
     include_today = bool(cleaned.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
 
-    # Backward compatibility: MainCollector expects exclude_pickup_today.
     cleaned[CONF_EXCLUDE_PICKUP_TODAY] = not include_today
 
     return cleaned

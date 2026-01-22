@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from datetime import date, datetime, time
-import hashlib
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util import dt as dt_util
 
@@ -17,15 +18,14 @@ from .const.const import (
     ATTR_LAST_UPDATE,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
-    CONF_ID,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
+    DOMAIN,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
 
-# Options keys from your config flow
 CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
 DEFAULT_SHOW_FULL_TIMESTAMP = True
 
@@ -34,7 +34,6 @@ DEFAULT_SHOW_FULL_TIMESTAMP = True
 class _Config:
     default_label: str
     show_full_timestamp: bool
-    id_name: str
 
 
 def _is_naive(value: datetime) -> bool:
@@ -49,9 +48,24 @@ def _as_utc_aware(value: datetime) -> datetime:
 
 
 def _date_to_local_midnight(value: date) -> datetime:
-    """Convert a date into a timezone aware local midnight datetime."""
+    """Convert a date into a timezone-aware local midnight datetime."""
     local_dt = datetime.combine(value, time.min).replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
     return local_dt
+
+
+def _address_key(config: dict[str, Any]) -> str:
+    postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
+    street_number = str(config.get(CONF_STREET_NUMBER, "")).strip()
+    suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
+    return f"{postal_code}:{street_number}:{suffix}".strip(":")
+
+
+def _address_label(config: dict[str, Any]) -> str:
+    postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
+    street_number = str(config.get(CONF_STREET_NUMBER, "")).strip()
+    suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
+    return f"{postal_code} {street_number}{suffix}".strip()
+
 
 class CustomSensor(RestoreEntity, SensorEntity):
     """Representation of a custom based waste sensor."""
@@ -69,43 +83,42 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self.hass = hass
         self.waste_type = waste_type
         self.fetch_data = fetch_data
+        self._config = config
 
-        id_name = str(config.get(CONF_ID, "") or "")
         self._cfg = _Config(
             default_label=str(config.get(CONF_DEFAULT_LABEL, "geen")),
             show_full_timestamp=bool(
                 config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
             ),
-            id_name=id_name,
         )
 
         self._last_update: str | None = None
         self._days_until_collection_date: int | None = None
 
-        self._attr_name = (
-            SENSOR_PREFIX + (f"{self._cfg.id_name} " if self._cfg.id_name else "")
-        ) + waste_type
-
+        self._attr_name = f"{SENSOR_PREFIX}{waste_type}"
         self._attr_unique_id = self._make_unique_id(config, waste_type)
 
-        # For HA timestamp device class, prefer native_value
         self._attr_device_class: SensorDeviceClass | None = None
         self._native_value: datetime | str | None = None
-
-        # Keep a string state for non timestamp values
         self._fallback_state = self._cfg.default_label
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Group all sensors for the same address under one device."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, _address_key(self._config))},
+            name=f"Afvalwijzer {_address_label(self._config)}",
+            manufacturer="Afvalwijzer",
+        )
 
     @staticmethod
     def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
         unique_source = (
-            f"{waste_type}"
-            f"{config.get(CONF_ID)}"
-            f"{config.get(CONF_COLLECTOR)}"
-            f"{config.get(CONF_POSTAL_CODE)}"
-            f"{config.get(CONF_STREET_NUMBER)}"
-            f"{config.get(CONF_SUFFIX, '')}"
+            f"{waste_type}|"
+            f"{config.get(CONF_COLLECTOR)}|"
+            f"{_address_key(config)}"
         )
-        return hashlib.sha1(unique_source.encode()).hexdigest()
+        return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
 
     @property
     def native_value(self) -> datetime | str | None:
@@ -117,7 +130,13 @@ class CustomSensor(RestoreEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Apply the fetched value to the sensor state."""
-        attrs: dict[str, Any] = {ATTR_LAST_UPDATE: self._last_update}
+        attrs: dict[str, Any] = {
+            ATTR_LAST_UPDATE: self._last_update,
+            "postal_code": self._config.get(CONF_POSTAL_CODE),
+            "street_number": self._config.get(CONF_STREET_NUMBER),
+            "suffix": self._config.get(CONF_SUFFIX, ""),
+            "collector": self._config.get(CONF_COLLECTOR),
+        }
         if "next_date" in (self._attr_name or "").lower():
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
         return attrs
@@ -171,12 +190,9 @@ class CustomSensor(RestoreEntity, SensorEntity):
             self._native_value = local_dt
             return
 
-        # If user does not want full timestamp, expose a plain string date.
-        # Device class must be unset in that case to avoid HA expecting a datetime.
         self._attr_device_class = None
         self._native_value = None
         self._fallback_state = collection_date.isoformat()
-
 
     def _set_error_state(self) -> None:
         """Set a safe fallback state on errors."""

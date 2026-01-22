@@ -159,7 +159,6 @@ CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
-CONF_ID = "id"
 CONF_EXCLUDE_LIST = "exclude_list"
 
 SENSOR_PREFIX = "afvalwijzer "

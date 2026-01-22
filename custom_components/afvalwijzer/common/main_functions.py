@@ -73,7 +73,7 @@ def waste_type_rename(item_name: str) -> str:
         "grijze container": "restafval",
         "kerstb": "kerstboom",
         "kerstboom": "kerstbomen",
-        "keukenafval": "vet-goed",
+        "keukenafval": "gft",
         "opk": "papier",
         "oud papier en karton": "papier",
         "packages": "pmd",

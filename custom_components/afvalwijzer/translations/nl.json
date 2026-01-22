@@ -3,15 +3,22 @@
     "step": {
       "user": {
         "title": "Configureer Afvalwijzer",
-        "description": "Stel je Afvalwijzer-integratie in.",
+        "description": "Stel de Afvalwijzer-integratie in.",
         "data": {
-          "provider": "Provider (bijv. mijnafvalwijzer). Lees README.md.",
+          "collector": "Collector (bijv. mijnafvalwijzer)",
           "postal_code": "Postcode (bijv. 1234AB)",
           "street_number": "Huisnummer",
-          "suffix": "Huisnummer toevoeging",
-          "exclude_pickup_today": "Sluit ophalen van vandaag uit",
-          "default_label": "Standaard label bij geen datum bekend",
-          "exclude_list": "Afvaltype uitsluiten"
+          "suffix": "Huisnummer toevoeging"
+        }
+      },
+      "reconfigure": {
+        "title": "Afvalwijzer herconfigureren",
+        "description": "Pas de adresgegevens voor deze Afvalwijzer-configuratie aan.",
+        "data": {
+          "collector": "Collector",
+          "postal_code": "Postcode",
+          "street_number": "Huisnummer",
+          "suffix": "Huisnummer toevoeging"
         }
       }
     },
@@ -20,18 +27,21 @@
       "invalid_street_number": "Huisnummer moet numeriek zijn"
     },
     "abort": {
-      "already_configured": "Afvalwijzer is al geconfigureerd"
+      "already_configured": "Afvalwijzer is al geconfigureerd",
+      "reconfigure_successful": "Afvalwijzer is succesvol hergeconfigureerd"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Afvalwijzer Opties",
-        "description": "Pas extra opties aan voor de Afvalwijzer-integratie.",
+        "title": "Afvalwijzer opties",
+        "description": "Pas extra instellingen voor de Afvalwijzer-integratie aan.",
         "data": {
-          "exclude_pickup_today": "Sluit ophalen van vandaag uit",
-          "default_label": "Standaard label bij geen datum bekend",
-          "exclude_list": "Afvaltype uitsluiten"
+          "show_full_timestamp": "Volledige datum en tijd tonen",
+          "include_today": "Ophaling van vandaag meenemen",
+          "default_label": "Standaard label wanneer geen datum bekend is",
+          "exclude_list": "Afvaltypes uitsluiten",
+          "language": "Taal"
         }
       }
     }

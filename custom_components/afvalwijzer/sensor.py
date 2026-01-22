@@ -21,7 +21,6 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
-    CONF_ID,
     CONF_POSTAL_CODE,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
@@ -39,7 +38,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
-        vol.Optional(CONF_ID, default=""): cv.string,
     }
 )
 
@@ -84,7 +82,7 @@ async def _setup_sensors(
     hass: HomeAssistant,
     config: dict[str, Any],
     async_add_entities,
-    data: AfvalwijzerData | None = None,
+    data: "AfvalwijzerData | None" = None,
 ) -> None:
     """General setup logic for platform and config entry."""
     _LOGGER.debug(
