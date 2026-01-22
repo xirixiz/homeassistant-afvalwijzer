@@ -392,7 +392,9 @@ providers = [
     {
         "provider": "twentemilieu",
         "enabled": False,
-        "addresses": [],
+        "addresses": [
+            {"postal_code": "7752AD", "street_number": "50"},
+        ],
     },
     {
         "provider": "uithoorn",
@@ -409,7 +411,9 @@ providers = [
     {
         "provider": "venray",
         "enabled": False,
-        "addresses": [],
+        "addresses": [
+            {"postal_code": "5802AC", "street_number": "12"},
+        ],
     },
     {
         "provider": "voorschoten",
