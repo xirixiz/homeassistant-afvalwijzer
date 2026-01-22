@@ -208,7 +208,7 @@ def _process_collection_dates(item: dict[str, Any], today: datetime) -> list[dat
             future_dates.extend(_generate_dates_for_year(day_delta, 1, today))
             continue
 
-        if "week" in frequency:
+        if "week" in frequency or "weken" in frequency:
             frequency_clean = (
                 frequency.replace(" weken", "").replace(" week", "").strip()
             )
