@@ -105,39 +105,206 @@ The second row sorts the waste items by date using the following lovelace code
 **The example yaml is to be used directly in the main ```cards: ``` node on the dashboard not inside a card yaml. <br/>
 This yaml uses a custom card being [auto-entities](https://github.com/thomasloven/lovelace-auto-entities), make sure its installed***
 
+Keep in mind your sensor might differ from the example due to different waste naming or different types of waste in your area.
+
+**Example yaml (same look as shown in the screenshot). This yaml uses a custom card being [stack-in-card](https://github.com/custom-cards/stack-in-card), make sure its installed**
+
+Keep in mind your sensor might differ from the example due to different waste naming or different types of waste in your area.
+
 ```yaml
-- type: custom:auto-entities
-  card:
-    type: glance
-  filter:
-    exclude:
-      - entity_id: sensor.afvalwijzer_*next*
-      - entity_id: sensor.afvalwijzer_day_after_tomorrow*
-      - entity_id: sensor.afvalwijzer_today*
-      - entity_id: sensor.afvalwijzer_tomorrow*
-      - entity_id: sensor.afvalwijzer_kerstbomen*
-      - entity_id: sensor.afvalwijzer_*orgen
-      - entity_id: sensor.afvalwijzer_van*
-    include:
-      - entity_id: sensor.afvalwijzer_*
-        options:
-          format: date
-  sort:
-    method: state
-- entities:
-    - style:
-        background: '#62717b'
-        height: 1px
-        margin-left: auto
-        margin-right: auto
-      type: divider
-  type: entities
-- type: markdown
-  content: >-
-    <center>De volgende leging is {{ states('sensor.afvalwijzer_next_type')
-    }}. Dat is over {{ states('sensor.afvalwijzer_next_in_days') }} {% if
-    is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
-    endif %}.</center>
+type: custom:stack-in-card
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: picture-entity
+        entity: sensor.afvalwijzer_today_formatted
+        show_name: false
+        show_state: false
+        state_image:
+          GFT: /local/afvalwijzer/GFT.png
+          Geen: /local/afvalwijzer/Geen.png
+          PMD: /local/afvalwijzer/PMD.png
+          Papier: /local/afvalwijzer/Papier.png
+          Restafval: /local/afvalwijzer/Restafval.png
+      - type: picture-entity
+        entity: sensor.afvalwijzer_tomorrow_formatted
+        show_name: false
+        show_state: false
+        state_image:
+          GFT: /local/afvalwijzer/GFT.png
+          Geen: /local/afvalwijzer/Geen.png
+          PMD: /local/afvalwijzer/PMD.png
+          Papier: /local/afvalwijzer/Papier.png
+          Restafval: /local/afvalwijzer/Restafval.png
+      - type: picture-entity
+        entity: sensor.afvalwijzer_day_after_tomorrow_formatted
+        show_name: false
+        show_state: false
+        state_image:
+          GFT: /local/afvalwijzer/GFT.png
+          Geen: /local/afvalwijzer/Geen.png
+          PMD: /local/afvalwijzer/PMD.png
+          Papier: /local/afvalwijzer/Papier.png
+          Restafval: /local/afvalwijzer/Restafval.png
+
+  - type: entities
+    entities:
+      - type: divider
+
+  - type: custom:auto-entities
+    card:
+      type: glance
+    filter:
+      exclude:
+        - entity_id: sensor.afvalwijzer_*next*
+        - entity_id: sensor.afvalwijzer_day_after_tomorrow*
+        - entity_id: sensor.afvalwijzer_today*
+        - entity_id: sensor.afvalwijzer_tomorrow*
+        - entity_id: sensor.afvalwijzer_kerstbomen*
+        - entity_id: sensor.afvalwijzer_*orgen
+        - entity_id: sensor.afvalwijzer_van*
+      include:
+        - entity_id: sensor.afvalwijzer_*_formatted
+          options:
+            format: date
+    sort:
+      method: state
+
+  - type: entities
+    entities:
+      - type: divider
+
+  - type: markdown
+    content: >-
+      <center>De volgende leging is {{ states('sensor.afvalwijzer_next_type')
+      }}. Dat is over {{ states('sensor.afvalwijzer_next_in_days') }} {% if
+      is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
+      endif %}.</center>
+
+  - type: entities
+    show_header_toggle: false
+    state_color: false
+    entities:
+      - type: divider
+      - entity: input_boolean.waste_moved
+      - entity: input_boolean.waste_reminder
+```
+
+Example waste.yaml packages you could use for formatted template sensors.
+Keep in mind your sensor might differ from the example due to different waste naming or different types of waste in your area.
+
+```yaml
+################################################
+## Packages
+################################################
+homeassistant:
+  customize:
+    sensor.afvalwijzer_today:
+      friendly_name: Vandaag
+    sensor.afvalwijzer_tomorrow:
+      friendly_name: Morgen
+    sensor.afvalwijzer_day_after_tomorrow:
+      friendly_name: Overmorgen
+
+    sensor.afvalwijzer_next_item:
+      friendly_name: Next pickup item
+    sensor.afvalwijzer_next_in_days:
+      friendly_name: Next pickup in days
+
+    sensor.afvalwijzer_gft:
+      friendly_name: GFT
+      entity_picture: /local/afvalwijzer/GFT.png
+    sensor.afvalwijzer_papier:
+      friendly_name: Papier
+      entity_picture: /local/afvalwijzer/Papier.png
+    sensor.afvalwijzer_pmd:
+      friendly_name: PMD
+      entity_picture: /local/afvalwijzer/PMD.png
+    sensor.afvalwijzer_restafval:
+      friendly_name: Restafval
+      entity_picture: /local/afvalwijzer/Restafval.png
+
+    sensor.afvalwijzer_gft_formatted:
+      friendly_name: GFT
+      entity_picture: /local/afvalwijzer/GFT.png
+    sensor.afvalwijzer_papier_formatted:
+      friendly_name: Papier
+      entity_picture: /local/afvalwijzer/Papier.png
+    sensor.afvalwijzer_pmd_formatted:
+      friendly_name: PMD
+      entity_picture: /local/afvalwijzer/PMD.png
+    sensor.afvalwijzer_restafval_formatted:
+      friendly_name: Restafval
+      entity_picture: /local/afvalwijzer/Restafval.png
+
+################################################
+## Template sensors
+################################################
+template:
+  - sensor:
+      - name: Afvalwijzer GFT formatted
+        unique_id: afvalwijzer_gft_formatted
+        state: >-
+          {% set ts = states('sensor.afvalwijzer_gft') | as_timestamp(default=none) %}
+          {{ ts | timestamp_custom('%d-%m-%Y') if ts is not none else 'Geen' }}
+
+      - name: Afvalwijzer Papier formatted
+        unique_id: afvalwijzer_papier_formatted
+        state: >-
+          {% set ts = states('sensor.afvalwijzer_papier') | as_timestamp(default=none) %}
+          {{ ts | timestamp_custom('%d-%m-%Y') if ts is not none else 'Geen' }}
+
+      - name: Afvalwijzer PMD formatted
+        unique_id: afvalwijzer_pmd_formatted
+        state: >-
+          {% set ts = states('sensor.afvalwijzer_pmd') | as_timestamp(default=none) %}
+          {{ ts | timestamp_custom('%d-%m-%Y') if ts is not none else 'Geen' }}
+
+      - name: Afvalwijzer Restafval formatted
+        unique_id: afvalwijzer_restafval_formatted
+        state: >-
+          {% set ts = states('sensor.afvalwijzer_restafval') | as_timestamp(default=none) %}
+          {{ ts | timestamp_custom('%d-%m-%Y') if ts is not none else 'Geen' }}
+
+      - name: Afvalwijzer next item formatted
+        unique_id: afvalwijzer_next_item_formatted
+        state: >-
+          {{ {
+            'gft': 'GFT',
+            'papier': 'Papier',
+            'pmd': 'PMD',
+            'restafval': 'Restafval'
+          }.get(states('sensor.afvalwijzer_next_item'), 'Geen') }}
+
+      - name: Afvalwijzer today formatted
+        unique_id: afvalwijzer_today_formatted
+        state: >-
+          {{ {
+            'gft': 'GFT',
+            'papier': 'Papier',
+            'pmd': 'PMD',
+            'restafval': 'Restafval'
+          }.get(states('sensor.afvalwijzer_today'), 'Geen') }}
+
+      - name: Afvalwijzer tomorrow formatted
+        unique_id: afvalwijzer_tomorrow_formatted
+        state: >-
+          {{ {
+            'gft': 'GFT',
+            'papier': 'Papier',
+            'pmd': 'PMD',
+            'restafval': 'Restafval'
+          }.get(states('sensor.afvalwijzer_tomorrow'), 'Geen') }}
+
+      - name: Afvalwijzer day after tomorrow formatted
+        unique_id: afvalwijzer_day_after_tomorrow_formatted
+        state: >-
+          {{ {
+            'gft': 'GFT',
+            'papier': 'Papier',
+            'pmd': 'PMD',
+            'restafval': 'Restafval'
+          }.get(states('sensor.afvalwijzer_day_after_tomorrow'), 'Geen') }}
 ```
 
 ## Installation

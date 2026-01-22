@@ -7,7 +7,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2026.1007"
+VERSION = "2026.1008"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -154,14 +154,13 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
 }
 
 CONF_COLLECTOR = "provider"
+CONF_FRIENDLY_NAME = "friendly_name"
 CONF_POSTAL_CODE = "postal_code"
 CONF_STREET_NUMBER = "street_number"
 CONF_SUFFIX = "suffix"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
-CONF_ID = "id"
 CONF_EXCLUDE_LIST = "exclude_list"
-CONF_DATE_ISOFORMAT = "date_isoformat"
 
 SENSOR_PREFIX = "afvalwijzer "
 SENSOR_ICON = "mdi:recycle"
