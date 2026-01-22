@@ -53,6 +53,7 @@ def waste_type_rename(item_name: str) -> str:
         "chemisch afval": "kca",
         "chemokar": "chemisch",
         "christmas_trees": "kerstbomen",
+        "ga": "grofvuil",
         "gemengde plastics": "plastic",
         "gft": "gft",
         "gft & etensresten": "gft",
