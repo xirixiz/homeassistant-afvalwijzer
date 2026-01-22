@@ -26,7 +26,6 @@ def test_main_collector_happy_flow():
             "1",
             "",
             "False",
-            "True",
             "",
             "geen",
         )

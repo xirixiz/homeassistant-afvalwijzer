@@ -3,16 +3,24 @@
     "step": {
       "user": {
         "title": "Configure Afvalwijzer",
-        "description": "Set up your afvalwijzer integration.",
+        "description": "Set up your Afvalwijzer integration.",
         "data": {
-          "provider": "Provider (e.g., mijnafvalwijzer). See README.md.",
-          "postal_code": "Postal code (e.g., 1234AB)",
+          "collector": "Collector (e.g. mijnafvalwijzer)",
+          "postal_code": "Postal code (e.g. 1234AB)",
           "street_number": "Street number",
           "suffix": "Address suffix",
-          "exclude_pickup_today": "Exclude today's pickup",
-          "date_isoformat": "Use ISO date format",
-          "default_label": "Default label when no data is available",
-          "exclude_list": "Waste type exclude list"
+          "friendly_name": "Friendly name (optional)"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Afvalwijzer",
+        "description": "Update the address details for this Afvalwijzer configuration.",
+        "data": {
+          "collector": "Collector",
+          "postal_code": "Postal code",
+          "street_number": "Street number",
+          "suffix": "Address suffix",
+          "friendly_name": "Friendly name (optional)"
         }
       }
     },
@@ -21,19 +29,21 @@
       "invalid_street_number": "Street number must be numeric"
     },
     "abort": {
-      "already_configured": "Afvalwijzer is already configured"
+      "already_configured": "Afvalwijzer is already configured",
+      "reconfigure_successful": "Afvalwijzer was successfully reconfigured"
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Afvalwijzer Options",
-        "description": "Configure options for afvalwijzer integration.",
+        "description": "Configure options for the Afvalwijzer integration.",
         "data": {
-          "exclude_pickup_today": "Exclude today's pickup",
-          "date_isoformat": "Use ISO date format",
+          "show_full_timestamp": "Show full timestamp",
+          "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
-          "exclude_list": "Waste type exclude list"
+          "exclude_list": "Waste type exclude list",
+          "language": "Language"
         }
       }
     }
