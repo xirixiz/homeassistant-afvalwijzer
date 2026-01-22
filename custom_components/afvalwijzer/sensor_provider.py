@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
+import hashlib
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
