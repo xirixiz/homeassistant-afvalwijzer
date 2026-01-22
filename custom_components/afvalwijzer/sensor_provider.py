@@ -104,12 +104,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
 
         self._attr_name = f"{SENSOR_PREFIX}{waste_type}"
         self._attr_unique_id = self._make_unique_id(config, waste_type)
+        self._attr_icon = self._icon_for_waste_type(waste_type)
 
         self._is_notification_sensor = waste_type == "notifications"
-        self._attr_icon = (
-            "mdi:bell-outline" if self._is_notification_sensor else SENSOR_ICON
-        )
-
         self._last_update: str | None = None
         self._days_until_collection_date: int | None = None
         self._is_collection_date_today = False
@@ -137,6 +134,33 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             f"{waste_type}|{config.get(CONF_COLLECTOR)}|{_address_key(config)}"
         )
         return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
+
+    @staticmethod
+    def _icon_for_waste_type(waste_type: str) -> str:
+        match waste_type:
+            case "best-tas":
+                return "mdi:bag-personal"
+            case "gft":
+                return "mdi:flower"
+            case "glas":
+                return "mdi:glass-fragile"
+            case "grofvuil":
+                return "mdi:sofa"
+            case "kerstbomen":
+                return "mdi:pine-tree"
+            case "papier":
+                return "mdi:newspaper"
+            case "plastic" | "pmd":
+                return "mdi:bottle-soda-classic"
+            case "restafval" | "restafvalzakken" | "restwagen":
+                return "mdi:trash-can"
+            case "snoeiafval" | "tuinafval":
+                return "mdi:leaf"
+            case "notifications":
+                return "mdi:bell"
+            case _:
+                _LOGGER.debug("No specific icon for: %s", waste_type)
+                return SENSOR_ICON
 
     @staticmethod
     def _resolve_include_today(config: dict[str, Any]) -> bool:
@@ -271,7 +295,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._native_value = count
         self._fallback_state = str(count)
 
-        self._attr_icon = "mdi:bell-alert" if count > 0 else "mdi:bell-outline"
+        self._attr_icon = "mdi:bell-alert" if count > 0 else "mdi:bell"
         self._last_update = dt_util.now().isoformat()
 
         _LOGGER.debug("Notification sensor updated: %s notification(s)", count)
