@@ -4,9 +4,8 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-# Create config dir if not present
-if [[ ! -d "${PWD}/config" ]]; then
-    mkdir -p "${PWD}/config"
+# Create config if not present
+if [[ ! -f "${PWD}/config/configuration.yaml" ]]; then
     hass --config "${PWD}/config" --script ensure_config
 fi
 if ! grep -R "^logger:" config/configuration.yaml >> /dev/null;then
@@ -14,10 +13,11 @@ echo "
 logger:
     default: info
     logs:
-        custom_components.miele: debug
-        pymiele: debug
-isal:
-" >> config/configuration.yaml
+        custom_components.afvalwijzer: debug" >> config/configuration.yaml
+fi
+if ! grep -R "^isal:" config/configuration.yaml >> /dev/null;then
+echo "
+isal:" >> config/configuration.yaml
 fi
 if ! grep -R "debugpy:" config/configuration.yaml >> /dev/null;then
 echo "
