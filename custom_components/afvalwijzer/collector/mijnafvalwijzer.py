@@ -9,7 +9,7 @@ import re
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..common.main_functions import format_postal_code
+from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -59,7 +59,25 @@ def _parse_waste_data_raw(response: dict) -> list[dict]:
         raise KeyError("No 'ophaaldagen' data found")
 
     # Keep original behavior: limit next items to 25
-    return ophaaldagen_data + ophaaldagen_next_data[:25]
+    items = ophaaldagen_data + ophaaldagen_next_data[:25]
+
+    waste_data_raw: list[dict[str, str]] = []
+    for item in items:
+        date_str = item.get("date")
+        if not date_str:
+            continue
+
+        waste_type = waste_type_rename((item.get("type") or "").strip().lower())
+        if not waste_type:
+            continue
+
+        # Fixes original bug: previous code created a tuple and returned datetime object.
+        # Keep intended output format consistent with other collectors: YYYY-MM-DD string.
+        waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
+
+        waste_data_raw.append({"type": waste_type, "date": waste_date})
+
+    return waste_data_raw
 
 
 def get_waste_data_raw(
@@ -89,7 +107,6 @@ def get_waste_data_raw(
         )
 
         waste_data_raw = _parse_waste_data_raw(response)
-
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

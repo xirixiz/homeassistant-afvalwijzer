@@ -236,6 +236,7 @@ providers = [
             {"postal_code": "3951EB", "street_number": "1"},
             {"postal_code": "3941RK", "street_number": "50", "suffix": "B"},
             {"postal_code": "5508SB", "street_number": "51"},
+            {"postal_code": "7944AB", "street_number": "1"},
         ],
     },
     {
