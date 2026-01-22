@@ -82,7 +82,7 @@ async def _setup_sensors(
     hass: HomeAssistant,
     config: dict[str, Any],
     async_add_entities,
-    data: "AfvalwijzerData | None" = None,
+    data: AfvalwijzerData | None = None,
 ) -> None:
     """General setup logic for platform and config entry."""
     _LOGGER.debug(
