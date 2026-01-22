@@ -114,6 +114,7 @@ providers = [
             {"postal_code": "3951EN", "street_number": "1"},
             {"postal_code": "3951EB", "street_number": "1"},
             {"postal_code": "3941RK", "street_number": "50", "suffix": "B"},
+            {"postal_code": "7944AB", "street_number": "1"},
         ],
     },
     {
@@ -246,7 +247,7 @@ def _run_for_entry(entry: dict) -> None:
     logger.info("Waste data custom: %s", collector.waste_data_custom)
     logger.info("Waste types provider: %s", collector.waste_types_provider)
     logger.info("Waste types custom: %s", collector.waste_types_custom)
-    logger.info("Waste notifications: %s", collector.notification_data)
+    logger.info("Waste notifications: %s", collector.notification_count)
 
 
 if __name__ == "__main__":
