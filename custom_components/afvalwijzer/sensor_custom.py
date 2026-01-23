@@ -151,9 +151,6 @@ class CustomSensor(RestoreEntity, SensorEntity):
         """Apply the fetched value to the sensor state."""
         attrs: dict[str, Any] = {
             ATTR_LAST_UPDATE: self._last_update,
-            "postal_code": self._config.get(CONF_POSTAL_CODE),
-            "street_number": self._config.get(CONF_STREET_NUMBER),
-            "suffix": self._config.get(CONF_SUFFIX, ""),
             "collector": self._config.get(CONF_COLLECTOR),
         }
         if "next_date" in (self._attr_name or "").lower():

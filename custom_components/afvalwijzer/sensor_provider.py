@@ -190,9 +190,6 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         """Apply provider data to the sensor state."""
         base_attrs: dict[str, Any] = {
             ATTR_LAST_UPDATE: self._last_update,
-            "postal_code": self._config.get(CONF_POSTAL_CODE),
-            "street_number": self._config.get(CONF_STREET_NUMBER),
-            "suffix": self._config.get(CONF_SUFFIX, ""),
             "collector": self._config.get(CONF_COLLECTOR),
         }
 
