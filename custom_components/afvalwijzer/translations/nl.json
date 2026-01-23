@@ -25,12 +25,12 @@
       }
     },
     "error": {
-      "invalid_postal_code": "Ongeldig postcodeformaat",
+      "invalid_postal_code": "Ongeldig postcode formaat",
       "invalid_street_number": "Huisnummer moet numeriek zijn"
     },
     "abort": {
       "already_configured": "Afvalwijzer is al geconfigureerd",
-      "reconfigure_successful": "Afvalwijzer is succesvol hergeconfigureerd"
+      "reconfigure_successful": "Afvalwijzer is succesvol geherconfigureerd"
     }
   },
   "options": {
@@ -40,8 +40,8 @@
         "description": "Pas extra instellingen voor de Afvalwijzer-integratie aan.",
         "data": {
           "show_full_timestamp": "Volledige datum en tijd tonen",
-          "include_today": "Ophaling van vandaag meenemen",
-          "default_label": "Standaard label wanneer geen datum bekend is",
+          "include_today": "Ophalen van vandaag meenemen",
+          "default_label": "Standaard label wanneer geen data bekend is",
           "exclude_list": "Afvaltypes uitsluiten",
           "language": "Taal"
         }

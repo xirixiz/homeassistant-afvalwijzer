@@ -7,8 +7,8 @@
         "data": {
           "collector": "Collector (e.g. mijnafvalwijzer)",
           "postal_code": "Postal code (e.g. 1234AB)",
-          "street_number": "Street number",
-          "suffix": "Address suffix",
+          "street_number": "House number",
+          "suffix": "House number suffix",
           "friendly_name": "Friendly name (optional)"
         }
       },
@@ -18,15 +18,15 @@
         "data": {
           "collector": "Collector",
           "postal_code": "Postal code",
-          "street_number": "Street number",
-          "suffix": "Address suffix",
+          "street_number": "House number",
+          "suffix": "House number suffix",
           "friendly_name": "Friendly name (optional)"
         }
       }
     },
     "error": {
       "invalid_postal_code": "Invalid postal code format",
-      "invalid_street_number": "Street number must be numeric"
+      "invalid_street_number": "House number must be numeric"
     },
     "abort": {
       "already_configured": "Afvalwijzer is already configured",
