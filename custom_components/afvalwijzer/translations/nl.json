@@ -5,7 +5,7 @@
         "title": "Configureer Afvalwijzer",
         "description": "Stel de Afvalwijzer-integratie in.",
         "data": {
-          "collector": "Afval-inzamelaar (bijv. mijnafvalwijzer)",
+          "collector": "Collector (bijv. mijnafvalwijzer)",
           "postal_code": "Postcode (bijv. 1234AB)",
           "street_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
@@ -16,7 +16,7 @@
         "title": "Afvalwijzer herconfigureren",
         "description": "Pas de adresgegevens voor deze Afvalwijzer-configuratie aan.",
         "data": {
-          "collector": "Afval-inzamelaar",
+          "collector": "Collector",
           "postal_code": "Postcode",
           "street_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
@@ -42,7 +42,7 @@
           "show_full_timestamp": "Volledige datum en tijd tonen",
           "include_today": "Ophalen van vandaag meenemen",
           "default_label": "Standaard label wanneer geen data bekend is",
-          "exclude_list": "Afval-types uitsluiten",
+          "exclude_list": "Afvaltypes uitsluiten",
           "language": "Taal"
         }
       }
