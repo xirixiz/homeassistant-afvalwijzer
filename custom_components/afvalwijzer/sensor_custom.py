@@ -73,8 +73,6 @@ def _address_label(config: dict[str, Any]) -> str:
 class CustomSensor(RestoreEntity, SensorEntity):
     """Representation of a custom based waste sensor."""
 
-    _attr_icon = SENSOR_ICON
-
     def __init__(
         self,
         hass: Any,
@@ -100,6 +98,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
         self._attr_name = f"{SENSOR_PREFIX}{waste_type}"
         self._attr_unique_id = self._make_unique_id(config, waste_type)
+        self._attr_icon = self._icon_for_waste_type(waste_type)
 
         self._attr_device_class: SensorDeviceClass | None = None
         self._native_value: datetime | str | None = None
@@ -120,6 +119,23 @@ class CustomSensor(RestoreEntity, SensorEntity):
             f"{waste_type}|{config.get(CONF_COLLECTOR)}|{_address_key(config)}"
         )
         return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
+
+    @staticmethod
+    def _icon_for_waste_type(waste_type: str) -> str:
+        match waste_type:
+            case "today":
+                return "mdi:calendar-today"
+            case "tomorrow":
+                return "mdi:calendar"
+            case "day_after_tomorrow":
+                return "mdi:calendar-end"
+            case "next_date":
+                return "mdi:calendar-multiselect"
+            case "next_in_days":
+                return "mdi:counter"
+            case _:
+                _LOGGER.debug("No specific icon for: %s", waste_type)
+                return SENSOR_ICON
 
     @property
     def native_value(self) -> datetime | str | None:
