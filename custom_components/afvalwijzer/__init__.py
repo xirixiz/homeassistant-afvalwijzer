@@ -55,7 +55,9 @@ def _derive_include_today_from_legacy(entry: ConfigEntry) -> bool:
     return not exclude_today
 
 
-def _migrate_options_if_needed(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, Any]:
+def _migrate_options_if_needed(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> dict[str, Any]:
     """Ensure required options exist, migrating from legacy entry.data if needed."""
     options: dict[str, Any] = dict(entry.options)
     changed = False
@@ -75,7 +77,9 @@ def _migrate_options_if_needed(hass: HomeAssistant, entry: ConfigEntry) -> dict[
         changed = True
 
     if CONF_EXCLUDE_LIST not in options:
-        options[CONF_EXCLUDE_LIST] = str(entry.data.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST))
+        options[CONF_EXCLUDE_LIST] = str(
+            entry.data.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST)
+        )
         changed = True
 
     if changed:
@@ -84,7 +88,9 @@ def _migrate_options_if_needed(hass: HomeAssistant, entry: ConfigEntry) -> dict[
     return options
 
 
-def _build_effective_config(entry: ConfigEntry, options: dict[str, Any]) -> dict[str, Any]:
+def _build_effective_config(
+    entry: ConfigEntry, options: dict[str, Any]
+) -> dict[str, Any]:
     """Merge entry data and options, with options taking precedence."""
     return {**dict(entry.data), **options}
 
