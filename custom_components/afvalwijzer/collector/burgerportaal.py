@@ -181,15 +181,16 @@ def _parse_waste_data_raw(
         if not fraction:
             continue
 
-        waste_type = waste_type_rename(fraction.strip().lower())
-        if not waste_type:
+        waste_types = waste_type_rename(fraction.strip().lower())
+        if not waste_types:
             continue
 
-        # Original behavior: take date part before "T"
-        date_part = collection_dt.split("T", 1)[0]
-        waste_date = datetime.strptime(date_part, "%Y-%m-%d").strftime("%Y-%m-%d")
+        for waste_type in waste_types.split("-"):
+            # Original behavior: take date part before "T"
+            date_part = collection_dt.split("T", 1)[0]
+            waste_date = datetime.strptime(date_part, "%Y-%m-%d").strftime("%Y-%m-%d")
 
-        waste_data_raw.append({"type": waste_type, "date": waste_date})
+            waste_data_raw.append({"type": waste_type, "date": waste_date})
 
     # Preserve original behavior: sorted by date
     return sorted(waste_data_raw, key=lambda d: d["date"])
