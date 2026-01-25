@@ -4,7 +4,7 @@ Author: Bram van Dartel - xirixiz
 
 Usage:
 from afvalwijzer.collector.main_collector import MainCollector
-MainCollector('<provider>','<postal_code>','<street_number>','<suffix>','True','True','','geen')
+MainCollector('<provider>','<postal_code>','<street_number>','<suffix>','True','True','geen')
 
 Run test:
 - Update this file with your information (or the information you would like to test with, examples are in that file)
@@ -32,11 +32,14 @@ addresses = [
     #{"provider": "afvalstoffendienstkalender", "postal_code": "5237BE", "street_number": "2"},
     #{"provider": "almere", "postal_code": "1311HG", "street_number": "20"},
     #{"provider": "amsterdam", "postal_code": "1066KC", "street_number": "18"},
+    #{"provider": "assen", "postal_code": "9403XT", "street_number": "19"},
     #{"provider": "avalex", "postal_code": "2611XG", "street_number": "87"},
+    #{"provider": "bar", "postal_code": "3161XB", "street_number": "13", "suffix": "b"},
     #{"provider": "circulus", "postal_code": "7421AC", "street_number": "1"},
     #{"provider": "dar", "postal_code": "6532AJ", "street_number": "1"},
     #{"provider": "dar", "postal_code": "6665CN", "street_number": "1"},
     #{"provider": "geertruidenberg", "postal_code": "4941GZ", "street_number": "283"},
+    #{"provider": "groningen", "postal_code": "9725KL", "street_number": "5"},
     #{"provider": "hvc", "postal_code": "1822AL", "street_number": "198"},
     #{"provider": "maassluis", "postal_code": "3146BL", "street_number": "22"},
     #{"provider": "mijnafvalwijzer", "postal_code": "5146EG", "street_number": "1"},
