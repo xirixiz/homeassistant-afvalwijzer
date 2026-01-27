@@ -84,7 +84,6 @@ _Component to integrate with the following providers/communities._
 | Voorschoten                    | opzet                            |
 | Waalre                         |                                  |
 | Waardlanden                    |                                  |
-| Westland                       | ximmio                           |
 | Woerden                        | ximmio                           |
 | ZRD                            | opzet                            |
 
