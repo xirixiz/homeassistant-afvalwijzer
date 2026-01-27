@@ -112,10 +112,6 @@ def get_waste_data_raw(
 
     base_url = _build_base_url(provider)
 
-    # Preserve original intent: provider != "suez" computed, but original code never used it.
-    # Keep it as a local in case you later want provider-specific verify behavior.
-    _verify = provider != "suez"  # noqa: F841
-
     try:
         response_address = _fetch_address_list(
             session,
