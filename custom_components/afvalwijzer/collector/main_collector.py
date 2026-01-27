@@ -3,7 +3,6 @@
 from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (
     _LOGGER,
-    SENSOR_COLLECTORS_AFVALALERT,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
@@ -25,7 +24,6 @@ from ..const.const import (
 
 try:
     from . import (
-        afvalalert,
         amsterdam,
         burgerportaal,
         circulus,
@@ -97,7 +95,6 @@ class MainCollector:
             # list of providers with common parameter signatures
             common_providers = [
                 (SENSOR_COLLECTORS_MIJNAFVALWIJZER, mijnafvalwijzer.get_waste_data_raw),
-                (SENSOR_COLLECTORS_AFVALALERT, afvalalert.get_waste_data_raw),
                 (SENSOR_COLLECTORS_AMSTERDAM, amsterdam.get_waste_data_raw),
                 (SENSOR_COLLECTORS_BURGERPORTAAL, burgerportaal.get_waste_data_raw),
                 (SENSOR_COLLECTORS_CIRCULUS, circulus.get_waste_data_raw),

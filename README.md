@@ -17,7 +17,6 @@ _Component to integrate with the following providers/communities._
 | -------------------------------| -------------------------------- |
 | ACV                            | ximmio                           |
 | Afval3xBeter                   | opzet                            |
-| AfvalAlert                     |                                  |
 | Afvalstoffendienst             | opzet                            |
 | Alkmaar                        |                                  |
 | Almere                         | ximmio                           |
