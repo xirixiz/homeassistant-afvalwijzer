@@ -126,7 +126,6 @@ SENSOR_COLLECTORS_XIMMIO = {
     "blink": "https://wasteprod2api.ximmio.com",
     "meerlanden": "https://wasteprod2api.ximmio.com",
     "rad": "https://wasteprod2api.ximmio.com",
-    "westland": "https://wasteprod2api.ximmio.com",
     "woerden": "https://wasteprod2api.ximmio.com",
     "ximmio": "https://wasteapi.ximmio.com",
 }
@@ -144,7 +143,6 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
     "twentemilieu": "8d97bb56-5afd-4cbc-a651-b4f7314264b4",
     "venlo": "280affe9-1428-443b-895a-b90431b8ca31",
     "waardlanden": "942abcf6-3775-400d-ae5d-7380d728b23c",
-    "westland": "6fc75608-126a-4a50-9241-a002ce8c8a6c",
     "woerden": "06856f74-6826-4c6a-aabf-69bc9d20b5a6",
     "ximmio": "800bf8d7-6dd1-4490-ba9d-b419d6dc8a45",
 }
