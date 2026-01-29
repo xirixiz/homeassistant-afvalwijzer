@@ -64,7 +64,6 @@ SENSOR_COLLECTORS_OPZET = {
     "afvalstoffendienst": "https://afvalstoffendienst.nl",
     "afvalstoffendienstkalender": "https://afvalstoffendienst.nl",
     "alphenaandenrijn": "https://afvalkalender.alphenaandenrijn.nl",
-    "berkelland": "https://afvalkalender.gemeenteberkelland.nl",
     "cranendonck": "https://afvalkalender.cranendonck.nl",
     "cyclus": "https://cyclusnv.nl",
     "dar": "https://afvalkalender.dar.nl",
