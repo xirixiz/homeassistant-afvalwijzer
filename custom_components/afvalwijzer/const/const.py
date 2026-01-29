@@ -11,10 +11,6 @@ VERSION = "2026.1008"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
-SENSOR_COLLECTORS_AFVALALERT = {
-    "afvalalert": "https://www.afvalalert.nl/kalender",
-}
-
 SENSOR_COLLECTORS_AMSTERDAM = {
     "amsterdam": "https://api.data.amsterdam.nl/v1/afvalwijzer/afvalwijzer",
 }

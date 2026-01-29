@@ -21,7 +21,6 @@ from .const.const import (
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
     DOMAIN,
-    SENSOR_COLLECTORS_AFVALALERT,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
@@ -64,7 +63,6 @@ def _build_all_collectors() -> list[str]:
     return sorted(
         {
             *SENSOR_COLLECTORS_MIJNAFVALWIJZER,
-            *SENSOR_COLLECTORS_AFVALALERT.keys(),
             *SENSOR_COLLECTORS_AMSTERDAM.keys(),
             *SENSOR_COLLECTORS_BURGERPORTAAL.keys(),
             *SENSOR_COLLECTORS_CIRCULUS.keys(),
