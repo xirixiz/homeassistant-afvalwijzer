@@ -87,7 +87,6 @@ SENSOR_COLLECTORS_OPZET = {
     "sliedrecht": "https://afvalkalender.sliedrecht.nl",
     "spaarnelanden": "https://afvalwijzer.spaarnelanden.nl",
     "sudwestfryslan": "https://afvalkalender.sudwestfryslan.nl",
-    "suez": "https://inzamelwijzer.prezero.nl",
     "uithoorn": "https://cyclusnv.nl",
     "venray": "https://afvalkalender.venray.nl",
     "voorschoten": "https://afvalkalender.voorschoten.nl",

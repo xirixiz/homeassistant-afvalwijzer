@@ -74,7 +74,6 @@ _Component to integrate with the following providers/communities._
 | Sliedrecht                     | opzet                            |
 | Spaarnelanden                  | opzet                            |
 | Sudwest Fryslan                | opzet                            |
-| SUEZ                           | opzet                            |
 | Tilburg                        | burgerportaal                    |
 | Twente Milieu                  | ximmio                           |
 | Uithoorn                       | opzet                            |
