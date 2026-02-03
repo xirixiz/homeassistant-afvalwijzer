@@ -18,9 +18,9 @@ _Component to integrate with the following providers/communities._
 | ACV                            | ximmio                           |
 | Afval3xBeter                   | opzet                            |
 | Afvalstoffendienst             | opzet                            |
-| Alkmaar                        |                                  |
 | Almere                         | ximmio                           |
 | Alphen aan den Rijn            | opzet                            |
+| Amsterdam                      |                                  |
 | AreaReiniging                  | ximmio                           |
 | Assen                          | burgerportaal                    |
 | Avalex                         | ximmio                           |
@@ -73,7 +73,7 @@ _Component to integrate with the following providers/communities._
 | Schouwen-Duiveland             | opzet                            |
 | Sliedrecht                     | opzet                            |
 | Spaarnelanden                  | opzet                            |
-| Sudwest Fryslan                | opzet                            |
+| Súdwest-Fryslân                | opzet                            |
 | Tilburg                        | burgerportaal                    |
 | Twente Milieu                  | ximmio                           |
 | Uithoorn                       | opzet                            |
