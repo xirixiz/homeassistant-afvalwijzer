@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Convert a Nederland.csv.zst file to a pickle index.
+
+Usage:
+  python3 scripts/convert-zst-to-pkl
+
+Requires either the Python package `zstandard` (recommended) or the `unzstd`/`zstd` command.
+"""
+import argparse
+import csv
+import io
+from itertools import chain
+import logging
+from pathlib import Path
+import pickle
+import sys
+import time
+
+import zstandard as zstd
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+LOGGER = logging.getLogger(__name__)
+
+def open_zst_text(path):
+    """Return a text-mode iterator over lines from a .zst compressed file.
+
+    Tries python `zstandard` first, falls back to `unzstd`/`zstd -d -c`.
+    """
+
+    f = open(path, "rb")
+    dctx = zstd.ZstdDecompressor()
+    stream = dctx.stream_reader(f)
+    text = io.TextIOWrapper(stream, encoding="utf-8", newline="")
+    return text
+
+def normalize_postcode(pc: str) -> str:
+    """Normalize a postal code by removing spaces and converting to uppercase."""
+    return pc.replace(" ", "").upper()
+
+
+def detect_and_iterate(text_stream):
+    """Detect CSV dialect and return headers and reader.
+
+    Reads a sample of the text stream to detect delimiter and header,
+    then returns the field names and a DictReader for the full stream.
+    """
+    # Read a sample to let csv.Sniffer detect delimiter/header reliably
+    sample = text_stream.read(65536)
+    if not sample:
+        return [], iter(())
+    # Create a combined iterator: sample first, then the remaining stream
+    remaining = text_stream
+    line_iter = chain(io.StringIO(sample), remaining)
+    sniffer = csv.Sniffer()
+    try:
+        dialect = sniffer.sniff(sample)
+    except Exception:
+        dialect = csv.excel
+    reader = csv.DictReader(line_iter, dialect=dialect)
+    return reader.fieldnames or [], reader
+
+
+def build_index(file_path: str, index_path: str) -> int:
+    """Build a postcode -> municipality index file for fast lookups."""
+    LOGGER.info("Building index from %s...", file_path)
+    t0 = time.time()
+
+    try:
+        text_stream = open_zst_text(file_path)
+    except Exception as e:
+        LOGGER.error("Error opening file: %s", e)
+        return 2
+    t1 = time.time()
+    LOGGER.info("⏱ File open/decompress: %.3fs", t1-t0)
+
+    headers, reader = detect_and_iterate(text_stream)
+    t2 = time.time()
+    LOGGER.info("⏱ Header detection: %.3fs", t2-t1)
+
+    if not headers:
+        LOGGER.error("Empty or unreadable CSV file")
+        return 2
+
+    pc_candidates = [
+        h for h in headers if "post" in h.lower() and "code" in h.lower() or h.lower() == "postcode"
+    ]
+    mun_candidates = [h for h in headers if "gemeente" in h.lower() or "municip" in h.lower()]
+
+    if not pc_candidates:
+        pc_candidates = [h for h in headers if "post" in h.lower()]
+    if not mun_candidates:
+        mun_candidates = [h for h in headers if "gemeente" in h.lower() or "municip" in h.lower()]
+
+    if not pc_candidates or not mun_candidates:
+        LOGGER.error("Couldn't find required columns")
+        return 2
+
+    pc_col = pc_candidates[0]
+    mun_col = mun_candidates[0]
+
+    index = {}
+    row_count = 0
+    for row in reader:
+        row_count += 1
+        if row_count % 100000 == 0:
+            LOGGER.info("  Processed %s rows...", f"{row_count:,}")
+        val = row.get(pc_col, "") or ""
+        pc_norm = normalize_postcode(val)
+        if pc_norm:
+            mun_val = row.get(mun_col, "") or ""
+            index[pc_norm] = mun_val.strip()
+
+    t3 = time.time()
+    LOGGER.info("⏱ Indexed %s unique postcodes from %s rows: %.3fs", f"{len(index):,}", f"{row_count:,}", t3-t2)
+
+    Path(index_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(index_path, "wb") as f:
+        pickle.dump(index, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    t4 = time.time()
+    LOGGER.info("⏱ Saved index to %s: %.3fs", index_path, t4-t3)
+    LOGGER.info("⏱ Total time: %.3fs", t4-t0)
+    LOGGER.info("Index file size: %.1f MB", Path(index_path).stat().st_size / 1024 / 1024)
+    return 0
+
+
+def main():
+    """Convert Nederland.csv.zst to a pickle index file."""
+    parser = argparse.ArgumentParser(description="Convert zst to pkl")
+    parser.add_argument(
+        "--file",
+        "-f",
+        default="data/Nederland.csv.zst",
+        help="Path to Nederland.csv.zst (default: data/Nederland.csv.zst)",
+    )
+    parser.add_argument(
+        "--index-file",
+        default="data/postcode_index.pkl",
+        help="Path to index file (default: data/postcode_index.pkl)",
+    )
+    args = parser.parse_args()
+
+    rc = build_index(args.file, args.index_file)
+    sys.exit(rc)
+
+
+if __name__ == "__main__":
+    main()

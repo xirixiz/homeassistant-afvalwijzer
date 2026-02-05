@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/../custom_components"
+
+python3 -m afvalwijzer.tests.check_municipality_coverage

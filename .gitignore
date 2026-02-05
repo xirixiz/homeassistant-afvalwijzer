@@ -144,3 +144,5 @@ dmypy.json
 .pyre/
 
 .DS*
+
+data/
