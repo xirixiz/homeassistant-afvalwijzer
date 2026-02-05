@@ -4,4 +4,4 @@ set -e
 
 cd "$(dirname "$0")/../custom_components"
 
-python3 -m afvalwijzer.tests.test_module
+python3 -m afvalwijzer.tests.test_module "$@"

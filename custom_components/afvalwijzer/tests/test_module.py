@@ -11,6 +11,7 @@ Run test:
 - Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
 """
 
+import argparse
 import logging
 import os
 
@@ -103,7 +104,7 @@ addresses = [
     #{"provider": "waardlanden", "postal_code": "4143GD", "street_number": "46"},
     #{"provider": "woerden", "postal_code": "3446GL", "street_number": "16"},
     #{"provider": "ximmio", "postal_code": "2162JP", "street_number": "2"},
-    #{"provider": "zrd", "postal_code": "4462JA", "street_number": "18"},
+    #{"provider": "zrd", "postal_code": "4561MT", "street_number": "3"},
 ]
 # fmt: on
 
@@ -111,7 +112,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 
-def _run_for_entry(entry: dict) -> None:
+def _run_for_entry(entry: dict, failures_only: bool = True) -> None:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
     street_number = entry.get("street_number")
@@ -143,6 +144,9 @@ def _run_for_entry(entry: dict) -> None:
         )
         return
 
+    if failures_only:
+        return
+
     LOGGER.info("Waste data with today: %s", collector.waste_data_with_today)
     LOGGER.info("Waste data without today: %s", collector.waste_data_without_today)
     LOGGER.info("Waste data custom: %s", collector.waste_data_custom)
@@ -152,8 +156,16 @@ def _run_for_entry(entry: dict) -> None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Test AfvalWijzer collectors")
+    parser.add_argument(
+        "--failures-only",
+        action="store_true",
+        help="Only report failures, skip success logs",
+    )
+    args = parser.parse_args()
+
     for entry in addresses:
         try:
-            _run_for_entry(entry)
+            _run_for_entry(entry, failures_only=args.failures_only)
         except Exception as exc:  # pragma: no cover - manual test runner
             LOGGER.exception("Error while running entry %s: %s", entry, exc)
