@@ -19,7 +19,7 @@ os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 from ..collector.main_collector import MainCollector
 
 # Common parameters for all tests
-exclude_pickup_today = "True"
+exclude_pickup_today = "False"
 exclude_list = ""
 default_label = "geen"
 
