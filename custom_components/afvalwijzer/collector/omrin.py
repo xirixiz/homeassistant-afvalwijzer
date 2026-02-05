@@ -62,9 +62,9 @@ def _login(
         "HouseNumber": int(street_number),
         "HouseNumberExtension": suffix,
         "DeviceId": device_id or str(uuid.uuid4()),
-        "Platform": "Android",
+        "Platform": "iOS",
         "AppVersion": "4.0.3.273",
-        "OsVersion": "HomeAssistant 2024.1",
+        "OsVersion": "iPhone15,3 26.2.1",
     }
 
     response = session.post(
