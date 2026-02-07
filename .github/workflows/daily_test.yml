@@ -23,7 +23,7 @@ jobs:
       - name: Enable all addresses
         run: sed -i 's/#{/{/g' custom_components/afvalwijzer/tests/test_data.py
       - name: Test module
-        run: scripts/test-module --report-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
+        run: scripts/test-module --show-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
 
   check-municipality-coverage:
     runs-on: "ubuntu-latest"
