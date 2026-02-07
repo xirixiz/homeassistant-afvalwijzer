@@ -19,7 +19,7 @@ jobs:
       - run: python3 -m pip install -r requirements.txt
       - run: scripts/test-module
 
- municipality-coverage:
+  municipality-coverage:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v6"
