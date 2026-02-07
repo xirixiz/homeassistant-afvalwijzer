@@ -20,6 +20,8 @@ jobs:
           cache-dependency-path: requirements.txt
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
+      - name: Enable all addresses
+        run: sed -i 's/#{/{/g' custom_components/afvalwijzer/tests/test_data.py
       - name: Test module
         run: scripts/test-module --report-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
 
@@ -61,5 +63,7 @@ jobs:
       - name: Convert zst to pkl
         run: scripts/convert-zst-to-pkl
         if: steps.checksum.outputs.changed == 'true'
+      - name: Enable all addresses
+        run: sed -i 's/#{/{/g' custom_components/afvalwijzer/tests/test_data.py
       - name: Check municipality coverage
         run: scripts/check-municipality-coverage 2>&1 | tee $GITHUB_STEP_SUMMARY
