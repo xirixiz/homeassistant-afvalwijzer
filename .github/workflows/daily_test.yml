@@ -1,0 +1,35 @@
+name: "Afvalwijzer: Daily Test"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  test-module:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - uses: "actions/setup-python@v6"
+        with:
+          python-version: "3.x"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - run: python3 -m pip install --upgrade pip
+      - run: python3 -m pip install -r requirements.txt
+      - run: scripts/test-module
+
+ municipality-coverage:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - uses: "actions/setup-python@v6"
+        with:
+          python-version: "3.x"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - run: python3 -m pip install --upgrade pip
+      - run: python3 -m pip install -r requirements.txt zstandard
+      - run: scripts/download-addresses-Nederland
+      - run: scripts/convert-zst-to-pkl
+      - run: scripts/municipality-coverage
