@@ -35,13 +35,27 @@ jobs:
         id: cache
         with:
           path: "data/"
-          key: "data-cache-${{ github.run_number }}"
-          restore-keys: |
-            data-cache-
+          key: "data-cache"
+          restore-keys: data-cache
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
       - run: scripts/download-addresses-Nederland
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Check if data changed
+        id: checksum
+        run: |
+          if [ -f data/.csv.zst.hash ]; then
+            OLD_HASH=$(cat data/.csv.zst.hash)
+            NEW_HASH=$(sha256sum data/Nederland.csv.zst | cut -d ' ' -f1)
+            if [ "$OLD_HASH" != "$NEW_HASH" ]; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "$NEW_HASH" > data/.csv.zst.hash
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            sha256sum data/Nederland.csv.zst | cut -d ' ' -f1 > data/.csv.zst.hash
+          fi
       - run: scripts/convert-zst-to-pkl
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.checksum.outputs.changed == 'true'
       - run: scripts/municipality-coverage >> $GITHUB_STEP_SUMMARY
