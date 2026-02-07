@@ -82,12 +82,6 @@ def main():
         action="store_true",
         help="Show municipalities with multiple test addresses",
     )
-    parser.add_argument(
-        "--export",
-        default="../data/coverage_report.txt",
-        metavar="FILE",
-        help="Export report to file instead of stdout",
-    )
     args = parser.parse_args()
 
     LOGGER.info("Loading municipality data...")
@@ -139,7 +133,7 @@ def main():
         output_lines.extend(sorted(missing_municipalities))
 
     # Add duplicates section when exporting
-    if args.export and duplicates:
+    if duplicates:
         output_lines.append("")
         output_lines.append("=" * 70)
         output_lines.append(
@@ -155,13 +149,7 @@ def main():
     # Output to file or stdout
     output_text = "\n".join(output_lines)
 
-    if args.export:
-        Path(args.export).write_text(output_text + "\n")
-        LOGGER.info("Report exported to %s", args.export)
-    else:
-        LOGGER.info(output_text)
-
-    return 0 if len(missing_municipalities) == 0 else 1
+    LOGGER.info(output_text)
 
 
 if __name__ == "__main__":
