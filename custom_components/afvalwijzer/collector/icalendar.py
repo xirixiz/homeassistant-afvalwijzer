@@ -4,13 +4,11 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from ical.calendar_stream import IcsCalendarStream
-from ical.exceptions import CalendarParseError
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..common.main_functions import waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICAL
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -20,10 +18,10 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 def _build_url(
     provider: str, year: int, postal_code: str, street_number: str, suffix: str
 ) -> str:
-    if provider not in SENSOR_COLLECTORS_ICAL:
+    if provider not in SENSOR_COLLECTORS_ICALENDAR:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    return SENSOR_COLLECTORS_ICAL[provider].format(
+    return SENSOR_COLLECTORS_ICALENDAR[provider].format(
         year,
         postal_code,
         street_number,
@@ -49,29 +47,39 @@ def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
 
     waste_data_raw: list[dict[str, str]] = []
 
-    try:
-        calendar = IcsCalendarStream.calendar_from_ics(waste_data_raw_temp)
-    except CalendarParseError:
-        return []
+    lines = waste_data_raw_temp.splitlines()
+    event = {}  # Temporary dict to hold event data
 
-    for event in calendar.timeline:
-        if not event.summary or not event.start:
+    for line in lines:
+        # Only process lines containing a colon
+        if ":" not in line:
             continue
 
-        waste_type_raw = event.summary.strip().lower()
-        waste_type = waste_type_rename(waste_type_raw)
-
-        if not waste_type:
+        # Split the line into field and value parts
+        parts = line.split(":", 1)
+        if len(parts) < 2:
             continue
 
-        waste_date = event.start.strftime("%Y-%m-%d")
+        # Clean up the field name and value
+        field = parts[0].split(";")[0].strip()
+        value = parts[1].strip()
 
-        waste_data_raw.append(
-            {
-                "type": waste_type,
-                "date": waste_date,
-            }
-        )
+        if field == "BEGIN" and value == "VEVENT":
+            event = {}  # Initialize a new event
+        elif field == "SUMMARY":
+            event["type"] = waste_type_rename(value.lower())
+        elif field == "DTSTART":
+            if value.isdigit() and len(value) == 8:
+                # Format date as YYYY-MM-DD
+                event["date"] = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
+            else:
+                _LOGGER.debug(f"Unsupported waste_date format: {value}")
+        elif field == "END" and value == "VEVENT":
+            if "date" in event and "type" in event:
+                waste_data_raw.append(event)
+            else:
+                _LOGGER.debug(f"Incomplete event data encountered: {event}")
+            event = {}  # Reset the event for the next one
 
     return waste_data_raw
 
@@ -102,7 +110,7 @@ def get_waste_data_raw(
         )
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("iCal request error: %s", err)
+        _LOGGER.error("iCalendar request error: %s", err)
         raise ValueError(err) from err
 
     if not waste_data_raw_temp:
@@ -114,5 +122,5 @@ def get_waste_data_raw(
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes
-        _LOGGER.error("iCal invalid and/or no data received from %s", url)
+        _LOGGER.error("iCalendar invalid and/or no data received from %s", url)
         raise ValueError(f"Invalid and/or no data received from {url}") from err

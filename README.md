@@ -27,7 +27,7 @@ _Component to integrate with the following providers/communities._
 | Avri                           | ximmio                           |
 | BAR                            | burgerportaal                    |
 | Blink                          | ximmio                           |
-| Borsele                        | ical                             |
+| Borsele                        | icalendar                        |
 | Circulus                       |                                  |
 | Cranendonck                    | opzet                            |
 | Cure                           | mijnafvalwijzer                  |
@@ -40,7 +40,7 @@ _Component to integrate with the following providers/communities._
 | Eemsdelta                      | omrin                            |
 | GAD                            | opzet                            |
 | Geertruidenberg                | opzet                            |
-| Goes                           | ical                             |
+| Goes                           | icalendar                        |
 | Groningen                      | burgerportaal                    |
 | Harderwijk                     | omrin                            |
 | Hellendoorn                    | ximmio                           |

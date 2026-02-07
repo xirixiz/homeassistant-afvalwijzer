@@ -10,7 +10,6 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "requirements": [
-    "ical",
     "requests",
     "urllib3"
   ],
