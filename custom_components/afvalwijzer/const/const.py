@@ -32,6 +32,11 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
     "deafvalapp": "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={0}&straatId=0&huisnr={1}&huisnrtoev={2}",
 }
 
+SENSOR_COLLECTORS_ICALENDAR = {
+    "borsele": "https://afvalkalender.borsele.nl/afval/afvalkalender/{0}/{1}-{2}{3}.ics",
+    "goes": "https://afvalkalender.goes.nl/{0}/{1}-{2}{3}.ics",
+}
+
 SENSOR_COLLECTORS_IRADO = {
     "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}",
 }
