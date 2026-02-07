@@ -83,7 +83,6 @@ def main():
     )
     args = parser.parse_args()
 
-    LOGGER.info("Loading municipality data...")
     all_municipalities = get_all_municipalities(args.index_file)
     covered = get_covered_municipalities(TEST_ADDRESSES, args.index_file)
 
@@ -95,9 +94,7 @@ def main():
 
     # Prepare output
     output_lines = []
-    output_lines.append("=" * 70)
-    output_lines.append("MUNICIPALITY COVERAGE REPORT")
-    output_lines.append("=" * 70)
+    output_lines.append("# Municipality Coverage Report\n")
     output_lines.append(f"Total municipalities in NL: {len(all_municipalities)}")
     output_lines.append(f"Covered by tests: {len(covered_municipalities)}")
     output_lines.append(f"Missing from tests: {len(missing_municipalities)}")
@@ -105,35 +102,33 @@ def main():
     output_lines.append(
         f"Coverage: {len(covered_municipalities) / len(all_municipalities) * 100:.1f}%"
     )
-    output_lines.append("=" * 70)
     output_lines.append("")
 
     if args.show_duplicates:
         output_lines.append(
-            f"MUNICIPALITIES WITH MULTIPLE TEST ADDRESSES ({len(duplicates)}):"
+            f"## Municipalities with multiple test addresses ({len(duplicates)})\n"
         )
-        output_lines.append("-" * 70)
         for municipality in sorted(duplicates.keys()):
             providers = duplicates[municipality]
             output_lines.append(f"\n{municipality} ({len(providers)} test addresses)")
             for provider, postal_code in providers:
                 output_lines.append(f"  - {provider:30s} {postal_code}")
     elif args.show_covered:
-        output_lines.append(f"COVERED MUNICIPALITIES ({len(covered_municipalities)}):")
-        output_lines.append("-" * 70)
+        output_lines.append(
+            f"## Covered municipalities ({len(covered_municipalities)})\n"
+        )
         for municipality in sorted(covered_municipalities):
             providers = covered[municipality]
             output_lines.append(f"\n{municipality}")
             for provider, postal_code in providers:
                 output_lines.append(f"  - {provider:30s} {postal_code}")
     else:
-        output_lines.append(f"MISSING MUNICIPALITIES ({len(missing_municipalities)}):")
-        output_lines.append("-" * 70)
-        output_lines.extend(sorted(missing_municipalities))
+        output_lines.append(
+            f"## Missing municipalities ({len(missing_municipalities)})\n"
+        )
+        output_lines.extend([f"- {m}" for m in sorted(missing_municipalities)])
 
-    # Output to file or stdout
     output_text = "\n".join(output_lines)
-
     LOGGER.info(output_text)
 
 

@@ -29,18 +29,19 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 
-def _run_for_entry(entry: dict, report_failures_only: bool = False) -> None:
+def _run_for_entry(entry: dict, report_failures_only: bool = False) -> bool:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
     street_number = entry.get("street_number")
     suffix = entry.get("suffix", "")
 
-    LOGGER.info(
-        "--- Running provider: %s, postal_code: %s, street_number: %s ---",
-        provider,
-        postal_code,
-        street_number,
-    )
+    if not report_failures_only:
+        LOGGER.info(
+            "--- Running provider: %s, postal_code: %s, street_number: %s ---",
+            provider,
+            postal_code,
+            street_number,
+        )
 
     collector = MainCollector(
         provider,
@@ -59,10 +60,10 @@ def _run_for_entry(entry: dict, report_failures_only: bool = False) -> None:
             postal_code,
             street_number,
         )
-        return
+        return False
 
     if report_failures_only:
-        return
+        return True
 
     LOGGER.info("Waste data with today: %s", collector.waste_data_with_today)
     LOGGER.info("Waste data without today: %s", collector.waste_data_without_today)
@@ -70,6 +71,7 @@ def _run_for_entry(entry: dict, report_failures_only: bool = False) -> None:
     LOGGER.info("Waste types provider: %s", collector.waste_types_provider)
     LOGGER.info("Waste types custom: %s", collector.waste_types_custom)
     LOGGER.info("Waste notification data: %s", collector.notification_data)
+    return True
 
 
 if __name__ == "__main__":
@@ -81,8 +83,18 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    failures = 0
     for entry in TEST_ADDRESSES:
         try:
-            _run_for_entry(entry, report_failures_only=args.report_failures_only)
+            if not _run_for_entry(
+                entry, report_failures_only=args.report_failures_only
+            ):
+                failures += 1
         except Exception as exc:  # pragma: no cover - manual test runner
             LOGGER.exception("Error while running entry %s: %s", entry, exc)
+            failures += 1
+
+    if failures == 0:
+        LOGGER.info("All test entries passed with no failures.")
+    else:
+        LOGGER.error("%d test entries failed.", failures)

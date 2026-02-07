@@ -21,9 +21,9 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
       - name: Test module
-        run: scripts/test-module --report-failures-only 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+        run: scripts/test-module --report-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
 
-  municipality-coverage:
+  check-municipality-coverage:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v6"
@@ -40,7 +40,8 @@ jobs:
           restore-keys: data-cache
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
-      - run: scripts/download-addresses-Nederland
+      - name: Download addresses Nederland in csv.zst format
+        run: scripts/download-addresses-Nederland
       - name: Check if data changed
         id: checksum
         run: |
@@ -57,7 +58,8 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
             sha256sum data/Nederland.csv.zst | cut -d ' ' -f1 > data/.csv.zst.hash
           fi
-      - run: scripts/convert-zst-to-pkl
+      - name: Convert zst to pkl
+        run: scripts/convert-zst-to-pkl
         if: steps.checksum.outputs.changed == 'true'
       - name: Check municipality coverage
-        run: scripts/municipality-coverage 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+        run: scripts/check-municipality-coverage 2>&1 | tee $GITHUB_STEP_SUMMARY
