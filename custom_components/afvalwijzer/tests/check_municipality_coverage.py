@@ -81,6 +81,11 @@ def main():
         action="store_true",
         help="Show municipalities with multiple test addresses",
     )
+    parser.add_argument(
+        "--only-summary",
+        action="store_true",
+        help="Only show summary statistics, skip detailed lists",
+    )
     args = parser.parse_args()
 
     all_municipalities = get_all_municipalities(args.index_file)
@@ -102,6 +107,11 @@ def main():
     output_lines.append(
         f"Coverage: {len(covered_municipalities) / len(all_municipalities) * 100:.1f}%"
     )
+    if args.only_summary:
+        output_text = "\n".join(output_lines)
+        LOGGER.info(output_text)
+        return
+
     output_lines.append("")
 
     if args.show_duplicates:
