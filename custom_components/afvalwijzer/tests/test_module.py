@@ -14,6 +14,7 @@ Run test:
 import argparse
 import logging
 import os
+import sys
 
 # skip init, required for this test module
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
@@ -96,5 +97,8 @@ if __name__ == "__main__":
 
     if failures == 0:
         LOGGER.info("All test entries passed with no failures.")
+        sys.exit(0)
     else:
-        LOGGER.error("%d test entries failed.", failures)
+        entry_label = "entry" if failures == 1 else "entries"
+        LOGGER.error("%d test %s failed.", failures, entry_label)
+        sys.exit(1)
