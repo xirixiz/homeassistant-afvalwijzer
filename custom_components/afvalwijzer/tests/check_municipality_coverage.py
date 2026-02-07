@@ -12,7 +12,6 @@ Usage:
 
 import argparse
 import logging
-from pathlib import Path
 import pickle
 import sys
 
@@ -131,20 +130,6 @@ def main():
         output_lines.append(f"MISSING MUNICIPALITIES ({len(missing_municipalities)}):")
         output_lines.append("-" * 70)
         output_lines.extend(sorted(missing_municipalities))
-
-    # Add duplicates section when exporting
-    if duplicates:
-        output_lines.append("")
-        output_lines.append("=" * 70)
-        output_lines.append(
-            f"MUNICIPALITIES WITH MULTIPLE TEST ADDRESSES ({len(duplicates)}):"
-        )
-        output_lines.append("=" * 70)
-        for municipality in sorted(duplicates.keys()):
-            providers = duplicates[municipality]
-            output_lines.append(f"\n{municipality} ({len(providers)} test addresses)")
-            for provider, postal_code in providers:
-                output_lines.append(f"  - {provider:30s} {postal_code}")
 
     # Output to file or stdout
     output_text = "\n".join(output_lines)

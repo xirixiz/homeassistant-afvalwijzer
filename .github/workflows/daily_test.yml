@@ -20,7 +20,7 @@ jobs:
           cache-dependency-path: requirements.txt
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
-      - run: scripts/test-module
+      - run: scripts/test-module --report-failures-only >> $GITHUB_STEP_SUMMARY
 
   municipality-coverage:
     runs-on: "ubuntu-latest"
@@ -31,8 +31,17 @@ jobs:
           python-version: "3.x"
           cache: "pip"
           cache-dependency-path: requirements.txt
+      - uses: "actions/cache@v5"
+        id: cache
+        with:
+          path: "data/"
+          key: "data-cache-${{ github.run_number }}"
+          restore-keys: |
+            data-cache-
       - run: python3 -m pip install --upgrade pip
-      - run: python3 -m pip install -r requirements.txt zstandard
+      - run: python3 -m pip install -r requirements.txt
       - run: scripts/download-addresses-Nederland
+        if: steps.cache.outputs.cache-hit != 'true'
       - run: scripts/convert-zst-to-pkl
-      - run: scripts/municipality-coverage
+        if: steps.cache.outputs.cache-hit != 'true'
+      - run: scripts/municipality-coverage >> $GITHUB_STEP_SUMMARY
