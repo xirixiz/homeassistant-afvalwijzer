@@ -30,13 +30,13 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 
-def _run_for_entry(entry: dict, report_failures_only: bool = False) -> bool:
+def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
     street_number = entry.get("street_number")
     suffix = entry.get("suffix", "")
 
-    if not report_failures_only:
+    if not show_failures_only:
         LOGGER.info(
             "--- Running provider: %s, postal_code: %s, street_number: %s ---",
             provider,
@@ -63,7 +63,7 @@ def _run_for_entry(entry: dict, report_failures_only: bool = False) -> bool:
         )
         return False
 
-    if report_failures_only:
+    if show_failures_only:
         return True
 
     LOGGER.info("Waste data with today: %s", collector.waste_data_with_today)
@@ -78,18 +78,16 @@ def _run_for_entry(entry: dict, report_failures_only: bool = False) -> bool:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test AfvalWijzer collectors")
     parser.add_argument(
-        "--report-failures-only",
+        "--show-failures-only",
         action="store_true",
-        help="Only report failures, skip success logs",
+        help="Only show failures, skip success logs",
     )
     args = parser.parse_args()
 
     failures = 0
     for entry in TEST_ADDRESSES:
         try:
-            if not _run_for_entry(
-                entry, report_failures_only=args.report_failures_only
-            ):
+            if not _run_for_entry(entry, show_failures_only=args.show_failures_only):
                 failures += 1
         except Exception as exc:  # pragma: no cover - manual test runner
             LOGGER.exception("Error while running entry %s: %s", entry, exc)
