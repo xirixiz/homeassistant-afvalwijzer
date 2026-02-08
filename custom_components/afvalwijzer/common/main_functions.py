@@ -80,6 +80,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "papier en karton": "papier",
     "papier en karton (avond inzameling)": "papier",
     "papier en karton (inzameling overdag)": "papier",
+    "papier-karton": "papier",
     "papierinzameling": "papier",
     "pbd": "pmd",
     "pdb": "pmd",
@@ -106,6 +107,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "residual_waste": "restafval",
     "rest": "restafval",
     "restafval- mini containers": "restafval",
+    "restafval in zak": "restafvalzakken",
     "restafvalzakken": "restafvalzakken",
     "rolcontainer gft en etensresten": "gft",
     "rolcontainer restafval": "restafval",
@@ -154,6 +156,6 @@ def waste_type_rename(item_name: str) -> str:
     waste_type = WASTE_TYPE_MAPPING.get(cleaned_item_name, cleaned_item_name)
 
     if waste_type not in WASTE_TYPE_MAPPING.values():
-        _LOGGER.debug("Unmapped waste type encountered: '%s'", item_name)
+        _LOGGER.debug("Unmapped waste type encountered: '%s'", cleaned_item_name)
 
     return waste_type

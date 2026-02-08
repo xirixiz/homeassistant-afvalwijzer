@@ -55,6 +55,7 @@ class MainCollector:
         postal_code: str,
         street_number: str,
         suffix: str,
+        street_name: str,
         exclude_pickup_today,
         exclude_list: str,
         default_label: str,
@@ -65,6 +66,7 @@ class MainCollector:
         self.postal_code = str(postal_code).strip().upper()
         self.street_number = str(street_number).strip()
         self.suffix = str(suffix).strip().lower()
+        self.street_name = str(street_name).strip().lower()
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
         self.exclude_list = str(exclude_list).strip().lower()
         self.default_label = str(default_label).strip()
@@ -116,9 +118,15 @@ class MainCollector:
                 # sensor_set might be a list or a dict (using its keys)
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
-                    return getter(
-                        self.provider, self.postal_code, self.street_number, self.suffix
-                    )
+                    args = [
+                        self.provider,
+                        self.postal_code,
+                        self.street_number,
+                        self.suffix,
+                    ]
+                    if self.provider in SENSOR_COLLECTORS_RECYCLEAPP:
+                        args.append(self.street_name)
+                    return getter(*args)
             _LOGGER.error(f"Unknown provider: {self.provider}")
             raise ValueError(f"Unknown provider: {self.provider}")
 
@@ -146,7 +154,10 @@ class MainCollector:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
                     result = getter(
-                        self.provider, self.postal_code, self.street_number, self.suffix
+                        self.provider,
+                        self.postal_code,
+                        self.street_number,
+                        self.suffix,
                     )
                     _LOGGER.debug(
                         f"Retrieved {len(result)} notification(s) from {self.provider}"

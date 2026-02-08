@@ -4,7 +4,7 @@ Author: Bram van Dartel - xirixiz
 
 Usage:
 from afvalwijzer.collector.main_collector import MainCollector
-MainCollector('<provider>','<postal_code>','<street_number>','<suffix>','True','True','geen')
+MainCollector('<provider>','<postal_code>','<street_number>','<suffix>','<street_name>','True','True','geen')
 
 Run test:
 - Update this file with your information (or the information you would like to test with, examples are in that file)
@@ -83,6 +83,7 @@ addresses = [
     #{"provider": "purmerend", "postal_code": "1462XP", "street_number": "11"},
     #{"provider": "rad", "postal_code": "3252BV", "street_number": "17"},
     #{"provider": "rd4", "postal_code": "6301ET", "street_number": "6"},
+    #{"provider": "recycleapp", "postal_code": "8700", "street_number": "1", "street_name": "Aarsele-Dorp"},
     #{"provider": "reinis", "postal_code": "3209BS", "street_number": "14"},
     #{"provider": "rmn", "postal_code": "3402TA", "street_number": "1"},
     #{"provider": "rmn", "postal_code": "3701XK", "street_number": "24"},
@@ -117,6 +118,7 @@ def _run_for_entry(entry: dict, failures_only: bool = True) -> None:
     postal_code = entry.get("postal_code").strip().upper()
     street_number = entry.get("street_number")
     suffix = entry.get("suffix", "")
+    street_name = entry.get("street_name", "")
 
     LOGGER.info(
         "--- Running provider: %s, postal_code: %s, street_number: %s ---",
@@ -130,6 +132,7 @@ def _run_for_entry(entry: dict, failures_only: bool = True) -> None:
         postal_code,
         street_number,
         suffix,
+        street_name,
         exclude_pickup_today,
         exclude_list,
         default_label,

@@ -24,6 +24,7 @@ from .const.const import (
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
     CONF_POSTAL_CODE,
+    CONF_STREET_NAME,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
     DOMAIN,
@@ -68,14 +69,18 @@ def _address_key(config: dict[str, Any]) -> str:
     postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
     street_number = str(config.get(CONF_STREET_NUMBER, "")).strip()
     suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    return f"{postal_code}:{street_number}:{suffix}".strip(":")
+    street_name = str(config.get(CONF_STREET_NAME, "")).strip()
+
+    return f"{postal_code}:{street_number}:{suffix}:{street_name}".strip(":")
 
 
 def _address_label(config: dict[str, Any]) -> str:
     postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
     street_number = str(config.get(CONF_STREET_NUMBER, "")).strip()
     suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    return f"{postal_code} {street_number}{suffix}".strip()
+    street_name = str(config.get(CONF_STREET_NAME, "")).strip()
+
+    return f"{postal_code} {street_number}{suffix} {street_name}".strip()
 
 
 class ProviderSensor(RestoreEntity, SensorEntity):
@@ -152,8 +157,10 @@ class ProviderSensor(RestoreEntity, SensorEntity):
                 return "mdi:newspaper"
             case "plastic" | "pmd":
                 return "mdi:bottle-soda-classic"
-            case "restafval" | "restafvalzakken" | "restwagen":
+            case "restafval" | "restwagen":
                 return "mdi:trash-can"
+            case "restafvalzakken":
+                return "mdi:sack"
             case "snoeiafval" | "tuinafval":
                 return "mdi:leaf"
             case "notifications":
