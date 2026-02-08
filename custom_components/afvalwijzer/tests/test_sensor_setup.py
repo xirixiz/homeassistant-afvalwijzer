@@ -9,8 +9,8 @@ import pytest
 from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
 )
 from custom_components.afvalwijzer.sensor import (
@@ -85,7 +85,7 @@ def test_setup_sensors_creates_entities_and_notification_added(monkeypatch):
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
     }
@@ -123,7 +123,7 @@ def test_schedule_update_invokes_data_update(monkeypatch):
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
     }
@@ -155,7 +155,7 @@ def test_async_setup_entry_transient_error_raises(monkeypatch):
     entry.data = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
     }
@@ -190,7 +190,7 @@ def test_async_setup_entry_non_transient_failure_returns(monkeypatch):
     entry.data = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
     }

@@ -123,12 +123,12 @@ def _generate_dates_for_year(
 
 
 def _build_query_params(
-    postal_code: str, street_number: str, suffix: str
+    postal_code: str, house_number: str, suffix: str
 ) -> list[dict[str, str]]:
     """Build query parameter variants for suffix handling."""
     base_params = {
         "postcode": postal_code,
-        "huisnummer": str(street_number),
+        "huisnummer": str(house_number),
     }
 
     if not suffix:
@@ -258,7 +258,7 @@ def _process_collection_dates(item: dict[str, Any], today: datetime) -> list[dat
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -273,7 +273,7 @@ def get_waste_data_raw(
         postal_code = format_postal_code(postal_code)
         suffix = (suffix or "").strip()
 
-        params_list = _build_query_params(postal_code, str(street_number), suffix)
+        params_list = _build_query_params(postal_code, str(house_number), suffix)
 
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
             session,

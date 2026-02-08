@@ -28,7 +28,7 @@ def _get_session_cookie(
     session: requests.Session,
     url: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
@@ -54,7 +54,7 @@ def _get_session_cookie(
     data = {
         "authenticityToken": authenticity_token,
         "zipCode": postal_code,
-        "number": street_number,
+        "number": house_number,
     }
 
     raw_response = session.post(
@@ -71,7 +71,7 @@ def _get_session_cookie(
 
 def _maybe_select_address(
     response: dict[str, Any],
-    street_number: str,
+    house_number: str,
     suffix: str,
 ) -> str:
     """Select an address when multiple options are returned.
@@ -84,7 +84,7 @@ def _maybe_select_address(
 
     if suffix:
         search_pattern = (
-            rf" {re.escape(str(street_number))} {re.escape(suffix.lower())}\b"
+            rf" {re.escape(str(house_number))} {re.escape(suffix.lower())}\b"
         )
         for address in addresses:
             address_str = address.get("address") or ""
@@ -100,7 +100,7 @@ def _ensure_authenticated_address(
     url: str,
     response: dict[str, Any],
     logged_in_cookies: requests.cookies.RequestsCookieJar,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     timeout: tuple[float, float],
@@ -111,7 +111,7 @@ def _ensure_authenticated_address(
     if not flash_message:
         return
 
-    authentication_url = _maybe_select_address(response, street_number, suffix)
+    authentication_url = _maybe_select_address(response, house_number, suffix)
     if not authentication_url:
         return
 
@@ -173,7 +173,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -190,7 +190,7 @@ def get_waste_data_raw(
             session,
             url,
             postal_code,
-            street_number,
+            house_number,
             timeout=timeout,
             verify=verify,
         )
@@ -204,7 +204,7 @@ def get_waste_data_raw(
             url,
             response,
             logged_in_cookies,
-            street_number,
+            house_number,
             suffix,
             timeout=timeout,
             verify=verify,

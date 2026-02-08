@@ -9,8 +9,8 @@ from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
 )
 from custom_components.afvalwijzer.sensor_provider import ProviderSensor
@@ -49,7 +49,7 @@ def test_notification_sensor_counts_and_icon():
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
     }
@@ -70,7 +70,7 @@ def test_resolve_include_today_legacy_flag():
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
         CONF_EXCLUDE_PICKUP_TODAY: True,
@@ -91,7 +91,7 @@ def test_provider_sensor_timestamp_and_days_until():
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
         # include_today resolved by default settings in ProviderSensor

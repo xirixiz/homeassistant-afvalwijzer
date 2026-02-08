@@ -23,8 +23,8 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
     DOMAIN,
     SENSOR_ICON,
@@ -66,16 +66,16 @@ def _date_to_local_midnight(value: date) -> datetime:
 
 def _address_key(config: dict[str, Any]) -> str:
     postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
-    street_number = str(config.get(CONF_STREET_NUMBER, "")).strip()
+    house_number = str(config.get(CONF_HOUSE_NUMBER, "")).strip()
     suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    return f"{postal_code}:{street_number}:{suffix}".strip(":")
+    return f"{postal_code}:{house_number}:{suffix}".strip(":")
 
 
 def _address_label(config: dict[str, Any]) -> str:
     postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
-    street_number = str(config.get(CONF_STREET_NUMBER, "")).strip()
+    house_number = str(config.get(CONF_HOUSE_NUMBER, "")).strip()
     suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    return f"{postal_code} {street_number}{suffix}".strip()
+    return f"{postal_code} {house_number}{suffix}".strip()
 
 
 class ProviderSensor(RestoreEntity, SensorEntity):

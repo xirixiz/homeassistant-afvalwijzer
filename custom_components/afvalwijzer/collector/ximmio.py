@@ -79,14 +79,14 @@ def _fetch_address_data(
     url: str,
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     timeout: tuple[float, float],
 ) -> dict[str, Any]:
     data: dict[str, Any] = {
         "postCode": postal_code,
-        "houseNumber": street_number,
+        "houseNumber": house_number,
         "companyCode": SENSOR_COLLECTORS_XIMMIO_IDS[provider],
     }
 
@@ -182,7 +182,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -203,7 +203,7 @@ def get_waste_data_raw(
             url,
             provider,
             postal_code,
-            street_number,
+            house_number,
             suffix,
             timeout=timeout,
         )

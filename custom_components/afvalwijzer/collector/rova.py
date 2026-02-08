@@ -16,7 +16,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
-def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
+def _build_url(provider: str, postal_code: str, house_number: str, suffix: str) -> str:
     base_url = SENSOR_COLLECTORS_ROVA.get(provider)
     if not base_url:
         raise ValueError(f"Invalid provider: {provider}, please verify")
@@ -26,7 +26,7 @@ def _build_url(provider: str, postal_code: str, street_number: str, suffix: str)
     # Keep original behavior: take=10
     return (
         f"{base_url}/api/waste-calendar/upcoming"
-        f"?houseNumber={street_number}&addition={suffix}&postalcode={postal_code}&take=10"
+        f"?houseNumber={house_number}&addition={suffix}&postalcode={postal_code}&take=10"
     )
 
 
@@ -70,7 +70,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -80,7 +80,7 @@ def get_waste_data_raw(
     """Return waste_data_raw."""
 
     session = session or requests.Session()
-    url = _build_url(provider, postal_code, street_number, suffix)
+    url = _build_url(provider, postal_code, house_number, suffix)
 
     try:
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
