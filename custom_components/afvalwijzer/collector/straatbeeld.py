@@ -31,7 +31,7 @@ def _fetch_waste_data_raw_temp(
     session: requests.Session,
     base_url: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     timeout: tuple[float, float],
@@ -43,7 +43,7 @@ def _fetch_waste_data_raw_temp(
     }
     payload = {
         "postal_code": postal_code,
-        "house_number": street_number,
+        "house_number": house_number,
         "house_letter": suffix or "",
     }
 
@@ -100,7 +100,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -119,7 +119,7 @@ def get_waste_data_raw(
             session,
             base_url,
             postal_code,
-            str(street_number),
+            str(house_number),
             suffix,
             timeout=timeout,
             verify=verify,

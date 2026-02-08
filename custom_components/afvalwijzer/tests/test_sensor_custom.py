@@ -8,8 +8,8 @@ from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
 )
 from custom_components.afvalwijzer.sensor_custom import CustomSensor
@@ -52,7 +52,7 @@ def test_custom_sensor_timestamp_and_days_until():
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
     }
@@ -80,7 +80,7 @@ def test_custom_sensor_fallback_when_no_full_timestamp():
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
-        CONF_STREET_NUMBER: "1",
+        CONF_HOUSE_NUMBER: "1",
         CONF_SUFFIX: "",
         CONF_DEFAULT_LABEL: "geen",
         "show_full_timestamp": False,

@@ -112,7 +112,7 @@ def _fetch_address_list(
     session: requests.Session,
     org_id: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     id_token: str,
     *,
     timeout: tuple[float, float],
@@ -120,7 +120,7 @@ def _fetch_address_list(
 ) -> list[dict[str, Any]]:
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address"
-        f"?zipcode={postal_code}&housenumber={street_number}",
+        f"?zipcode={postal_code}&housenumber={house_number}",
         headers={"authorization": id_token},
         timeout=timeout,
         verify=verify,
@@ -199,7 +199,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -227,7 +227,7 @@ def get_waste_data_raw(
             session,
             org_id,
             postal_code,
-            street_number,
+            house_number,
             id_token,
             timeout=timeout,
             verify=verify,
