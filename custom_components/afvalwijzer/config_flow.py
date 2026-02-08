@@ -18,6 +18,7 @@ from .const.const import (
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
     CONF_POSTAL_CODE,
+    CONF_STREET_NAME,
     CONF_STREET_NUMBER,
     CONF_SUFFIX,
     DOMAIN,
@@ -52,7 +53,8 @@ DEFAULT_DEFAULT_LABEL = "geen"
 DEFAULT_EXCLUDE_LIST = ""
 DEFAULT_FRIENDLY_NAME = ""
 
-_POSTAL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
+_POSTAL_CODE_BE_RE = re.compile(r"^\d{4}$")
+_POSTAL_CODE_NL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
 _ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
 
 _RECONFIGURE_STEP_ID = "reconfigure"
@@ -85,15 +87,53 @@ def _build_all_collectors() -> list[str]:
 
 ALL_COLLECTORS = _build_all_collectors()
 
-USER_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS),
+COLLECTOR_SCHEMA = vol.Schema({vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS)})
+
+
+def _address_schema_for(collector: str | None) -> vol.Schema:
+    """Return an address schema depending on the collector."""
+    schema_dict: dict[vol.Marker, Any] = {
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_STREET_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
-        vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
     }
-)
+
+    if collector in SENSOR_COLLECTORS_RECYCLEAPP:
+        schema_dict[vol.Required(CONF_STREET_NAME)] = cv.string
+
+    schema_dict[vol.Optional(CONF_FRIENDLY_NAME, default="")] = cv.string
+
+    return vol.Schema(schema_dict)
+
+
+def _reconfigure_schema_for(current: dict[str, Any]) -> vol.Schema:
+    """Return a schema for reconfiguration, pre-filled with current values."""
+    collector = current.get(CONF_COLLECTOR, "")
+
+    schema_dict: dict[vol.Marker, Any] = {
+        vol.Required(CONF_COLLECTOR, default=current.get(CONF_COLLECTOR, "")): vol.In(
+            ALL_COLLECTORS
+        ),
+        vol.Required(
+            CONF_POSTAL_CODE, default=current.get(CONF_POSTAL_CODE, "")
+        ): cv.string,
+        vol.Required(
+            CONF_STREET_NUMBER, default=current.get(CONF_STREET_NUMBER, "")
+        ): cv.string,
+        vol.Optional(CONF_SUFFIX, default=current.get(CONF_SUFFIX, "")): cv.string,
+    }
+
+    if collector in SENSOR_COLLECTORS_RECYCLEAPP:
+        schema_dict[
+            vol.Required(CONF_STREET_NAME, default=current.get(CONF_STREET_NAME, ""))
+        ] = cv.string
+
+    schema_dict[
+        vol.Optional(CONF_FRIENDLY_NAME, default=current.get(CONF_FRIENDLY_NAME, ""))
+    ] = cv.string
+
+    return vol.Schema(schema_dict)
+
 
 OPTIONS_SCHEMA = vol.Schema(
     {
@@ -116,11 +156,12 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Initialize config flow."""
         self._reconfigure_entry: config_entries.ConfigEntry | None = None
+        self._collector: str | None = None
 
     @staticmethod
-    def _validate_postal_code(postal_code: str) -> bool:
+    def _validate_postal_code(postal_code: str, collector: str) -> bool:
         """Validate Dutch postal code format (e.g., 1234AB)."""
-        return _validate_postal_code(postal_code)
+        return _validate_postal_code(postal_code, collector)
 
     @staticmethod
     def _validate_street_number(street_number: str) -> bool:
@@ -143,12 +184,29 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
+            self._collector = str(user_input[CONF_COLLECTOR])
+            return await self.async_step_address()
+        return self.async_show_form(
+            step_id="user", data_schema=COLLECTOR_SCHEMA, errors=errors
+        )
+
+    async def async_step_address(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.FlowResult:
+        """Handle address details after collector selection."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            collector = self._collector or str(user_input.get(CONF_COLLECTOR, ""))
             cleaned = _clean_user_input(user_input)
+            cleaned[CONF_COLLECTOR] = collector
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             street_number = str(cleaned[CONF_STREET_NUMBER])
+            collector = str(cleaned[CONF_COLLECTOR])
 
-            if not self._validate_postal_code(postal_code):
+            if not self._validate_postal_code(postal_code, collector):
                 errors["base"] = "invalid_postal_code"
             elif not self._validate_street_number(street_number):
                 errors["base"] = "invalid_street_number"
@@ -159,8 +217,12 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             user_input = cleaned
 
-        schema = self.add_suggested_values_to_schema(USER_SCHEMA, user_input or {})
-        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+        schema = self.add_suggested_values_to_schema(
+            _address_schema_for(self._collector), user_input or {}
+        )
+        return self.async_show_form(
+            step_id="address", data_schema=schema, errors=errors
+        )
 
     async def async_step_reconfigure(
         self,
@@ -189,8 +251,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             street_number = str(cleaned[CONF_STREET_NUMBER])
+            collector = str(cleaned[CONF_COLLECTOR])
 
-            if not self._validate_postal_code(postal_code):
+            if not self._validate_postal_code(postal_code, collector):
                 errors["base"] = "invalid_postal_code"
             elif not self._validate_street_number(street_number):
                 errors["base"] = "invalid_street_number"
@@ -213,7 +276,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input:
             suggested.update(user_input)
 
-        schema = self.add_suggested_values_to_schema(USER_SCHEMA, suggested)
+        schema = self.add_suggested_values_to_schema(
+            _reconfigure_schema_for(suggested), suggested
+        )
         return self.async_show_form(
             step_id=_RECONFIGURE_STEP_ID,
             data_schema=schema,
@@ -285,6 +350,9 @@ def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:
     suffix_raw = str(cleaned.get(CONF_SUFFIX, ""))
     cleaned[CONF_SUFFIX] = suffix_raw.strip().upper()
 
+    street_name_raw = str(cleaned.get(CONF_STREET_NAME, ""))
+    cleaned[CONF_STREET_NAME] = street_name_raw.strip()
+
     return cleaned
 
 
@@ -311,12 +379,23 @@ def _unique_id_from(cleaned: dict[str, Any]) -> str:
     postal_code = str(cleaned.get(CONF_POSTAL_CODE, "")).strip()
     street_number = str(cleaned.get(CONF_STREET_NUMBER, "")).strip()
     suffix = str(cleaned.get(CONF_SUFFIX, "")).strip()
-    return f"{collector}:{postal_code}:{street_number}:{suffix}".strip(":")
+    street_name = str(cleaned.get(CONF_STREET_NAME, "")).strip()
+
+    if street_name:
+        return (
+            f"{collector}:{postal_code}:{street_number}:{suffix}:{street_name}".strip(
+                ":"
+            )
+        )
+    else:
+        return f"{collector}:{postal_code}:{street_number}:{suffix}".strip(":")
 
 
-def _validate_postal_code(postal_code: str) -> bool:
+def _validate_postal_code(postal_code: str, collector: str) -> bool:
     """Validate Dutch postal code format (e.g., 1234AB)."""
-    return bool(_POSTAL_RE.match(postal_code.strip()))
+    if collector in SENSOR_COLLECTORS_RECYCLEAPP:
+        return bool(_POSTAL_CODE_BE_RE.match(postal_code.strip()))
+    return bool(_POSTAL_CODE_NL_RE.match(postal_code.strip()))
 
 
 def _validate_street_number(street_number: str) -> bool:

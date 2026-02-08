@@ -7,20 +7,22 @@ def test_validate_postal_code_valid():
     """Test postal code validation with valid input."""
     flow = AfvalwijzerConfigFlow()
 
-    assert flow._validate_postal_code("1234AB") is True
-    assert flow._validate_postal_code("1234 AB") is True
-    assert flow._validate_postal_code("5678CD") is True
+    assert flow._validate_postal_code("1234AB", "") is True
+    assert flow._validate_postal_code("1234 AB", "") is True
+    assert flow._validate_postal_code("5678CD", "") is True
+    assert flow._validate_postal_code("1234", "recycleapp") is True
 
 
 def test_validate_postal_code_invalid():
     """Test postal code validation with invalid input."""
     flow = AfvalwijzerConfigFlow()
 
-    assert flow._validate_postal_code("") is False
-    assert flow._validate_postal_code("123") is False
-    assert flow._validate_postal_code("12345") is False
-    assert flow._validate_postal_code("ABCD12") is False
-    assert flow._validate_postal_code("1234ABC") is False
+    assert flow._validate_postal_code("", "") is False
+    assert flow._validate_postal_code("123", "") is False
+    assert flow._validate_postal_code("12345", "") is False
+    assert flow._validate_postal_code("ABCD12", "") is False
+    assert flow._validate_postal_code("1234ABC", "") is False
+    assert flow._validate_postal_code("1234AB", "recycleapp") is False
 
 
 def test_validate_street_number_valid():
