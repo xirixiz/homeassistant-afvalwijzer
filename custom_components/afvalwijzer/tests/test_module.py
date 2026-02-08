@@ -30,7 +30,7 @@ addresses = [
     #{"provider": "acv", "postal_code": "6714KK", "street_number": "20"},
     #{"provider": "afval3xbeter", "postal_code": "4874AA", "street_number": "42"},
     #{"provider": "afvalstoffendienst", "postal_code": "5222AA", "street_number": "5"},
-    #{"provider": "afvalstoffendienstkalender", "postal_code": "5237BE", "street_number": "2"},
+    #{"provider": "afvalstoffendienst", "postal_code": "5237BE", "street_number": "2"},
     #{"provider": "almere", "postal_code": "1311HG", "street_number": "20"},
     #{"provider": "alphenaandenrijn", "postal_code": "2408CV", "street_number": "5"},
     #{"provider": "amsterdam", "postal_code": "1066KC", "street_number": "18"},
