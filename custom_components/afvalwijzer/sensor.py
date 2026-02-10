@@ -24,6 +24,7 @@ from .const.const import (
     CONF_FRIENDLY_NAME,
     CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
+    CONF_STREET_NAME,
     CONF_SUFFIX,
     SCAN_INTERVAL,
 )
@@ -36,6 +37,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_POSTAL_CODE): cv.string,
         vol.Required(CONF_HOUSE_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
+        vol.Optional(CONF_STREET_NAME, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
@@ -156,6 +158,7 @@ class AfvalwijzerData:
                 self.config.get(CONF_POSTAL_CODE),
                 self.config.get(CONF_HOUSE_NUMBER),
                 self.config.get(CONF_SUFFIX),
+                self.config.get(CONF_STREET_NAME),
                 self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
                 self.config.get(CONF_EXCLUDE_LIST),
                 self.config.get(CONF_DEFAULT_LABEL),

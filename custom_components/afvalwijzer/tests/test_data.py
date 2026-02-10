@@ -123,6 +123,7 @@ TEST_ADDRESSES = [
     #{"provider": "rd4", "postal_code": "6301ET", "house_number": "6"},
     #{"provider": "rd4", "postal_code": "6417AT", "house_number": "32"},
     #{"provider": "rd4", "postal_code": "6441AD", "house_number": "11"},
+    #{"provider": "recycleapp", "postal_code": "8700", "street_number": "1", "street_name": "Aarsele-Dorp"},
     #{"provider": "reinis", "postal_code": "3209BS", "house_number": "14"},
     #{"provider": "rmn", "postal_code": "3402TA", "house_number": "1"},
     #{"provider": "rmn", "postal_code": "3437GS", "house_number": "2"},
