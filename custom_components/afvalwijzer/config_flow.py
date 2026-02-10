@@ -57,33 +57,27 @@ _ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
 
 _RECONFIGURE_STEP_ID = "reconfigure"
 
-
-def _build_all_collectors() -> list[str]:
-    """Return a sorted list of all supported collectors."""
-    return sorted(
-        {
-            *SENSOR_COLLECTORS_MIJNAFVALWIJZER,
-            *SENSOR_COLLECTORS_AMSTERDAM.keys(),
-            *SENSOR_COLLECTORS_BURGERPORTAAL.keys(),
-            *SENSOR_COLLECTORS_CIRCULUS.keys(),
-            *SENSOR_COLLECTORS_DEAFVALAPP.keys(),
-            *SENSOR_COLLECTORS_IRADO.keys(),
-            *SENSOR_COLLECTORS_KLIKOGROEP.keys(),
-            *SENSOR_COLLECTORS_MONTFERLAND.keys(),
-            *SENSOR_COLLECTORS_OMRIN.keys(),
-            *SENSOR_COLLECTORS_OPZET.keys(),
-            *SENSOR_COLLECTORS_RECYCLEAPP.keys(),
-            *SENSOR_COLLECTORS_RD4.keys(),
-            *SENSOR_COLLECTORS_REINIS.keys(),
-            *SENSOR_COLLECTORS_ROVA.keys(),
-            *SENSOR_COLLECTORS_STRAATBEELD.keys(),
-            *SENSOR_COLLECTORS_XIMMIO_IDS.keys(),
-            "rwm",
-        }
-    )
-
-
-ALL_COLLECTORS = _build_all_collectors()
+ALL_COLLECTORS = sorted(
+    {
+        *SENSOR_COLLECTORS_MIJNAFVALWIJZER,
+        *SENSOR_COLLECTORS_AMSTERDAM.keys(),
+        *SENSOR_COLLECTORS_BURGERPORTAAL.keys(),
+        *SENSOR_COLLECTORS_CIRCULUS.keys(),
+        *SENSOR_COLLECTORS_DEAFVALAPP.keys(),
+        *SENSOR_COLLECTORS_IRADO.keys(),
+        *SENSOR_COLLECTORS_KLIKOGROEP.keys(),
+        *SENSOR_COLLECTORS_MONTFERLAND.keys(),
+        *SENSOR_COLLECTORS_OMRIN.keys(),
+        *SENSOR_COLLECTORS_OPZET.keys(),
+        *SENSOR_COLLECTORS_RD4.keys(),
+        *SENSOR_COLLECTORS_RECYCLEAPP.keys(),
+        *SENSOR_COLLECTORS_REINIS.keys(),
+        *SENSOR_COLLECTORS_ROVA.keys(),
+        "rwm",
+        *SENSOR_COLLECTORS_STRAATBEELD.keys(),
+        *SENSOR_COLLECTORS_XIMMIO_IDS.keys(),
+    }
+)
 
 USER_SCHEMA = vol.Schema(
     {
