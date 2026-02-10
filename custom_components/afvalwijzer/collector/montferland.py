@@ -152,17 +152,21 @@ def get_waste_data_raw(
             _LOGGER.error("MONTFERLAND: AdministratieID not found!")
             return []
 
-        year = datetime.today().year
+        today = datetime.today()
 
-        waste_data_raw_temp = _fetch_waste_data_raw_temp(
-            session,
-            base_url,
-            administratie_id,
-            adres_id,
-            year,
-            timeout=timeout,
-            verify=verify,
-        )
+        waste_data_raw_temp = []
+        for year in (today.year, today.year + 1):
+            waste_data_raw_temp.extend(
+                _fetch_waste_data_raw_temp(
+                    session,
+                    base_url,
+                    administratie_id,
+                    adres_id,
+                    year,
+                    timeout=timeout,
+                    verify=verify,
+                )
+            )
 
         if not waste_data_raw_temp:
             _LOGGER.error("No Waste data found!")
