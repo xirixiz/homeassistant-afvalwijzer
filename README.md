@@ -27,6 +27,7 @@ _Component to integrate with the following providers/communities._
 | Avri                           | ximmio                           |
 | BAR                            | burgerportaal                    |
 | Blink                          | ximmio                           |
+| Borsele                        | icalendar                        |
 | Circulus                       |                                  |
 | Cranendonck                    | opzet                            |
 | Cure                           | mijnafvalwijzer                  |
@@ -39,6 +40,7 @@ _Component to integrate with the following providers/communities._
 | Eemsdelta                      | omrin                            |
 | GAD                            | opzet                            |
 | Geertruidenberg                | opzet                            |
+| Goes                           | icalendar                        |
 | Groningen                      | burgerportaal                    |
 | Harderwijk                     | omrin                            |
 | Hellendoorn                    | ximmio                           |
@@ -377,7 +379,7 @@ logger:
     - platform: afvalwijzer
       provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) choose the provider for your community.
       postal_code: 1234AB              # (required, default = '')
-      street_number: 5                 # (required, default = '')
+      house_number: 5                  # (required, default = '')
       suffix: ''                       # (optional, default = '')
       exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
       date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"

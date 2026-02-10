@@ -20,7 +20,7 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 def _build_url(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
 ) -> str:
     if provider not in SENSOR_COLLECTORS_MIJNAFVALWIJZER:
@@ -30,7 +30,7 @@ def _build_url(
 
     return SENSOR_COLLECTORS_MIJNAFVALWIJZER[provider].format(
         corrected_postal_code,
-        street_number,
+        house_number,
         suffix,
     )
 
@@ -83,7 +83,7 @@ def _parse_waste_data_raw(response: dict) -> list[dict]:
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -93,7 +93,7 @@ def get_waste_data_raw(
     """Return waste_data_raw."""
 
     session = session or requests.Session()
-    url = _build_url(provider, postal_code, street_number, suffix)
+    url = _build_url(provider, postal_code, house_number, suffix)
 
     # Add afvaldata parameter to get afvaldata only from today onwards; this reduces the response size
     url = f"{url}&afvaldata={datetime.now().strftime('%Y-%m-%d')}"
@@ -175,7 +175,7 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
 def get_notification_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -188,7 +188,7 @@ def get_notification_data_raw(
     Returns empty list if provider doesn't support notifications or if there are no notifications.
     """
     session = session or requests.Session()
-    url = _build_url(provider, postal_code, street_number, suffix)
+    url = _build_url(provider, postal_code, house_number, suffix)
 
     try:
         response = _fetch_data(

@@ -1,11 +1,6 @@
-bumpver
-colorlog
-flatdict
 homeassistant
 pre-commit
-pycryptodome
 requests
-rsa
 ruff
 urllib3
 zstandard

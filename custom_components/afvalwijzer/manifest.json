@@ -10,8 +10,8 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "requirements": [
-    "rsa",
-    "pycryptodome"
+    "requests",
+    "urllib3"
   ],
   "version": "2026.1008"
 }

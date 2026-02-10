@@ -4,7 +4,7 @@ Author: Bram van Dartel - xirixiz
 
 Usage:
 from afvalwijzer.collector.main_collector import MainCollector
-MainCollector('<provider>','<postal_code>','<street_number>','<suffix>','True','True','geen')
+MainCollector('<provider>','<postal_code>','<house_number>','<suffix>','True','True','geen')
 
 Run test:
 - Update this file with your information (or the information you would like to test with, examples are in that file)
@@ -33,21 +33,21 @@ LOGGER = logging.getLogger(__name__)
 def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
-    street_number = entry.get("street_number")
+    house_number = entry.get("house_number")
     suffix = entry.get("suffix", "")
 
     if not show_failures_only:
         LOGGER.info(
-            "--- Running provider: %s, postal_code: %s, street_number: %s ---",
+            "--- Running provider: %s, postal_code: %s, house_number: %s ---",
             provider,
             postal_code,
-            street_number,
+            house_number,
         )
 
     collector = MainCollector(
         provider,
         postal_code,
-        street_number,
+        house_number,
         suffix,
         exclude_pickup_today,
         exclude_list,
@@ -56,10 +56,10 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
 
     if collector.waste_data_with_today == {} or collector.waste_types_provider == []:
         LOGGER.error(
-            "Failed to fetch waste data for provider: %s, postal_code: %s, street_number: %s",
+            "Failed to fetch waste data for provider: %s, postal_code: %s, house_number: %s",
             provider,
             postal_code,
-            street_number,
+            house_number,
         )
         return False
 

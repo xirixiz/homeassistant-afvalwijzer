@@ -22,8 +22,8 @@ from .const.const import (
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
     SCAN_INTERVAL,
 )
@@ -34,7 +34,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Optional(CONF_COLLECTOR, default="mijnafvalwijzer"): cv.string,
         vol.Required(CONF_POSTAL_CODE): cv.string,
-        vol.Required(CONF_STREET_NUMBER): cv.string,
+        vol.Required(CONF_HOUSE_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
         vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
@@ -154,7 +154,7 @@ class AfvalwijzerData:
             collector = MainCollector(
                 self.config.get(CONF_COLLECTOR),
                 self.config.get(CONF_POSTAL_CODE),
-                self.config.get(CONF_STREET_NUMBER),
+                self.config.get(CONF_HOUSE_NUMBER),
                 self.config.get(CONF_SUFFIX),
                 self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
                 self.config.get(CONF_EXCLUDE_LIST),

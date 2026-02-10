@@ -26,13 +26,13 @@ def _fetch_address_data(
     session: requests.Session,
     base_url: str,
     corrected_postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
 ) -> list[dict[str, Any]]:
-    address_url = f"{base_url}/adressen/{corrected_postal_code}:{street_number}{suffix}"
+    address_url = f"{base_url}/adressen/{corrected_postal_code}:{house_number}{suffix}"
     response = session.get(address_url, timeout=timeout, verify=verify)
     response.raise_for_status()
     data = response.json()
@@ -108,7 +108,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str = "",
     *,
     session: requests.Session | None = None,
@@ -128,7 +128,7 @@ def get_waste_data_raw(
             session,
             base_url,
             corrected_postal_code,
-            street_number,
+            house_number,
             suffix,
             timeout=timeout,
             verify=verify,
