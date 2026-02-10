@@ -61,8 +61,7 @@ def get_covered_municipalities(addresses: list, index_path: str) -> dict:
     return covered
 
 
-def main():
-    """Check municipality coverage of test addresses."""
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Check municipality coverage of test addresses"
     )
@@ -107,10 +106,11 @@ def main():
     output_lines.append(
         f"Coverage: {len(covered_municipalities) / len(all_municipalities) * 100:.1f}%"
     )
+
     if args.only_summary:
         output_text = "\n".join(output_lines)
         LOGGER.info(output_text)
-        return
+        sys.exit(0)
 
     output_lines.append("")
 
@@ -140,7 +140,4 @@ def main():
 
     output_text = "\n".join(output_lines)
     LOGGER.info(output_text)
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(0)

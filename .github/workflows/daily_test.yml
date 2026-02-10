@@ -23,4 +23,6 @@ jobs:
       - name: Enable all addresses
         run: sed -i 's/#{"provider"/{"provider"/g' custom_components/afvalwijzer/tests/test_data.py
       - name: Test module
-        run: scripts/test-module --show-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
+        run: |
+          set -o pipefail
+          scripts/test-module --show-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
