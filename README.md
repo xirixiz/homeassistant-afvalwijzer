@@ -13,7 +13,7 @@ _Component to integrate with the following providers/communities._
 
 ## Supported waste collectors
 
-| Provider                       | Opmerking / bron                 |
+| Provider                       | Remark / source                  |
 | -------------------------------| -------------------------------- |
 | ACV                            | ximmio                           |
 | Afval3xBeter                   | opzet                            |
@@ -37,6 +37,7 @@ _Component to integrate with the following providers/communities._
 | De Fryske Marren               | opzet                            |
 | DenHaag                        | opzet                            |
 | Drimmelen                      |                                  |
+| Edam-Volemdam                  | icalendar                        |
 | Eemsdelta                      | omrin                            |
 | GAD                            | opzet                            |
 | Geertruidenberg                | opzet                            |
