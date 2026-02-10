@@ -18,6 +18,6 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
       - name: Enable all addresses
-        run: sed -i 's/#{"provider"/{"provider"/g' custom_components/afvalwijzer/tests/test_module.py
+        run: sed -i 's/#{"provider"/{"provider"/g' custom_components/afvalwijzer/tests/test_data.py
       - name: Test module
         run: scripts/test-module --show-failures-only 2>&1 | tee $GITHUB_STEP_SUMMARY
