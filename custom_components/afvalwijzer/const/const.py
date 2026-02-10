@@ -67,7 +67,6 @@ SENSOR_COLLECTORS_OMRIN = {
 SENSOR_COLLECTORS_OPZET = {
     "afval3xbeter": "https://afval3xbeter.nl",
     "afvalstoffendienst": "https://afvalstoffendienst.nl",
-    "afvalstoffendienstkalender": "https://afvalstoffendienst.nl",
     "alphenaandenrijn": "https://afvalkalender.alphenaandenrijn.nl",
     "cranendonck": "https://afvalkalender.cranendonck.nl",
     "cyclus": "https://cyclusnv.nl",

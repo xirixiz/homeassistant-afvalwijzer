@@ -30,7 +30,7 @@ addresses = [
     #{"provider": "acv", "postal_code": "6714KK", "street_number": "20"},
     #{"provider": "afval3xbeter", "postal_code": "4874AA", "street_number": "42"},
     #{"provider": "afvalstoffendienst", "postal_code": "5222AA", "street_number": "5"},
-    #{"provider": "afvalstoffendienstkalender", "postal_code": "5237BE", "street_number": "2"},
+    #{"provider": "afvalstoffendienst", "postal_code": "5237BE", "street_number": "2"},
     #{"provider": "almere", "postal_code": "1311HG", "street_number": "20"},
     #{"provider": "alphenaandenrijn", "postal_code": "2408CV", "street_number": "5"},
     #{"provider": "amsterdam", "postal_code": "1066KC", "street_number": "18"},
@@ -114,7 +114,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 
-def _run_for_entry(entry: dict, failures_only: bool = True) -> None:
+def _run_for_entry(entry: dict, show_failures_only: bool = False) -> None:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
     street_number = entry.get("street_number")
@@ -146,7 +146,7 @@ def _run_for_entry(entry: dict, failures_only: bool = True) -> None:
         )
         return
 
-    if failures_only:
+    if show_failures_only:
         return
 
     LOGGER.info("Waste data with today: %s", collector.waste_data_with_today)
@@ -160,7 +160,7 @@ def _run_for_entry(entry: dict, failures_only: bool = True) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test AfvalWijzer collectors")
     parser.add_argument(
-        "--failures-only",
+        "--show-failures-only",
         action="store_true",
         help="Only report failures, skip success logs",
     )
@@ -168,6 +168,6 @@ if __name__ == "__main__":
 
     for entry in addresses:
         try:
-            _run_for_entry(entry, failures_only=args.failures_only)
+            _run_for_entry(entry, args.show_failures_only)
         except Exception as exc:  # pragma: no cover - manual test runner
             LOGGER.exception("Error while running entry %s: %s", entry, exc)
