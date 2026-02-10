@@ -30,7 +30,7 @@ def _fetch_address_data(
     session: requests.Session,
     base_url: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     timeout: tuple[float, float],
@@ -40,7 +40,7 @@ def _fetch_address_data(
         f"{base_url}/Login.ashx{_QUERY_START}",
         params={
             "Postcode": postal_code,
-            "Huisnummer": street_number,
+            "Huisnummer": house_number,
             "Toevoeging": suffix or "",
         },
         timeout=timeout,
@@ -118,7 +118,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -137,7 +137,7 @@ def get_waste_data_raw(
             session,
             base_url,
             postal_code,
-            str(street_number),
+            str(house_number),
             suffix,
             timeout=timeout,
             verify=verify,
@@ -152,17 +152,21 @@ def get_waste_data_raw(
             _LOGGER.error("MONTFERLAND: AdministratieID not found!")
             return []
 
-        year = datetime.today().year
+        today = datetime.today()
 
-        waste_data_raw_temp = _fetch_waste_data_raw_temp(
-            session,
-            base_url,
-            administratie_id,
-            adres_id,
-            year,
-            timeout=timeout,
-            verify=verify,
-        )
+        waste_data_raw_temp = []
+        for year in (today.year, today.year + 1):
+            waste_data_raw_temp.extend(
+                _fetch_waste_data_raw_temp(
+                    session,
+                    base_url,
+                    administratie_id,
+                    adres_id,
+                    year,
+                    timeout=timeout,
+                    verify=verify,
+                )
+            )
 
         if not waste_data_raw_temp:
             _LOGGER.error("No Waste data found!")

@@ -17,15 +17,16 @@ from .const.const import (
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
     DOMAIN,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
+    SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_IRADO,
     SENSOR_COLLECTORS_KLIKOGROEP,
     SENSOR_COLLECTORS_MIJNAFVALWIJZER,
@@ -59,33 +60,28 @@ _ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
 
 _RECONFIGURE_STEP_ID = "reconfigure"
 
-
-def _build_all_collectors() -> list[str]:
-    """Return a sorted list of all supported collectors."""
-    return sorted(
-        {
-            *SENSOR_COLLECTORS_MIJNAFVALWIJZER,
-            *SENSOR_COLLECTORS_AMSTERDAM.keys(),
-            *SENSOR_COLLECTORS_BURGERPORTAAL.keys(),
-            *SENSOR_COLLECTORS_CIRCULUS.keys(),
-            *SENSOR_COLLECTORS_DEAFVALAPP.keys(),
-            *SENSOR_COLLECTORS_IRADO.keys(),
-            *SENSOR_COLLECTORS_KLIKOGROEP.keys(),
-            *SENSOR_COLLECTORS_MONTFERLAND.keys(),
-            *SENSOR_COLLECTORS_OMRIN.keys(),
-            *SENSOR_COLLECTORS_OPZET.keys(),
-            *SENSOR_COLLECTORS_RECYCLEAPP.keys(),
-            *SENSOR_COLLECTORS_RD4.keys(),
-            *SENSOR_COLLECTORS_REINIS.keys(),
-            *SENSOR_COLLECTORS_ROVA.keys(),
-            *SENSOR_COLLECTORS_STRAATBEELD.keys(),
-            *SENSOR_COLLECTORS_XIMMIO_IDS.keys(),
-            "rwm",
-        }
-    )
-
-
-ALL_COLLECTORS = _build_all_collectors()
+ALL_COLLECTORS = sorted(
+    {
+        *SENSOR_COLLECTORS_MIJNAFVALWIJZER,
+        *SENSOR_COLLECTORS_AMSTERDAM.keys(),
+        *SENSOR_COLLECTORS_BURGERPORTAAL.keys(),
+        *SENSOR_COLLECTORS_CIRCULUS.keys(),
+        *SENSOR_COLLECTORS_DEAFVALAPP.keys(),
+        *SENSOR_COLLECTORS_ICALENDAR.keys(),
+        *SENSOR_COLLECTORS_IRADO.keys(),
+        *SENSOR_COLLECTORS_KLIKOGROEP.keys(),
+        *SENSOR_COLLECTORS_MONTFERLAND.keys(),
+        *SENSOR_COLLECTORS_OMRIN.keys(),
+        *SENSOR_COLLECTORS_OPZET.keys(),
+        *SENSOR_COLLECTORS_RD4.keys(),
+        *SENSOR_COLLECTORS_RECYCLEAPP.keys(),
+        *SENSOR_COLLECTORS_REINIS.keys(),
+        *SENSOR_COLLECTORS_ROVA.keys(),
+        "rwm",
+        *SENSOR_COLLECTORS_STRAATBEELD.keys(),
+        *SENSOR_COLLECTORS_XIMMIO_IDS.keys(),
+    }
+)
 
 COLLECTOR_SCHEMA = vol.Schema({vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS)})
 
@@ -94,7 +90,7 @@ def _address_schema_for(collector: str | None) -> vol.Schema:
     """Return an address schema depending on the collector."""
     schema_dict: dict[vol.Marker, Any] = {
         vol.Required(CONF_POSTAL_CODE): cv.string,
-        vol.Required(CONF_STREET_NUMBER): cv.string,
+        vol.Required(CONF_HOUSE_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
     }
 
@@ -118,7 +114,7 @@ def _reconfigure_schema_for(current: dict[str, Any]) -> vol.Schema:
             CONF_POSTAL_CODE, default=current.get(CONF_POSTAL_CODE, "")
         ): cv.string,
         vol.Required(
-            CONF_STREET_NUMBER, default=current.get(CONF_STREET_NUMBER, "")
+            CONF_HOUSE_NUMBER, default=current.get(CONF_HOUSE_NUMBER, "")
         ): cv.string,
         vol.Optional(CONF_SUFFIX, default=current.get(CONF_SUFFIX, "")): cv.string,
     }
@@ -164,9 +160,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return _validate_postal_code(postal_code, collector)
 
     @staticmethod
-    def _validate_street_number(street_number: str) -> bool:
+    def _validate_house_number(house_number: str) -> bool:
         """Validate that the street number is a positive integer."""
-        return _validate_street_number(street_number)
+        return _validate_house_number(house_number)
 
     @staticmethod
     @callback
@@ -203,13 +199,13 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             cleaned[CONF_COLLECTOR] = collector
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
-            street_number = str(cleaned[CONF_STREET_NUMBER])
+            house_number = str(cleaned[CONF_HOUSE_NUMBER])
             collector = str(cleaned[CONF_COLLECTOR])
 
             if not self._validate_postal_code(postal_code, collector):
                 errors["base"] = "invalid_postal_code"
-            elif not self._validate_street_number(street_number):
-                errors["base"] = "invalid_street_number"
+            elif not self._validate_house_number(house_number):
+                errors["base"] = "invalid_house_number"
             else:
                 await self.async_set_unique_id(_unique_id_from(cleaned))
                 self._abort_if_unique_id_configured()
@@ -250,13 +246,13 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             cleaned = _clean_user_input(user_input)
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
-            street_number = str(cleaned[CONF_STREET_NUMBER])
+            house_number = str(cleaned[CONF_HOUSE_NUMBER])
             collector = str(cleaned[CONF_COLLECTOR])
 
             if not self._validate_postal_code(postal_code, collector):
                 errors["base"] = "invalid_postal_code"
-            elif not self._validate_street_number(street_number):
-                errors["base"] = "invalid_street_number"
+            elif not self._validate_house_number(house_number):
+                errors["base"] = "invalid_house_number"
             else:
                 assert self._reconfigure_entry is not None
 
@@ -377,18 +373,16 @@ def _unique_id_from(cleaned: dict[str, Any]) -> str:
     """Return a unique ID based on collector and address."""
     collector = str(cleaned.get(CONF_COLLECTOR, "")).strip()
     postal_code = str(cleaned.get(CONF_POSTAL_CODE, "")).strip()
-    street_number = str(cleaned.get(CONF_STREET_NUMBER, "")).strip()
+    house_number = str(cleaned.get(CONF_HOUSE_NUMBER, "")).strip()
     suffix = str(cleaned.get(CONF_SUFFIX, "")).strip()
     street_name = str(cleaned.get(CONF_STREET_NAME, "")).strip()
 
     if street_name:
-        return (
-            f"{collector}:{postal_code}:{street_number}:{suffix}:{street_name}".strip(
-                ":"
-            )
+        return f"{collector}:{postal_code}:{house_number}:{suffix}:{street_name}".strip(
+            ":"
         )
     else:
-        return f"{collector}:{postal_code}:{street_number}:{suffix}".strip(":")
+        return f"{collector}:{postal_code}:{house_number}:{suffix}".strip(":")
 
 
 def _validate_postal_code(postal_code: str, collector: str) -> bool:
@@ -398,6 +392,6 @@ def _validate_postal_code(postal_code: str, collector: str) -> bool:
     return bool(_POSTAL_CODE_NL_RE.match(postal_code.strip()))
 
 
-def _validate_street_number(street_number: str) -> bool:
+def _validate_house_number(house_number: str) -> bool:
     """Validate that the street number is a positive integer."""
-    return street_number.strip().isdigit()
+    return house_number.strip().isdigit()

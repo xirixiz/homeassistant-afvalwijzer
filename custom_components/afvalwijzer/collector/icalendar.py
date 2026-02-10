@@ -8,25 +8,28 @@ import requests
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..common.main_functions import waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_DEAFVALAPP
+from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
-def _build_url(provider: str, postal_code: str, house_number: str, suffix: str) -> str:
-    if provider not in SENSOR_COLLECTORS_DEAFVALAPP:
+def _build_url(
+    provider: str, year: int, postal_code: str, house_number: str, suffix: str
+) -> str:
+    if provider not in SENSOR_COLLECTORS_ICALENDAR:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    return SENSOR_COLLECTORS_DEAFVALAPP[provider].format(
+    return SENSOR_COLLECTORS_ICALENDAR[provider].format(
+        year,
         postal_code,
         house_number,
         suffix,
     )
 
 
-def _fetch_waste_data_raw_temp(
+def _fetch_waste_data_raw(
     session: requests.Session,
     url: str,
     *,
@@ -35,42 +38,48 @@ def _fetch_waste_data_raw_temp(
 ) -> str:
     response = session.get(url, timeout=timeout, verify=verify)
     response.raise_for_status()
-    # Keep original behavior: treat body as text (CSV-ish)
     return response.text or ""
 
 
 def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
-    # Original behavior: if empty -> []
     if not waste_data_raw_temp:
         return []
 
     waste_data_raw: list[dict[str, str]] = []
 
-    # Each row: "<type>;<date>;<date>;...;"
-    for row in waste_data_raw_temp.strip().split("\n"):
-        row = row.strip()
-        if not row:
+    lines = waste_data_raw_temp.splitlines()
+    event = {}  # Temporary dict to hold event data
+
+    for line in lines:
+        # Only process lines containing a colon
+        if ":" not in line:
             continue
 
-        parts = row.split(";")
-        if not parts:
+        # Split the line into field and value parts
+        parts = line.split(":", 1)
+        if len(parts) < 2:
             continue
 
-        waste_type_raw = parts[0].strip().lower()
-        waste_type = waste_type_rename(waste_type_raw)
+        # Clean up the field name and value
+        field = parts[0].split(";")[0].strip()
+        value = parts[1].strip()
 
-        # Keep safe behavior: if waste_type_rename returns empty/None, skip row
-        if not waste_type:
-            continue
-
-        # Original code used [1:-1] to ignore trailing empty after last ';'
-        for date_str in parts[1:-1]:
-            date_str = date_str.strip()
-            if not date_str:
-                continue
-
-            waste_date = datetime.strptime(date_str, "%d-%m-%Y").strftime("%Y-%m-%d")
-            waste_data_raw.append({"type": waste_type, "date": waste_date})
+        if field == "BEGIN" and value == "VEVENT":
+            event = {}  # Initialize a new event
+        elif field == "SUMMARY":
+            event["type"] = waste_type_rename(value.lower())
+        elif field == "DTSTART":
+            if value.isdigit() and len(value) == 8:
+                # Format date as YYYY-MM-DD
+                event["date"] = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
+            else:
+                _LOGGER.debug(f"Unsupported waste_date format: {value}")
+        elif field == "END" and value == "VEVENT":
+            if "date" in event and "type" in event:
+                waste_data_raw.append(event)
+            else:
+                _LOGGER.debug(f"Incomplete event data encountered: {event}")
+            event = {}  # Reset the event for the next one
 
     return waste_data_raw
 
@@ -88,10 +97,12 @@ def get_waste_data_raw(
     """Return waste_data_raw."""
 
     session = session or requests.Session()
-    url = _build_url(provider, postal_code, house_number, suffix)
+
+    year = datetime.today().year
+    url = _build_url(provider, year, postal_code, house_number, suffix)
 
     try:
-        waste_data_raw_temp = _fetch_waste_data_raw_temp(
+        waste_data_raw_temp = _fetch_waste_data_raw(
             session,
             url,
             timeout=timeout,
@@ -99,7 +110,7 @@ def get_waste_data_raw(
         )
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("DeAfvalApp request error: %s", err)
+        _LOGGER.error("iCalendar request error: %s", err)
         raise ValueError(err) from err
 
     if not waste_data_raw_temp:
@@ -111,5 +122,5 @@ def get_waste_data_raw(
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes
-        _LOGGER.error("DeAfvalApp invalid and/or no data received from %s", url)
+        _LOGGER.error("iCalendar invalid and/or no data received from %s", url)
         raise ValueError(f"Invalid and/or no data received from {url}") from err

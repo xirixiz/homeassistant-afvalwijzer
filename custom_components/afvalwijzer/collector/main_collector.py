@@ -7,6 +7,7 @@ from ..const.const import (
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
     SENSOR_COLLECTORS_DEAFVALAPP,
+    SENSOR_COLLECTORS_ICALENDAR,
     SENSOR_COLLECTORS_IRADO,
     SENSOR_COLLECTORS_KLIKOGROEP,
     SENSOR_COLLECTORS_MIJNAFVALWIJZER,
@@ -28,6 +29,7 @@ try:
         burgerportaal,
         circulus,
         deafvalapp,
+        icalendar,
         irado,
         klikogroep,
         mijnafvalwijzer,
@@ -53,7 +55,7 @@ class MainCollector:
         self,
         provider: str,
         postal_code: str,
-        street_number: str,
+        house_number: str,
         suffix: str,
         street_name: str,
         exclude_pickup_today,
@@ -64,7 +66,7 @@ class MainCollector:
         # Normalize input parameters
         self.provider = str(provider).strip().lower()
         self.postal_code = str(postal_code).strip().upper()
-        self.street_number = str(street_number).strip()
+        self.house_number = str(house_number).strip()
         self.suffix = str(suffix).strip().lower()
         self.street_name = str(street_name).strip().lower()
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
@@ -101,10 +103,11 @@ class MainCollector:
                 (SENSOR_COLLECTORS_BURGERPORTAAL, burgerportaal.get_waste_data_raw),
                 (SENSOR_COLLECTORS_CIRCULUS, circulus.get_waste_data_raw),
                 (SENSOR_COLLECTORS_DEAFVALAPP, deafvalapp.get_waste_data_raw),
+                (SENSOR_COLLECTORS_ICALENDAR, icalendar.get_waste_data_raw),
+                (SENSOR_COLLECTORS_IRADO, irado.get_waste_data_raw),
                 (SENSOR_COLLECTORS_KLIKOGROEP, klikogroep.get_waste_data_raw),
                 (SENSOR_COLLECTORS_MONTFERLAND, montferland.get_waste_data_raw),
                 (SENSOR_COLLECTORS_OMRIN, omrin.get_waste_data_raw),
-                (SENSOR_COLLECTORS_IRADO, irado.get_waste_data_raw),
                 (SENSOR_COLLECTORS_OPZET, opzet.get_waste_data_raw),
                 (SENSOR_COLLECTORS_RD4, rd4.get_waste_data_raw),
                 (SENSOR_COLLECTORS_RECYCLEAPP, recycleapp.get_waste_data_raw),
@@ -121,7 +124,7 @@ class MainCollector:
                     args = [
                         self.provider,
                         self.postal_code,
-                        self.street_number,
+                        self.house_number,
                         self.suffix,
                     ]
                     if self.provider in SENSOR_COLLECTORS_RECYCLEAPP:
@@ -156,7 +159,7 @@ class MainCollector:
                     result = getter(
                         self.provider,
                         self.postal_code,
-                        self.street_number,
+                        self.house_number,
                         self.suffix,
                     )
                     _LOGGER.debug(

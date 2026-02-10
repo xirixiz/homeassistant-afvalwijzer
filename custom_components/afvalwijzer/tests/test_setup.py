@@ -29,7 +29,7 @@ def test_async_setup_entry(mock_hass):
     entry.data = {
         "collector": "mijnafvalwijzer",
         "postal_code": "1234AB",
-        "street_number": "1",
+        "house_number": "1",
     }
 
     result = asyncio.run(async_setup_entry(mock_hass, entry))

@@ -32,6 +32,11 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
     "deafvalapp": "https://dataservice.deafvalapp.nl/dataservice/DataServiceServlet?service=OPHAALSCHEMA&land=NL&postcode={0}&straatId=0&huisnr={1}&huisnrtoev={2}",
 }
 
+SENSOR_COLLECTORS_ICALENDAR = {
+    "borsele": "https://afvalkalender.borsele.nl/afval/afvalkalender/{0}/{1}-{2}{3}.ics",
+    "goes": "https://afvalkalender.goes.nl/{0}/{1}-{2}{3}.ics",
+}
+
 SENSOR_COLLECTORS_IRADO = {
     "irado": "https://www.irado.nl/wp-json/wsa/v1/location/address/calendar/pickups?zipcode={0}&number={1}&extention={2}",
 }
@@ -62,7 +67,6 @@ SENSOR_COLLECTORS_OMRIN = {
 SENSOR_COLLECTORS_OPZET = {
     "afval3xbeter": "https://afval3xbeter.nl",
     "afvalstoffendienst": "https://afvalstoffendienst.nl",
-    "afvalstoffendienstkalender": "https://afvalstoffendienst.nl",
     "alphenaandenrijn": "https://afvalkalender.alphenaandenrijn.nl",
     "cranendonck": "https://afvalkalender.cranendonck.nl",
     "cyclus": "https://cyclusnv.nl",
@@ -148,7 +152,7 @@ SENSOR_COLLECTORS_XIMMIO_IDS = {
 CONF_COLLECTOR = "provider"
 CONF_FRIENDLY_NAME = "friendly_name"
 CONF_POSTAL_CODE = "postal_code"
-CONF_STREET_NUMBER = "street_number"
+CONF_HOUSE_NUMBER = "house_number"
 CONF_SUFFIX = "suffix"
 CONF_STREET_NAME = "street_name"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"

@@ -25,23 +25,23 @@ def test_validate_postal_code_invalid():
     assert flow._validate_postal_code("1234AB", "recycleapp") is False
 
 
-def test_validate_street_number_valid():
+def test_validate_house_number_valid():
     """Test street number validation with valid input."""
     flow = AfvalwijzerConfigFlow()
 
-    assert flow._validate_street_number("1") is True
-    assert flow._validate_street_number("123") is True
-    assert flow._validate_street_number("  45  ") is True
+    assert flow._validate_house_number("1") is True
+    assert flow._validate_house_number("123") is True
+    assert flow._validate_house_number("  45  ") is True
 
 
-def test_validate_street_number_invalid():
+def test_validate_house_number_invalid():
     """Test street number validation with invalid input."""
     flow = AfvalwijzerConfigFlow()
 
-    assert flow._validate_street_number("") is False
-    assert flow._validate_street_number("12a") is False
-    assert flow._validate_street_number("abc") is False
-    assert flow._validate_street_number("12-34") is False
+    assert flow._validate_house_number("") is False
+    assert flow._validate_house_number("12a") is False
+    assert flow._validate_house_number("abc") is False
+    assert flow._validate_house_number("12-34") is False
 
 
 def test_postal_code_normalization():

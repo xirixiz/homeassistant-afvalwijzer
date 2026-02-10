@@ -19,12 +19,12 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 def _fetch_address_data(
     session: requests.Session,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
 ) -> list[dict[str, Any]]:
-    url = SENSOR_COLLECTORS_RWM["getAddress"].format(postal_code, street_number)
+    url = SENSOR_COLLECTORS_RWM["getAddress"].format(postal_code, house_number)
     response = session.get(url, timeout=timeout, verify=verify)
     response.raise_for_status()
     return response.json() or []
@@ -71,7 +71,7 @@ def _parse_waste_data_raw(
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -89,7 +89,7 @@ def get_waste_data_raw(
         address_data = _fetch_address_data(
             session,
             postal_code,
-            street_number,
+            house_number,
             timeout=timeout,
             verify=verify,
         )

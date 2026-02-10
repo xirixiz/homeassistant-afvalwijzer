@@ -7,7 +7,7 @@
         "data": {
           "collector": "Collector (bijv. mijnafvalwijzer)",
           "postal_code": "Postcode (bijv. 1234AB)",
-          "street_number": "Huisnummer",
+          "house_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
           "street_name": "Straatnaam",
           "friendly_name": "Vriendelijke naam (optioneel)"
@@ -19,7 +19,7 @@
         "data": {
           "collector": "Collector",
           "postal_code": "Postcode",
-          "street_number": "Huisnummer",
+          "house_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
           "street_name": "Straatnaam",
           "friendly_name": "Vriendelijke naam (optioneel)"
@@ -28,7 +28,7 @@
     },
     "error": {
       "invalid_postal_code": "Ongeldig postcode formaat",
-      "invalid_street_number": "Huisnummer moet numeriek zijn"
+      "invalid_house_number": "Huisnummer moet numeriek zijn"
     },
     "abort": {
       "already_configured": "Afvalwijzer is al geconfigureerd",
