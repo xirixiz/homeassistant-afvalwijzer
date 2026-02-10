@@ -21,7 +21,7 @@ This custom component tries to support as much as possible, but there are some m
 
 ## Supported waste collectors
 
-| Provider                       | Opmerking / bron                 |
+| Provider                       | Remark / source                  |
 | -------------------------------| -------------------------------- |
 | ACV                            | ximmio                           |
 | Afval3xBeter                   | opzet                            |
@@ -45,6 +45,7 @@ This custom component tries to support as much as possible, but there are some m
 | De Fryske Marren               | opzet                            |
 | DenHaag                        | opzet                            |
 | Drimmelen                      |                                  |
+| Edam-Volemdam                  | icalendar                        |
 | Eemsdelta                      | omrin                            |
 | GAD                            | opzet                            |
 | Geertruidenberg                | opzet                            |
