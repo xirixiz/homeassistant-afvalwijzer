@@ -50,6 +50,7 @@ TEST_ADDRESSES = [
     #{"provider": "deafvalapp", "postal_code": "5708TE", "house_number": "2"},
     #{"provider": "defryskemarren", "postal_code": "8501BR", "house_number": "21"},
     #{"provider": "denhaag", "postal_code": "2564EX", "house_number": "75"},
+    #{"provider": "edam-volendam", "postal_code": "1135VJ", "house_number": "18"},
     #{"provider": "gad", "postal_code": "1214HA", "house_number": "156"},
     #{"provider": "gad", "postal_code": "1262BC", "house_number": "15"},
     #{"provider": "gad", "postal_code": "1401EE", "house_number": "22"},

@@ -34,6 +34,7 @@ SENSOR_COLLECTORS_DEAFVALAPP = {
 
 SENSOR_COLLECTORS_ICALENDAR = {
     "borsele": "https://afvalkalender.borsele.nl/afval/afvalkalender/{0}/{1}-{2}{3}.ics",
+    "edam-volendam": "https://www.edam-volendam.nl/trash-calendar/download/{1}/{2}/{3}?year={0}",
     "goes": "https://afvalkalender.goes.nl/{0}/{1}-{2}{3}.ics",
 }
 
