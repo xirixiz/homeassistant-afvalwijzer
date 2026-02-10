@@ -18,6 +18,7 @@ This custom component tries to support as much as possible, but there are some m
 - Bergen (Limburg)
 - Gennep
 - Haaksbergen
+- Landsmeer
 
 ## Supported waste collectors
 
