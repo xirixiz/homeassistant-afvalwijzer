@@ -21,6 +21,7 @@ from .const.const import (
     CONF_FRIENDLY_NAME,
     CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
+    CONF_STREET_NAME,
     CONF_SUFFIX,
     DOMAIN,
     SENSOR_ICON,
@@ -60,14 +61,18 @@ def _address_key(config: dict[str, Any]) -> str:
     postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
     house_number = str(config.get(CONF_HOUSE_NUMBER, "")).strip()
     suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    return f"{postal_code}:{house_number}:{suffix}".strip(":")
+    street_name = str(config.get(CONF_STREET_NAME, "")).strip()
+
+    return f"{postal_code}:{house_number}:{suffix}:{street_name}".strip(":")
 
 
 def _address_label(config: dict[str, Any]) -> str:
     postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
     house_number = str(config.get(CONF_HOUSE_NUMBER, "")).strip()
     suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    return f"{postal_code} {house_number}{suffix}".strip()
+    street_name = str(config.get(CONF_STREET_NAME, "")).strip()
+
+    return f"{postal_code} {house_number}{suffix} {street_name}".strip()
 
 
 class CustomSensor(RestoreEntity, SensorEntity):

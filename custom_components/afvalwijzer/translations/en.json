@@ -9,6 +9,7 @@
           "postal_code": "Postal code (e.g. 1234AB)",
           "house_number": "House number",
           "suffix": "House number suffix",
+          "street_name": "Street name",
           "friendly_name": "Friendly name (optional)"
         }
       },
@@ -20,6 +21,7 @@
           "postal_code": "Postal code",
           "house_number": "House number",
           "suffix": "House number suffix",
+          "street_name": "Street name",
           "friendly_name": "Friendly name (optional)"
         }
       }

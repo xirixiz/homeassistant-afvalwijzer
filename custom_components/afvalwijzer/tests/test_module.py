@@ -4,7 +4,7 @@ Author: Bram van Dartel - xirixiz
 
 Usage:
 from afvalwijzer.collector.main_collector import MainCollector
-MainCollector('<provider>','<postal_code>','<house_number>','<suffix>','True','True','geen')
+MainCollector('<provider>','<postal_code>','<house_number>','<suffix>','<street_name>','True','True','geen')
 
 Run test:
 - Update this file with your information (or the information you would like to test with, examples are in that file)
@@ -35,6 +35,7 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
     postal_code = entry.get("postal_code").strip().upper()
     house_number = entry.get("house_number")
     suffix = entry.get("suffix", "")
+    street_name = entry.get("street_name", "")
 
     if not show_failures_only:
         LOGGER.info(
@@ -49,6 +50,7 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
         postal_code,
         house_number,
         suffix,
+        street_name,
         exclude_pickup_today,
         exclude_list,
         default_label,

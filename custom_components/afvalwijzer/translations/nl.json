@@ -9,6 +9,7 @@
           "postal_code": "Postcode (bijv. 1234AB)",
           "house_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
+          "street_name": "Straatnaam",
           "friendly_name": "Vriendelijke naam (optioneel)"
         }
       },
@@ -20,6 +21,7 @@
           "postal_code": "Postcode",
           "house_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
+          "street_name": "Straatnaam",
           "friendly_name": "Vriendelijke naam (optioneel)"
         }
       }
