@@ -53,7 +53,7 @@ class MainCollector:
         self,
         provider: str,
         postal_code: str,
-        street_number: str,
+        house_number: str,
         suffix: str,
         exclude_pickup_today,
         exclude_list: str,
@@ -63,7 +63,7 @@ class MainCollector:
         # Normalize input parameters
         self.provider = str(provider).strip().lower()
         self.postal_code = str(postal_code).strip().upper()
-        self.street_number = str(street_number).strip()
+        self.house_number = str(house_number).strip()
         self.suffix = str(suffix).strip().lower()
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
         self.exclude_list = str(exclude_list).strip().lower()
@@ -117,7 +117,7 @@ class MainCollector:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
                     return getter(
-                        self.provider, self.postal_code, self.street_number, self.suffix
+                        self.provider, self.postal_code, self.house_number, self.suffix
                     )
             _LOGGER.error(f"Unknown provider: {self.provider}")
             raise ValueError(f"Unknown provider: {self.provider}")
@@ -146,7 +146,7 @@ class MainCollector:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
                     result = getter(
-                        self.provider, self.postal_code, self.street_number, self.suffix
+                        self.provider, self.postal_code, self.house_number, self.suffix
                     )
                     _LOGGER.debug(
                         f"Retrieved {len(result)} notification(s) from {self.provider}"

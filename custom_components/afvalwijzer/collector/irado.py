@@ -24,7 +24,7 @@ _DEFAULT_HEADERS = {
 }
 
 
-def _build_url(provider: str, postal_code: str, street_number: str, suffix: str) -> str:
+def _build_url(provider: str, postal_code: str, house_number: str, suffix: str) -> str:
     if provider not in SENSOR_COLLECTORS_IRADO:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
@@ -32,7 +32,7 @@ def _build_url(provider: str, postal_code: str, street_number: str, suffix: str)
 
     return SENSOR_COLLECTORS_IRADO[provider].format(
         corrected_postal_code,
-        street_number,
+        house_number,
         suffix,
     )
 
@@ -105,7 +105,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
-    street_number: str,
+    house_number: str,
     suffix: str,
     *,
     session: requests.Session | None = None,
@@ -115,7 +115,7 @@ def get_waste_data_raw(
     """Return waste_data_raw."""
 
     session = session or requests.Session()
-    url = _build_url(provider, postal_code, street_number, suffix)
+    url = _build_url(provider, postal_code, house_number, suffix)
 
     try:
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
