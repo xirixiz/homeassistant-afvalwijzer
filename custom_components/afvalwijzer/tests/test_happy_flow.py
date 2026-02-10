@@ -25,6 +25,7 @@ def test_main_collector_happy_flow():
             "1234AB",
             "1",
             "",
+            "",
             "False",
             "",
             "geen",
