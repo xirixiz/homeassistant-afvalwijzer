@@ -17,8 +17,8 @@ from .const.const import (
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
+    CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
-    CONF_STREET_NUMBER,
     CONF_SUFFIX,
     DOMAIN,
     SENSOR_COLLECTORS_AMSTERDAM,
@@ -85,7 +85,7 @@ USER_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS),
         vol.Required(CONF_POSTAL_CODE): cv.string,
-        vol.Required(CONF_STREET_NUMBER): cv.string,
+        vol.Required(CONF_HOUSE_NUMBER): cv.string,
         vol.Optional(CONF_SUFFIX, default=""): cv.string,
         vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
     }
@@ -119,9 +119,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return _validate_postal_code(postal_code)
 
     @staticmethod
-    def _validate_street_number(street_number: str) -> bool:
+    def _validate_house_number(house_number: str) -> bool:
         """Validate that the street number is a positive integer."""
-        return _validate_street_number(street_number)
+        return _validate_house_number(house_number)
 
     @staticmethod
     @callback
@@ -142,12 +142,12 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             cleaned = _clean_user_input(user_input)
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
-            street_number = str(cleaned[CONF_STREET_NUMBER])
+            house_number = str(cleaned[CONF_HOUSE_NUMBER])
 
             if not self._validate_postal_code(postal_code):
                 errors["base"] = "invalid_postal_code"
-            elif not self._validate_street_number(street_number):
-                errors["base"] = "invalid_street_number"
+            elif not self._validate_house_number(house_number):
+                errors["base"] = "invalid_house_number"
             else:
                 await self.async_set_unique_id(_unique_id_from(cleaned))
                 self._abort_if_unique_id_configured()
@@ -184,12 +184,12 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             cleaned = _clean_user_input(user_input)
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
-            street_number = str(cleaned[CONF_STREET_NUMBER])
+            house_number = str(cleaned[CONF_HOUSE_NUMBER])
 
             if not self._validate_postal_code(postal_code):
                 errors["base"] = "invalid_postal_code"
-            elif not self._validate_street_number(street_number):
-                errors["base"] = "invalid_street_number"
+            elif not self._validate_house_number(house_number):
+                errors["base"] = "invalid_house_number"
             else:
                 assert self._reconfigure_entry is not None
 
@@ -305,9 +305,9 @@ def _unique_id_from(cleaned: dict[str, Any]) -> str:
     """Return a unique ID based on collector and address."""
     collector = str(cleaned.get(CONF_COLLECTOR, "")).strip()
     postal_code = str(cleaned.get(CONF_POSTAL_CODE, "")).strip()
-    street_number = str(cleaned.get(CONF_STREET_NUMBER, "")).strip()
+    house_number = str(cleaned.get(CONF_HOUSE_NUMBER, "")).strip()
     suffix = str(cleaned.get(CONF_SUFFIX, "")).strip()
-    return f"{collector}:{postal_code}:{street_number}:{suffix}".strip(":")
+    return f"{collector}:{postal_code}:{house_number}:{suffix}".strip(":")
 
 
 def _validate_postal_code(postal_code: str) -> bool:
@@ -315,6 +315,6 @@ def _validate_postal_code(postal_code: str) -> bool:
     return bool(_POSTAL_RE.match(postal_code.strip()))
 
 
-def _validate_street_number(street_number: str) -> bool:
+def _validate_house_number(house_number: str) -> bool:
     """Validate that the street number is a positive integer."""
-    return street_number.strip().isdigit()
+    return house_number.strip().isdigit()
