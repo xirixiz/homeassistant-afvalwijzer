@@ -50,7 +50,10 @@ def _fetch_waste_data_raw_temp(
     return response.json()
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: dict[str, Any],
+    custom_mapping: dict[str, str] | None = None,
+) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
     calendar = waste_data_raw_temp.get("calendar") or {}
@@ -61,7 +64,9 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
         waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
 
         for waste_code in waste_types:
-            waste_type = waste_type_rename((waste_code or "").strip().lower())
+            waste_type = waste_type_rename(
+                (waste_code or "").strip().lower(), custom_mapping
+            )
             if not waste_type:
                 continue
 
@@ -75,6 +80,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
@@ -104,7 +110,7 @@ def get_waste_data_raw(
         return []
 
     try:
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, custom_mapping)
         return waste_data_raw
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("KlikoGroep: Invalid and/or no data received from %s", url)

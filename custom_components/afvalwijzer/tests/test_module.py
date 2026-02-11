@@ -36,6 +36,7 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
     house_number = entry.get("house_number")
     suffix = entry.get("suffix", "")
     street_name = entry.get("street_name", "")
+    custom_mapping = entry.get("custom_mapping", "")
 
     if not show_failures_only:
         LOGGER.info(
@@ -54,6 +55,7 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
         exclude_pickup_today,
         exclude_list,
         default_label,
+        custom_mapping,
     )
 
     if collector.waste_data_with_today == {} or collector.waste_types_provider == []:

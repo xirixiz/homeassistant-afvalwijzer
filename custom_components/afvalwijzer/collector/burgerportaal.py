@@ -169,6 +169,7 @@ def _fetch_waste_data_raw_temp(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
+    custom_mapping: dict[str, str] | None = None,
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
@@ -181,7 +182,7 @@ def _parse_waste_data_raw(
         if not fraction:
             continue
 
-        waste_types = waste_type_rename(fraction.strip().lower())
+        waste_types = waste_type_rename(fraction.strip().lower(), custom_mapping)
         if not waste_types:
             continue
 
@@ -201,6 +202,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
@@ -250,7 +252,7 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, custom_mapping)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

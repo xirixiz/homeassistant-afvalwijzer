@@ -41,7 +41,10 @@ def _fetch_waste_data_raw(
     return response.text or ""
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: str,
+    custom_mapping: dict[str, str] | None = None,
+) -> list[dict[str, str]]:
     if not waste_data_raw_temp:
         return []
 
@@ -67,7 +70,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
         if field == "BEGIN" and value == "VEVENT":
             event = {}  # Initialize a new event
         elif field == "SUMMARY":
-            event["type"] = waste_type_rename(value.lower())
+            event["type"] = waste_type_rename(value.lower(), custom_mapping)
         elif field == "DTSTART":
             if value.isdigit() and len(value) == 8:
                 # Format date as YYYY-MM-DD
@@ -89,6 +92,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
@@ -118,7 +122,7 @@ def get_waste_data_raw(
         return []
 
     try:
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, custom_mapping)
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes

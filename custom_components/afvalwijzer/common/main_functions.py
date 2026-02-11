@@ -6,7 +6,9 @@ codes) and mapping provider-specific waste type labels to standardized keys.
 
 from __future__ import annotations
 
+import json
 import re
+from typing import Any
 
 from ..const.const import _LOGGER
 
@@ -153,11 +155,64 @@ def format_postal_code(postal_code: str) -> str:
     return f"{match.group(1)}{match.group(2).upper()}"
 
 
-def waste_type_rename(item_name: str) -> str:
+def normalize_custom_mapping(custom_mapping: dict[str, str] | None) -> dict[str, str]:
+    """Normalize a custom mapping to lowercase string keys and values."""
+    if not custom_mapping:
+        return {}
+
+    normalized: dict[str, str] = {}
+    for key, value in custom_mapping.items():
+        if key is None or value is None:
+            continue
+
+        key_clean = str(key).strip().lower()
+        value_clean = str(value).strip().lower()
+        if not key_clean or not value_clean:
+            continue
+
+        normalized[key_clean] = value_clean
+
+    return normalized
+
+
+def parse_custom_mapping(raw: Any) -> dict[str, str]:
+    """Parse a custom mapping from a dict or JSON string."""
+    if not raw:
+        return {}
+
+    if isinstance(raw, dict):
+        return normalize_custom_mapping(raw)
+
+    if isinstance(raw, str):
+        raw_str = raw.strip()
+        if not raw_str:
+            return {}
+
+        try:
+            parsed = json.loads(raw_str)
+        except json.JSONDecodeError:
+            _LOGGER.warning("Invalid custom mapping JSON provided; ignoring.")
+            return {}
+
+        if not isinstance(parsed, dict):
+            _LOGGER.warning("Custom mapping JSON must be an object; ignoring.")
+            return {}
+
+        return normalize_custom_mapping(parsed)
+
+    _LOGGER.warning("Custom mapping must be a dict or JSON string; ignoring.")
+    return {}
+
+
+def waste_type_rename(
+    item_name: str, custom_mapping: dict[str, str] | None = None
+) -> str:
     """Normalize a provider waste type label to a standardized key.
 
     Args:
         item_name: Raw waste type label as provided by a collector/provider.
+        custom_mapping: Optional mapping raw labels to standardized keys. Custom
+            mapping takes precedence over built-in mappings.
 
     Returns:
         A standardized waste type key (lowercase). If no mapping exists, return the
@@ -165,6 +220,10 @@ def waste_type_rename(item_name: str) -> str:
 
     """
     cleaned_item_name = item_name.strip().lower()
+
+    custom_mapping = parse_custom_mapping(custom_mapping)
+    if cleaned_item_name in custom_mapping:
+        return custom_mapping[cleaned_item_name]
 
     waste_type = WASTE_TYPE_MAPPING.get(cleaned_item_name, cleaned_item_name)
 

@@ -28,7 +28,8 @@
     },
     "error": {
       "invalid_postal_code": "Invalid postal code format",
-      "invalid_house_number": "House number must be numeric"
+      "invalid_house_number": "House number must be numeric",
+      "invalid_custom_mapping": "Custom mapping must be valid JSON"
     },
     "abort": {
       "already_configured": "Afvalwijzer is already configured",
@@ -36,6 +37,9 @@
     }
   },
   "options": {
+    "error": {
+      "invalid_custom_mapping": "Custom mapping must be valid JSON"
+    },
     "step": {
       "init": {
         "title": "Afvalwijzer Options",
@@ -45,6 +49,7 @@
           "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list",
+          "custom_mapping": "Custom mapping (JSON object)",
           "language": "Language"
         }
       }

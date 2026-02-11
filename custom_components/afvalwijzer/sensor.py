@@ -18,6 +18,7 @@ from .collector.main_collector import MainCollector
 from .const.const import (
     _LOGGER,
     CONF_COLLECTOR,
+    CONF_CUSTOM_MAPPING,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
@@ -42,6 +43,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
         vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
         vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
+        vol.Optional(CONF_CUSTOM_MAPPING, default=""): vol.Any(cv.string, dict),
     }
 )
 
@@ -162,6 +164,7 @@ class AfvalwijzerData:
                 self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
                 self.config.get(CONF_EXCLUDE_LIST),
                 self.config.get(CONF_DEFAULT_LABEL),
+                self.config.get(CONF_CUSTOM_MAPPING),
             )
         except ValueError as err:
             _LOGGER.error("Collector initialization failed: %s", err)

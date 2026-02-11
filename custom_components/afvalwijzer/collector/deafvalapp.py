@@ -39,7 +39,10 @@ def _fetch_waste_data_raw_temp(
     return response.text or ""
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: str,
+    custom_mapping: dict[str, str] | None = None,
+) -> list[dict[str, str]]:
     # Original behavior: if empty -> []
     if not waste_data_raw_temp:
         return []
@@ -57,7 +60,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: str) -> list[dict[str, str]]:
             continue
 
         waste_type_raw = parts[0].strip().lower()
-        waste_type = waste_type_rename(waste_type_raw)
+        waste_type = waste_type_rename(waste_type_raw, custom_mapping)
 
         # Keep safe behavior: if waste_type_rename returns empty/None, skip row
         if not waste_type:
@@ -80,6 +83,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
@@ -107,7 +111,7 @@ def get_waste_data_raw(
         return []
 
     try:
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, custom_mapping)
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes

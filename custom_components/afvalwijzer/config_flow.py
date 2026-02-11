@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -13,6 +14,7 @@ from homeassistant.helpers import config_validation as cv
 
 from .const.const import (
     CONF_COLLECTOR,
+    CONF_CUSTOM_MAPPING,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
@@ -53,6 +55,7 @@ DEFAULT_INCLUDE_TODAY = True
 DEFAULT_DEFAULT_LABEL = "geen"
 DEFAULT_EXCLUDE_LIST = ""
 DEFAULT_FRIENDLY_NAME = ""
+DEFAULT_CUSTOM_MAPPING = ""
 
 _POSTAL_CODE_BE_RE = re.compile(r"^\d{4}$")
 _POSTAL_CODE_NL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
@@ -139,6 +142,7 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Optional(CONF_INCLUDE_TODAY, default=DEFAULT_INCLUDE_TODAY): cv.boolean,
         vol.Optional(CONF_DEFAULT_LABEL, default=DEFAULT_DEFAULT_LABEL): cv.string,
         vol.Optional(CONF_EXCLUDE_LIST, default=DEFAULT_EXCLUDE_LIST): cv.string,
+        vol.Optional(CONF_CUSTOM_MAPPING, default=DEFAULT_CUSTOM_MAPPING): cv.string,
         vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(_ALL_LANGUAGES),
     }
 )
@@ -295,6 +299,15 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
     ) -> config_entries.FlowResult:
         """Handle the options step."""
         if user_input is not None:
+            if not _validate_custom_mapping_json(
+                user_input.get(CONF_CUSTOM_MAPPING, "")
+            ):
+                return self.async_show_form(
+                    step_id="init",
+                    data_schema=self._build_options_schema(),
+                    errors={"base": "invalid_custom_mapping"},
+                )
+
             cleaned = _clean_options_input(user_input)
 
             result = self.async_create_entry(title="", data=cleaned)
@@ -303,10 +316,16 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
             )
             return result
 
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self._build_options_schema(),
+        )
+
+    def _build_options_schema(self) -> vol.Schema:
         current = dict(self._config_entry.options)
         include_today = bool(current.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
 
-        schema = vol.Schema(
+        return vol.Schema(
             {
                 vol.Optional(
                     CONF_SHOW_FULL_TIMESTAMP,
@@ -327,13 +346,15 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                     default=current.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST),
                 ): cv.string,
                 vol.Optional(
+                    CONF_CUSTOM_MAPPING,
+                    default=current.get(CONF_CUSTOM_MAPPING, DEFAULT_CUSTOM_MAPPING),
+                ): cv.string,
+                vol.Optional(
                     CONF_LANGUAGE,
                     default=current.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
                 ): vol.In(_ALL_LANGUAGES),
             }
         )
-
-        return self.async_show_form(step_id="init", data_schema=schema)
 
 
 def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:
@@ -364,9 +385,32 @@ def _clean_options_input(options_input: dict[str, Any]) -> dict[str, Any]:
 
     include_today = bool(cleaned.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
 
+    custom_mapping_raw = str(cleaned.get(CONF_CUSTOM_MAPPING, DEFAULT_CUSTOM_MAPPING))
+    cleaned[CONF_CUSTOM_MAPPING] = custom_mapping_raw.strip()
+
     cleaned[CONF_EXCLUDE_PICKUP_TODAY] = not include_today
 
     return cleaned
+
+
+def _validate_custom_mapping_json(raw: Any) -> bool:
+    """Validate custom mapping JSON input from the options form."""
+    if raw is None:
+        return True
+
+    if isinstance(raw, dict):
+        return True
+
+    raw_str = str(raw).strip()
+    if not raw_str:
+        return True
+
+    try:
+        parsed = json.loads(raw_str)
+    except json.JSONDecodeError:
+        return False
+
+    return isinstance(parsed, dict)
 
 
 def _unique_id_from(cleaned: dict[str, Any]) -> str:

@@ -98,7 +98,7 @@ TEST_ADDRESSES = [
     #{"provider": "mijnafvalwijzer", "postal_code": "5685AB", "house_number": "57"},
     #{"provider": "mijnafvalwijzer", "postal_code": "5954CM", "house_number": "14"},
     #{"provider": "mijnafvalwijzer", "postal_code": "7009MH", "house_number": "51"},
-    #{"provider": "mijnafvalwijzer", "postal_code": "7944AB", "house_number": "1"},
+    {"provider": "mijnafvalwijzer", "postal_code": "7944AB", "house_number": "1", "custom_mapping": '{"keukenafval": "vet-goed"}'},
     #{"provider": "mijnafvalwijzer", "postal_code": "8253LT", "house_number": "30"},
     #{"provider": "mijnafvalwijzer", "postal_code": "9511RB", "house_number": "3"},
     #{"provider": "mijnafvalwijzer", "postal_code": "9521HN", "house_number": "80"},

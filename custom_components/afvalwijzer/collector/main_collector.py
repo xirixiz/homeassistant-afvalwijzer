@@ -61,6 +61,7 @@ class MainCollector:
         exclude_pickup_today,
         exclude_list: str,
         default_label: str,
+        custom_mapping: dict[str, str] | None = None,
     ):
         """Initialize MainCollector with parameters and fetch waste data."""
         # Normalize input parameters
@@ -72,6 +73,7 @@ class MainCollector:
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
         self.exclude_list = str(exclude_list).strip().lower()
         self.default_label = str(default_label).strip()
+        self.custom_mapping = custom_mapping or {}
 
         # Get raw waste data using the appropriate provider method
         waste_data_raw = self._get_waste_data_raw()
@@ -129,7 +131,7 @@ class MainCollector:
                     ]
                     if self.provider in SENSOR_COLLECTORS_RECYCLEAPP:
                         args.append(self.street_name)
-                    return getter(*args)
+                    return getter(*args, custom_mapping=self.custom_mapping)
             _LOGGER.error(f"Unknown provider: {self.provider}")
             raise ValueError(f"Unknown provider: {self.provider}")
 

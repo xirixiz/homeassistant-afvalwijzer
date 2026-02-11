@@ -51,7 +51,10 @@ def _fetch_data(
     return response.json()
 
 
-def _parse_waste_data_raw(response: dict) -> list[dict]:
+def _parse_waste_data_raw(
+    response: dict,
+    custom_mapping: dict[str, str] | None = None,
+) -> list[dict]:
     ophaaldagen_data = response.get("ophaaldagen", {}).get("data", [])
     ophaaldagen_next_data = response.get("ophaaldagenNext", {}).get("data", [])
 
@@ -67,7 +70,9 @@ def _parse_waste_data_raw(response: dict) -> list[dict]:
         if not date_str:
             continue
 
-        waste_type = waste_type_rename((item.get("type") or "").strip().lower())
+        waste_type = waste_type_rename(
+            (item.get("type") or "").strip().lower(), custom_mapping
+        )
         if not waste_type:
             continue
 
@@ -85,6 +90,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
@@ -106,7 +112,7 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(response)
+        waste_data_raw = _parse_waste_data_raw(response, custom_mapping)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

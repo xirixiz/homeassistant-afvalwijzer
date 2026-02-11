@@ -136,6 +136,7 @@ def _fetch_calendar(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: Sequence[dict[str, Any]],
+    custom_mapping: dict[str, str] | None = None,
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
@@ -144,7 +145,9 @@ def _parse_waste_data_raw(
         if not date_str:
             continue
 
-        waste_type = waste_type_rename((item.get("type") or "").strip().lower())
+        waste_type = waste_type_rename(
+            (item.get("type") or "").strip().lower(), custom_mapping
+        )
         if not waste_type:
             continue
 
@@ -159,6 +162,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     token: str | None = None,
     session: requests.Session | None = None,
@@ -197,7 +201,7 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, custom_mapping)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

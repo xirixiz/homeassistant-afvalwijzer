@@ -40,7 +40,9 @@ def _fetch_waste_data_raw_temp(
     raise NotImplementedError
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: Any) -> list[dict[str, Any]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: Any, custom_mapping: dict[str, str] | None = None
+) -> list[dict[str, Any]]:
     """Parse provider output into the common waste schema.
 
     Convert API specific output into a list of dicts where each dict matches the
@@ -54,6 +56,7 @@ def get_waste_data_raw(
     postal_code: str,
     house_number: str,
     suffix: str,
+    custom_mapping: dict[str, str] | None = None,
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
@@ -72,7 +75,7 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, custom_mapping)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

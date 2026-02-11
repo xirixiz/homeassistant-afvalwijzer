@@ -28,7 +28,8 @@
     },
     "error": {
       "invalid_postal_code": "Ongeldig postcode formaat",
-      "invalid_house_number": "Huisnummer moet numeriek zijn"
+      "invalid_house_number": "Huisnummer moet numeriek zijn",
+      "invalid_custom_mapping": "Custom mapping moet geldige JSON zijn"
     },
     "abort": {
       "already_configured": "Afvalwijzer is al geconfigureerd",
@@ -36,6 +37,9 @@
     }
   },
   "options": {
+    "error": {
+      "invalid_custom_mapping": "Custom mapping moet geldige JSON zijn"
+    },
     "step": {
       "init": {
         "title": "Afvalwijzer opties",
@@ -45,6 +49,7 @@
           "include_today": "Ophalen van vandaag meenemen",
           "default_label": "Standaard label wanneer geen data bekend is",
           "exclude_list": "Afvaltypes uitsluiten",
+          "custom_mapping": "Custom mapping (JSON object)",
           "language": "Taal"
         }
       }
