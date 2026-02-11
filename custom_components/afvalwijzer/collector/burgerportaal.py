@@ -169,6 +169,7 @@ def _fetch_waste_data_raw_temp(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
+    postal_code: str = "",
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
@@ -181,7 +182,7 @@ def _parse_waste_data_raw(
         if not fraction:
             continue
 
-        waste_types = waste_type_rename(fraction.strip().lower())
+        waste_types = waste_type_rename(fraction.strip().lower(), postal_code)
         if not waste_types:
             continue
 
@@ -250,7 +251,7 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

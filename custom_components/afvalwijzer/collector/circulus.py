@@ -154,11 +154,14 @@ def _fetch_waste_data_raw_temp(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
+    postal_code: str = "",
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
-        waste_type = waste_type_rename((item.get("code") or "").strip().lower())
+        waste_type = waste_type_rename(
+            (item.get("code") or "").strip().lower(), postal_code
+        )
         if not waste_type:
             continue
 
@@ -222,7 +225,7 @@ def get_waste_data_raw(
             _LOGGER.error("Circulus: No Waste data found!")
             return []
 
-        return _parse_waste_data_raw(waste_data_raw_temp)
+        return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("Circulus request error: %s", err)
