@@ -68,7 +68,6 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "kca klein chemisch afval": "kca",
     "kerstb": "kerstbomen",
     "kerstboom": "kerstbomen",
-    "keukenafval": "vet-goed",
     "luiers": "luiers",
     "opk": "papier",
     "oud papier": "papier",
