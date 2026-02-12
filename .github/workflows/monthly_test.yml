@@ -18,7 +18,7 @@ jobs:
           python-version: "3.x"
           cache: "pip"
           cache-dependency-path: requirements.txt
-      - uses: actions/cache@v5
+      - uses: "actions/cache@v5"
         with:
           path: data/
           key: data-cache-${{ hashFiles('data/Nederland.csv.zst') }}
@@ -35,12 +35,15 @@ jobs:
             OLD_HASH=$(cat data/.csv.zst.hash)
             NEW_HASH=$(sha256sum data/Nederland.csv.zst | cut -d ' ' -f1)
             if [ "$OLD_HASH" != "$NEW_HASH" ]; then
+              echo "Old hash isn't equal to new hash"
               echo "changed=true" >> $GITHUB_OUTPUT
               echo "$NEW_HASH" > data/.csv.zst.hash
             else
+              echo "Old hash is equal to new hash"
               echo "changed=false" >> $GITHUB_OUTPUT
             fi
           else
+            echo "Old hash didn't exist"
             echo "changed=true" >> $GITHUB_OUTPUT
             sha256sum data/Nederland.csv.zst | cut -d ' ' -f1 > data/.csv.zst.hash
           fi
