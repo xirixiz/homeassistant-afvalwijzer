@@ -154,6 +154,7 @@ def _parse_ximmio_date(value: str) -> str | None:
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: dict[str, Any],
+    postal_code: str | None = None,
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
@@ -166,7 +167,7 @@ def _parse_waste_data_raw(
             continue
 
         waste_type_text = (item.get("_pickupTypeText") or "").strip().lower()
-        waste_type = waste_type_rename(waste_type_text)
+        waste_type = waste_type_rename(waste_type_text, postal_code)
         if not waste_type:
             continue
 
@@ -236,7 +237,7 @@ def get_waste_data_raw(
             _LOGGER.error("Could not retrieve trash schedule!")
             return []
 
-        return _parse_waste_data_raw(waste_data_raw_temp)
+        return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("XIMMIO request error: %s", err)

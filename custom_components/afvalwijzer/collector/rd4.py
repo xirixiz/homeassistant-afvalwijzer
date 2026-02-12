@@ -56,6 +56,7 @@ def _fetch_waste_data_raw_temp(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
+    postal_code: str = "",
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
@@ -64,7 +65,9 @@ def _parse_waste_data_raw(
         if not date_str:
             continue
 
-        waste_type = waste_type_rename((item.get("type") or "").strip().lower())
+        waste_type = waste_type_rename(
+            (item.get("type") or "").strip().lower(), postal_code
+        )
         if not waste_type:
             continue
 
@@ -103,7 +106,7 @@ def get_waste_data_raw(
             _LOGGER.error("No waste data found or address not found!")
             return []
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

@@ -178,6 +178,7 @@ def _fetch_waste_data_raw_temp(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
+    postal_code: str = "",
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
     today = datetime.now()
@@ -187,7 +188,7 @@ def _parse_waste_data_raw(
             continue
 
         code = (item.get("afvalwijzerFractieCode") or "").strip().lower()
-        waste_type = waste_type_rename(code)
+        waste_type = waste_type_rename(code, postal_code)
         if not waste_type:
             continue
 
@@ -288,7 +289,7 @@ def get_waste_data_raw(
             _LOGGER.error("No Waste data found!")
             return []
 
-        waste_data_raw = _parse_waste_data_raw(embedded)
+        waste_data_raw = _parse_waste_data_raw(embedded, postal_code)
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:

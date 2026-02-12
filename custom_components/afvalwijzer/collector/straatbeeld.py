@@ -58,7 +58,9 @@ def _fetch_waste_data_raw_temp(
     return response.json() or {}
 
 
-def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str, str]]:
+def _parse_waste_data_raw(
+    waste_data_raw_temp: dict[str, Any], postal_code: str = ""
+) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
     collections = waste_data_raw_temp.get("collections") or {}
@@ -88,7 +90,7 @@ def _parse_waste_data_raw(waste_data_raw_temp: dict[str, Any]) -> list[dict[str,
                     if not name:
                         continue
 
-                    waste_type = waste_type_rename(name)
+                    waste_type = waste_type_rename(name, postal_code)
                     if not waste_type:
                         continue
 
@@ -129,7 +131,7 @@ def get_waste_data_raw(
             _LOGGER.error("No Waste data found!")
             return []
 
-        return _parse_waste_data_raw(waste_data_raw_temp)
+        return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("STRAATBEELD request error: %s", err)

@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 
 from ..const.const import _LOGGER
+from .postal_code_mappings import get_postal_code_override
 
 # Precompile the postal code pattern for better performance.
 POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")
@@ -68,7 +69,6 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "kca klein chemisch afval": "kca",
     "kerstb": "kerstbomen",
     "kerstboom": "kerstbomen",
-    "keukenafval": "vet-goed",
     "luiers": "luiers",
     "opk": "papier",
     "oud papier": "papier",
@@ -154,18 +154,33 @@ def format_postal_code(postal_code: str) -> str:
     return f"{match.group(1)}{match.group(2).upper()}"
 
 
-def waste_type_rename(item_name: str) -> str:
+def waste_type_rename(item_name: str, postal_code: str | None = None) -> str:
     """Normalize a provider waste type label to a standardized key.
+
+    When *postal_code* is supplied, postal-code-specific overrides (defined in
+    ``postal_code_mappings.py``) are checked **first**. If a match is found the
+    override wins; otherwise the global ``WASTE_TYPE_MAPPING`` is consulted.
 
     Args:
         item_name: Raw waste type label as provided by a collector/provider.
+        postal_code: Optional full postal code (e.g. ``"7941AB"``). Only the
+            first four digits are used for the override lookup.
 
     Returns:
-        A standardized waste type key (lowercase). If no mapping exists, return the
-        cleaned input.
+        A standardized waste type key (lowercase). If no mapping exists, return
+        the cleaned input.
 
     """
     cleaned_item_name = item_name.strip().lower()
+
+    # Check postal-code-specific overrides first.
+    if postal_code:
+        match = POSTAL_CODE_PATTERN.search(postal_code)
+        if match:
+            postal_code_digits = int(match.group(1))
+            override = get_postal_code_override(postal_code_digits, cleaned_item_name)
+            if override is not None:
+                return override
 
     waste_type = WASTE_TYPE_MAPPING.get(cleaned_item_name, cleaned_item_name)
 

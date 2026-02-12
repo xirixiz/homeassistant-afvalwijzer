@@ -45,12 +45,13 @@ def _fetch_waste_data_raw_temp(
 
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
+    postal_code: str = "",
 ) -> list[dict[str, str]]:
     waste_data_raw: list[dict[str, str]] = []
 
     for item in waste_data_raw_temp:
         waste_title = ((item.get("wasteType") or {}).get("title")) or ""
-        waste_type = waste_type_rename(waste_title)
+        waste_type = waste_type_rename(waste_title, postal_code)
         if not waste_type:
             continue
 
@@ -101,7 +102,7 @@ def get_waste_data_raw(
         return []
 
     try:
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp)
+        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
         return waste_data_raw
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("ROVA: Invalid and/or no data received from %s", url)

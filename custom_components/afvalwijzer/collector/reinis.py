@@ -73,6 +73,7 @@ def _fetch_waste_data_raw_temp(
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
     afvalstroom_response: list[dict[str, Any]],
+    postal_code: str = "",
 ) -> list[dict[str, str]]:
     # Build lookup dict once (faster and clearer than next(...) per item)
     afvalstroom_map: dict[Any, str] = {}
@@ -95,7 +96,7 @@ def _parse_waste_data_raw(
         if not title:
             continue
 
-        afval_type = waste_type_rename(title)
+        afval_type = waste_type_rename(title, postal_code)
         if not afval_type:
             continue
 
@@ -150,7 +151,7 @@ def get_waste_data_raw(
         )
 
         waste_data_raw = _parse_waste_data_raw(
-            waste_data_raw_temp, afvalstroom_response
+            waste_data_raw_temp, afvalstroom_response, postal_code
         )
         return waste_data_raw
 
