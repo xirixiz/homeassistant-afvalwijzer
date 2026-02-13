@@ -45,9 +45,9 @@ body:
     validations:
       required: true
     attributes:
-      label: Your postacal code (area)?
+      label: Your postal code (area)?
       description: >
-        Please share a valid postal code for sesting.
+        Please share a valid postal code for testing.
   - type: textarea
     attributes:
       label: Anything in the logs that might be useful for us?
