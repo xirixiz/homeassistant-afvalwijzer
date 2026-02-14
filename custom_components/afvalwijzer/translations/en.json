@@ -23,7 +23,7 @@
         "title": "Reconfigure Afvalwijzer",
         "description": "Update the address details for this Afvalwijzer configuration.",
         "data": {
-          "provider": "Collector (e.g. mijnafvalwijzer)",
+          "provider": "Collector",
           "postal_code": "Postal code",
           "house_number": "House number",
           "suffix": "House number suffix",
