@@ -5,7 +5,13 @@
         "title": "Configure Afvalwijzer",
         "description": "Set up your Afvalwijzer integration.",
         "data": {
-          "collector": "Collector (e.g. mijnafvalwijzer)",
+          "collector": "Collector (e.g. mijnafvalwijzer)"
+        }
+      },
+      "address": {
+        "title": "Configure Afvalwijzer",
+        "description": "Set up your Afvalwijzer integration.",
+        "data": {
           "postal_code": "Postal code (e.g. 1234AB)",
           "house_number": "House number",
           "suffix": "House number suffix",
