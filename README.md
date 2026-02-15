@@ -60,6 +60,7 @@ _Component to integrate with the following providers/communities._
 | Nijkerk                        |                                  |
 | Ôffalkalinder                  | opzet                            |
 | Omrin                          |                                  |
+| Oostzaan                       | ximmio                           |
 | Oude IJsselstreek              | klikogroep                       |
 | Peel en Maas                   | opzet                            |
 | PreZero                        | opzet                            |

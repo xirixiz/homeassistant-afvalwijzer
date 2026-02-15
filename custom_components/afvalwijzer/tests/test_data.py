@@ -114,6 +114,7 @@ TEST_ADDRESSES = [
     #{"provider": "omrin", "postal_code": "9164KD", "house_number": "6"},
     #{"provider": "omrin", "postal_code": "9285ML", "house_number": "17"},
     #{"provider": "omrin", "postal_code": "9991AB", "house_number": "2"},
+    #{"provider": "oostzaan", "postal_code": "1511WN", "house_number": "114"},
     #{"provider": "oudeijsselstreek", "postal_code": "7081GD", "house_number": "79"},
     #{"provider": "peelenmaas", "postal_code": "5991GR", "house_number": "32"},
     #{"provider": "prezero", "postal_code": "6822NG", "house_number": "1"},
