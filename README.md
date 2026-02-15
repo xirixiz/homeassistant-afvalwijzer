@@ -69,6 +69,7 @@ This custom component tries to support as much as possible, but there are some m
 | Nijkerk                        |                                  |
 | Ôffalkalinder                  | opzet                            |
 | Omrin                          |                                  |
+| Oostzaan                       | ximmio                           |
 | Oude IJsselstreek              | klikogroep                       |
 | Peel en Maas                   | opzet                            |
 | PreZero                        | opzet                            |
