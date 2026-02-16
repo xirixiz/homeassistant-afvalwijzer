@@ -18,6 +18,10 @@ This custom component tries to support as much as possible, but there are some m
 - Gennep
 - Haaksbergen
 - Landsmeer
+- Schiermonnikoog
+- Texel
+- Vlieland
+- Weert
 
 ## Supported waste collectors
 
