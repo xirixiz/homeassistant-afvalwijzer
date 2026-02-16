@@ -1,12 +1,11 @@
 # Afvalwijzer
 
-[![custom_updater][customupdaterbadge]][customupdater]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Validation And Formatting](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml/badge.svg)](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml)
-<br><br>
+
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
 
 _Component to integrate with the following providers/communities._
@@ -392,11 +391,14 @@ logger:
       postal_code: 1234AB              # (required, default = '')
       house_number: 5                  # (required, default = '')
       suffix: ''                       # (optional, default = '')
-      exclude_pickup_today: true       # (optional, default = true) to take or not to take Today into account in the next pickup.
-      date_isoformat: false            # (optional, default = false) show the date in full isoformat if desired. Example: "2024-01-14T08:40:33.993521"
+      street_name: ''                  # (optional, default = '') Only used for RecycleApp
+      include_today: true              # (optional, default = true) to take or not to take Today into account in the next pickup.
+      show_full_timestamp: false       # (optional, default = false) show the date with full timestamp if desired. Example: "2024-01-14T08:40:33.993521"
       default_label: geen              # (optional, default = geen) label if no date found
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
-      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). F.e. "papier, gft, restafval, pmd, etc"
+      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). E.g. "papier, gft, restafval, pmd, etc"
+      language: 'nl'                   # (optional, default = 'nl')
+      friendly_name: ''                # (optional, default = '<postal_code> <house_number><suffix>') set a friendly name for the device
 ```
 
 ---
@@ -524,7 +526,3 @@ actions:
 [exampleimg1]: images/afvalwijzer-lovelace_1.png
 
 [exampleimg2]: images/afvalwijzer-lovelace_2.png
-
-[customupdater]: https://github.com/custom-components/custom_updater
-
-[customupdaterbadge]: https://img.shields.io/badge/custom__updater-true-success.svg
