@@ -389,7 +389,7 @@ logger:
       id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
       exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). E.g. "papier, gft, restafval, pmd, etc"
       language: 'nl'                   # (optional, default = 'nl')
-      default_label: ''                # (optional, default = '<postal_code> <house_number><suffix>') set a default label for the device
+      friendly_name: ''                # (optional, default = '<postal_code> <house_number><suffix>') set a friendly name for the device
 ```
 
 ---
