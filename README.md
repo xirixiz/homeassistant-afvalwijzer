@@ -10,6 +10,19 @@
 
 _Component to integrate with the following providers/communities._
 
+## Known unsupported municipalities
+
+This custom component tries to support as much as possible, but there are some municipalities which we can't support at this time.
+
+- Bergen (Limburg)
+- Gennep
+- Haaksbergen
+- Landsmeer
+- Schiermonnikoog
+- Texel
+- Vlieland
+- Weert
+
 ## Supported waste collectors
 
 | Provider                       | Remark / source                  |
