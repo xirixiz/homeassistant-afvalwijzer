@@ -1,0 +1,9 @@
+services:
+  afvalwijzer:
+    image: "ghcr.io/home-assistant/home-assistant:latest"
+    volumes:
+      - ./config:/config
+      - ./custom_components/afvalwijzer:/config/custom_components/afvalwijzer
+    restart: unless-stopped
+    ports:
+      - 8123:8123
