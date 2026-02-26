@@ -1,0 +1,14 @@
+# Default Home Assistant configuration
+
+# Enable logging
+logger:
+  default: info
+  logs:
+    custom_components.afvalwijzer: debug
+
+# Placeholder for your custom 'isal' integration
+isal:
+
+# Debugging helper (commented out by default)
+# Uncomment the line below if you want to use debugger
+# debugpy:
