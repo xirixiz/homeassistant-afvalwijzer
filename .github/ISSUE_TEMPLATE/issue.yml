@@ -1,7 +1,13 @@
 name: 🚨 Report an issue
-description: Report an issue with Afvalwijzer for Home Assistant.
-labels: bug
+description: Report an issue or unexpected behavior with the Afvalwijzer integration.
+labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Sorry to hear you're experiencing an issue! 🐛
+        Before submitting, please quickly search the [existing issues](../issues) to see if this has already been reported.
+
   - type: dropdown
     id: language
     attributes:
@@ -15,74 +21,82 @@ body:
         - '🇬🇧 English'
     validations:
       required: true
-      
-  - type: markdown
-    attributes:
-      value: |
-        This issue form is for reporting bugs only!
 
-        If you have a feature or enhancement request, please use the applicable form
   - type: textarea
-    validations:
-      required: true
+    id: problem
     attributes:
-      label: The problem
+      label: The Problem
       description: >-
-        Describe the issue you are experiencing here to communicate to the
-        maintainers. Tell us what you were trying to do and what happened.
-
-        Provide a clear and concise description of what the problem is.
-
-  - type: markdown
-    attributes:
-      value: |
-        ## Environment
-
-  - type: textarea
-    attributes:
-      label: Home Assistant logs
-      description: Please provide the logs.
+        Tell us what you were trying to do and what actually happened.
+      placeholder: "When I do [...], the integration does [...] instead of [...]"
     validations:
       required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: What exact steps do we need to take to replicate the issue?
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. Notice the error...
+    validations:
+      required: true
+
+  - type: input
+    id: postal_code
+    validations:
+      required: true
+    attributes:
+      label: Postal Code (Area)
+      description: Please share the valid postal code you are using for testing so we can replicate the API call.
+      placeholder: "e.g., 1234 AB"
 
   - type: input
     id: version_afvalwijzer
     validations:
       required: true
     attributes:
-      label: Version of afvalwijzer integration having the issue?
-      placeholder: afvalwijzer-
-      description: >
-        Can be found in the Configuration panel -> Info.
+      label: Afvalwijzer Integration Version
+      description: Which version of this integration are you running? (Check HACS or the Integration page).
+      placeholder: "e.g., v202X.X.X"
 
   - type: input
     id: version_hass
     validations:
       required: true
     attributes:
-      label: Version of Home Assistant having the issue?
-      description: >
-        Can be found in the Configuration panel -> Info.
-  
-  - type: input
-    id: postal_code
-    validations:
-      required: true
-    attributes:
-      label: Your postal code (area)?
-      description: >
-        Please share a valid postal code for testing.
-  
-  - type: textarea
-    attributes:
-      label: Anything in the logs that might be useful for us?
-      description: For example, error message, or stack traces.
-      render: txt
+      label: Home Assistant Core Version
+      description: Which version of Home Assistant Core are you running? (Check Settings -> System -> About).
+      placeholder: "e.g., 202X.X.X"
 
   - type: textarea
+    id: logs
     attributes:
-      label: Additional information
-      description: >
-        If you have any additional information for us, use the field below.
-        Please note, you can attach screenshots or screen recordings here, by
-        setting the cursor in the field below and dragging and dropping files into the box.
+      label: Home Assistant Logs / Error Messages
+      description: |
+        Please provide the relevant errors or stack traces from your Home Assistant logs (Settings -> System -> Logs). 
+        *Tip: It helps immensely if you enable debug logging for this integration first.*
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Information
+      description: >-
+        Any other context about the problem? You can also attach screenshots or screen recordings by dragging and dropping them into this box.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched the existing issues to ensure this bug hasn't already been reported.
+          required: true
+        - label: I have updated both Home Assistant and the Afvalwijzer integration to the latest versions, and the issue still persists.
+          required: true
