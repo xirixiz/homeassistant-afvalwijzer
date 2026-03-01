@@ -1,7 +1,23 @@
-# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 version: 2
 updates:
-    - package-ecosystem: 'github-actions'
-      directory: '/'
-      schedule:
-          interval: 'weekly'
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      
+    # Group all action updates into a single PR to reduce noise
+    groups:
+      actions:
+        patterns:
+          - "*"
+          
+    # Automatically apply labels to the PRs
+    labels:
+      - "dependencies"
+      - "github-actions"
+      
+    # Keep commit history clean and structured
+    commit-message:
+      prefix: "ci"
+      include: "scope"
