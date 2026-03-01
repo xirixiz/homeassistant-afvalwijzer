@@ -1,6 +1,13 @@
-name: 💡 Request a feature or an enhancement
-description: Request a feature or an enhancement
+name: 💡 Feature Request
+description: Suggest an idea or enhancement for this project.
+labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest an improvement! 🎉
+        Before you submit, please do a quick search to ensure your idea hasn't been requested already.
+
   - type: dropdown
     id: language
     attributes:
@@ -15,26 +22,42 @@ body:
     validations:
       required: true
       
-  - type: markdown
-    attributes:
-      value: |
-        This form is for requesting a feature or an enhancement.
-
   - type: textarea
+    id: problem
+    attributes:
+      label: The Problem
+      description: >-
+        Is your feature request related to a problem or friction point? Please describe it clearly.
+      placeholder: "I'm always frustrated when [...] because [...]"
     validations:
       required: true
-    attributes:
-      label: Request
-      description: >-
-        Describe the feature or enhancement you like to see implemented.
-        Tell us what value it brings to the users.
-
-        Provide a clear and concise description of what you would like to request.
 
   - type: textarea
+    id: solution
     attributes:
-      label: Additional information
+      label: The Proposed Solution
       description: >-
-        If you have any additional information, use the field below.
-        Please note, you can attach screenshots or screen recordings here, by
-        dragging and dropping files in the field below.
+        Describe the feature or enhancement you would like to see implemented. Tell us what value it brings to the users.
+      placeholder: "I would like to see a feature that [...]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Information
+      description: >-
+        If you have any additional context, mockups, or alternatives you've considered, add them below. 
+        You can attach screenshots or screen recordings by dragging and dropping files into this field.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched the existing issues to ensure this feature hasn't already been requested.
+          required: true
+        - label: I am willing to submit a Pull Request to help implement this feature.
+          required: false
