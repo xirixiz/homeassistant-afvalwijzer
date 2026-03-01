@@ -2,6 +2,20 @@ name: 🚨 Report an issue
 description: Report an issue with Afvalwijzer for Home Assistant.
 labels: bug
 body:
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language / Voertaal
+      description: |
+        > [!TIP]
+        > *🇬🇧 Unable to communicate in Dutch? Welcome anyway! Feel free to use English.*
+        > *🇳🇱 Voel je vooral vrij om in het Nederlands te communiceren, ondanks dat het project Engelstalig is.*
+      options:
+        - '🇳🇱 Nederlandstalig'
+        - '🇬🇧 English'
+    validations:
+      required: true
+      
   - type: markdown
     attributes:
       value: |
@@ -18,10 +32,19 @@ body:
         maintainers. Tell us what you were trying to do and what happened.
 
         Provide a clear and concise description of what the problem is.
+
   - type: markdown
     attributes:
       value: |
         ## Environment
+
+  - type: textarea
+    attributes:
+      label: Home Assistant logs
+      description: Please provide the logs.
+    validations:
+      required: true
+
   - type: input
     id: version_afvalwijzer
     validations:
@@ -31,15 +54,16 @@ body:
       placeholder: afvalwijzer-
       description: >
         Can be found in the Configuration panel -> Info.
+
   - type: input
-    id: version
+    id: version_hass
     validations:
       required: true
     attributes:
-      label: Version of Home Assistant Core having the issue?
-      placeholder: core-
+      label: Version of Home Assistant having the issue?
       description: >
         Can be found in the Configuration panel -> Info.
+  
   - type: input
     id: postal_code
     validations:
@@ -48,11 +72,13 @@ body:
       label: Your postal code (area)?
       description: >
         Please share a valid postal code for testing.
+  
   - type: textarea
     attributes:
       label: Anything in the logs that might be useful for us?
       description: For example, error message, or stack traces.
       render: txt
+
   - type: textarea
     attributes:
       label: Additional information
