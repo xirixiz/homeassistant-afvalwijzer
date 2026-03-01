@@ -1,23 +1,52 @@
 version: 2
 updates:
+  # GitHub Actions (CI Workflows)
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      
-    # Group all action updates into a single PR to reduce noise
     groups:
       actions:
         patterns:
           - "*"
-          
-    # Automatically apply labels to the PRs
     labels:
       - "dependencies"
       - "github-actions"
-      
-    # Keep commit history clean and structured
     commit-message:
       prefix: "ci"
+      include: "scope"
+
+  # Python Dependencies (requirements_dev.txt, pyproject.toml, etc.)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      python:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Pre-commit hooks (Ruff, Black, etc. if you use .pre-commit-config.yaml)
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      pre-commit:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "pre-commit"
+    commit-message:
+      prefix: "chore"
       include: "scope"
