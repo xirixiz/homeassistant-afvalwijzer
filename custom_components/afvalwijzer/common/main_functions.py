@@ -42,6 +42,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "gfte afval": "gft",
     "glass": "glas",
     "green": "gft",
+    "greenbasket": "gft",
     "grey": "restafval",
     "grijze container": "restafval",
     "grijze container / sortibak": "restafval",
