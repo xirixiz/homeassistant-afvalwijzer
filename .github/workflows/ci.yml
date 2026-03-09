@@ -49,7 +49,7 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt -r requirements_test.txt
       - run: scripts/coverage
-      - uses: dorny/test-reporter@v2.5.0
+      - uses: dorny/test-reporter@v2.6.0
         with:
           name: Test Results
           path: pytest.xml
