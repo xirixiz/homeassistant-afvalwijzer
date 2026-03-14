@@ -53,6 +53,10 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
     },
 }
 
+SENSOR_COLLECTORS_MIJNAFVALHULP = {
+    "mijnafvalhulp": "https://mijn.afvalhulp.nl",
+}
+
 SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
     "mijnafvalwijzer": "https://api.mijnafvalwijzer.nl/webservices/appsinput/?apikey=5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca&method=postcodecheck&postcode={0}&street=&huisnummer={1}&toevoeging={2}&app_name=afvalwijzer&platform=web&langs=nl",
 }

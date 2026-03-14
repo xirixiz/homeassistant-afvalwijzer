@@ -7,7 +7,7 @@ from datetime import datetime
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import parse_ical_waste_data
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -39,51 +39,6 @@ def _fetch_waste_data_raw(
     response = session.get(url, timeout=timeout, verify=verify)
     response.raise_for_status()
     return response.text or ""
-
-
-def _parse_waste_data_raw(
-    waste_data_raw_temp: str, postal_code: str = ""
-) -> list[dict[str, str]]:
-    if not waste_data_raw_temp:
-        return []
-
-    waste_data_raw: list[dict[str, str]] = []
-
-    lines = waste_data_raw_temp.splitlines()
-    event = {}  # Temporary dict to hold event data
-
-    for line in lines:
-        # Only process lines containing a colon
-        if ":" not in line:
-            continue
-
-        # Split the line into field and value parts
-        parts = line.split(":", 1)
-        if len(parts) < 2:
-            continue
-
-        # Clean up the field name and value
-        field = parts[0].split(";")[0].strip()
-        value = parts[1].strip()
-
-        if field == "BEGIN" and value == "VEVENT":
-            event = {}  # Initialize a new event
-        elif field == "SUMMARY":
-            event["type"] = waste_type_rename(value.lower(), postal_code)
-        elif field == "DTSTART":
-            if value.isdigit() and len(value) == 8:
-                # Format date as YYYY-MM-DD
-                event["date"] = f"{value[:4]}-{value[4:6]}-{value[6:8]}"
-            else:
-                _LOGGER.debug(f"Unsupported waste_date format: {value}")
-        elif field == "END" and value == "VEVENT":
-            if "date" in event and "type" in event:
-                waste_data_raw.append(event)
-            else:
-                _LOGGER.debug(f"Incomplete event data encountered: {event}")
-            event = {}  # Reset the event for the next one
-
-    return waste_data_raw
 
 
 def get_waste_data_raw(
@@ -120,7 +75,7 @@ def get_waste_data_raw(
         return []
 
     try:
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
+        waste_data_raw = parse_ical_waste_data(waste_data_raw_temp, postal_code)
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes
