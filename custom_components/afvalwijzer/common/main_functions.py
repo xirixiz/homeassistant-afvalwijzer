@@ -191,7 +191,7 @@ def waste_type_rename(item_name: str, postal_code: str | None = None) -> str:
     waste_type = WASTE_TYPE_MAPPING.get(cleaned_item_name, cleaned_item_name)
 
     if waste_type not in WASTE_TYPE_MAPPING.values():
-        _LOGGER.debug("Unmapped waste type encountered: '%s'", cleaned_item_name)
+        _LOGGER.warning("Unmapped waste type encountered: '%s'", cleaned_item_name)
 
     return waste_type
 
@@ -235,16 +235,16 @@ def parse_ical_waste_data(
         elif field == "SUMMARY":
             event["type"] = waste_type_rename(value.lower(), postal_code)
         elif field == "DTSTART":
-            date_str = value[:8]
-            if date_str.isdigit() and len(date_str) == 8:
+            if len(value) >= 8 and value[:8].isdigit():
+                date_str = value[:8]
                 event["date"] = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
             else:
-                _LOGGER.debug("Unsupported waste_date format: %s", value)
+                _LOGGER.warning("Unsupported waste_date format: %s", value)
         elif field == "END" and value == "VEVENT":
             if "date" in event and "type" in event:
                 waste_data.append(event)
             else:
-                _LOGGER.debug("Incomplete iCal event data encountered: %s", event)
+                _LOGGER.warning("Incomplete iCal event data encountered: %s", event)
             event = {}
 
     return waste_data
