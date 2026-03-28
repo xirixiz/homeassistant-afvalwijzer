@@ -191,7 +191,7 @@ def waste_type_rename(item_name: str, postal_code: str | None = None) -> str:
     waste_type = WASTE_TYPE_MAPPING.get(cleaned_item_name, cleaned_item_name)
 
     if waste_type not in WASTE_TYPE_MAPPING.values():
-        _LOGGER.warning("Unmapped waste type encountered: '%s'", cleaned_item_name)
+        _LOGGER.debug("Unmapped waste type encountered: '%s'", cleaned_item_name)
 
     return waste_type
 
