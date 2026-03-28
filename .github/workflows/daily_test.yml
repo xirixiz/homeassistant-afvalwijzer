@@ -1,9 +1,6 @@
 name: "Afvalwijzer: Daily Test"
 
 on:
-  push:
-    branches:
-      - municipality-coverage
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
