@@ -73,6 +73,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "kerstb": "kerstbomen",
     "kerstboom": "kerstbomen",
     "luiers": "luiers",
+    "mobiletransferpoint": "grip",
     "opk": "papier",
     "oud papier": "papier",
     "oud papier & karton": "papier",
