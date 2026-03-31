@@ -48,11 +48,12 @@ class NextSensorData:
 
     def __get_next_waste_type(self):
         try:
-            return [
+            waste_types = [
                 waste["type"]
                 for waste in self.waste_data_after_date_selected
                 if waste["date"] == self.next_waste_date
-            ] or [self.default_label]
+            ]
+            return list(dict.fromkeys(waste_types)) or [self.default_label]
         except Exception as err:
             _LOGGER.error("Error occurred in __get_next_waste_type: %s", err)
             return [self.default_label]

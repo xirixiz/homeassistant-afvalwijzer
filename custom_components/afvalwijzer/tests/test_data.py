@@ -314,6 +314,7 @@ TEST_ADDRESSES = [
     #{"provider": "sudwestfryslan", "postal_code": "8604ED", "house_number": "1"},
     #{"provider": "tilburg", "postal_code": "5038EC", "house_number": "37"},
     #{"provider": "tilburg", "postal_code": "5053AT", "house_number": "88"},
+    #{"provider": "tilburg", "postal_code": "5057DE", "house_number": "4"},
     #{"provider": "twentemilieu", "postal_code": "7271JG", "house_number": "8"},
     #{"provider": "twentemilieu", "postal_code": "7491GX", "house_number": "15"},
     #{"provider": "twentemilieu", "postal_code": "7524AR", "house_number": "3"},
