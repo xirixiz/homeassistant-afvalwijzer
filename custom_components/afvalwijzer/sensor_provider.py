@@ -155,6 +155,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
                 return "mdi:sofa"
             case "kerstbomen":
                 return "mdi:pine-tree"
+            case "grip" | "maas" | "milieubus":
+                return "mdi:truck-cargo-container"
             case "papier":
                 return "mdi:newspaper"
             case "plastic" | "pmd":
