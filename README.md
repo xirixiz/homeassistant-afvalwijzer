@@ -1,11 +1,11 @@
 # Afvalwijzer
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-[![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
-[![Validation And Formatting](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml/badge.svg)](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/combined_ci.yml)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration) [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Open Source Love png1](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/) [![Validation And Formatting](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/ci.yml/badge.svg)](https://github.com/xirixiz/homeassistant-afvalwijzer/actions/workflows/ci.yml)
 
+![Version](https://img.shields.io/github/v/release/xirixiz/homeassistant-afvalwijzer)
+![GitHub Downloads](https://img.shields.io/github/downloads/xirixiz/homeassistant-afvalwijzer/latest/total)
+
+[![hacs_badge](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=xirixiz&repository=homeassistant-afvalwijzer)
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/xirixiz)
 
 _Component to integrate with the following providers/communities._
@@ -385,27 +385,6 @@ logger:
 ```
 
 ## EXAMPLE CONFIGURATION
-
-###### SENSOR - CONFIGURATION.YAML
-
-```yaml
-  sensor:
-    - platform: afvalwijzer
-      provider: mijnafvalwijzer        # (required, default = mijnafvalwijzer) choose the provider for your community.
-      postal_code: 1234AB              # (required, default = '')
-      house_number: 5                  # (required, default = '')
-      suffix: ''                       # (optional, default = '')
-      street_name: ''                  # (optional, default = '') Only used for RecycleApp
-      include_today: true              # (optional, default = true) to take or not to take Today into account in the next pickup.
-      show_full_timestamp: false       # (optional, default = false) show the date with full timestamp if desired. Example: "2024-01-14T08:40:33.993521"
-      default_label: geen              # (optional, default = geen) label if no date found
-      id: ''                           # (optional, default = '') use if you'd like to have multiple waste pickup locations in HASS
-      exclude_list: ''                 # (optional, default = '') comma separated list of wast types (case ignored). E.g. "papier, gft, restafval, pmd, etc"
-      language: 'nl'                   # (optional, default = 'nl')
-      friendly_name: ''                # (optional, default = '<postal_code> <house_number><suffix>') set a friendly name for the device
-```
-
----
 
 ###### INPUT BOOLEAN (FOR AUTOMATION)
 

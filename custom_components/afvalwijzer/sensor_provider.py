@@ -131,6 +131,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             identifiers={(DOMAIN, _address_key(self._config))},
             name=f"Afvalwijzer {self._config.get(CONF_FRIENDLY_NAME) or _address_label(self._config)}",
             manufacturer="Afvalwijzer",
+            model=self._config.get(CONF_COLLECTOR),
+            entry_type="service",
         )
 
     @staticmethod
@@ -153,6 +155,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
                 return "mdi:sofa"
             case "kerstbomen":
                 return "mdi:pine-tree"
+            case "grip" | "maas" | "milieubus":
+                return "mdi:truck-cargo-container"
             case "papier":
                 return "mdi:newspaper"
             case "plastic" | "pmd":

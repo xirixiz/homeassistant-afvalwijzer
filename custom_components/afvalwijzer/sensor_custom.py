@@ -116,6 +116,8 @@ class CustomSensor(RestoreEntity, SensorEntity):
             identifiers={(DOMAIN, _address_key(self._config))},
             name=f"Afvalwijzer {self._config.get(CONF_FRIENDLY_NAME) or _address_label(self._config)}",
             manufacturer="Afvalwijzer",
+            model=self._config.get(CONF_COLLECTOR),
+            entry_type="service",
         )
 
     @staticmethod

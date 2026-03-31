@@ -36,12 +36,14 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "gft afval": "gft",
     "gft en etensresten": "gft",
     "gft groente- fruit en tuinafval": "gft",
+    "gft ophaal": "gft",
     "gft+e": "gft",
     "gft-afval": "gft",
     "gfte": "gft",
     "gfte afval": "gft",
     "glass": "glas",
     "green": "gft",
+    "greenbasket": "gft",
     "grey": "restafval",
     "grijze container": "restafval",
     "grijze container / sortibak": "restafval",
@@ -62,6 +64,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "grof tuinafval": "snoeiafval",
     "grofvuil": "grofvuil",
     "grofvuil en elektrische apparaten": "grofvuil",
+    "grofvuil ophaal": "grofvuil",
     "inzameling gft en etensresten": "gft",
     "inzameling gft+e": "gft",
     "inzameling papier en karton": "papier",
@@ -70,6 +73,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "kerstb": "kerstbomen",
     "kerstboom": "kerstbomen",
     "luiers": "luiers",
+    "mobiletransferpoint": "grip",
     "opk": "papier",
     "oud papier": "papier",
     "oud papier & karton": "papier",
@@ -86,6 +90,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "papier en karton (avond inzameling)": "papier",
     "papier en karton (inzameling overdag)": "papier",
     "papier en karton eemnes": "papier",
+    "papier ophaal": "papier",
     "papier-karton": "papier",
     "papiercont": "papier",
     "papierinzameling": "papier",
@@ -113,6 +118,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "pmd in zakken": "pmd",
     "pmd plastic, metalen en drankkartons": "pmd",
     "pmd+": "pmd",
+    "pmd+ ophaal": "pmd",
     "pmd-zak": "pmd",
     "pmdrest": "pmd-restafval",
     "pruning_waste": "snoeiafval",
@@ -129,6 +135,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "sortibak": "sorti",
     "takken": "snoeiafval",
     "takken en snoeiafval": "snoeiafval",
+    "takken en snoeiafval ophaal": "snoeiafval",
     "tariefzak restafval": "restafvalzakken",
     "textile": "textiel",
     "tree": "kerstbomen",
@@ -188,3 +195,57 @@ def waste_type_rename(item_name: str, postal_code: str | None = None) -> str:
         _LOGGER.debug("Unmapped waste type encountered: '%s'", cleaned_item_name)
 
     return waste_type
+
+
+def parse_ical_waste_data(
+    ical_text: str, postal_code: str = ""
+) -> list[dict[str, str]]:
+    """Parse VEVENT blocks from raw iCal text into a list of waste data dicts.
+
+    Each returned dict contains ``"date"`` (``"YYYY-MM-DD"``) and ``"type"``
+    (a normalised waste type key via :func:`waste_type_rename`).
+
+    Args:
+        ical_text: Raw iCal content as a string.
+        postal_code: Optional postal code forwarded to :func:`waste_type_rename`
+            for postal-code-specific overrides.
+
+    Returns:
+        A list of ``{"date": ..., "type": ...}`` dicts for complete events.
+
+    """
+    if not ical_text:
+        return []
+
+    waste_data: list[dict[str, str]] = []
+    event: dict[str, str] = {}
+
+    for line in ical_text.splitlines():
+        if ":" not in line:
+            continue
+
+        parts = line.split(":", 1)
+        if len(parts) < 2:
+            continue
+
+        field = parts[0].split(";")[0].strip()
+        value = parts[1].strip()
+
+        if field == "BEGIN" and value == "VEVENT":
+            event = {}
+        elif field == "SUMMARY":
+            event["type"] = waste_type_rename(value.lower(), postal_code)
+        elif field == "DTSTART":
+            if len(value) >= 8 and value[:8].isdigit():
+                date_str = value[:8]
+                event["date"] = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
+            else:
+                _LOGGER.warning("Unsupported waste_date format: %s", value)
+        elif field == "END" and value == "VEVENT":
+            if "date" in event and "type" in event:
+                waste_data.append(event)
+            else:
+                _LOGGER.warning("Incomplete iCal event data encountered: %s", event)
+            event = {}
+
+    return waste_data

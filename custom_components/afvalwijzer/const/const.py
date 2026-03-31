@@ -7,7 +7,7 @@ _LOGGER = logging.getLogger(__name__)
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2026.1010"
+VERSION = "2026.1014"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -51,6 +51,10 @@ SENSOR_COLLECTORS_KLIKOGROEP = {
         "id": "505",
         "url": "cp-maassluis.klikocontainermanager.com",
     },
+}
+
+SENSOR_COLLECTORS_MIJNAFVALHULP = {
+    "mijnafvalhulp": "https://mijn.afvalhulp.nl",
 }
 
 SENSOR_COLLECTORS_MIJNAFVALWIJZER = {

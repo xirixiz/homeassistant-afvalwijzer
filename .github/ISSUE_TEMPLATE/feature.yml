@@ -1,43 +1,63 @@
-name: 💡 Feature request
-description: Request a new feature or enhancement.
-labels: enhancement
+name: 💡 Feature Request
+description: Suggest an idea or enhancement for this project.
+labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        This form is for requesting new features or enhancements!
-        Make sure that you have updated the integration to the latest version.
-        Check if there are similar requests already. If so, please add your request as a comment to that issue.
-  - type: textarea
-    validations:
-      required: true
-    attributes:
-      label: Feature request
-      description: >-
-        Describe what new functions or enhancements you want to see.
+        Thanks for taking the time to suggest an improvement! 🎉
+        Before you submit, please do a quick search to ensure your idea hasn't been requested already.
 
-  - type: markdown
+  - type: dropdown
+    id: language
     attributes:
-      value: |
-        ## Environment
-  - type: input
-    id: version_afvalwijzer
+      label: Language / Voertaal
+      description: |
+        > [!TIP]
+        > *🇬🇧 Unable to communicate in Dutch? Welcome anyway! Feel free to use English.*
+        > *🇳🇱 Voel je vooral vrij om in het Nederlands te communiceren, ondanks dat het project Engelstalig is.*
+      options:
+        - '🇳🇱 Nederlandstalig'
+        - '🇬🇧 English'
     validations:
       required: true
-    attributes:
-      label: What version of the integration are you using?
-      placeholder: afvalwijzer-
-      description: >
-        Can be found in the Configuration panel -> Info.
+      
   - type: textarea
+    id: problem
     attributes:
-      label: Anything in the logs that might be useful for us?
-      description: For example, error message, or stack traces.
-      render: txt
+      label: The Problem
+      description: >-
+        Is your feature request related to a problem or friction point? Please describe it clearly.
+      placeholder: "I'm always frustrated when [...] because [...]"
+    validations:
+      required: true
+
   - type: textarea
+    id: solution
     attributes:
-      label: Additional information
-      description: >
-        If you have any additional information for us, use the field below.
-        Please note, you can attach screenshots or screen recordings here by
-        setting the cursor in the field below and dragging and dropping files into the box.
+      label: The Proposed Solution
+      description: >-
+        Describe the feature or enhancement you would like to see implemented. Tell us what value it brings to the users.
+      placeholder: "I would like to see a feature that [...]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Information
+      description: >-
+        If you have any additional context, mockups, or alternatives you've considered, add them below. 
+        You can attach screenshots or screen recordings by dragging and dropping files into this field.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched the existing issues to ensure this feature hasn't already been requested.
+          required: true
+        - label: I am willing to submit a Pull Request to help implement this feature.
+          required: false

@@ -1,8 +1,9 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: 🙋 Ask a question in the HASS community
-    url: https://community.home-assistant.io/t/garbage-pickup-date-mijnafvalwijzer-nl-custom-component/34631
-    about: If you are unsure where to go, then contacting the HASS community is recommended; Just ask!
-  - name: 🙋 Support issue on Github
+  - name: 💬 GitHub Discussions (Q&A)
     url: https://github.com/xirixiz/homeassistant-afvalwijzer/discussions/categories/q-a
-    about: Please ask and answer questions here.
+    about: Need help troubleshooting an error? Ask the community and find answers in our GitHub Q&A board.
+
+  - name: 🙋 Home Assistant Community Forum
+    url: https://community.home-assistant.io/t/garbage-pickup-date-mijnafvalwijzer-nl-custom-component/34631
+    about: Best for general questions, sharing dashboard setups, or getting configuration help from other Home Assistant users.
