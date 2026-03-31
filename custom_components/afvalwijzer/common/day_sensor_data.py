@@ -32,11 +32,12 @@ class DaySensorData:
     def __gen_day_sensor(self, date):
         day = []
         try:
-            day.extend(
+            waste_types = [
                 waste["type"]
                 for waste in self.waste_data_formatted
                 if waste["date"] == date
-            )
+            ]
+            day.extend(list(dict.fromkeys(waste_types)))
             if not day:
                 day.append(self.default_label)
         except Exception as err:
