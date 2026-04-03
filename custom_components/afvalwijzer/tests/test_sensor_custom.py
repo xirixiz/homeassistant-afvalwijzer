@@ -70,7 +70,7 @@ def test_custom_sensor_timestamp_and_days_until():
 
 
 def test_custom_sensor_fallback_when_no_full_timestamp():
-    """CustomSensor returns ISO date string when full timestamp disabled."""
+    """CustomSensor returns ISO date when full timestamp disabled."""
     today = date.today()
     target = today + timedelta(days=5)
 
@@ -90,6 +90,6 @@ def test_custom_sensor_fallback_when_no_full_timestamp():
 
     asyncio.run(sensor.async_update())
 
-    # when full timestamp disabled, native_value returns fallback string
-    assert isinstance(sensor.native_value, str)
-    assert sensor.native_value == target.isoformat()
+    # when full timestamp disabled, native_value returns fallback
+    assert isinstance(sensor.native_value, date)
+    assert sensor.native_value == target
