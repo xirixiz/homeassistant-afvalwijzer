@@ -119,7 +119,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         self._is_collection_date_day_after_tomorrow = False
 
         self._attr_device_class: SensorDeviceClass | None = None
-        self._native_value: datetime | int | None = None
+        self._native_value: datetime | date | int | None = None
         self._fallback_state = (
             "0" if self._is_notification_sensor else self._cfg.default_label
         )
@@ -193,6 +193,9 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             return (
                 self._native_value if isinstance(self._native_value, datetime) else None
             )
+
+        if self._attr_device_class == SensorDeviceClass.DATE:
+            return self._native_value if isinstance(self._native_value, date) else None
 
         return self._fallback_state
 
@@ -283,7 +286,8 @@ class ProviderSensor(RestoreEntity, SensorEntity):
             self._native_value = local_dt
             return
 
-        self._attr_device_class = None
+        self._attr_device_class = SensorDeviceClass.DATE
+        self._native_value = collection_date
         self._fallback_state = collection_date.isoformat()
 
     def _update_collection_date_flags(self, collection_date: date) -> None:

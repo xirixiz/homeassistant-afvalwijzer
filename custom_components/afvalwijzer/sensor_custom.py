@@ -106,7 +106,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
         self._attr_icon = self._icon_for_waste_type(waste_type)
 
         self._attr_device_class: SensorDeviceClass | None = None
-        self._native_value: datetime | str | None = None
+        self._native_value: datetime | date | str | None = None
         self._fallback_state = self._cfg.default_label
 
     @property
@@ -145,12 +145,14 @@ class CustomSensor(RestoreEntity, SensorEntity):
                 return SENSOR_ICON
 
     @property
-    def native_value(self) -> datetime | str | None:
+    def native_value(self) -> datetime | date | str | None:
         """Return the native value of the sensor."""
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
             return (
                 self._native_value if isinstance(self._native_value, datetime) else None
             )
+        if self._attr_device_class == SensorDeviceClass.DATE:
+            return self._native_value if isinstance(self._native_value, date) else None
         return self._fallback_state
 
     @property
@@ -215,8 +217,8 @@ class CustomSensor(RestoreEntity, SensorEntity):
             self._native_value = local_dt
             return
 
-        self._attr_device_class = None
-        self._native_value = None
+        self._attr_device_class = SensorDeviceClass.DATE
+        self._native_value = collection_date
         self._fallback_state = collection_date.isoformat()
 
     def _set_error_state(self) -> None:
