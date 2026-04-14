@@ -31,6 +31,8 @@ def _is_referenced(repo_root: Path, name: str, const_path: Path) -> bool:
     for path in repo_root.rglob("*"):
         if path.resolve() == const_path.resolve() or not path.is_file():
             continue
+        if path.suffix not in {".py", ".json"}:
+            continue
         text = path.read_text(encoding="utf8")
         if pattern.search(text):
             return True
