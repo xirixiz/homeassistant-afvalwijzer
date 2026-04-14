@@ -12,7 +12,7 @@ jobs:
       - uses: "actions/checkout@v6"
       - run: zip -r ../../afvalwijzer.zip . -x "tests/*" "*/__pycache__/*" "__pycache__/*"
         working-directory: custom_components/afvalwijzer
-      - uses: "softprops/action-gh-release@v2"
+      - uses: "softprops/action-gh-release@v3"
         with:
           files: "afvalwijzer.zip"
           generate_release_notes: true
