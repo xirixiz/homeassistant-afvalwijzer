@@ -26,7 +26,7 @@ def _build_url(provider: str, postal_code: str, house_number: str, suffix: str) 
     # Keep original behavior: take=10
     return (
         f"{base_url}/api/waste-calendar/upcoming"
-        f"?houseNumber={house_number}&addition={suffix}&postalcode={postal_code}&take=10"
+        f"?houseNumber={house_number}&addition={suffix}&postalcode={postal_code}&take=20"
     )
 
 
