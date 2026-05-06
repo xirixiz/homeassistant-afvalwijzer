@@ -255,7 +255,7 @@ TEST_ADDRESSES = [
     #{"provider": "rd4", "postal_code": "6225CH", "house_number": "11"},
     #{"provider": "rd4", "postal_code": "6231CB", "house_number": "85"},
     #{"provider": "rd4", "postal_code": "6245TN", "house_number": "19"},
-    #{"provider": "rd4", "postal_code": "6271HE", "house_number": "7"},
+    #{"provider": "rd4", "postal_code": "6271EL", "house_number": "32"},
     #{"provider": "rd4", "postal_code": "6291VH", "house_number": "4"},
     #{"provider": "rd4", "postal_code": "6301ET", "house_number": "6"},
     #{"provider": "rd4", "postal_code": "6351AR", "house_number": "51"},
