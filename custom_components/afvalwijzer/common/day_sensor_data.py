@@ -13,12 +13,11 @@ class DaySensorData:
 
         Prepare waste data for today, tomorrow, and the day after tomorrow.
         """
-        today = datetime.now().strftime("%d-%m-%Y")
 
         self.waste_data_formatted = sorted(
             waste_data_formatted, key=lambda d: d["date"]
         )
-        self.today_date = datetime.strptime(today, "%d-%m-%Y")
+        self.today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)
         self.default_label = default_label
