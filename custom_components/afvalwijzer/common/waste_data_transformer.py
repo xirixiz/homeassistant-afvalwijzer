@@ -114,7 +114,14 @@ class WasteDataTransformer:
             _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
             waste_data_formatted = []
 
-        days = DaySensorData(waste_data_formatted, self.default_label)
+        if self.exclude_pickup_today.casefold() not in ("false", "no"):
+            waste_data_for_days = [
+                w for w in waste_data_formatted if w["date"] > self.DATE_TODAY
+            ]
+        else:
+            waste_data_for_days = waste_data_formatted
+
+        days = DaySensorData(waste_data_for_days, self.default_label)
 
         try:
             waste_data_after_date_selected = [

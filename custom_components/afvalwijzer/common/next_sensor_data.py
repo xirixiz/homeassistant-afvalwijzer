@@ -1,6 +1,6 @@
 """Afvalwijzer integration."""
 
-from datetime import date, datetime
+from homeassistant.util import dt as dt_util
 
 from ..const.const import _LOGGER
 
@@ -14,7 +14,7 @@ class NextSensorData:
         Prepare data for the next waste collection date, the number of days
         until that date, and the corresponding waste type.
         """
-        self.today_date = datetime.now()
+        self.today_date = dt_util.now()
         self.default_label = default_label
 
         future_waste_data = [
