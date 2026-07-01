@@ -12,7 +12,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Hassfest validation
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@v7"
       - name: HACS Action
         uses: "hacs/action@main"
         with:
@@ -25,7 +25,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@v7"
       - uses: "actions/setup-python@v6"
         with:
           python-version: "3.x"
@@ -38,7 +38,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Run tests
     steps:
-      - uses: "actions/checkout@v6"
+      - uses: "actions/checkout@v7"
       - uses: "actions/setup-python@v6"
         with:
           python-version: "3.x"
