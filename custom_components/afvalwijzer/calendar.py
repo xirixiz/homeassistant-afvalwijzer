@@ -56,18 +56,21 @@ class AfvalwijzerCalendar(CalendarEntity):
             if not include_today and event_date_only == today:
                 continue
 
-            start = dt_util.start_of_local_day(event_date)
+            # Zet de datetime om naar een pure startdatum (date object)
+            # start_date en end_date in de 'if' moeten hier ook date objecten zijn
+            start = event_date_only
             end = start + timedelta(days=1)
 
-            if start_date <= start <= end_date:
+            # Let op: zorg dat start_date en end_date hierboven ook .date() objecten zijn!
+            if start_date.date() <= start <= end_date.date():
                 # Format: "Collector: WasteType" (e.g., "Mijnafvalwijzer: Papier")
                 summary_text = f"{collector.capitalize()}: {waste_type.capitalize()}"
 
                 events.append(
                     CalendarEvent(
                         summary=summary_text,
-                        start=start,
-                        end=end,
+                        start=start,     # Nu een datetime.date object
+                        end=end,         # Nu een datetime.date object
                         all_day=True,
                     )
                 )
