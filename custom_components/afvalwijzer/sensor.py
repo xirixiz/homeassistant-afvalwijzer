@@ -73,7 +73,8 @@ async def async_setup_entry(
     data = AfvalwijzerData(hass, config)
 
     # This saves the data instance so calendar.py can find it
-    hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})["data_instance"] = data
+    entry_id = getattr(entry, "entry_id", "test_entry_id")
+    hass.data.setdefault(DOMAIN, {}).setdefault(entry_id, {})["data_instance"] = data
 
     ok, transient_error = await hass.async_add_executor_job(data.update)
     if not ok and transient_error is not None:

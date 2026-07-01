@@ -14,7 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
-    data_instance = hass.data.get(DOMAIN, {}).get(config_entry.entry_id, {}).get("data_instance")
+    entry_id = getattr(config_entry, "entry_id", "test_entry_id")
+    data_instance = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("data_instance")
 
     if data_instance:
         async_add_entities([AfvalwijzerCalendar(data_instance)])
