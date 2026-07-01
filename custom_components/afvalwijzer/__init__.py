@@ -32,7 +32,7 @@ try:
     from homeassistant.const import Platform
     from homeassistant.helpers import config_validation as cv
 
-    PLATFORMS: list[Platform] = [Platform.SENSOR]
+    PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
     CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 except ImportError:  # pragma: no cover
     # Standalone test run, no Home Assistant installed
@@ -108,8 +108,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Afvalwijzer from a config entry."""
     if _skip_runtime_setup():
         return True
-    else:
-        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     hass.data.setdefault(DOMAIN, {})
 
