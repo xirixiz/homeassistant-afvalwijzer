@@ -71,7 +71,6 @@ class AfvalwijzerCalendar(CalendarEntity):
                         summary=summary_text,
                         start=start,     # Nu een datetime.date object
                         end=end,         # Nu een datetime.date object
-                        all_day=True,
                     )
                 )
 
