@@ -32,7 +32,7 @@ try:
     from homeassistant.const import Platform
     from homeassistant.helpers import config_validation as cv
 
-    PLATFORMS: list[Platform] = [Platform.SENSOR]
+    PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
     CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 except ImportError:  # pragma: no cover
     # Standalone test run, no Home Assistant installed

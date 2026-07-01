@@ -2,6 +2,8 @@
 
 from datetime import datetime, timedelta
 
+from homeassistant.util import dt as dt_util
+
 from ..const.const import _LOGGER
 
 
@@ -13,11 +15,12 @@ class DaySensorData:
 
         Prepare waste data for today, tomorrow, and the day after tomorrow.
         """
-        today = datetime.now().strftime("%d-%m-%Y")
 
         self.waste_data_formatted = sorted(
             waste_data_formatted, key=lambda d: d["date"]
         )
+        # self.today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today = dt_util.now().strftime("%d-%m-%Y")
         self.today_date = datetime.strptime(today, "%d-%m-%Y")
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)

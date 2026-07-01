@@ -2,6 +2,8 @@
 
 from datetime import date, datetime
 
+from homeassistant.util import dt as dt_util
+
 from ..const.const import _LOGGER
 
 
@@ -14,11 +16,18 @@ class NextSensorData:
         Prepare data for the next waste collection date, the number of days
         until that date, and the corresponding waste type.
         """
-        self.waste_data_after_date_selected = sorted(
-            waste_data_after_date_selected, key=lambda d: d["date"]
-        )
-        self.today_date = datetime.now()
+        today = dt_util.now().strftime("%d-%m-%Y")
+        self.today_date = datetime.strptime(today, "%d-%m-%Y")
         self.default_label = default_label
+
+        future_waste_data = [
+            waste for waste in waste_data_after_date_selected
+            if waste["date"].date() > self.today_date.date()
+        ]
+
+        self.waste_data_after_date_selected = sorted(
+            future_waste_data, key=lambda d: d["date"]
+        )
 
         self.next_waste_date = self.__get_next_waste_date()
         self.next_waste_in_days = self.__get_next_waste_in_days()

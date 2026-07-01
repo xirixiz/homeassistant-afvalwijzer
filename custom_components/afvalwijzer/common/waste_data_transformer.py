@@ -50,9 +50,15 @@ class WasteDataTransformer:
             waste_data_with_today = {}
             waste_data_without_today = {}
 
+            if self.exclude_pickup_today.casefold() in ("false", "no"):
+                cutoff_date = self.DATE_TODAY
+            else:
+                cutoff_date = self.DATE_TOMORROW
+
             for item in self.waste_data_raw:
                 item_date = datetime.strptime(item["date"], "%Y-%m-%d")
                 item_name = item["type"].strip().lower()
+
                 if (
                     item_name not in self.exclude_list
                     and item_name not in waste_data_with_today
@@ -60,13 +66,10 @@ class WasteDataTransformer:
                 ):
                     waste_data_with_today[item_name] = item_date
 
-            for item in self.waste_data_raw:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
-                item_name = item["type"].strip().lower()
                 if (
                     item_name not in self.exclude_list
                     and item_name not in waste_data_without_today
-                    and item_date > self.DATE_TODAY
+                    and item_date >= cutoff_date
                 ):
                     waste_data_without_today[item_name] = item_date
 
@@ -77,6 +80,7 @@ class WasteDataTransformer:
                     waste_data_without_today.setdefault(item_name, self.default_label)
 
             return waste_data_with_today, waste_data_without_today
+
         except Exception as err:
             _LOGGER.error("Other error occurred: %s", err)
             return {}, {}
@@ -114,7 +118,14 @@ class WasteDataTransformer:
             _LOGGER.error("Other error occurred waste_data_formatted: %s", err)
             waste_data_formatted = []
 
-        days = DaySensorData(waste_data_formatted, self.default_label)
+        if self.exclude_pickup_today.casefold() not in ("false", "no"):
+            waste_data_for_days = [
+                w for w in waste_data_formatted if w["date"] > self.DATE_TODAY
+            ]
+        else:
+            waste_data_for_days = waste_data_formatted
+
+        days = DaySensorData(waste_data_for_days, self.default_label)
 
         try:
             waste_data_after_date_selected = [

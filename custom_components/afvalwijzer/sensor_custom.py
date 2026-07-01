@@ -184,7 +184,7 @@ class CustomSensor(RestoreEntity, SensorEntity):
 
     def _apply_value(self, value: Any) -> None:
         """Apply collector output to sensor state."""
-        self._days_until_collection_date = None
+        self._days_until_collection_date = self._cfg.default_label
         self._attr_device_class = None
         self._native_value = None
 
