@@ -1,77 +1,62 @@
 from __future__ import annotations
-
 from datetime import datetime
 import logging
-
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.util import dt as dt_util
-
 from .const.const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
-    _LOGGER.info("Setting up Afvalwijzer Calendar...")
+    # Retrieve the data instance saved by sensor.py
+    data_instance = hass.data.get(DOMAIN, {}).get(config_entry.entry_id, {}).get("data_instance")
 
-    try:
-        # Access the domain data
-        integration_data = hass.data[DOMAIN].get(config_entry.entry_id)
-        _LOGGER.info("Integration data keys: %s", integration_data.keys())
-        coordinator = integration_data.get("coordinator")
-
-        if coordinator:
-            fetch_data = coordinator.fetch_data
-            async_add_entities([AfvalwijzerCalendar(fetch_data)])
-        else:
-            _LOGGER.error("Could not find 'coordinator' in integration_data. Keys found: %s", integration_data.keys())
-
-    except Exception as e:
-        _LOGGER.error("CRITICAL ERROR setting up Afvalwijzer Calendar: %s", e)
+    if data_instance:
+        async_add_entities([AfvalwijzerCalendar(data_instance)])
+    else:
+        _LOGGER.error("Afvalwijzer Calendar: Could not find data_instance!")
 
 class AfvalwijzerCalendar(CalendarEntity):
     """Representation of the Afvalwijzer Calendar."""
 
-    def __init__(self, fetch_data):
-        """Initialize the Afvalwijzer calendar entity."""
-        self._fetch_data = fetch_data
-        self._attr_name = "Afvalwijzer"
-        self._attr_unique_id = "afvalwijzer_calendar_filtered"
+    def __init__(self, data):
+        """Initialize the Afvalwijzer Calendar entity."""
+        self._data = data
+        self._attr_name = "Afvalwijzer Calendar"
+        self._attr_unique_id = "afvalwijzer_calendar_raw"
 
     @property
     def event(self):
-        """Return the next upcoming event, if available."""
+        """Return the next upcoming event."""
         return None
 
     async def async_get_events(self, hass, start_date: datetime, end_date: datetime) -> list[CalendarEvent]:
-        """Fetch events from the Afvalwijzer data source within the specified date range."""
+        """Return events in a specific time frame."""
         events = []
         today = dt_util.now().date()
-        exclude_today = self._fetch_data.exclude_pickup_today.casefold() not in ("false", "no")
 
-        # LOGGING: See how much data we actually have
-        raw_data = getattr(self._fetch_data, 'waste_data_raw', [])
-        _LOGGER.info("Calendar fetching events. Raw data items found: %s", len(raw_data))
+        # Access config from the data instance to see if "exclude today" is active
+        # Assuming config is a dict with 'include_today'
+        include_today = self._data.config.get("include_today", True)
 
-        for item in raw_data:
-            try:
-                event_date = datetime.strptime(item["date"], "%Y-%m-%d").date()
-                if exclude_today and event_date == today:
-                    continue
+        # Use waste_data_with_today as the unfiltered source
+        waste_source = self._data.waste_data_with_today or {}
 
-                start = dt_util.start_of_local_day(datetime.combine(event_date, datetime.min.time()))
-                end = dt_util.end_of_local_day(datetime.combine(event_date, datetime.min.time()))
+        for waste_type, event_date in waste_source.items():
+            if not isinstance(event_date, datetime):
+                continue
 
-                if start_date <= start <= end_date:
-                    events.append(
-                        CalendarEvent(
-                            summary=item["type"].capitalize(),
-                            start=start,
-                            end=end,
-                        )
-                    )
-            except Exception as err:
-                _LOGGER.error("Error processing calendar event: %s", err)
+            event_date_only = event_date.date()
 
-        _LOGGER.info("Calendar returning %s events", len(events))
+            # If "include_today" is False, filter out today's items
+            if not include_today and event_date_only == today:
+                continue
+
+            start = dt_util.start_of_local_day(event_date)
+            end = dt_util.end_of_local_day(event_date)
+
+            if start_date <= start <= end_date:
+                events.append(CalendarEvent(summary=waste_type.capitalize(), start=start, end=end))
+
         return events

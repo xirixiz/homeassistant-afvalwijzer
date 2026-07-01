@@ -26,6 +26,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
     CONF_SUFFIX,
+    DOMAIN,
     SCAN_INTERVAL,
 )
 from .sensor_custom import CustomSensor
@@ -70,6 +71,9 @@ async def async_setup_entry(
     config: dict[str, Any] = {**entry.data, **entry.options}
 
     data = AfvalwijzerData(hass, config)
+
+    # This saves the data instance so calendar.py can find it
+    hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})["data_instance"] = data
 
     ok, transient_error = await hass.async_add_executor_job(data.update)
     if not ok and transient_error is not None:
