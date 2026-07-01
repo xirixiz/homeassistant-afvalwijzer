@@ -1,8 +1,11 @@
 from __future__ import annotations
-from datetime import datetime
+
+from datetime import datetime, timedelta  # Ensure these are imported
 import logging
+
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.util import dt as dt_util
+
 from .const.const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,10 +24,10 @@ class AfvalwijzerCalendar(CalendarEntity):
     """Representation of the Afvalwijzer Calendar."""
 
     def __init__(self, data):
-        """Initialize the Afvalwijzer Calendar entity."""
+        """Initialize the calendar entity."""
         self._data = data
         self._attr_name = "Afvalwijzer Calendar"
-        self._attr_unique_id = "afvalwijzer_calendar_raw"
+        self._attr_unique_id = "afvalwijzer_calendar_filtered"
 
     @property
     def event(self):
@@ -32,12 +35,12 @@ class AfvalwijzerCalendar(CalendarEntity):
         return None
 
     async def async_get_events(self, hass, start_date: datetime, end_date: datetime) -> list[CalendarEvent]:
-        """Return events in a specific time frame."""
+        """Return events within the specified date range."""
         events = []
         today = dt_util.now().date()
 
         # Access config from the data instance to see if "exclude today" is active
-        # Assuming config is a dict with 'include_today'
+        # We ensure it defaults to True if not found
         include_today = self._data.config.get("include_today", True)
 
         # Use waste_data_with_today as the unfiltered source
@@ -53,8 +56,9 @@ class AfvalwijzerCalendar(CalendarEntity):
             if not include_today and event_date_only == today:
                 continue
 
+            # FIXED: Create the start of the day and add 1 day for the end
             start = dt_util.start_of_local_day(event_date)
-            end = dt_util.end_of_local_day(event_date)
+            end = start + timedelta(days=1)
 
             if start_date <= start <= end_date:
                 events.append(CalendarEvent(summary=waste_type.capitalize(), start=start, end=end))
