@@ -14,15 +14,24 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
     _LOGGER.info("Setting up Afvalwijzer Calendar...")
 
-    # Attempt to retrieve the data coordinator
     try:
-        coordinator = hass.data[DOMAIN][config_entry.entry_id]
-        fetch_data = coordinator.fetch_data
-        async_add_entities([AfvalwijzerCalendar(fetch_data)])
+        # Access the domain data
+        integration_data = hass.data[DOMAIN].get(config_entry.entry_id)
+        _LOGGER.info("Integration data keys: %s", integration_data.keys())
+        coordinator = integration_data.get("coordinator")
+
+        if coordinator:
+            fetch_data = coordinator.fetch_data
+            async_add_entities([AfvalwijzerCalendar(fetch_data)])
+        else:
+            _LOGGER.error("Could not find 'coordinator' in integration_data. Keys found: %s", integration_data.keys())
+
     except Exception as e:
-        _LOGGER.error("Failed to set up Afvalwijzer Calendar: %s", e)
+        _LOGGER.error("CRITICAL ERROR setting up Afvalwijzer Calendar: %s", e)
 
 class AfvalwijzerCalendar(CalendarEntity):
+    """Representation of the Afvalwijzer Calendar."""
+
     def __init__(self, fetch_data):
         """Initialize the Afvalwijzer calendar entity."""
         self._fetch_data = fetch_data
