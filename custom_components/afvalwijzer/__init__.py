@@ -108,6 +108,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Afvalwijzer from a config entry."""
     if _skip_runtime_setup():
         return True
+    else:
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     hass.data.setdefault(DOMAIN, {})
 
