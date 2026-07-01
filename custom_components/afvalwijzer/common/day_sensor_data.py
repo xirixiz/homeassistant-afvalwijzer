@@ -1,6 +1,6 @@
 """Afvalwijzer integration."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from homeassistant.util import dt as dt_util
 
@@ -20,7 +20,8 @@ class DaySensorData:
             waste_data_formatted, key=lambda d: d["date"]
         )
         # self.today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        self.today_date = dt_util.now()
+        today = dt_util.now().strftime("%d-%m-%Y")
+        self.today_date = datetime.strptime(today, "%d-%m-%Y")
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)
         self.default_label = default_label
