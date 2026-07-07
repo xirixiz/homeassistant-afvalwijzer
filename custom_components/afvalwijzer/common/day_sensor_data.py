@@ -1,8 +1,11 @@
 """Generate day-based waste sensor data."""
 
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
+
 from homeassistant.util import dt as dt_util
+
 from ..const.const import _LOGGER
+
 
 class DaySensorData:
     """Generate day-based waste sensor data."""
