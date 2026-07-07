@@ -1,6 +1,6 @@
 """Generate day-based waste sensor data."""
 
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 from homeassistant.util import dt as dt_util
 from ..const.const import _LOGGER
 
@@ -15,12 +15,12 @@ class DaySensorData:
         self.waste_data_formatted = sorted(
             waste_data_formatted, key=lambda d: d["date"]
         )
-
-        # Store as proper date objects for Home Assistant calculations
+        
+        # Store as proper timezone-aware date objects for Home Assistant calculations
         self.today_date = dt_util.now().date()
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)
-
+        
         self.default_label = default_label
 
         self.waste_data_today = self.__gen_day_sensor(self.today_date)
@@ -32,19 +32,35 @@ class DaySensorData:
     def __gen_day_sensor(self, target_date):
         day = []
         try:
-            target_date_str = target_date.strftime("%Y-%m-%d")
+            for waste in self.waste_data_formatted:
+                waste_date = waste["date"]
+                
+                # Robustly extract the date object regardless of how the transformer stored it
+                if isinstance(waste_date, datetime):
+                    waste_date_obj = waste_date.date()
+                elif isinstance(waste_date, date):
+                    waste_date_obj = waste_date
+                elif isinstance(waste_date, str):
+                    try:
+                        waste_date_obj = datetime.strptime(waste_date, "%Y-%m-%d").date()
+                    except ValueError:
+                        continue
+                else:
+                    continue
 
-            waste_types = [
-                waste["type"]
-                for waste in self.waste_data_formatted
-                if waste["date"] == target_date_str
-            ]
-            day.extend(list(dict.fromkeys(waste_types)))
-            if not day:
-                day.append(self.default_label)
+                # Safe comparison between two date objects
+                if waste_date_obj == target_date:
+                    day.append(waste["type"])
+            
+            # Remove duplicates and apply default label if empty
+            waste_types = list(dict.fromkeys(day))
+            if not waste_types:
+                waste_types.append(self.default_label)
+            
+            return waste_types
         except Exception as err:
             _LOGGER.error("Error occurred in __gen_day_sensor: %s", err)
-        return day
+            return []
 
     def _gen_day_sensor_data(self):
         """Generate the combined day sensor data dictionary."""
