@@ -1,11 +1,8 @@
-"""Afvalwijzer integration."""
+"""Generate day-based waste sensor data."""
 
-from datetime import datetime, timedelta
-
+from datetime import timedelta
 from homeassistant.util import dt as dt_util
-
 from ..const.const import _LOGGER
-
 
 class DaySensorData:
     """Generate day-based waste sensor data."""
@@ -15,15 +12,15 @@ class DaySensorData:
 
         Prepare waste data for today, tomorrow, and the day after tomorrow.
         """
-
         self.waste_data_formatted = sorted(
             waste_data_formatted, key=lambda d: d["date"]
         )
-        # self.today_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        today = dt_util.now().strftime("%d-%m-%Y")
-        self.today_date = datetime.strptime(today, "%d-%m-%Y")
+
+        # Store as proper date objects for Home Assistant calculations
+        self.today_date = dt_util.now().date()
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)
+
         self.default_label = default_label
 
         self.waste_data_today = self.__gen_day_sensor(self.today_date)
@@ -32,13 +29,15 @@ class DaySensorData:
 
         self.data = self._gen_day_sensor_data()
 
-    def __gen_day_sensor(self, date):
+    def __gen_day_sensor(self, target_date):
         day = []
         try:
+            target_date_str = target_date.strftime("%Y-%m-%d")
+
             waste_types = [
                 waste["type"]
                 for waste in self.waste_data_formatted
-                if waste["date"] == date
+                if waste["date"] == target_date_str
             ]
             day.extend(list(dict.fromkeys(waste_types)))
             if not day:

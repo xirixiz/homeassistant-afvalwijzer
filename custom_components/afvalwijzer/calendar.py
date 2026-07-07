@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 import logging
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
@@ -44,33 +44,35 @@ class AfvalwijzerCalendar(CalendarEntity):
         include_today = self._data.config.get("include_today", True)
         waste_source = self._data.waste_data_with_today or {}
 
-        # Get the collector name from the config, fallback to 'Afvalwijzer' if missing
         collector = self._data.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
         for waste_type, event_date in waste_source.items():
-            if not isinstance(event_date, datetime):
+            if isinstance(event_date, str):
+                try:
+                    event_date_only = datetime.strptime(event_date, "%Y-%m-%d").date()
+                except ValueError:
+                    continue
+            elif isinstance(event_date, datetime):
+                event_date_only = event_date.date()
+            elif isinstance(event_date, date):
+                event_date_only = event_date
+            else:
                 continue
-
-            event_date_only = event_date.date()
 
             if not include_today and event_date_only == today:
                 continue
 
-            # Zet de datetime om naar een pure startdatum (date object)
-            # start_date en end_date in de 'if' moeten hier ook date objecten zijn
             start = event_date_only
             end = start + timedelta(days=1)
 
-            # Let op: zorg dat start_date en end_date hierboven ook .date() objecten zijn!
             if start_date.date() <= start <= end_date.date():
-                # Format: "Collector: WasteType" (e.g., "Mijnafvalwijzer: Papier")
                 summary_text = f"{collector.capitalize()}: {waste_type.capitalize()}"
 
                 events.append(
                     CalendarEvent(
                         summary=summary_text,
-                        start=start,     # Nu een datetime.date object
-                        end=end,         # Nu een datetime.date object
+                        start=start,
+                        end=end,
                     )
                 )
 
