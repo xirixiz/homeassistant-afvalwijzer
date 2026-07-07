@@ -15,12 +15,12 @@ class DaySensorData:
         self.waste_data_formatted = sorted(
             waste_data_formatted, key=lambda d: d["date"]
         )
-        
+
         # Store as proper timezone-aware date objects for Home Assistant calculations
         self.today_date = dt_util.now().date()
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)
-        
+
         self.default_label = default_label
 
         self.waste_data_today = self.__gen_day_sensor(self.today_date)
@@ -34,8 +34,7 @@ class DaySensorData:
         try:
             for waste in self.waste_data_formatted:
                 waste_date = waste["date"]
-                
-                # Robustly extract the date object regardless of how the transformer stored it
+
                 if isinstance(waste_date, datetime):
                     waste_date_obj = waste_date.date()
                 elif isinstance(waste_date, date):
@@ -51,12 +50,12 @@ class DaySensorData:
                 # Safe comparison between two date objects
                 if waste_date_obj == target_date:
                     day.append(waste["type"])
-            
+
             # Remove duplicates and apply default label if empty
             waste_types = list(dict.fromkeys(day))
             if not waste_types:
                 waste_types.append(self.default_label)
-            
+
             return waste_types
         except Exception as err:
             _LOGGER.error("Error occurred in __gen_day_sensor: %s", err)
