@@ -159,11 +159,6 @@ cards:
           PMD: /local/afvalwijzer/PMD.png
           Papier: /local/afvalwijzer/Papier.png
           Restafval: /local/afvalwijzer/Restafval.png
-
-  - type: entities
-    entities:
-      - type: divider
-
   - type: custom:auto-entities
     card:
       type: glance
@@ -176,29 +171,25 @@ cards:
         - entity_id: sensor.afvalwijzer_kerstbomen*
         - entity_id: sensor.afvalwijzer_*orgen
         - entity_id: sensor.afvalwijzer_van*
-      include:
         - entity_id: sensor.afvalwijzer_*_formatted
+        - entity_id: sensor.afvalwijzer_notif*
+      include:
+        - entity_id: sensor.afvalwijzer_*
           options:
             format: date
     sort:
       method: state
-
-  - type: entities
-    entities:
-      - type: divider
-
+      reverse: false
   - type: markdown
     content: >-
       <center>De volgende leging is {{ states('sensor.afvalwijzer_next_type')
       }}. Dat is over {{ states('sensor.afvalwijzer_next_in_days') }} {% if
       is_state('sensor.afvalwijzer_next_in_days', '1') %}dag{% else %}dagen{%
       endif %}.</center>
-
   - type: entities
     show_header_toggle: false
     state_color: false
     entities:
-      - type: divider
       - entity: input_boolean.waste_moved
       - entity: input_boolean.waste_reminder
 ```
@@ -318,6 +309,20 @@ template:
             'pmd': 'PMD',
             'restafval': 'Restafval'
           }.get(states('sensor.afvalwijzer_day_after_tomorrow'), 'Geen') }}
+```
+
+When using the formatted entities, on the frontend you need to use one of these to sort properly by date:
+```yaml
+sort:
+  method: template
+  template: "{{ strptime(states(entity), '%d-%m-%Y') }}"
+  reverse: false
+```
+Or
+```yaml
+sort:
+  method: last_updated
+  reverse: false
 ```
 
 ## Installation
