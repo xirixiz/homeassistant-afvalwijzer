@@ -111,7 +111,7 @@ If you are searching for a component with the focus on container cleaning servic
 |----------|-------------------------|
 | `sensor` | Show waste pickup dates |
 
-![example][exampleimg1]
+<img width="603" height="634" alt="image" src="https://github.com/user-attachments/assets/25c98b66-ed2a-4bb8-b729-9deb333ff526" />
 
 The second row sorts the waste items by date using the following lovelace code
 
