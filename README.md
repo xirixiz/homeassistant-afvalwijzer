@@ -511,6 +511,5 @@ actions:
 
 ---
 
-[exampleimg1]: images/afvalwijzer-lovelace_1.png
-
+[exampleimg1]: <img width="603" height="634" alt="image" src="https://github.com/user-attachments/assets/bd7b01e5-18f7-4047-9cfb-c94dd4a215b8" />
 [exampleimg2]: images/afvalwijzer-lovelace_2.png
