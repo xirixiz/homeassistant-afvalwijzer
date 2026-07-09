@@ -54,6 +54,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             cached_data = await self._store.async_load()
             if cached_data and self._is_cache_for_current_config(cached_data):
                 self._apply_data(cached_data["data"])
+                self.data = cached_data["data"]
                 _LOGGER.debug("Loaded Afvalwijzer data from cache")
                 return True
         except Exception as err:
