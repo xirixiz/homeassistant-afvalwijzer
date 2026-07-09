@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import os
+from random import randint
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import callback
+from homeassistant.helpers.event import async_call_later, async_track_time_change
+
+_LOGGER = logging.getLogger(__name__)
 
 from .const.const import (
     CONF_DEFAULT_LABEL,
@@ -131,6 +136,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
+    @callback
+    def _schedule_midnight_update(now: Any) -> None:
+        """Trigger an update at midnight with a randomized jitter."""
+        jitter = randint(1, 600)
+        _LOGGER.debug("Scheduling midnight refresh in %s seconds", jitter)
+
+        async def _do_update(_: Any) -> None:
+            await coordinator.async_request_refresh()
+
+        entry.async_on_unload(async_call_later(hass, jitter, _do_update))
+
+    entry.async_on_unload(
+        async_track_time_change(
+            hass, _schedule_midnight_update, hour=0, minute=0, second=0
+        )
+    )
 
     if PLATFORMS:
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

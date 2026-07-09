@@ -4,6 +4,9 @@ from datetime import date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.util import dt as dt_util
+
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_COLLECTOR,
@@ -80,7 +83,7 @@ def test_resolve_include_today_legacy_flag():
 
 def test_provider_sensor_timestamp_and_days_until():
     """Provider sensor returns timestamp and correct days-until value."""
-    today = date.today()
+    today = dt_util.now().date()
     target = today + timedelta(days=1)
 
     coordinator = FakeCoordinator(provider_data={"restafval": target}, notifications=[])
