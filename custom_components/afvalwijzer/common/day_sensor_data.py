@@ -11,19 +11,15 @@ class DaySensorData:
     """Generate day-based waste sensor data."""
 
     def __init__(self, waste_data_formatted, default_label):
-        """Initialize day-based sensor data.
+        """Initialize day-based sensor data."""
 
-        Prepare waste data for today, tomorrow, and the day after tomorrow.
-        """
+        # Sort using string conversion to prevent crashes if types are mixed upstream
         self.waste_data_formatted = sorted(
-            waste_data_formatted, key=lambda d: d["date"]
+            waste_data_formatted, key=lambda d: str(d["date"])
         )
 
-        # 1. Get HA timezone-aware date
-        base_date = dt_util.now().date()
-
-        # 2. Convert to midnight datetime objects to perfectly match the transformer data
-        self.today_date = datetime.combine(base_date, datetime.min.time())
+        # Keep as proper datetime.date objects for HA calculations
+        self.today_date = dt_util.now().date()
         self.tomorrow_date = self.today_date + timedelta(days=1)
         self.day_after_tomorrow_date = self.today_date + timedelta(days=2)
 
@@ -35,20 +31,37 @@ class DaySensorData:
 
         self.data = self._gen_day_sensor_data()
 
-    def __gen_day_sensor(self, date):
+    def __gen_day_sensor(self, target_date):
         day = []
         try:
-            waste_types = [
-                waste["type"]
-                for waste in self.waste_data_formatted
-                if waste["date"] == date
-            ]
-            day.extend(list(dict.fromkeys(waste_types)))
-            if not day:
-                day.append(self.default_label)
+            for waste in self.waste_data_formatted:
+                waste_date = waste["date"]
+
+                # Scenario 1: It's a datetime or date object (Naive or Timezone-Aware)
+                if hasattr(waste_date, "year") and hasattr(waste_date, "month") and hasattr(waste_date, "day"):
+                    if (waste_date.year == target_date.year and
+                        waste_date.month == target_date.month and
+                        waste_date.day == target_date.day):
+                        day.append(waste["type"])
+
+                # Scenario 2: It's a raw string (e.g., "2026-07-09")
+                elif isinstance(waste_date, str):
+                    try:
+                        parsed_date = datetime.strptime(waste_date, "%Y-%m-%d").date()
+                        if parsed_date == target_date:
+                            day.append(waste["type"])
+                    except ValueError:
+                        pass
+
+            # De-duplicate and apply the default label (e.g., "geen") if empty
+            waste_types = list(dict.fromkeys(day))
+            if not waste_types:
+                waste_types.append(self.default_label)
+            return waste_types
+
         except Exception as err:
             _LOGGER.error("Error occurred in __gen_day_sensor: %s", err)
-        return day
+            return [self.default_label]
 
     def _gen_day_sensor_data(self):
         """Generate the combined day sensor data dictionary."""
