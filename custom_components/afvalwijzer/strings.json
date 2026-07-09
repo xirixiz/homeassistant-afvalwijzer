@@ -1,0 +1,60 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Afvalwijzer",
+        "description": "Set up your Afvalwijzer integration.",
+        "data": {
+          "provider": "Collector (e.g. mijnafvalwijzer)"
+        }
+      },
+      "address": {
+        "title": "Configure Afvalwijzer",
+        "description": "Set up your Afvalwijzer integration.",
+        "data": {
+          "postal_code": "Postal code (e.g. 1234AB)",
+          "house_number": "House number",
+          "suffix": "House number suffix",
+          "street_name": "Street name",
+          "friendly_name": "Friendly name (optional)"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Afvalwijzer",
+        "description": "Update the address details for this Afvalwijzer configuration.",
+        "data": {
+          "provider": "Collector",
+          "postal_code": "Postal code",
+          "house_number": "House number",
+          "suffix": "House number suffix",
+          "street_name": "Street name",
+          "friendly_name": "Friendly name (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_postal_code": "Invalid postal code format",
+      "invalid_house_number": "House number must be numeric"
+    },
+    "abort": {
+      "already_configured": "Afvalwijzer is already configured",
+      "reconfigure_successful": "Afvalwijzer was successfully reconfigured",
+      "invalid_address": "Invalid postal code or house number provided in YAML configuration"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Afvalwijzer Options",
+        "description": "Configure options for the Afvalwijzer integration.",
+        "data": {
+          "show_full_timestamp": "Show full timestamp",
+          "include_today": "Include today's pickup",
+          "default_label": "Default label when no data is available",
+          "exclude_list": "Waste type exclude list",
+          "language": "Language"
+        }
+      }
+    }
+  }
+}
