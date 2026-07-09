@@ -175,8 +175,6 @@ ATTR_IS_COLLECTION_DATE_TOMORROW = "is_collection_date_tomorrow"
 ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW = "is_collection_date_day_after_tomorrow"
 ATTR_DAYS_UNTIL_COLLECTION_DATE = "days_until_collection_date"
 
-SCAN_INTERVAL = timedelta(hours=4)
-
 DOMAIN = "afvalwijzer"
 DOMAIN_DATA = "afvalwijzer_data"
 

@@ -15,19 +15,19 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
-    data_instance = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("data_instance")
+    coordinator = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("coordinator")
 
-    if data_instance:
-        async_add_entities([AfvalwijzerCalendar(data_instance)])
+    if coordinator:
+        async_add_entities([AfvalwijzerCalendar(coordinator)])
     else:
-        _LOGGER.error("Afvalwijzer Calendar: Could not find data_instance!")
+        _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")
 
 class AfvalwijzerCalendar(CalendarEntity):
     """Representation of the Afvalwijzer calendar."""
 
-    def __init__(self, data):
+    def __init__(self, coordinator):
         """Initialize the Afvalwijzer calendar."""
-        self._data = data
+        self.coordinator = coordinator
         self._attr_name = "Afvalwijzer Calendar"
         self._attr_unique_id = "afvalwijzer_calendar_filtered"
 
@@ -41,10 +41,10 @@ class AfvalwijzerCalendar(CalendarEntity):
         events = []
         today = dt_util.now().date()
 
-        include_today = self._data.config.get("include_today", True)
-        waste_source = self._data.waste_data_with_today or {}
+        include_today = self.coordinator.config.get("include_today", True)
+        waste_source = self.coordinator.waste_data_with_today or {}
 
-        collector = self._data.config.get(CONF_COLLECTOR, "Afvalwijzer")
+        collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
         for waste_type, event_date in waste_source.items():
             if isinstance(event_date, str):

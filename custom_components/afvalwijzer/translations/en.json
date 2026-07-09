@@ -38,7 +38,8 @@
     },
     "abort": {
       "already_configured": "Afvalwijzer is already configured",
-      "reconfigure_successful": "Afvalwijzer was successfully reconfigured"
+      "reconfigure_successful": "Afvalwijzer was successfully reconfigured",
+      "invalid_address": "Invalid postal code or house number provided in YAML configuration"
     }
   },
   "options": {

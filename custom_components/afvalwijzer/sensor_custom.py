@@ -8,8 +8,10 @@ import hashlib
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.core import callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const.const import (
@@ -75,20 +77,21 @@ def _address_label(config: dict[str, Any]) -> str:
     return f"{postal_code} {house_number}{suffix} {street_name}".strip()
 
 
-class CustomSensor(RestoreEntity, SensorEntity):
+class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
     """Representation of a custom based waste sensor."""
 
     def __init__(
         self,
         hass: Any,
         waste_type: str,
-        fetch_data: Any,
+        coordinator: Any,
         config: dict[str, Any],
     ) -> None:
         """Initialize a custom Afvalwijzer sensor."""
+        super().__init__(coordinator)
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_data = fetch_data
+        self.coordinator = coordinator
         self._config = config
 
         self._cfg = _Config(
@@ -164,13 +167,13 @@ class CustomSensor(RestoreEntity, SensorEntity):
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
         return attrs
 
-    async def async_update(self) -> None:
-        """Fetch the latest data and update the state."""
-        _LOGGER.debug("Updating custom sensor: %s", self.name)
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.debug("Updating custom sensor from coordinator: %s", self.name)
 
         try:
-            await self.hass.async_add_executor_job(self.fetch_data.update)
-            waste_data_custom = self.fetch_data.waste_data_custom or {}
+            waste_data_custom = self.coordinator.waste_data_custom or {}
 
             if self.waste_type not in waste_data_custom:
                 raise ValueError(f"No data for waste type: {self.waste_type}")
@@ -181,6 +184,8 @@ class CustomSensor(RestoreEntity, SensorEntity):
         except Exception as err:
             _LOGGER.error("Error updating custom sensor %s: %s", self.name, err)
             self._set_error_state()
+
+        self.async_write_ha_state()
 
     def _apply_value(self, value: Any) -> None:
         """Apply collector output to sensor state."""

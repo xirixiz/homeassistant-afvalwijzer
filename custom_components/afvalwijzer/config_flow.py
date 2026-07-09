@@ -174,6 +174,32 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Return the options flow handler."""
         return AfvalwijzerOptionsFlow(config_entry)
 
+    async def async_step_import(
+        self, import_data: dict[str, Any]
+    ) -> config_entries.FlowResult:
+        """Import a config entry from configuration.yaml."""
+        if CONF_EXCLUDE_PICKUP_TODAY in import_data:
+            import_data[CONF_INCLUDE_TODAY] = not import_data[CONF_EXCLUDE_PICKUP_TODAY]
+
+        cleaned = _clean_user_input(import_data)
+        options = _clean_options_input(import_data)
+
+        collector = str(cleaned.get(CONF_COLLECTOR, ""))
+        postal_code = str(cleaned.get(CONF_POSTAL_CODE, ""))
+        house_number = str(cleaned.get(CONF_HOUSE_NUMBER, ""))
+
+        if not self._validate_postal_code(postal_code, collector) or not self._validate_house_number(house_number):
+            return self.async_abort(reason="invalid_address")
+
+        await self.async_set_unique_id(_unique_id_from(cleaned))
+        self._abort_if_unique_id_configured()
+
+        return self.async_create_entry(
+            title="Afvalwijzer",
+            data=cleaned,
+            options=options,
+        )
+
     async def async_step_user(
         self,
         user_input: dict[str, Any] | None = None,

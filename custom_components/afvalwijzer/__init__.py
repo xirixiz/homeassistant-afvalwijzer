@@ -13,6 +13,7 @@ from .const.const import (
     CONF_EXCLUDE_PICKUP_TODAY,
     DOMAIN,
 )
+from .coordinator import AfvalwijzerDataUpdateCoordinator
 
 # Options keys
 CONF_INCLUDE_TODAY = "include_today"
@@ -114,10 +115,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options = _migrate_options_if_needed(hass, entry)
     effective_config = _build_effective_config(entry, options)
 
+    coordinator = AfvalwijzerDataUpdateCoordinator(hass, effective_config, entry.entry_id)
+    cache_loaded = await coordinator.async_load_cache()
+    
+    if not cache_loaded:
+        await coordinator.async_config_entry_first_refresh()
+    else:
+        hass.async_create_task(coordinator.async_request_refresh())
+
     hass.data[DOMAIN][entry.entry_id] = {
         "data": dict(entry.data),
         "options": options,
         "config": effective_config,
+        "coordinator": coordinator,
     }
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
@@ -136,7 +146,10 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> Non
     options = _migrate_options_if_needed(hass, entry)
     effective_config = _build_effective_config(entry, options)
 
+    existing = hass.data[DOMAIN].get(entry.entry_id, {})
+
     hass.data[DOMAIN][entry.entry_id] = {
+        **existing,
         "data": dict(entry.data),
         "options": options,
         "config": effective_config,
