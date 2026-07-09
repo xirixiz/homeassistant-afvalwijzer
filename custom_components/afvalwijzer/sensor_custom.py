@@ -200,6 +200,15 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         self._attr_device_class = None
         self._native_value = None
 
+        if isinstance(value, str):
+            parsed = dt_util.parse_datetime(value)
+            if parsed is not None:
+                value = parsed
+            else:
+                parsed_date = dt_util.parse_date(value)
+                if parsed_date is not None:
+                    value = parsed_date
+
         if isinstance(value, datetime):
             aware = _as_utc_aware(value)
             self._set_timestamp(aware)
