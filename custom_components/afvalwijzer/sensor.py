@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+import logging
 from typing import Any
 
-import logging
 import voluptuous as vol
 
-_LOGGER = logging.getLogger(__name__)
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
+
 from .const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
@@ -28,6 +26,8 @@ from .const.const import (
 )
 from .sensor_custom import CustomSensor
 from .sensor_provider import ProviderSensor
+
+_LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {

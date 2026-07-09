@@ -16,7 +16,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const.const import (
-    _LOGGER,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW,
     ATTR_IS_COLLECTION_DATE_TODAY,

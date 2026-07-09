@@ -1,6 +1,5 @@
 """Afvalwijzer integration."""
 
-from datetime import timedelta
 import logging
 
 _LOGGER = logging.getLogger(__name__)

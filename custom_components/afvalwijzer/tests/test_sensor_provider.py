@@ -97,7 +97,7 @@ def test_provider_sensor_timestamp_and_days_until():
 
     sensor = ProviderSensor(hass, "restafval", coordinator, cfg)
     sensor.async_write_ha_state = MagicMock()
-    
+
     sensor._handle_coordinator_update()
 
     assert isinstance(sensor.native_value, datetime)

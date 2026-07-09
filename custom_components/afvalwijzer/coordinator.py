@@ -99,7 +99,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.notification_data = data.get("notification_data", [])
 
     def _fetch_data(self) -> dict[str, Any]:
-        """Synchronously fetch data."""
+        """Fetch data synchronously."""
         try:
             collector = MainCollector(
                 self.config.get(CONF_COLLECTOR),

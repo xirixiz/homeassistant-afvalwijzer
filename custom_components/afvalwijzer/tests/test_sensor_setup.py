@@ -1,11 +1,8 @@
 """Tests for sensor.py setup and behavior."""
 
-import asyncio
 from datetime import date, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
-
-import pytest
 
 from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
@@ -45,13 +42,13 @@ def _make_hass():
     hass = SimpleNamespace()
     hass.data = {}
     hass.async_add_executor_job = _exec
-    
+
     # Mock task scheduling and config flow init
     hass.async_create_task = MagicMock()
     hass.config_entries = SimpleNamespace()
     hass.config_entries.flow = SimpleNamespace()
     hass.config_entries.flow.async_init = MagicMock()
-    
+
     return hass
 
 
@@ -86,15 +83,15 @@ async def test_setup_sensors_creates_entities_and_notification_added():
 async def test_async_setup_platform_triggers_import():
     """Legacy YAML setup triggers a config flow import."""
     hass = _make_hass()
-    
+
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
         CONF_POSTAL_CODE: "1234AB",
         CONF_HOUSE_NUMBER: "1",
     }
-    
+
     await async_setup_platform(hass, cfg, MagicMock())
-    
+
     # Verify the config flow init was called
     hass.config_entries.flow.async_init.assert_called_once_with(
         DOMAIN,
@@ -108,7 +105,7 @@ async def test_async_setup_entry_uses_coordinator():
     """async_setup_entry correctly retrieves the coordinator and calls _setup_sensors."""
     hass = _make_hass()
     coordinator = _FakeCoordinator()
-    
+
     entry = SimpleNamespace()
     entry.entry_id = "test_entry"
     entry.data = {
@@ -117,18 +114,18 @@ async def test_async_setup_entry_uses_coordinator():
         CONF_HOUSE_NUMBER: "1",
     }
     entry.options = {}
-    
+
     hass.data[DOMAIN] = {
         "test_entry": {
             "coordinator": coordinator
         }
     }
-    
+
     added = []
 
     def _add_entities(entities, update):
         added.extend(entities)
 
     await async_setup_entry(hass, entry, _add_entities)
-    
+
     assert len(added) == 3

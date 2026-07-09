@@ -117,7 +117,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     coordinator = AfvalwijzerDataUpdateCoordinator(hass, effective_config, entry.entry_id)
     cache_loaded = await coordinator.async_load_cache()
-    
+
     if not cache_loaded:
         await coordinator.async_config_entry_first_refresh()
     else:
