@@ -5,15 +5,16 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Any
 
+import logging
 import voluptuous as vol
 
+_LOGGER = logging.getLogger(__name__)
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 from .const.const import (
-    _LOGGER,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,

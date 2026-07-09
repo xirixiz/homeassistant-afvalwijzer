@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, time
 import hashlib
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
@@ -15,7 +16,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const.const import (
-    _LOGGER,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_LAST_UPDATE,
     CONF_COLLECTOR,
@@ -29,6 +29,8 @@ from .const.const import (
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
 DEFAULT_SHOW_FULL_TIMESTAMP = True
@@ -180,6 +182,11 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
             self._apply_value(waste_data_custom[self.waste_type])
             self._last_update = dt_util.now().isoformat()
+            _LOGGER.debug(
+                "Updated custom sensor %s from coordinator with value: %s",
+                self.name,
+                self.native_value,
+            )
 
         except Exception as err:
             _LOGGER.error("Error updating custom sensor %s: %s", self.name, err)

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 import hashlib
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
@@ -33,6 +34,8 @@ from .const.const import (
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 CONF_INCLUDE_TODAY = "include_today"
 CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
@@ -238,6 +241,11 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
                 self._apply_value(waste_data_provider[self.waste_type])
                 self._last_update = dt_util.now().isoformat()
+                _LOGGER.debug(
+                    "Updated sensor %s from coordinator with value: %s",
+                    self.name,
+                    self.native_value,
+                )
 
         except Exception as err:
             _LOGGER.error("Error updating sensor %s: %s", self.name, err)
