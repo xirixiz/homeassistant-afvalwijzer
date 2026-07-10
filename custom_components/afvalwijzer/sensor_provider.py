@@ -5,15 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 import hashlib
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.core import callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const.const import (
-    _LOGGER,
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW,
     ATTR_IS_COLLECTION_DATE_TODAY,
@@ -31,6 +33,8 @@ from .const.const import (
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 CONF_INCLUDE_TODAY = "include_today"
 CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
@@ -83,20 +87,21 @@ def _address_label(config: dict[str, Any]) -> str:
     return f"{postal_code} {house_number}{suffix} {street_name}".strip()
 
 
-class ProviderSensor(RestoreEntity, SensorEntity):
+class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
     """Representation of a provider based waste sensor."""
 
     def __init__(
         self,
         hass: Any,
         waste_type: str,
-        fetch_data: Any,
+        coordinator: Any,
         config: dict[str, Any],
     ) -> None:
         """Initialize a provider-based Afvalwijzer sensor."""
+        super().__init__(coordinator)
         self.hass = hass
         self.waste_type = waste_type
-        self.fetch_data = fetch_data
+        self.coordinator = coordinator
         self._config = config
 
         self._cfg = _Config(
@@ -205,7 +210,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         }
 
         if self._is_notification_sensor:
-            notifications = self.fetch_data.notification_data or []
+            notifications = self.coordinator.notification_data or []
             base_attrs["notifications"] = notifications
             base_attrs["count"] = len(notifications)
             return base_attrs
@@ -220,37 +225,51 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         )
         return base_attrs
 
-    async def async_update(self) -> None:
-        """Set the sensor state as a timestamp value."""
-        _LOGGER.debug("Updating sensor: %s", self.name)
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.debug("Updating sensor from coordinator: %s", self.name)
 
         try:
-            await self.hass.async_add_executor_job(self.fetch_data.update)
-
             if self._is_notification_sensor:
                 self._update_notification_sensor()
-                return
+            else:
+                waste_data_provider = self._select_provider_data()
+                if self.waste_type not in waste_data_provider:
+                    raise ValueError(f"No data for waste type: {self.waste_type}")
 
-            waste_data_provider = self._select_provider_data()
-            if self.waste_type not in waste_data_provider:
-                raise ValueError(f"No data for waste type: {self.waste_type}")
-
-            self._apply_value(waste_data_provider[self.waste_type])
-            self._last_update = dt_util.now().isoformat()
+                self._apply_value(waste_data_provider[self.waste_type])
+                self._last_update = dt_util.now().isoformat()
+                _LOGGER.debug(
+                    "Updated sensor %s from coordinator with value: %s",
+                    self.name,
+                    self.native_value,
+                )
 
         except Exception as err:
             _LOGGER.error("Error updating sensor %s: %s", self.name, err)
             self._set_error_state()
 
+        self.async_write_ha_state()
+
     def _select_provider_data(self) -> dict[str, Any]:
         if self._cfg.include_today:
-            return self.fetch_data.waste_data_with_today or {}
-        return self.fetch_data.waste_data_without_today or {}
+            return self.coordinator.waste_data_with_today or {}
+        return self.coordinator.waste_data_without_today or {}
 
     def _apply_value(self, value: Any) -> None:
         self._days_until_collection_date = self._cfg.default_label
         self._attr_device_class = None
         self._native_value = None
+
+        if isinstance(value, str):
+            parsed = dt_util.parse_datetime(value)
+            if parsed is not None:
+                value = parsed
+            else:
+                parsed_date = dt_util.parse_date(value)
+                if parsed_date is not None:
+                    value = parsed_date
 
         if isinstance(value, datetime):
             aware = _as_utc_aware(value)
@@ -297,7 +316,7 @@ class ProviderSensor(RestoreEntity, SensorEntity):
         )
 
     def _update_notification_sensor(self) -> None:
-        notifications = self.fetch_data.notification_data or []
+        notifications = self.coordinator.notification_data or []
         count = len(notifications)
 
         self._native_value = count

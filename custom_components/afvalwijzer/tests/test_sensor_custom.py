@@ -1,8 +1,10 @@
 """Tests for CustomSensor behavior."""
 
-import asyncio
 from datetime import date, datetime, timedelta
 from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+from homeassistant.util import dt as dt_util
 
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -15,8 +17,8 @@ from custom_components.afvalwijzer.const.const import (
 from custom_components.afvalwijzer.sensor_custom import CustomSensor
 
 
-class FakeFetch:
-    """Fake fetcher providing deterministic custom waste data for tests."""
+class FakeCoordinator:
+    """Fake coordinator providing deterministic custom waste data for tests."""
 
     def __init__(self, value):
         """Initialize with a single custom value for `next_date`."""
@@ -24,11 +26,7 @@ class FakeFetch:
         self.waste_data_with_today = {}
         self.waste_data_without_today = {}
         self.notification_data = []
-
-    def update(self):
-        """No-op update method to match the production interface."""
-        # noop: data is already present
-        return None
+        self.data = {}
 
 
 def _make_hass():
@@ -43,10 +41,10 @@ def _make_hass():
 
 def test_custom_sensor_timestamp_and_days_until():
     """CustomSensor exposes timestamp and correct days-until attribute."""
-    today = date.today()
+    today = dt_util.now().date()
     target = today + timedelta(days=2)
 
-    fetch = FakeFetch(target)
+    coordinator = FakeCoordinator(target)
     hass = _make_hass()
 
     cfg = {
@@ -57,9 +55,10 @@ def test_custom_sensor_timestamp_and_days_until():
         CONF_DEFAULT_LABEL: "geen",
     }
 
-    sensor = CustomSensor(hass, "next_date", fetch, cfg)
+    sensor = CustomSensor(hass, "next_date", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
 
-    asyncio.run(sensor.async_update())
+    sensor._handle_coordinator_update()
 
     # timestamp mode is enabled by default, native_value should be datetime
     assert isinstance(sensor.native_value, datetime)
@@ -74,7 +73,7 @@ def test_custom_sensor_fallback_when_no_full_timestamp():
     today = date.today()
     target = today + timedelta(days=5)
 
-    fetch = FakeFetch(target)
+    coordinator = FakeCoordinator(target)
     hass = _make_hass()
 
     cfg = {
@@ -86,9 +85,10 @@ def test_custom_sensor_fallback_when_no_full_timestamp():
         "show_full_timestamp": False,
     }
 
-    sensor = CustomSensor(hass, "next_date", fetch, cfg)
+    sensor = CustomSensor(hass, "next_date", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
 
-    asyncio.run(sensor.async_update())
+    sensor._handle_coordinator_update()
 
     # when full timestamp disabled, native_value returns fallback string
     assert isinstance(sensor.native_value, str)

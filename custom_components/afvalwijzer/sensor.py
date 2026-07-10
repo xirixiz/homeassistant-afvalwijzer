@@ -2,21 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+import logging
 from typing import Any
 
 import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.event import async_track_time_interval
 
-from .collector.main_collector import MainCollector
 from .const.const import (
-    _LOGGER,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
@@ -27,10 +23,11 @@ from .const.const import (
     CONF_STREET_NAME,
     CONF_SUFFIX,
     DOMAIN,
-    SCAN_INTERVAL,
 )
 from .sensor_custom import CustomSensor
 from .sensor_provider import ProviderSensor
+
+_LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -54,12 +51,19 @@ async def async_setup_platform(
     discovery_info=None,
 ) -> None:
     """Set up sensors via YAML or discovery (legacy)."""
-    cfg = discovery_info or config
-    if not cfg:
-        _LOGGER.error("Missing configuration; sensors cannot be created.")
-        return
-
-    await _setup_sensors(hass, cfg, async_add_entities)
+    _LOGGER.warning(
+        "Configuration of the Afvalwijzer integration in YAML is deprecated "
+        "and will be removed in a future release; Your existing configuration "
+        "has been imported into the UI automatically and can be safely removed "
+        "from your configuration.yaml file"
+    )
+    hass.async_create_task(
+        hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": "import"},
+            data=config,
+        )
+    )
 
 
 async def async_setup_entry(
@@ -69,31 +73,16 @@ async def async_setup_entry(
 ) -> None:
     """Set up sensors from a config entry (config flow)."""
     config: dict[str, Any] = {**entry.data, **entry.options}
+    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
 
-    data = AfvalwijzerData(hass, config)
-
-    # This saves the data instance so calendar.py can find it
-    entry_id = getattr(entry, "entry_id", "test_entry_id")
-    hass.data.setdefault(DOMAIN, {}).setdefault(entry_id, {})["data_instance"] = data
-
-    ok, transient_error = await hass.async_add_executor_job(data.update)
-    if not ok and transient_error is not None:
-        _LOGGER.warning("Afvalwijzer backend not ready yet; will retry setup.")
-        raise ConfigEntryNotReady from transient_error
-    if not ok:
-        _LOGGER.error(
-            "Afvalwijzer initial update failed; aborting setup for this entry."
-        )
-        return
-
-    await _setup_sensors(hass, config, async_add_entities, data)
+    await _setup_sensors(hass, config, async_add_entities, coordinator)
 
 
 async def _setup_sensors(
     hass: HomeAssistant,
     config: dict[str, Any],
     async_add_entities,
-    data: AfvalwijzerData | None = None,
+    coordinator: Any,
 ) -> None:
     """General setup logic for platform and config entry."""
     _LOGGER.debug(
@@ -101,38 +90,18 @@ async def _setup_sensors(
         config.get(CONF_COLLECTOR),
     )
 
-    if data is None:
-        data = AfvalwijzerData(hass, config)
-        ok, transient_error = await hass.async_add_executor_job(data.update)
-        if not ok and transient_error is not None:
-            _LOGGER.warning(
-                "Afvalwijzer backend not ready during platform setup; skipping.",
-            )
-            return
-        if not ok:
-            _LOGGER.error("Afvalwijzer failed to fetch initial data; skipping setup.")
-            return
-
-    update_interval = SCAN_INTERVAL or timedelta(hours=4)
-
-    @callback
-    def _schedule_update(_now) -> None:
-        hass.async_add_executor_job(data.update)
-
-    async_track_time_interval(hass, _schedule_update, update_interval)
-
-    waste_data_with_today = data.waste_data_with_today or {}
-    waste_data_custom = data.waste_data_custom or {}
+    waste_data_with_today = coordinator.waste_data_with_today or {}
+    waste_data_custom = coordinator.waste_data_custom or {}
 
     entities: list[Any] = [
-        ProviderSensor(hass, wtype, data, config) for wtype in waste_data_with_today
+        ProviderSensor(hass, wtype, coordinator, config) for wtype in waste_data_with_today
     ]
     entities.extend(
-        CustomSensor(hass, wtype, data, config) for wtype in waste_data_custom
+        CustomSensor(hass, wtype, coordinator, config) for wtype in waste_data_custom
     )
 
-    if data.notification_data is not None:
-        entities.append(ProviderSensor(hass, "notifications", data, config))
+    if coordinator.notification_data:
+        entities.append(ProviderSensor(hass, "notifications", coordinator, config))
         _LOGGER.debug("Added notification sensor for provider")
 
     if not entities:
@@ -143,58 +112,4 @@ async def _setup_sensors(
     async_add_entities(entities, True)
 
 
-class AfvalwijzerData:
-    """Handles fetching and storing Afvalwijzer data."""
 
-    def __init__(self, hass: HomeAssistant, config: dict[str, Any]) -> None:
-        """Initialize the Afvalwijzer base sensor."""
-        self.hass = hass
-        self.config = config
-        self.waste_data_with_today: dict[str, Any] | None = None
-        self.waste_data_without_today: dict[str, Any] | None = None
-        self.waste_data_custom: dict[str, Any] | None = None
-        self.notification_data: list[Any] | None = None
-
-    def update(self) -> tuple[bool, Exception | None]:
-        """Fetch the latest waste data."""
-        try:
-            collector = MainCollector(
-                self.config.get(CONF_COLLECTOR),
-                self.config.get(CONF_POSTAL_CODE),
-                self.config.get(CONF_HOUSE_NUMBER),
-                self.config.get(CONF_SUFFIX),
-                self.config.get(CONF_STREET_NAME),
-                self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
-                self.config.get(CONF_EXCLUDE_LIST),
-                self.config.get(CONF_DEFAULT_LABEL),
-            )
-        except ValueError as err:
-            _LOGGER.error("Collector initialization failed: %s", err)
-            return False, None
-        except Exception as err:
-            _LOGGER.warning("Collector init unexpected error: %s", err)
-            return False, err
-
-        try:
-            self.waste_data_with_today = collector.waste_data_with_today
-            self.waste_data_without_today = collector.waste_data_without_today
-            self.waste_data_custom = collector.waste_data_custom
-            self.notification_data = collector.notification_data
-            _LOGGER.debug("Waste data updated successfully.")
-            return True, None
-        except TimeoutError as err:
-            _LOGGER.warning("Timeout fetching waste data: %s", err)
-            return False, err
-        except ConnectionError as err:
-            _LOGGER.warning("Connection error fetching waste data: %s", err)
-            return False, err
-        except ValueError as err:
-            _LOGGER.error("Failed to fetch waste data: %s", err)
-            self.waste_data_with_today = {}
-            self.waste_data_without_today = {}
-            self.waste_data_custom = {}
-            self.notification_data = []
-            return False, None
-        except Exception as err:
-            _LOGGER.warning("Unexpected error fetching waste data: %s", err)
-            return False, err

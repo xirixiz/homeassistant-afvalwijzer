@@ -38,7 +38,8 @@
     },
     "abort": {
       "already_configured": "Afvalwijzer is al geconfigureerd",
-      "reconfigure_successful": "Afvalwijzer is succesvol geherconfigureerd"
+      "reconfigure_successful": "Afvalwijzer is succesvol geherconfigureerd",
+      "invalid_address": "Ongeldige postcode of huisnummer in YAML-configuratie"
     }
   },
   "options": {

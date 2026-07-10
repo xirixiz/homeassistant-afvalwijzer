@@ -1,8 +1,11 @@
 """Tests for ProviderSensor behavior."""
 
-import asyncio
 from datetime import date, datetime, timedelta
 from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.util import dt as dt_util
 
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -16,8 +19,8 @@ from custom_components.afvalwijzer.const.const import (
 from custom_components.afvalwijzer.sensor_provider import ProviderSensor
 
 
-class FakeFetch:
-    """Fake fetcher providing provider and notification data for tests."""
+class FakeCoordinator:
+    """Fake coordinator providing provider and notification data for tests."""
 
     def __init__(self, provider_data=None, notifications=None):
         """Initialize with optional provider and notifications payloads."""
@@ -25,10 +28,7 @@ class FakeFetch:
         self.waste_data_without_today = provider_data or {}
         self.waste_data_custom = {}
         self.notification_data = notifications or []
-
-    def update(self):
-        """No-op update method to match the production interface."""
-        return None
+        self.data = {}
 
 
 def _make_hass():
@@ -43,7 +43,7 @@ def _make_hass():
 
 def test_notification_sensor_counts_and_icon():
     """Provider notification sensor exposes count and list of notifications."""
-    fetch = FakeFetch(provider_data={}, notifications=["a", "b", "c"])
+    coordinator = FakeCoordinator(provider_data={}, notifications=["a", "b", "c"])
     hass = _make_hass()
 
     cfg = {
@@ -54,9 +54,10 @@ def test_notification_sensor_counts_and_icon():
         CONF_DEFAULT_LABEL: "geen",
     }
 
-    sensor = ProviderSensor(hass, "notifications", fetch, cfg)
+    sensor = ProviderSensor(hass, "notifications", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
 
-    asyncio.run(sensor.async_update())
+    sensor._handle_coordinator_update()
 
     assert sensor.native_value == 3
     attrs = sensor.extra_state_attributes
@@ -76,16 +77,16 @@ def test_resolve_include_today_legacy_flag():
         CONF_EXCLUDE_PICKUP_TODAY: True,
     }
 
-    sensor = ProviderSensor(SimpleNamespace(data={}), "restafval", FakeFetch(), cfg)
+    sensor = ProviderSensor(SimpleNamespace(data={}), "restafval", FakeCoordinator(), cfg)
     assert sensor._cfg.include_today is False
 
 
 def test_provider_sensor_timestamp_and_days_until():
     """Provider sensor returns timestamp and correct days-until value."""
-    today = date.today()
+    today = dt_util.now().date()
     target = today + timedelta(days=1)
 
-    fetch = FakeFetch(provider_data={"restafval": target}, notifications=[])
+    coordinator = FakeCoordinator(provider_data={"restafval": target}, notifications=[])
     hass = _make_hass()
 
     cfg = {
@@ -97,8 +98,10 @@ def test_provider_sensor_timestamp_and_days_until():
         # include_today resolved by default settings in ProviderSensor
     }
 
-    sensor = ProviderSensor(hass, "restafval", fetch, cfg)
-    asyncio.run(sensor.async_update())
+    sensor = ProviderSensor(hass, "restafval", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
+
+    sensor._handle_coordinator_update()
 
     assert isinstance(sensor.native_value, datetime)
     attrs = sensor.extra_state_attributes
