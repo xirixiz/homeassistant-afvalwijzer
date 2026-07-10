@@ -21,7 +21,8 @@ class NextSensorData:
         self.default_label = default_label
 
         future_waste_data = [
-            waste for waste in waste_data_after_date_selected
+            waste
+            for waste in waste_data_after_date_selected
             if waste["date"].date() > self.today_date.date()
         ]
 

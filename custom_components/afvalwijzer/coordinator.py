@@ -29,10 +29,13 @@ _LOGGER = logging.getLogger(__name__)
 STORAGE_KEY = f"{DOMAIN}.cache"
 STORAGE_VERSION = 1
 
+
 class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching Afvalwijzer data."""
 
-    def __init__(self, hass: HomeAssistant, config: dict[str, Any], entry_id: str) -> None:
+    def __init__(
+        self, hass: HomeAssistant, config: dict[str, Any], entry_id: str
+    ) -> None:
         """Initialize the coordinator."""
         super().__init__(
             hass,
@@ -66,7 +69,8 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         cache_config = cached_data.get("config", {})
         return (
             cache_config.get(CONF_POSTAL_CODE) == self.config.get(CONF_POSTAL_CODE)
-            and cache_config.get(CONF_HOUSE_NUMBER) == self.config.get(CONF_HOUSE_NUMBER)
+            and cache_config.get(CONF_HOUSE_NUMBER)
+            == self.config.get(CONF_HOUSE_NUMBER)
             and cache_config.get(CONF_COLLECTOR) == self.config.get(CONF_COLLECTOR)
         )
 

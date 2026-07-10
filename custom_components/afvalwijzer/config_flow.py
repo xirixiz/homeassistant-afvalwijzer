@@ -188,7 +188,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         postal_code = str(cleaned.get(CONF_POSTAL_CODE, ""))
         house_number = str(cleaned.get(CONF_HOUSE_NUMBER, ""))
 
-        if not self._validate_postal_code(postal_code, collector) or not self._validate_house_number(house_number):
+        if not self._validate_postal_code(
+            postal_code, collector
+        ) or not self._validate_house_number(house_number):
             return self.async_abort(reason="invalid_address")
 
         await self.async_set_unique_id(_unique_id_from(cleaned))

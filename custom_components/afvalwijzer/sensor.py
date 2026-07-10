@@ -94,7 +94,8 @@ async def _setup_sensors(
     waste_data_custom = coordinator.waste_data_custom or {}
 
     entities: list[Any] = [
-        ProviderSensor(hass, wtype, coordinator, config) for wtype in waste_data_with_today
+        ProviderSensor(hass, wtype, coordinator, config)
+        for wtype in waste_data_with_today
     ]
     entities.extend(
         CustomSensor(hass, wtype, coordinator, config) for wtype in waste_data_custom
@@ -110,6 +111,3 @@ async def _setup_sensors(
 
     _LOGGER.info("Adding %d sensors for Afvalwijzer.", len(entities))
     async_add_entities(entities, True)
-
-
-
