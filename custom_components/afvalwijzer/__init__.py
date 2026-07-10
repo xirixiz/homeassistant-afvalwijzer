@@ -10,8 +10,6 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.core import callback
 from homeassistant.helpers.event import async_call_later, async_track_time_change
 
-_LOGGER = logging.getLogger(__name__)
-
 from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
@@ -19,6 +17,8 @@ from .const.const import (
     DOMAIN,
 )
 from .coordinator import AfvalwijzerDataUpdateCoordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 # Options keys
 CONF_INCLUDE_TODAY = "include_today"

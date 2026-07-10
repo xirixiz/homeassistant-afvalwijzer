@@ -1,11 +1,8 @@
 """Tests for ProviderSensor behavior."""
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
-
-from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.util import dt as dt_util
 
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -17,6 +14,7 @@ from custom_components.afvalwijzer.const.const import (
     CONF_SUFFIX,
 )
 from custom_components.afvalwijzer.sensor_provider import ProviderSensor
+from homeassistant.util import dt as dt_util
 
 
 class FakeCoordinator:
