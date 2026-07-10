@@ -4,8 +4,6 @@ from datetime import date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from homeassistant.util import dt as dt_util
-
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_COLLECTOR,
@@ -15,6 +13,7 @@ from custom_components.afvalwijzer.const.const import (
     CONF_SUFFIX,
 )
 from custom_components.afvalwijzer.sensor_custom import CustomSensor
+from homeassistant.util import dt as dt_util
 
 
 class FakeCoordinator:
