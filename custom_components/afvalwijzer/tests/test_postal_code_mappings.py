@@ -159,8 +159,8 @@ class TestPostalCodeOverridesStructure:
             assert isinstance(entry, tuple), f"Expected tuple, got {type(entry)}"
             assert len(entry) == 2, f"Expected 2-tuple, got {len(entry)}-tuple"
             code_range, mapping = entry
-            assert isinstance(code_range, range), (
-                f"Expected range, got {type(code_range)}"
+            assert isinstance(code_range, (range, frozenset)), (
+                f"Expected range or frozenset, got {type(code_range)}"
             )
             assert isinstance(mapping, dict), f"Expected dict, got {type(mapping)}"
 

@@ -21,6 +21,10 @@ class WasteDataTransformer:
 
         Prepare raw waste data and generate derived datasets for sensor use.
         """
+        waste_data_raw = [
+            item for item in waste_data_raw
+            if item["type"].strip().lower() != "ignore"
+        ]
         waste_data_raw.sort(
             key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d")
         )

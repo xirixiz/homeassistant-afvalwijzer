@@ -5,7 +5,7 @@ depending on the 4-digit postal code area. Overrides defined here take
 priority over the global ``WASTE_TYPE_MAPPING`` in ``main_functions.py``.
 
 Each entry in ``POSTAL_CODE_OVERRIDES`` is a tuple of:
-  * A ``range`` of 4-digit postal code prefixes (inclusive start, exclusive end).
+  * A ``range`` or ``frozenset`` of 4-digit postal code prefixes (inclusive start, exclusive end for range).
   * A ``dict`` mapping raw waste type labels (lowercase) to standardized keys.
 
 Example::
@@ -20,11 +20,18 @@ This matches postal codes 7940XX through 7944XX and renames
 
 from __future__ import annotations
 
-POSTAL_CODE_OVERRIDES: list[tuple[range, dict[str, str]]] = [
+POSTAL_CODE_OVERRIDES: list[tuple[range | frozenset[int], dict[str, str]]] = [
     (
         range(7940, 7945),  # Meppel
         {
             "keukenafval": "vet-goed",
+        },
+    ),
+    (
+        frozenset({5043, 5050, 5051, 5052, 5133}),  # Goirle area
+        {
+            "rest-gft": "ignore",
+            "rest-gfte": "ignore",
         },
     ),
     # Add more overrides here as needed, for example:
