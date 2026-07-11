@@ -23,7 +23,7 @@ def test_day_sensor_data_type_variations(mock_now, date_input):
 
     waste_data_formatted = [
         {"type": "gft", "date": date_input},
-        {"type": "pmd", "date": "2026-07-10"}
+        {"type": "pmd", "date": "2026-07-10"},
     ]
 
     sensor_data = DaySensorData(waste_data_formatted, "geen")

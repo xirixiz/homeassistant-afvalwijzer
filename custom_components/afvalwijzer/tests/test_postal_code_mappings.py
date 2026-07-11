@@ -126,6 +126,7 @@ class TestWasteTypeRenameWithPostalCode:
         with patch(
             "custom_components.afvalwijzer.common.main_functions.get_postal_code_override",
         ) as mock_override:
+
             def side_effect(digits, name):
                 for r, m in test_overrides:
                     if digits in r and name in m:
@@ -142,7 +143,7 @@ class TestWasteTypeRenameWithPostalCode:
         """Test the specific 'rest-gfte' API return for Goirle postal codes."""
         result = waste_type_rename("rest-gfte", "5050AB")
 
-        assert result is None
+        assert result == "ignore"
 
 
 # ---------------------------------------------------------------------------
