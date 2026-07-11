@@ -334,7 +334,6 @@ TEST_ADDRESSES = [
     #{"provider": "waardlanden", "postal_code": "4205XD", "house_number": "9"},
     #{"provider": "woerden", "postal_code": "3421SJ", "house_number": "47"},
     #{"provider": "woerden", "postal_code": "3446GL", "house_number": "16"},
-    #{"provider": "ximmio", "postal_code": "2161LN", "house_number": "33"},
     #{"provider": "zrd", "postal_code": "4351ND", "house_number": "23"},
     #{"provider": "zrd", "postal_code": "4401CW", "house_number": "2"},
     #{"provider": "zrd", "postal_code": "4421MA", "house_number": "1"},
