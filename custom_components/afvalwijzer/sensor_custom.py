@@ -106,7 +106,9 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         self._last_update: str | None = None
         self._days_until_collection_date: int | None = None
 
-        self._attr_name = f"{SENSOR_PREFIX}{waste_type}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = waste_type.lower().replace("-", "_")
+        self.entity_id = f"sensor.{SENSOR_PREFIX}{waste_type}"
         self._attr_unique_id = self._make_unique_id(config, waste_type)
         self._attr_icon = self._icon_for_waste_type(waste_type)
 
@@ -165,34 +167,52 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
             ATTR_LAST_UPDATE: self._last_update,
             "collector": self._config.get(CONF_COLLECTOR),
         }
-        if "next_date" in (self._attr_name or "").lower():
+        if "next_date" in (self.waste_type or "").lower():
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
         return attrs
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.debug("Updating custom sensor from coordinator: %s", self.name)
+        _LOGGER.debug("Updating custom sensor from coordinator: %s", self.entity_id)
 
         try:
             waste_data_custom = self.coordinator.waste_data_custom or {}
 
             if self.waste_type not in waste_data_custom:
-                raise ValueError(f"No data for waste type: {self.waste_type}")
+                raise ValueError(f"No data for custom sensor: {self.waste_type}")
 
-            self._apply_value(waste_data_custom[self.waste_type])
+            raw_value = waste_data_custom[self.waste_type]
+            translated_val = self._translate_value(raw_value)
+            self._apply_value(translated_val)
             self._last_update = dt_util.now().isoformat()
-            _LOGGER.debug(
-                "Updated custom sensor %s from coordinator with value: %s",
-                self.name,
-                self.native_value,
-            )
-
+            if "None" not in str(self._native_value):
+                _LOGGER.debug(
+                    "Custom sensor %s updated. Value: %s",
+                    self.entity_id,
+                    self._native_value,
+                )
         except Exception as err:
-            _LOGGER.error("Error updating custom sensor %s: %s", self.name, err)
+            _LOGGER.error("Error updating custom sensor %s: %s", self.entity_id, err)
             self._set_error_state()
 
         self.async_write_ha_state()
+
+    def _translate_value(self, value: Any) -> Any:
+        """Translate the raw waste type value using the pre-loaded translation files."""
+        if not isinstance(value, str) or not value:
+            return value
+
+        sensor_translations = getattr(self.coordinator, "sensor_translations", {})
+
+        parts = [p.strip() for p in value.split(",")]
+        translated_parts = []
+        for part in parts:
+            safe_part = part.lower().replace(" ", "_").replace("-", "_")
+            translated_part = sensor_translations.get(safe_part, {}).get("name", part)
+            translated_parts.append(translated_part)
+
+        return ", ".join(translated_parts)
 
     def _apply_value(self, value: Any) -> None:
         """Apply collector output to sensor state."""

@@ -52,8 +52,87 @@
           "include_today": "Ophalen van vandaag meenemen",
           "default_label": "Standaard label wanneer geen data bekend is",
           "exclude_list": "Afvaltypes uitsluiten",
-          "language": "Taal"
+          "language": "Sensor status taal"
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "best_tas": {
+        "name": "BEST-tas"
+      },
+      "gft": {
+        "name": "GFT"
+      },
+      "glas": {
+        "name": "Glas"
+      },
+      "grofvuil": {
+        "name": "Grofvuil"
+      },
+      "kerstbomen": {
+        "name": "Kerstbomen"
+      },
+      "grip": {
+        "name": "GRIP"
+      },
+      "maas": {
+        "name": "Maas"
+      },
+      "milieubus": {
+        "name": "Milieubus"
+      },
+      "papier": {
+        "name": "Papier"
+      },
+      "plastic": {
+        "name": "Plastic"
+      },
+      "pmd": {
+        "name": "PMD"
+      },
+      "restafval": {
+        "name": "Restafval"
+      },
+      "restwagen": {
+        "name": "Restwagen"
+      },
+      "restafvalzakken": {
+        "name": "Restafvalzakken"
+      },
+      "snoeiafval": {
+        "name": "Snoeiafval"
+      },
+      "tuinafval": {
+        "name": "Tuinafval"
+      },
+      "notifications": {
+        "name": "Notificaties"
+      },
+      "today": {
+        "name": "Vandaag"
+      },
+      "tomorrow": {
+        "name": "Morgen"
+      },
+      "day_after_tomorrow": {
+        "name": "Overmorgen"
+      },
+      "next_date": {
+        "name": "Volgende ophaaldatum"
+      },
+      "next_in_days": {
+        "name": "Dagen tot volgende ophaling"
+      },
+      "next_type": {
+        "name": "Volgende ophaaltype"
+      },
+      "next_item": {
+        "name": "Volgende ophaalitem"
+      },
+      "geen": {
+        "name": "Geen"
       }
     }
   }

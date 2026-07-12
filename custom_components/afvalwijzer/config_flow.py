@@ -328,9 +328,6 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
             cleaned = _clean_options_input(user_input)
 
             result = self.async_create_entry(title="", data=cleaned)
-            self.hass.async_create_task(
-                self.hass.config_entries.async_reload(self._config_entry.entry_id)
-            )
             return result
 
         current = dict(self._config_entry.options)
