@@ -29,18 +29,24 @@ from .sensor_provider import ProviderSensor
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Optional(CONF_COLLECTOR, default="mijnafvalwijzer"): cv.string,
-        vol.Required(CONF_POSTAL_CODE): cv.string,
-        vol.Required(CONF_HOUSE_NUMBER): cv.string,
-        vol.Optional(CONF_SUFFIX, default=""): cv.string,
-        vol.Optional(CONF_STREET_NAME, default=""): cv.string,
-        vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
-        vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
-        vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
-        vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
-    }
+PLATFORM_SCHEMA = vol.All(
+    cv.deprecated("id"),
+    cv.deprecated("street_number", replacement_key=CONF_HOUSE_NUMBER),
+    PLATFORM_SCHEMA.extend(
+        {
+            vol.Optional(CONF_COLLECTOR, default="mijnafvalwijzer"): cv.string,
+            vol.Required(CONF_POSTAL_CODE): cv.string,
+            vol.Required(CONF_HOUSE_NUMBER): cv.string,
+            vol.Optional(CONF_SUFFIX, default=""): cv.string,
+            vol.Optional(CONF_STREET_NAME, default=""): cv.string,
+            vol.Optional(CONF_EXCLUDE_PICKUP_TODAY, default=True): cv.boolean,
+            vol.Optional(CONF_EXCLUDE_LIST, default=""): cv.string,
+            vol.Optional(CONF_DEFAULT_LABEL, default="geen"): cv.string,
+            vol.Optional(CONF_FRIENDLY_NAME, default=""): cv.string,
+            vol.Remove("id"): cv.string,
+            vol.Remove("street_number"): cv.string,
+        }
+    ),
 )
 
 
