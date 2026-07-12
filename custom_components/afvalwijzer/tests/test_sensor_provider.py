@@ -75,7 +75,9 @@ def test_resolve_include_today_legacy_flag():
         CONF_EXCLUDE_PICKUP_TODAY: True,
     }
 
-    sensor = ProviderSensor(SimpleNamespace(data={}), "restafval", FakeCoordinator(), cfg)
+    sensor = ProviderSensor(
+        SimpleNamespace(data={}), "restafval", FakeCoordinator(), cfg
+    )
     assert sensor._cfg.include_today is False
 
 

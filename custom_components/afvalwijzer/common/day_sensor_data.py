@@ -38,10 +38,16 @@ class DaySensorData:
                 waste_date = waste["date"]
 
                 # Scenario 1: It's a datetime or date object (Naive or Timezone-Aware)
-                if hasattr(waste_date, "year") and hasattr(waste_date, "month") and hasattr(waste_date, "day"):
-                    if (waste_date.year == target_date.year and
-                        waste_date.month == target_date.month and
-                        waste_date.day == target_date.day):
+                if (
+                    hasattr(waste_date, "year")
+                    and hasattr(waste_date, "month")
+                    and hasattr(waste_date, "day")
+                ):
+                    if (
+                        waste_date.year == target_date.year
+                        and waste_date.month == target_date.month
+                        and waste_date.day == target_date.day
+                    ):
                         day.append(waste["type"])
 
                 # Scenario 2: It's a raw string (e.g., "2026-07-09")

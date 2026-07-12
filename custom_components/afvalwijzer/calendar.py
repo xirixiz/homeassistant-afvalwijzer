@@ -12,6 +12,7 @@ from .const.const import CONF_COLLECTOR, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
@@ -21,6 +22,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         async_add_entities([AfvalwijzerCalendar(coordinator)])
     else:
         _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")
+
 
 class AfvalwijzerCalendar(CalendarEntity):
     """Representation of the Afvalwijzer calendar."""
@@ -36,7 +38,9 @@ class AfvalwijzerCalendar(CalendarEntity):
         """Return the next upcoming event."""
         return None
 
-    async def async_get_events(self, hass, start_date: datetime, end_date: datetime) -> list[CalendarEvent]:
+    async def async_get_events(
+        self, hass, start_date: datetime, end_date: datetime
+    ) -> list[CalendarEvent]:
         """Get the calendar events."""
         events = []
         today = dt_util.now().date()

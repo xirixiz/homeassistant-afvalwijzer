@@ -12,12 +12,12 @@ from custom_components.afvalwijzer.calendar import AfvalwijzerCalendar
 async def test_calendar_event_parsing():
     """Test that the calendar handles mixed date types correctly."""
     mock_data = MagicMock()
-    mock_data.config = {"include_today": True, "collector": "afvalthuis"}
+    mock_data.config = {"include_today": True, "provider": "afvalthuis"}
 
     mock_data.waste_data_with_today = {
         "gft": "2026-07-09",
         "pmd": date(2026, 7, 10),
-        "restafval": datetime(2026, 7, 11)
+        "restafval": datetime(2026, 7, 11),
     }
 
     calendar = AfvalwijzerCalendar(mock_data)

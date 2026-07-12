@@ -120,7 +120,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options = _migrate_options_if_needed(hass, entry)
     effective_config = _build_effective_config(entry, options)
 
-    coordinator = AfvalwijzerDataUpdateCoordinator(hass, effective_config, entry.entry_id)
+    coordinator = AfvalwijzerDataUpdateCoordinator(
+        hass, effective_config, entry.entry_id
+    )
     cache_loaded = await coordinator.async_load_cache()
 
     if not cache_loaded:

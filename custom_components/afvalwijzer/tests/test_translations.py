@@ -15,6 +15,7 @@ def get_keys(d, prefix=""):
             keys.add(key)
     return keys
 
+
 def test_en_json_matches_strings_json():
     """Test that en.json is an exact copy of strings.json."""
     with open("custom_components/afvalwijzer/strings.json") as f:
@@ -24,6 +25,7 @@ def test_en_json_matches_strings_json():
         en_data = json.load(f)
 
     assert strings_data == en_data, "en.json must be an exact copy of strings.json"
+
 
 def test_translation_keys_match_strings_json():
     """Test that all translation files have the exact same keys as strings.json."""
@@ -47,4 +49,6 @@ def test_translation_keys_match_strings_json():
         extra_keys = trans_keys - strings_keys
 
         assert not missing_keys, f"{filename} is missing keys: {missing_keys}"
-        assert not extra_keys, f"{filename} has extra keys not in strings.json: {extra_keys}"
+        assert not extra_keys, (
+            f"{filename} has extra keys not in strings.json: {extra_keys}"
+        )
