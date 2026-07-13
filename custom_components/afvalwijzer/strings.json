@@ -52,7 +52,7 @@
           "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list",
-          "translate_states": "Capitalize and translate sensor states (WARNING: Breaks automations expecting lowercase)",
+          "translate_states": "Format sensor states for UI (WARNING: Breaks automations expecting raw lowercase values)",
           "language": "Sensor state language (Only applies if translation is enabled above)"
         }
       }
