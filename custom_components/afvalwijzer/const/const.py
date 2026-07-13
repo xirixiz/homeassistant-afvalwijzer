@@ -166,6 +166,7 @@ CONF_STREET_NAME = "street_name"
 CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_EXCLUDE_LIST = "exclude_list"
+CONF_TRANSLATE_STATES = "translate_states"
 
 SENSOR_PREFIX = "afvalwijzer "
 SENSOR_ICON = "mdi:recycle"

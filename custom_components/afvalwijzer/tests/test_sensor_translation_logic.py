@@ -27,7 +27,7 @@ async def test_translate_value():
     coordinator = MockCoordinator(mock_translations)
 
     class DummySensor:
-        pass
+        _config = {"translate_states": True}
 
     sensor = DummySensor()
     sensor.coordinator = coordinator
@@ -55,6 +55,11 @@ async def test_translate_value():
     # 7. Test None is ignored
     assert translate_fn(None) is None
 
+    # 8. Test disabled translation
+    sensor._config = {"translate_states": False}
+    assert translate_fn("gft, papier") == "gft, papier"
+    assert translate_fn("geen") == "geen"
+
 
 @pytest.mark.asyncio
 async def test_provider_sensor_fallback_translation():
@@ -63,8 +68,12 @@ async def test_provider_sensor_fallback_translation():
         "geen": {"name": "None"},
     }
 
+    class DummyConfig:
+        translate_states = True
+        default_label = "geen"
+
     class DummyProviderSensor:
-        pass
+        _cfg = DummyConfig()
 
     sensor = DummyProviderSensor()
     sensor.coordinator = MockCoordinator(mock_translations)
