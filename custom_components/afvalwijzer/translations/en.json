@@ -53,7 +53,7 @@
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list",
           "translate_states": "Capitalize and translate sensor states (WARNING: Breaks automations expecting lowercase)",
-          "language": "Sensor state language"
+          "language": "Sensor state language (Only applies if translation is enabled above)"
         }
       }
     }
