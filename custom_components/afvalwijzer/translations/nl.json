@@ -53,7 +53,7 @@
           "default_label": "Standaard label wanneer geen data bekend is",
           "exclude_list": "Afvaltypes uitsluiten",
           "translate_states": "Sensorstatussen opmaken voor UI (LET OP: breekt automatiseringen die onbewerkte kleine letters verwachten)",
-          "language": "Sensor status taal (Alleen van toepassing indien vertaling hierboven is ingeschakeld)"
+          "language": "Sensor status taal (Alleen van toepassing indien opmaak hierboven is ingeschakeld)"
         }
       }
     }
