@@ -52,8 +52,87 @@
           "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list",
-          "language": "Language"
+          "language": "Sensor state language"
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "best_tas": {
+        "name": "BEST-bag"
+      },
+      "gft": {
+        "name": "Organic waste (GFT)"
+      },
+      "glas": {
+        "name": "Glass"
+      },
+      "grofvuil": {
+        "name": "Bulky waste"
+      },
+      "kerstbomen": {
+        "name": "Christmas trees"
+      },
+      "grip": {
+        "name": "GRIP"
+      },
+      "maas": {
+        "name": "Maas"
+      },
+      "milieubus": {
+        "name": "Mobile collection vehicle"
+      },
+      "papier": {
+        "name": "Paper"
+      },
+      "plastic": {
+        "name": "Plastic"
+      },
+      "pmd": {
+        "name": "PMD"
+      },
+      "restafval": {
+        "name": "Residual waste"
+      },
+      "restwagen": {
+        "name": "Residual waste truck"
+      },
+      "restafvalzakken": {
+        "name": "Residual waste bags"
+      },
+      "snoeiafval": {
+        "name": "Pruning waste"
+      },
+      "tuinafval": {
+        "name": "Garden waste"
+      },
+      "notifications": {
+        "name": "Notifications"
+      },
+      "today": {
+        "name": "Today"
+      },
+      "tomorrow": {
+        "name": "Tomorrow"
+      },
+      "day_after_tomorrow": {
+        "name": "Day after tomorrow"
+      },
+      "next_date": {
+        "name": "Next collection date"
+      },
+      "next_in_days": {
+        "name": "Days until next collection"
+      },
+      "next_type": {
+        "name": "Next collection type"
+      },
+      "next_item": {
+        "name": "Next collection item"
+      },
+      "geen": {
+        "name": "None"
       }
     }
   }

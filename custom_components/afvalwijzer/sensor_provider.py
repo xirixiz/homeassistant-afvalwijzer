@@ -112,7 +112,9 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
             ),
         )
 
-        self._attr_name = f"{SENSOR_PREFIX}{waste_type}"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = waste_type.lower().replace("-", "_")
+        self.entity_id = f"sensor.{SENSOR_PREFIX}{waste_type}"
         self._attr_unique_id = self._make_unique_id(config, waste_type)
         self._attr_icon = self._icon_for_waste_type(waste_type)
 
@@ -122,12 +124,21 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
-
         self._attr_device_class: SensorDeviceClass | None = None
         self._native_value: datetime | int | None = None
-        self._fallback_state = (
-            "0" if self._is_notification_sensor else self._cfg.default_label
-        )
+
+        fallback_val = "0" if self._is_notification_sensor else self._cfg.default_label
+        self._fallback_state = fallback_val
+
+    def _set_error_state(self) -> None:
+        """Set sensor to error state."""
+        self._days_until_collection_date = None
+        self._is_collection_date_today = False
+        self._is_collection_date_tomorrow = False
+        self._is_collection_date_day_after_tomorrow = False
+        self._attr_device_class = None
+        self._native_value = None
+        self._fallback_state = self._translate_value(str(self._cfg.default_label))
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -228,7 +239,7 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.debug("Updating sensor from coordinator: %s", self.name)
+        _LOGGER.debug("Updating sensor from coordinator: %s", self.entity_id)
 
         try:
             if self._is_notification_sensor:
@@ -239,18 +250,34 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
                     raise ValueError(f"No data for waste type: {self.waste_type}")
 
                 self._apply_value(waste_data_provider[self.waste_type])
+                if "None" not in str(self._native_value):
+                    _LOGGER.debug(
+                        "Sensor %s updated. Value: %s",
+                        self.entity_id,
+                        self._native_value,
+                    )
                 self._last_update = dt_util.now().isoformat()
-                _LOGGER.debug(
-                    "Updated sensor %s from coordinator with value: %s",
-                    self.name,
-                    self.native_value,
-                )
-
         except Exception as err:
-            _LOGGER.error("Error updating sensor %s: %s", self.name, err)
+            _LOGGER.error("Error updating sensor %s: %s", self.entity_id, err)
             self._set_error_state()
 
         self.async_write_ha_state()
+
+    def _translate_value(self, value: Any) -> Any:
+        """Translate the raw waste type value using the pre-loaded translation files."""
+        if not isinstance(value, str) or not value:
+            return value
+
+        sensor_translations = getattr(self.coordinator, "sensor_translations", {})
+
+        parts = [p.strip() for p in value.split(",")]
+        translated_parts = []
+        for part in parts:
+            safe_part = part.lower().replace(" ", "_").replace("-", "_")
+            translated_part = sensor_translations.get(safe_part, {}).get("name", part)
+            translated_parts.append(translated_part)
+
+        return ", ".join(translated_parts)
 
     def _select_provider_data(self) -> dict[str, Any]:
         if self._cfg.include_today:
@@ -281,7 +308,7 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
             self._set_timestamp(aware, date_value=value)
             return
 
-        self._fallback_state = str(value)
+        self._fallback_state = self._translate_value(str(value))
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
