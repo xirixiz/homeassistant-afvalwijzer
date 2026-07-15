@@ -29,6 +29,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
     CONF_SUFFIX,
+    CONF_TRANSLATE_STATES,
     DOMAIN,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -48,6 +49,7 @@ class _Config:
     default_label: str
     include_today: bool
     show_full_timestamp: bool
+    translate_states: bool
 
 
 def _is_naive(value: datetime) -> bool:
@@ -110,6 +112,7 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
             show_full_timestamp=bool(
                 config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
             ),
+            translate_states=bool(config.get(CONF_TRANSLATE_STATES, False)),
         )
 
         self._attr_has_entity_name = True
@@ -267,6 +270,10 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         """Translate the raw waste type value using the pre-loaded translation files."""
         if not isinstance(value, str) or not value:
             return value
+
+        # Check if the user opted-in to translating sensor states
+        if not self._cfg.translate_states:
+            return str(value)
 
         sensor_translations = getattr(self.coordinator, "sensor_translations", {})
 

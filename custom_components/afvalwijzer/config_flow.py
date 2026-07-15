@@ -21,6 +21,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
     CONF_SUFFIX,
+    CONF_TRANSLATE_STATES,
     DOMAIN,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
@@ -353,6 +354,10 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                     CONF_EXCLUDE_LIST,
                     default=current.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST),
                 ): cv.string,
+                vol.Optional(
+                    CONF_TRANSLATE_STATES,
+                    default=current.get(CONF_TRANSLATE_STATES, False),
+                ): cv.boolean,
                 vol.Optional(
                     CONF_LANGUAGE,
                     default=current.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),

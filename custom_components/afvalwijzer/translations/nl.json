@@ -52,7 +52,8 @@
           "include_today": "Ophalen van vandaag meenemen",
           "default_label": "Standaard label wanneer geen data bekend is",
           "exclude_list": "Afvaltypes uitsluiten",
-          "language": "Sensor status taal"
+          "translate_states": "Vriendelijke weergave voor sensorstatussen (LET OP: breekt automatiseringen die onbewerkte kleine letters verwachten)",
+          "language": "Sensor status taal (Alleen van toepassing indien vriendelijke weergave hierboven is ingeschakeld)"
         }
       }
     }

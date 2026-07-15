@@ -25,6 +25,7 @@ from .const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
     CONF_SUFFIX,
+    CONF_TRANSLATE_STATES,
     DOMAIN,
     SENSOR_ICON,
     SENSOR_PREFIX,
@@ -202,6 +203,10 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         """Translate the raw waste type value using the pre-loaded translation files."""
         if not isinstance(value, str) or not value:
             return value
+
+        # Check if the user opted-in to translating sensor states
+        if not self._config.get(CONF_TRANSLATE_STATES, False):
+            return str(value)
 
         sensor_translations = getattr(self.coordinator, "sensor_translations", {})
 
