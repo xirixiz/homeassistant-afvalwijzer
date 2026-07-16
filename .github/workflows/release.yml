@@ -5,14 +5,26 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v7"
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            uploads.github.com:443
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - run: zip -r ../../afvalwijzer.zip . -x "tests/*" "*/__pycache__/*" "__pycache__/*"
         working-directory: custom_components/afvalwijzer
-      - uses: "softprops/action-gh-release@v3"
+      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           files: "afvalwijzer.zip"
           generate_release_notes: true
