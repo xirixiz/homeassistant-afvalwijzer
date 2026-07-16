@@ -7,12 +7,9 @@ from html import unescape
 import re
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 
 from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
@@ -90,7 +87,7 @@ def get_waste_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict]:
     """Return waste_data_raw."""
 
@@ -182,7 +179,7 @@ def get_notification_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict]:
     """Collector-style function for fetching notification data.
 

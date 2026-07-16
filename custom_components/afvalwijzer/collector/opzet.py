@@ -8,12 +8,9 @@ import re
 from typing import Any
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 
 from ..common.main_functions import waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 _BAG_ID_CACHE: dict[str, str] = {}
@@ -132,7 +129,7 @@ def get_waste_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
 
@@ -222,7 +219,7 @@ def get_notification_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict[str, Any]]:
     """Collector-style function for fetching notification data.
 

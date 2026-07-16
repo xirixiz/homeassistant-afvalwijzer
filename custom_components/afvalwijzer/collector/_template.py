@@ -3,15 +3,12 @@ from __future__ import annotations
 from typing import Any
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 
 from ..const.const import _LOGGER
 
 # from ..const.const import SENSOR_COLLECTORS_<NAME>
 # from ..common.main_functions import format_postal_code, waste_type_rename, ...
 
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 20.0)
 
@@ -59,7 +56,7 @@ def get_waste_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict[str, Any]]:
     """Return waste_data_raw."""
 
