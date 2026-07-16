@@ -7,26 +7,47 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   hassfest:
     runs-on: "ubuntu-latest"
     name: Hassfest validation
     steps:
-      - uses: "actions/checkout@v7"
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: HACS Action
-        uses: "hacs/action@main"
+        uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
         with:
           category: "integration"
           ignore: "brands"
       - name: Hassfest validation
-        uses: "home-assistant/actions/hassfest@master"
+        uses: home-assistant/actions/hassfest@f4ca6f671bd429efb108c0f2fa0ae8af0215986c # master
 
   style:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-      - uses: "actions/checkout@v7"
-      - uses: "actions/setup-python@v6"
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            files.pythonhosted.org:443
+            pypi.org:443
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.x"
           cache: "pip"
@@ -37,9 +58,22 @@ jobs:
   tests:
     runs-on: "ubuntu-latest"
     name: Run tests
+    permissions:
+      contents: read
+      checks: write
     steps:
-      - uses: "actions/checkout@v7"
-      - uses: "actions/setup-python@v6"
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            files.pythonhosted.org:443
+            pypi.org:443
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.x"
           cache: "pip"
@@ -49,7 +83,7 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt -r requirements_test.txt
       - run: scripts/coverage
-      - uses: dorny/test-reporter@v3.0.0
+      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         with:
           name: Test Results
           path: pytest.xml
