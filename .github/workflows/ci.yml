@@ -23,6 +23,9 @@ jobs:
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            pypi.org:443
+            files.pythonhosted.org:443
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: HACS Action
         uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
@@ -44,6 +47,7 @@ jobs:
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
             files.pythonhosted.org:443
             pypi.org:443
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -70,6 +74,7 @@ jobs:
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
             files.pythonhosted.org:443
             pypi.org:443
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
