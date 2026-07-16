@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer klikogroep."""
 
 from __future__ import annotations
 

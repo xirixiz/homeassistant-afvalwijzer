@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 import re
 from typing import Any
 
@@ -18,10 +19,18 @@ from .const.const import (
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
     CONF_HOUSE_NUMBER,
+    CONF_INCLUDE_TODAY,
+    CONF_LANGUAGE,
     CONF_POSTAL_CODE,
+    CONF_SHOW_FULL_TIMESTAMP,
     CONF_STREET_NAME,
     CONF_SUFFIX,
     CONF_TRANSLATE_STATES,
+    DEFAULT_DEFAULT_LABEL,
+    DEFAULT_EXCLUDE_LIST,
+    DEFAULT_INCLUDE_TODAY,
+    DEFAULT_LANGUAGE,
+    DEFAULT_SHOW_FULL_TIMESTAMP,
     DOMAIN,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
@@ -42,19 +51,6 @@ from .const.const import (
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
-
-# Options keys
-CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
-CONF_LANGUAGE = "language"
-CONF_INCLUDE_TODAY = "include_today"
-
-DEFAULT_SHOW_FULL_TIMESTAMP = True
-DEFAULT_LANGUAGE = "nl"
-DEFAULT_INCLUDE_TODAY = True
-
-DEFAULT_DEFAULT_LABEL = "geen"
-DEFAULT_EXCLUDE_LIST = ""
-DEFAULT_FRIENDLY_NAME = ""
 
 _POSTAL_CODE_BE_RE = re.compile(r"^\d{4}$")
 _POSTAL_CODE_NL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
@@ -325,11 +321,20 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.FlowResult:
         """Handle the options step."""
+        errors = {}
         if user_input is not None:
-            cleaned = _clean_options_input(user_input)
+            default_label = user_input.get(CONF_DEFAULT_LABEL, "")
+            try:
+                if default_label:
+                    datetime.strptime(default_label, "%Y-%m-%d")
+                    errors["base"] = "invalid_default_label_date"
+            except ValueError:
+                pass
 
-            result = self.async_create_entry(title="", data=cleaned)
-            return result
+            if not errors:
+                cleaned = _clean_options_input(user_input)
+                result = self.async_create_entry(title="", data=cleaned)
+                return result
 
         current = dict(self._config_entry.options)
         include_today = bool(current.get(CONF_INCLUDE_TODAY, DEFAULT_INCLUDE_TODAY))
@@ -365,7 +370,7 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
             }
         )
 
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)
 
 
 def _clean_user_input(user_input: dict[str, Any]) -> dict[str, Any]:

@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer recycleapp."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer icalendar."""
 
 from __future__ import annotations
 

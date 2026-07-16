@@ -1,20 +1,26 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer provider sensor."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
-import hashlib
+from datetime import date, datetime, timedelta
 import logging
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import callback
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util, slugify
 
+from .common.sensor_utils import (
+    address_key,
+    as_utc_aware,
+    build_device_info,
+    date_to_local_midnight,
+    make_unique_id,
+    translate_value,
+)
 from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     ATTR_IS_COLLECTION_DATE_DAY_AFTER_TOMORROW,
@@ -24,24 +30,16 @@ from .const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_PICKUP_TODAY,
-    CONF_FRIENDLY_NAME,
-    CONF_HOUSE_NUMBER,
-    CONF_POSTAL_CODE,
-    CONF_STREET_NAME,
-    CONF_SUFFIX,
+    CONF_INCLUDE_TODAY,
+    CONF_SHOW_FULL_TIMESTAMP,
     CONF_TRANSLATE_STATES,
-    DOMAIN,
+    DEFAULT_INCLUDE_TODAY,
+    DEFAULT_SHOW_FULL_TIMESTAMP,
     SENSOR_ICON,
     SENSOR_PREFIX,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-CONF_INCLUDE_TODAY = "include_today"
-CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
-
-DEFAULT_INCLUDE_TODAY = True
-DEFAULT_SHOW_FULL_TIMESTAMP = True
 
 
 @dataclass(slots=True)
@@ -50,43 +48,6 @@ class _Config:
     include_today: bool
     show_full_timestamp: bool
     translate_states: bool
-
-
-def _is_naive(value: datetime) -> bool:
-    return value.tzinfo is None or value.tzinfo.utcoffset(value) is None
-
-
-def _as_utc_aware(value: datetime) -> datetime:
-    """Return timezone aware datetime in UTC."""
-    if _is_naive(value):
-        value = value.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
-    return dt_util.as_utc(value)
-
-
-def _date_to_local_midnight(value: date) -> datetime:
-    """Convert a date into a timezone-aware local midnight datetime."""
-    local_dt = datetime.combine(value, time.min).replace(
-        tzinfo=dt_util.DEFAULT_TIME_ZONE
-    )
-    return local_dt
-
-
-def _address_key(config: dict[str, Any]) -> str:
-    postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
-    house_number = str(config.get(CONF_HOUSE_NUMBER, "")).strip()
-    suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    street_name = str(config.get(CONF_STREET_NAME, "")).strip()
-
-    return f"{postal_code}:{house_number}:{suffix}:{street_name}".strip(":")
-
-
-def _address_label(config: dict[str, Any]) -> str:
-    postal_code = str(config.get(CONF_POSTAL_CODE, "")).strip().upper().replace(" ", "")
-    house_number = str(config.get(CONF_HOUSE_NUMBER, "")).strip()
-    suffix = str(config.get(CONF_SUFFIX, "")).strip().upper()
-    street_name = str(config.get(CONF_STREET_NAME, "")).strip()
-
-    return f"{postal_code} {house_number}{suffix} {street_name}".strip()
 
 
 class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
@@ -117,8 +78,11 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
         self._attr_has_entity_name = True
         self._attr_translation_key = waste_type.lower().replace("-", "_")
-        self.entity_id = f"sensor.{slugify(SENSOR_PREFIX + waste_type)}"
-        self._attr_unique_id = self._make_unique_id(config, waste_type)
+
+        addr = address_key(config)
+        self.entity_id = f"sensor.{slugify(SENSOR_PREFIX + addr + '_' + waste_type)}"
+
+        self._attr_unique_id = make_unique_id(config, waste_type)
         self._attr_icon = self._icon_for_waste_type(waste_type)
 
         self._is_notification_sensor = waste_type == "notifications"
@@ -135,31 +99,24 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
     def _set_error_state(self) -> None:
         """Set sensor to error state."""
+        if self._is_notification_sensor:
+            self._native_value = 0
+            self._fallback_state = "0"
+        else:
+            self._fallback_state = self._translate_value(str(self._cfg.default_label))
+            self._native_value = None
+
         self._days_until_collection_date = None
+        self._attr_device_class = None
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
-        self._attr_device_class = None
-        self._native_value = None
-        self._fallback_state = self._translate_value(str(self._cfg.default_label))
+        self._last_update = dt_util.now().isoformat()
 
     @property
-    def device_info(self) -> DeviceInfo:
+    def device_info(self):
         """Group all sensors for the same address under one device."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, _address_key(self._config))},
-            name=f"Afvalwijzer {self._config.get(CONF_FRIENDLY_NAME) or _address_label(self._config)}",
-            manufacturer="Afvalwijzer",
-            model=self._config.get(CONF_COLLECTOR),
-            entry_type="service",
-        )
-
-    @staticmethod
-    def _make_unique_id(config: dict[str, Any], waste_type: str) -> str:
-        unique_source = (
-            f"{waste_type}|{config.get(CONF_COLLECTOR)}|{_address_key(config)}"
-        )
-        return hashlib.sha1(unique_source.encode(), usedforsecurity=False).hexdigest()
+        return build_device_info(self._config)
 
     @staticmethod
     def _icon_for_waste_type(waste_type: str) -> str:
@@ -253,7 +210,7 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
                     raise ValueError(f"No data for waste type: {self.waste_type}")
 
                 self._apply_value(waste_data_provider[self.waste_type])
-                if "None" not in str(self._native_value):
+                if self._native_value is not None:
                     _LOGGER.debug(
                         "Sensor %s updated. Value: %s",
                         self.entity_id,
@@ -268,23 +225,7 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
     def _translate_value(self, value: Any) -> Any:
         """Translate the raw waste type value using the pre-loaded translation files."""
-        if not isinstance(value, str) or not value:
-            return value
-
-        # Check if the user opted-in to translating sensor states
-        if not self._cfg.translate_states:
-            return str(value)
-
-        sensor_translations = getattr(self.coordinator, "sensor_translations", {})
-
-        parts = [p.strip() for p in value.split(",")]
-        translated_parts = []
-        for part in parts:
-            safe_part = part.lower().replace(" ", "_").replace("-", "_")
-            translated_part = sensor_translations.get(safe_part, {}).get("name", part)
-            translated_parts.append(translated_part)
-
-        return ", ".join(translated_parts)
+        return translate_value(value, self._config, self.coordinator)
 
     def _select_provider_data(self) -> dict[str, Any]:
         if self._cfg.include_today:
@@ -292,7 +233,7 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         return self.coordinator.waste_data_without_today or {}
 
     def _apply_value(self, value: Any) -> None:
-        self._days_until_collection_date = self._cfg.default_label
+        self._days_until_collection_date = None
         self._attr_device_class = None
         self._native_value = None
 
@@ -306,12 +247,12 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
                     value = parsed_date
 
         if isinstance(value, datetime):
-            aware = _as_utc_aware(value)
+            aware = as_utc_aware(value)
             self._set_timestamp(aware)
             return
 
         if isinstance(value, date):
-            aware = _date_to_local_midnight(value)
+            aware = date_to_local_midnight(value)
             self._set_timestamp(aware, date_value=value)
             return
 
@@ -360,18 +301,3 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
         self._last_update = dt_util.now().isoformat()
 
         _LOGGER.debug("Notification sensor updated: %s notification(s)", count)
-
-    def _set_error_state(self) -> None:
-        if self._is_notification_sensor:
-            self._native_value = 0
-            self._fallback_state = "0"
-        else:
-            self._fallback_state = self._cfg.default_label
-            self._native_value = None
-
-        self._days_until_collection_date = None
-        self._attr_device_class = None
-        self._is_collection_date_today = False
-        self._is_collection_date_tomorrow = False
-        self._is_collection_date_day_after_tomorrow = False
-        self._last_update = dt_util.now().isoformat()

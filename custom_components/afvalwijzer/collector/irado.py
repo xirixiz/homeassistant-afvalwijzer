@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer irado."""
 
 from __future__ import annotations
 

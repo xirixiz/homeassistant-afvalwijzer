@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer main collector."""
 
 from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (
@@ -47,7 +47,7 @@ try:
         ximmio,
     )
 except ImportError as err:
-    _LOGGER.error(f"Import error {err.args}")
+    _LOGGER.error("Import error %s", err.args)
 
 
 class MainCollector:
@@ -133,11 +133,11 @@ class MainCollector:
                     if self.provider in SENSOR_COLLECTORS_RECYCLEAPP:
                         args.append(self.street_name)
                     return getter(*args)
-            _LOGGER.error(f"Unknown provider: {self.provider}")
+            _LOGGER.error("Unknown provider: %s", self.provider)
             raise ValueError(f"Unknown provider: {self.provider}")
 
         except ValueError as err:
-            _LOGGER.error(f"Check afvalwijzer platform settings: {err}")
+            _LOGGER.error("Check afvalwijzer platform settings: %s", err)
             raise
 
     def _get_notification_data_raw(self):
@@ -171,7 +171,7 @@ class MainCollector:
                     return result
 
             # Provider doesn't support notifications
-            _LOGGER.debug(f"Provider {self.provider} does not support notifications")
+            _LOGGER.debug("Provider %s does not support notifications", self.provider)
             return []
 
         except Exception as err:

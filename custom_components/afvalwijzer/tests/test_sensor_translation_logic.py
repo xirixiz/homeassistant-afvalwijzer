@@ -2,7 +2,7 @@
 
 import pytest
 
-from custom_components.afvalwijzer.sensor_custom import CustomSensor
+from custom_components.afvalwijzer.common.sensor_utils import translate_value
 from custom_components.afvalwijzer.sensor_provider import ProviderSensor
 
 
@@ -25,40 +25,42 @@ async def test_translate_value():
     }
 
     coordinator = MockCoordinator(mock_translations)
-
-    class DummySensor:
-        _config = {"translate_states": True}
-
-    sensor = DummySensor()
-    sensor.coordinator = coordinator
-    translate_fn = CustomSensor._translate_value.__get__(sensor)
+    config_enabled = {"translate_states": True}
+    config_disabled = {"translate_states": False}
 
     # 1. Test single valid translation
-    assert translate_fn("gft") == "Organic waste"
+    assert translate_value("gft", config_enabled, coordinator) == "Organic waste"
 
     # 2. Test fallback 'geen'
-    assert translate_fn("geen") == "None"
+    assert translate_value("geen", config_enabled, coordinator) == "None"
 
     # 3. Test uppercase normalization
-    assert translate_fn("GFT") == "Organic waste"
+    assert translate_value("GFT", config_enabled, coordinator) == "Organic waste"
 
     # 4. Test comma separated
-    assert translate_fn("gft, papier") == "Organic waste, Paper"
-    assert translate_fn("gft,papier") == "Organic waste, Paper"
+    assert (
+        translate_value("gft, papier", config_enabled, coordinator)
+        == "Organic waste, Paper"
+    )
+    assert (
+        translate_value("gft,papier", config_enabled, coordinator)
+        == "Organic waste, Paper"
+    )
 
     # 5. Test unknown translation returns original
-    assert translate_fn("unknown_type") == "unknown_type"
+    assert (
+        translate_value("unknown_type", config_enabled, coordinator) == "unknown_type"
+    )
 
     # 6. Test date string is left intact
-    assert translate_fn("2024-01-01") == "2024-01-01"
+    assert translate_value("2024-01-01", config_enabled, coordinator) == "2024-01-01"
 
     # 7. Test None is ignored
-    assert translate_fn(None) is None
+    assert translate_value(None, config_enabled, coordinator) is None
 
     # 8. Test disabled translation
-    sensor._config = {"translate_states": False}
-    assert translate_fn("gft, papier") == "gft, papier"
-    assert translate_fn("geen") == "geen"
+    assert translate_value("gft, papier", config_disabled, coordinator) == "gft, papier"
+    assert translate_value("geen", config_disabled, coordinator) == "geen"
 
 
 @pytest.mark.asyncio
@@ -68,12 +70,8 @@ async def test_provider_sensor_fallback_translation():
         "geen": {"name": "None"},
     }
 
-    class DummyConfig:
-        translate_states = True
-        default_label = "geen"
-
     class DummyProviderSensor:
-        _cfg = DummyConfig()
+        _config = {"translate_states": True}
 
     sensor = DummyProviderSensor()
     sensor.coordinator = MockCoordinator(mock_translations)

@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer deafvalapp."""
 
 from __future__ import annotations
 

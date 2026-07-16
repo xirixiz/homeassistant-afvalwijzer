@@ -115,7 +115,12 @@ async def test_async_setup_entry_uses_coordinator():
     }
     entry.options = {}
 
-    hass.data[DOMAIN] = {"test_entry": {"coordinator": coordinator}}
+    hass.data[DOMAIN] = {
+        "test_entry": {
+            "coordinator": coordinator,
+            "config": dict(entry.data),
+        }
+    }
 
     added = []
 

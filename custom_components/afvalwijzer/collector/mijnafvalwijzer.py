@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer mijnafvalwijzer."""
 
 from __future__ import annotations
 
@@ -143,7 +143,7 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
                     )
                     continue
             except ValueError:
-                _LOGGER.warning(f"Invalid start_date format: {start_date_str}")
+                _LOGGER.warning("Invalid start_date format: %s", start_date_str)
                 # If date parsing fails, include the notification anyway
 
         content = item.get("text")
@@ -151,7 +151,7 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
             continue
 
         # Strip HTML tags and decode HTML entities
-        clean_content = re.sub("<[^<]+?>", "", content)
+        clean_content = re.sub(r"<[^>]*>", "", content)
         clean_content = unescape(clean_content).strip()
         clean_content = " ".join(clean_content.split())
 
@@ -208,8 +208,10 @@ def get_notification_data_raw(
         return notification_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.warning(f"MijnAfvalWijzer notification request error: {err}")
+        _LOGGER.warning("MijnAfvalWijzer notification request error: %s", err)
         return []
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.warning(f"MijnAfvalWijzer: Invalid notification data from {url}: {err}")
+        _LOGGER.warning(
+            "MijnAfvalWijzer: Invalid notification data from %s: %s", url, err
+        )
         return []

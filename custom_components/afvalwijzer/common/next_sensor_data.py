@@ -1,6 +1,6 @@
-"""Afvalwijzer integration."""
+"""Generate next-collection waste sensor data."""
 
-from datetime import date, datetime
+from datetime import datetime
 
 from homeassistant.util import dt as dt_util
 
@@ -30,13 +30,13 @@ class NextSensorData:
             future_waste_data, key=lambda d: d["date"]
         )
 
-        self.next_waste_date = self.__get_next_waste_date()
-        self.next_waste_in_days = self.__get_next_waste_in_days()
-        self.next_waste_type = self.__get_next_waste_type()
+        self.next_waste_date = self._get_next_waste_date()
+        self.next_waste_in_days = self._get_next_waste_in_days()
+        self.next_waste_type = self._get_next_waste_type()
 
         self.data = self._gen_next_sensor_data()
 
-    def __get_next_waste_date(self):
+    def _get_next_waste_date(self):
         if self.waste_data_after_date_selected == []:
             return self.default_label
 
@@ -46,17 +46,17 @@ class NextSensorData:
             _LOGGER.error("No waste data found after the selected date.")
             return self.default_label
 
-    def __get_next_waste_in_days(self):
+    def _get_next_waste_in_days(self):
         if self.next_waste_date == self.default_label:
             return self.default_label
 
         try:
-            return abs(self.next_waste_date.date() - date.today()).days
+            return abs(self.next_waste_date.date() - dt_util.now().date()).days
         except Exception as err:
-            _LOGGER.error("Error occurred in __get_next_waste_in_days: %s", err)
+            _LOGGER.error("Error occurred in _get_next_waste_in_days: %s", err)
             return self.default_label
 
-    def __get_next_waste_type(self):
+    def _get_next_waste_type(self):
         try:
             waste_types = [
                 waste["type"]
@@ -65,7 +65,7 @@ class NextSensorData:
             ]
             return list(dict.fromkeys(waste_types)) or [self.default_label]
         except Exception as err:
-            _LOGGER.error("Error occurred in __get_next_waste_type: %s", err)
+            _LOGGER.error("Error occurred in _get_next_waste_type: %s", err)
             return [self.default_label]
 
     def _gen_next_sensor_data(self):

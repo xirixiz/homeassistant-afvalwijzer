@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer opzet."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from ..const.const import _LOGGER, SENSOR_COLLECTORS_OPZET
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
+_BAG_ID_CACHE: dict[str, str] = {}
 
 
 def _build_base_url(provider: str) -> str:
@@ -58,6 +59,31 @@ def _select_bag_id(
         return None
 
     return response_address[0].get("bagId")
+
+
+def _get_bag_id(
+    session: requests.Session,
+    base_url: str,
+    postal_code: str,
+    house_number: str,
+    suffix: str,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> str | None:
+    cache_key = f"{base_url}_{postal_code}_{house_number}_{suffix}"
+    if cache_key in _BAG_ID_CACHE:
+        return _BAG_ID_CACHE[cache_key]
+
+    response_address = _fetch_address_list(
+        session, base_url, postal_code, house_number, timeout=timeout, verify=verify
+    )
+    if not response_address:
+        return None
+
+    bag_id = _select_bag_id(response_address, suffix)
+    if bag_id:
+        _BAG_ID_CACHE[cache_key] = bag_id
+    return bag_id
 
 
 def _fetch_waste_data_raw_temp(
@@ -116,22 +142,11 @@ def get_waste_data_raw(
     base_url = _build_base_url(provider)
 
     try:
-        response_address = _fetch_address_list(
-            session,
-            base_url,
-            postal_code,
-            house_number,
-            timeout=timeout,
-            verify=verify,
+        bag_id = _get_bag_id(
+            session, base_url, postal_code, house_number, suffix, timeout, verify
         )
-
-        if not response_address:
-            _LOGGER.error("No waste data found!")
-            return []
-
-        bag_id = _select_bag_id(response_address, suffix)
         if not bag_id:
-            _LOGGER.warning("Address not found!")
+            _LOGGER.warning("Address/bag_id not found!")
             return []
 
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
@@ -181,7 +196,7 @@ def _parse_notification_data_raw(
             continue
 
         # Strip HTML tags and decode HTML entities
-        clean_content = re.sub("<[^<]+?>", "", content)
+        clean_content = re.sub(r"<[^>]*>", "", content)
         clean_content = unescape(clean_content).strip()
 
         if not clean_content:
@@ -219,21 +234,9 @@ def get_notification_data_raw(
     base_url = _build_base_url(provider)
 
     try:
-        # Reuse address fetching logic
-        response_address = _fetch_address_list(
-            session,
-            base_url,
-            postal_code,
-            house_number,
-            timeout=timeout,
-            verify=verify,
+        bag_id = _get_bag_id(
+            session, base_url, postal_code, house_number, suffix, timeout, verify
         )
-
-        if not response_address:
-            _LOGGER.debug("No address data found for notifications")
-            return []
-
-        bag_id = _select_bag_id(response_address, suffix)
         if not bag_id:
             _LOGGER.debug("No bag_id found for notifications")
             return []
@@ -248,14 +251,14 @@ def get_notification_data_raw(
 
         notification_data_raw = _parse_notification_data_raw(notification_data_raw_temp)
         _LOGGER.debug(
-            f"Retrieved {len(notification_data_raw)} notification(s) from {provider}"
+            "Retrieved %s notification(s) from %s", len(notification_data_raw), provider
         )
 
         return notification_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.warning(f"OPZET notification request error: {err}")
+        _LOGGER.warning("OPZET notification request error: %s", err)
         return []
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.warning(f"OPZET: Invalid notification data from {base_url}: {err}")
+        _LOGGER.warning("OPZET: Invalid notification data from %s: %s", base_url, err)
         return []

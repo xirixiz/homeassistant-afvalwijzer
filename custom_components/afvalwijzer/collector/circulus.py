@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer circulus."""
 
 from __future__ import annotations
 

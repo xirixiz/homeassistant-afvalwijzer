@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer burgerportaal."""
 
 from __future__ import annotations
 

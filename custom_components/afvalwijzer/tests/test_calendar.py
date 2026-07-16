@@ -20,7 +20,7 @@ async def test_calendar_event_parsing():
         "restafval": datetime(2026, 7, 11),
     }
 
-    calendar = AfvalwijzerCalendar(mock_data)
+    calendar = AfvalwijzerCalendar(mock_data, "test_entry_id")
 
     start_date = datetime(2026, 7, 1)
     end_date = datetime(2026, 7, 31)
