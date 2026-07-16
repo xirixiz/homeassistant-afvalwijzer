@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer sensor."""
 
 from __future__ import annotations
 
@@ -78,8 +78,9 @@ async def async_setup_entry(
     async_add_entities,
 ) -> None:
     """Set up sensors from a config entry (config flow)."""
-    config: dict[str, Any] = {**entry.data, **entry.options}
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    entry_data = hass.data[DOMAIN][entry.entry_id]
+    config: dict[str, Any] = entry_data["config"]
+    coordinator = entry_data["coordinator"]
 
     await _setup_sensors(hass, config, async_add_entities, coordinator)
 

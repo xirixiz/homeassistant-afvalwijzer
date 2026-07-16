@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer mijnafvalwijzer."""
 
 from __future__ import annotations
 
@@ -7,12 +7,9 @@ from html import unescape
 import re
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 
 from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
@@ -90,7 +87,7 @@ def get_waste_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict]:
     """Return waste_data_raw."""
 
@@ -143,7 +140,7 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
                     )
                     continue
             except ValueError:
-                _LOGGER.warning(f"Invalid start_date format: {start_date_str}")
+                _LOGGER.warning("Invalid start_date format: %s", start_date_str)
                 # If date parsing fails, include the notification anyway
 
         content = item.get("text")
@@ -151,7 +148,7 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
             continue
 
         # Strip HTML tags and decode HTML entities
-        clean_content = re.sub("<[^<]+?>", "", content)
+        clean_content = re.sub(r"<[^>]*>", "", content)
         clean_content = unescape(clean_content).strip()
         clean_content = " ".join(clean_content.split())
 
@@ -182,7 +179,7 @@ def get_notification_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict]:
     """Collector-style function for fetching notification data.
 
@@ -208,8 +205,10 @@ def get_notification_data_raw(
         return notification_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.warning(f"MijnAfvalWijzer notification request error: {err}")
+        _LOGGER.warning("MijnAfvalWijzer notification request error: %s", err)
         return []
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.warning(f"MijnAfvalWijzer: Invalid notification data from {url}: {err}")
+        _LOGGER.warning(
+            "MijnAfvalWijzer: Invalid notification data from %s: %s", url, err
+        )
         return []

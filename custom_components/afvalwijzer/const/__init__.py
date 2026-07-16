@@ -1,1 +1,1 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer const module."""

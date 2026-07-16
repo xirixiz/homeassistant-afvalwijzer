@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer const."""
 
 import logging
 
@@ -167,6 +167,15 @@ CONF_EXCLUDE_PICKUP_TODAY = "exclude_pickup_today"
 CONF_DEFAULT_LABEL = "default_label"
 CONF_EXCLUDE_LIST = "exclude_list"
 CONF_TRANSLATE_STATES = "translate_states"
+CONF_INCLUDE_TODAY = "include_today"
+CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
+CONF_LANGUAGE = "language"
+
+DEFAULT_INCLUDE_TODAY = True
+DEFAULT_SHOW_FULL_TIMESTAMP = True
+DEFAULT_DEFAULT_LABEL = "geen"
+DEFAULT_EXCLUDE_LIST = ""
+DEFAULT_LANGUAGE = "nl"
 
 SENSOR_PREFIX = "afvalwijzer_"
 SENSOR_ICON = "mdi:recycle"

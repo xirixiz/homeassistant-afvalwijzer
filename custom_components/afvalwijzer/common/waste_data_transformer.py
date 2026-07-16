@@ -1,6 +1,8 @@
-"""Afvalwijzer integration."""
+"""Transform raw waste data into structures used by Afvalwijzer sensors."""
 
 from datetime import datetime, timedelta
+
+from homeassistant.util import dt as dt_util
 
 from ..common.day_sensor_data import DaySensorData
 from ..common.next_sensor_data import NextSensorData
@@ -21,34 +23,40 @@ class WasteDataTransformer:
 
         Prepare raw waste data and generate derived datasets for sensor use.
         """
-        waste_data_raw = [
-            item for item in waste_data_raw if item["type"].strip().lower() != "ignore"
+        parsed_data = [
+            {
+                "type": item["type"],
+                "date": datetime.strptime(item["date"], "%Y-%m-%d"),
+            }
+            for item in waste_data_raw
+            if item["type"].strip().lower() != "ignore"
         ]
-        waste_data_raw.sort(
-            key=lambda item: datetime.strptime(item["date"], "%Y-%m-%d")
-        )
-        self.waste_data_raw = waste_data_raw
+        parsed_data.sort(key=lambda item: item["date"])
+        self.waste_data_raw = parsed_data
         self.exclude_pickup_today = exclude_pickup_today
-        self.exclude_list = exclude_list.strip().lower()
+        self.exclude_set = {
+            x.strip() for x in exclude_list.strip().lower().split(",") if x.strip()
+        }
         self.default_label = default_label
 
-        today = datetime.now().strftime("%d-%m-%Y")
-        self.DATE_TODAY = datetime.strptime(today, "%d-%m-%Y")
+        now = dt_util.now()
+        today_date = now.date()
+        self.DATE_TODAY = datetime(today_date.year, today_date.month, today_date.day)
         self.DATE_TOMORROW = self.DATE_TODAY + timedelta(days=1)
 
         (
             self._waste_data_with_today,
             self._waste_data_without_today,
-        ) = self.__structure_waste_data()  # type: ignore
+        ) = self._structure_waste_data()  # type: ignore
 
         (
             self._waste_data_provider,
             self._waste_types_provider,
             self._waste_data_custom,
             self._waste_types_custom,
-        ) = self.__gen_sensor_waste_data()
+        ) = self._gen_sensor_waste_data()
 
-    def __structure_waste_data(self):
+    def _structure_waste_data(self):
         try:
             waste_data_with_today = {}
             waste_data_without_today = {}
@@ -59,18 +67,18 @@ class WasteDataTransformer:
                 cutoff_date = self.DATE_TOMORROW
 
             for item in self.waste_data_raw:
-                item_date = datetime.strptime(item["date"], "%Y-%m-%d")
+                item_date = item["date"]
                 item_name = item["type"].strip().lower()
 
                 if (
-                    item_name not in self.exclude_list
+                    item_name not in self.exclude_set
                     and item_name not in waste_data_with_today
                     and item_date >= self.DATE_TODAY
                 ):
                     waste_data_with_today[item_name] = item_date
 
                 if (
-                    item_name not in self.exclude_list
+                    item_name not in self.exclude_set
                     and item_name not in waste_data_without_today
                     and item_date >= cutoff_date
                 ):
@@ -78,7 +86,7 @@ class WasteDataTransformer:
 
             for item in self.waste_data_raw:
                 item_name = item["type"].strip().lower()
-                if item_name not in self.exclude_list:
+                if item_name not in self.exclude_set:
                     waste_data_with_today.setdefault(item_name, self.default_label)
                     waste_data_without_today.setdefault(item_name, self.default_label)
 
@@ -88,7 +96,7 @@ class WasteDataTransformer:
             _LOGGER.error("Other error occurred: %s", err)
             return {}, {}
 
-    def __gen_sensor_waste_data(self):
+    def _gen_sensor_waste_data(self):
         if self.exclude_pickup_today.casefold() in ("false", "no"):
             date_selected = self.DATE_TODAY
             waste_data_provider = self._waste_data_with_today
@@ -101,7 +109,7 @@ class WasteDataTransformer:
                 {
                     waste["type"]
                     for waste in self.waste_data_raw
-                    if waste["type"] not in self.exclude_list
+                    if waste["type"] not in self.exclude_set
                 }
             )
         except Exception as err:
@@ -112,7 +120,7 @@ class WasteDataTransformer:
             waste_data_formatted = [
                 {
                     "type": waste["type"],
-                    "date": datetime.strptime(waste["date"], "%Y-%m-%d"),
+                    "date": waste["date"],
                 }
                 for waste in self.waste_data_raw
                 if waste["type"] in waste_types_provider

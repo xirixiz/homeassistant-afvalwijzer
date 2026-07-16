@@ -1,1 +1,1 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer common module."""

@@ -1,15 +1,16 @@
 """Happy-flow tests for Afvalwijzer using mocked provider responses."""
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import patch
 
 from custom_components.afvalwijzer.collector.main_collector import MainCollector
+from homeassistant.util import dt as dt_util
 
 
 def test_main_collector_happy_flow():
     """MainCollector should process provider data and expose transformed results."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    next_week = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+    today = dt_util.now().strftime("%Y-%m-%d")
+    next_week = (dt_util.now() + timedelta(days=7)).strftime("%Y-%m-%d")
 
     sample_raw = [
         {"type": "restafval", "date": today},

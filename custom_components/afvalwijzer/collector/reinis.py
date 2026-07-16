@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer reinis."""
 
 from __future__ import annotations
 
@@ -6,12 +6,9 @@ from datetime import datetime
 from typing import Any
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 
 from ..common.main_functions import format_postal_code, waste_type_rename
 from ..const.const import _LOGGER, SENSOR_COLLECTORS_REINIS
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
@@ -114,7 +111,7 @@ def get_waste_data_raw(
     *,
     session: requests.Session | None = None,
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
-    verify: bool = False,
+    verify: bool = True,
 ) -> list[dict[str, str]]:
     """Return waste_data_raw."""
 

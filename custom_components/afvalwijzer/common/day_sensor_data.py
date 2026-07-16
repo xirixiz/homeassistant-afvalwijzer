@@ -25,13 +25,13 @@ class DaySensorData:
 
         self.default_label = default_label
 
-        self.waste_data_today = self.__gen_day_sensor(self.today_date)
-        self.waste_data_tomorrow = self.__gen_day_sensor(self.tomorrow_date)
-        self.waste_data_dot = self.__gen_day_sensor(self.day_after_tomorrow_date)
+        self.waste_data_today = self._gen_day_sensor(self.today_date)
+        self.waste_data_tomorrow = self._gen_day_sensor(self.tomorrow_date)
+        self.waste_data_dot = self._gen_day_sensor(self.day_after_tomorrow_date)
 
         self.data = self._gen_day_sensor_data()
 
-    def __gen_day_sensor(self, target_date):
+    def _gen_day_sensor(self, target_date):
         day = []
         try:
             for waste in self.waste_data_formatted:
@@ -66,7 +66,7 @@ class DaySensorData:
             return waste_types
 
         except Exception as err:
-            _LOGGER.error("Error occurred in __gen_day_sensor: %s", err)
+            _LOGGER.error("Error occurred in _gen_day_sensor: %s", err)
             return [self.default_label]
 
     def _gen_day_sensor_data(self):

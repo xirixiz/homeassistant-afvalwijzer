@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer afvalwijzer module."""
 
 from __future__ import annotations
 
@@ -16,20 +16,17 @@ from .const.const import (
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_INCLUDE_TODAY,
+    CONF_SHOW_FULL_TIMESTAMP,
+    DEFAULT_DEFAULT_LABEL,
+    DEFAULT_EXCLUDE_LIST,
+    DEFAULT_INCLUDE_TODAY,
+    DEFAULT_SHOW_FULL_TIMESTAMP,
     DOMAIN,
 )
 from .coordinator import AfvalwijzerDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-
-# Options keys
-CONF_INCLUDE_TODAY = "include_today"
-CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
-
-DEFAULT_INCLUDE_TODAY = True
-DEFAULT_SHOW_FULL_TIMESTAMP = True
-DEFAULT_DEFAULT_LABEL = "geen"
-DEFAULT_EXCLUDE_LIST = ""
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -134,7 +131,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         try:
             with open(trans_path, encoding="utf-8") as f:
                 return json.load(f).get("entity", {}).get("sensor", {})
-        except Exception:
+        except Exception as err:
+            _LOGGER.warning("Failed to load sensor translations for %s: %s", lang, err)
             return {}
 
     coordinator.sensor_translations = await hass.async_add_executor_job(

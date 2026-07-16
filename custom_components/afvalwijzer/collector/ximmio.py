@@ -1,4 +1,4 @@
-"""Afvalwijzer integration."""
+"""Afvalwijzer ximmio."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ import socket
 from typing import Any
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 from urllib3.util import connection as urllib3_connection
 
 from ..common.main_functions import waste_type_rename
@@ -16,8 +15,6 @@ from ..const.const import (
     SENSOR_COLLECTORS_XIMMIO,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
