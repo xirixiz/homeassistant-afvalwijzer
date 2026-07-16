@@ -13,7 +13,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.util import dt as dt_util
+from homeassistant.util import dt as dt_util, slugify
 
 from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -109,7 +109,7 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
         self._attr_has_entity_name = True
         self._attr_translation_key = waste_type.lower().replace("-", "_")
-        self.entity_id = f"sensor.{SENSOR_PREFIX}{waste_type}"
+        self.entity_id = f"sensor.{slugify(SENSOR_PREFIX + waste_type)}"
         self._attr_unique_id = self._make_unique_id(config, waste_type)
         self._attr_icon = self._icon_for_waste_type(waste_type)
 

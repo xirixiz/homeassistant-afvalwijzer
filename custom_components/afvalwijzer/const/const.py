@@ -168,7 +168,7 @@ CONF_DEFAULT_LABEL = "default_label"
 CONF_EXCLUDE_LIST = "exclude_list"
 CONF_TRANSLATE_STATES = "translate_states"
 
-SENSOR_PREFIX = "afvalwijzer "
+SENSOR_PREFIX = "afvalwijzer_"
 SENSOR_ICON = "mdi:recycle"
 
 ATTR_LAST_UPDATE = "last_update"
