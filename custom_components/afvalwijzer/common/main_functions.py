@@ -6,10 +6,12 @@ codes) and mapping provider-specific waste type labels to standardized keys.
 
 from __future__ import annotations
 
+import logging
 import re
 
-from ..const.const import _LOGGER
 from .postal_code_mappings import get_postal_code_override
+
+_LOGGER = logging.getLogger(__name__)
 
 # Precompile the postal code pattern for better performance.
 POSTAL_CODE_PATTERN = re.compile(r"(\d{4})\s*([A-Za-z]{2})")

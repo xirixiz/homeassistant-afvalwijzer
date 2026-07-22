@@ -10,4 +10,4 @@ python3 -m pytest \
     --cov=custom_components.afvalwijzer \
     --cov-report=term \
     -o console_output_style=count \
-    custom_components/afvalwijzer/tests
+    tests

@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from html import unescape
+import logging
 import re
 
 import requests
 
 from ..common.main_functions import format_postal_code, waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALWIJZER
+from ..const.const import SENSOR_COLLECTORS_MIJNAFVALWIJZER
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
@@ -136,7 +139,9 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
                 start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
                 if start_date < cutoff_date:
                     _LOGGER.debug(
-                        f"Skipping old notification: {item.get('title')} (start_date: {start_date_str})"
+                        "Skipping old notification: %s (start_date: %s)",
+                        item.get("title"),
+                        start_date_str,
                     )
                     continue
             except ValueError:
@@ -199,7 +204,7 @@ def get_notification_data_raw(
 
         notification_data_raw = _parse_notification_data_raw(response)
         _LOGGER.debug(
-            f"Retrieved {len(notification_data_raw)} notification(s) from {provider}"
+            "Retrieved %s notification(s) from %s", len(notification_data_raw), provider
         )
 
         return notification_data_raw

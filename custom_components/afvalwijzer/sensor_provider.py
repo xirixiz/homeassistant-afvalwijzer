@@ -9,7 +9,6 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import callback
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util, slugify
 
@@ -50,7 +49,7 @@ class _Config:
     translate_states: bool
 
 
-class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
+class ProviderSensor(CoordinatorEntity, SensorEntity):
     """Representation of a provider based waste sensor."""
 
     def __init__(
@@ -96,6 +95,12 @@ class ProviderSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
 
         fallback_val = "0" if self._is_notification_sensor else self._cfg.default_label
         self._fallback_state = fallback_val
+
+    async def async_added_to_hass(self) -> None:
+        """Populate initial state from data the coordinator already has."""
+        await super().async_added_to_hass()
+        if self.coordinator.data is not None:
+            self._handle_coordinator_update()
 
     def _set_error_state(self) -> None:
         """Set sensor to error state."""

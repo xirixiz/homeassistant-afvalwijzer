@@ -9,7 +9,7 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 
 from .const.const import (
@@ -82,39 +82,51 @@ async def async_setup_entry(
     config: dict[str, Any] = entry_data["config"]
     coordinator = entry_data["coordinator"]
 
-    await _setup_sensors(hass, config, async_add_entities, coordinator)
-
-
-async def _setup_sensors(
-    hass: HomeAssistant,
-    config: dict[str, Any],
-    async_add_entities,
-    coordinator: Any,
-) -> None:
-    """General setup logic for platform and config entry."""
     _LOGGER.debug(
         "Setting up Afvalwijzer sensors for provider: %s.",
         config.get(CONF_COLLECTOR),
     )
 
-    waste_data_with_today = coordinator.waste_data_with_today or {}
-    waste_data_custom = coordinator.waste_data_custom or {}
+    known_provider_types: set[str] = set()
+    known_custom_types: set[str] = set()
 
-    entities: list[Any] = [
-        ProviderSensor(hass, wtype, coordinator, config)
-        for wtype in waste_data_with_today
-    ]
-    entities.extend(
-        CustomSensor(hass, wtype, coordinator, config) for wtype in waste_data_custom
-    )
+    @callback
+    def _async_add_new_entities() -> None:
+        """Add entities for waste types not seen before.
 
-    if coordinator.notification_data:
-        entities.append(ProviderSensor(hass, "notifications", coordinator, config))
-        _LOGGER.debug("Added notification sensor for provider")
+        Runs on every coordinator refresh so seasonal waste types that
+        appear later (e.g. kerstbomen) get a sensor without a reload.
+        """
+        entities: list[Any] = []
 
-    if not entities:
-        _LOGGER.error("No entities created; check configuration or collector output.")
-        return
+        for wtype in coordinator.waste_data_with_today or {}:
+            if wtype not in known_provider_types:
+                known_provider_types.add(wtype)
+                entities.append(ProviderSensor(hass, wtype, coordinator, config))
 
-    _LOGGER.info("Adding %d sensors for Afvalwijzer.", len(entities))
-    async_add_entities(entities, True)
+        for wtype in coordinator.waste_data_custom or {}:
+            if wtype not in known_custom_types:
+                known_custom_types.add(wtype)
+                entities.append(CustomSensor(hass, wtype, coordinator, config))
+
+        if (
+            coordinator.notification_data
+            and "notifications" not in known_provider_types
+        ):
+            known_provider_types.add("notifications")
+            entities.append(ProviderSensor(hass, "notifications", coordinator, config))
+            _LOGGER.debug("Added notification sensor for provider")
+
+        if entities:
+            _LOGGER.info("Adding %d sensors for Afvalwijzer.", len(entities))
+            async_add_entities(entities)
+
+    _async_add_new_entities()
+
+    if not known_provider_types and not known_custom_types:
+        _LOGGER.warning(
+            "No entities created yet; check configuration or collector output. "
+            "Sensors will be added once the collector returns data."
+        )
+
+    entry.async_on_unload(coordinator.async_add_listener(_async_add_new_entities))

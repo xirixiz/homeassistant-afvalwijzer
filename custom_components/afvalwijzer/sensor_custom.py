@@ -9,7 +9,6 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import callback
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util, slugify
 
@@ -41,7 +40,7 @@ class _Config:
     show_full_timestamp: bool
 
 
-class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
+class CustomSensor(CoordinatorEntity, SensorEntity):
     """Representation of a custom based waste sensor."""
 
     def __init__(
@@ -85,6 +84,12 @@ class CustomSensor(CoordinatorEntity, RestoreEntity, SensorEntity):
     def device_info(self):
         """Group all sensors for the same address under one device."""
         return build_device_info(self._config)
+
+    async def async_added_to_hass(self) -> None:
+        """Populate initial state from data the coordinator already has."""
+        await super().async_added_to_hass()
+        if self.coordinator.data is not None:
+            self._handle_coordinator_update()
 
     @staticmethod
     def _icon_for_waste_type(waste_type: str) -> str:

@@ -283,10 +283,15 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 assert self._reconfigure_entry is not None
 
-                await self.async_set_unique_id(_unique_id_from(cleaned))
+                new_unique_id = _unique_id_from(cleaned)
+                await self.async_set_unique_id(new_unique_id)
+                if self._reconfigure_entry.unique_id != new_unique_id:
+                    # Abort if another entry already covers this address
+                    self._abort_if_unique_id_configured()
                 self.hass.config_entries.async_update_entry(
                     self._reconfigure_entry,
                     data=cleaned,
+                    unique_id=new_unique_id,
                 )
                 await self.hass.config_entries.async_reload(
                     self._reconfigure_entry.entry_id

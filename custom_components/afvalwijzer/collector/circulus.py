@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+import logging
 import re
 from typing import Any
 
 import requests
 
 from ..common.main_functions import waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_CIRCULUS
+from ..const.const import SENSOR_COLLECTORS_CIRCULUS
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 

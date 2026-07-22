@@ -8,7 +8,7 @@ MainCollector('<provider>','<postal_code>','<house_number>','<suffix>','<street_
 
 Run test:
 - Update this file with your information (or the information you would like to test with, examples are in that file)
-- Then run `python3 -m afvalwijzer.tests.test_module` from this path <some dir>/homeassistant-afvalwijzer/custom_components
+- Then run `python3 -m tests.test_module` from the repository root
 """
 
 import argparse
@@ -18,8 +18,8 @@ import sys
 
 # skip init, required for this test module
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
-from ..collector.main_collector import MainCollector
-from .test_data import TEST_ADDRESSES
+from custom_components.afvalwijzer.collector.main_collector import MainCollector
+from tests.test_data import TEST_ADDRESSES
 
 # Common parameters for all tests
 exclude_pickup_today = "False"

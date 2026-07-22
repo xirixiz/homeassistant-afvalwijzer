@@ -42,7 +42,8 @@ def _is_referenced(repo_root: Path, name: str, const_path: Path) -> bool:
 def test_constants_are_used_somewhere():
     """Check all constants created in const.py are used somewhere."""
     repo_root = Path(__file__).resolve().parents[1]
-    const_path = repo_root / "const" / "const.py"
+    component_root = repo_root / "custom_components" / "afvalwijzer"
+    const_path = component_root / "const" / "const.py"
 
     assert const_path.exists(), f"const.py not found at {const_path}"
 

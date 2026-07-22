@@ -1,10 +1,11 @@
 """Generate next-collection waste sensor data."""
 
 from datetime import datetime
+import logging
 
 from homeassistant.util import dt as dt_util
 
-from ..const.const import _LOGGER
+_LOGGER = logging.getLogger(__name__)
 
 
 class NextSensorData:

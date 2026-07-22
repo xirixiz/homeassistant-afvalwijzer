@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from datetime import datetime
+import logging
 
 import requests
 
 from ..common.main_functions import parse_ical_waste_data
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_ICALENDAR
+from ..const.const import SENSOR_COLLECTORS_ICALENDAR
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 

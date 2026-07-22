@@ -13,6 +13,25 @@ from .const.const import CONF_COLLECTOR, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 
+def _to_date(value) -> date | None:
+    """Coerce a waste data value (str, datetime or date) into a date.
+
+    Cached coordinator data stores datetimes as ISO strings (e.g.
+    "2026-07-22T00:00:00"), so plain dates and full timestamps must
+    both be accepted.
+    """
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        parsed_dt = dt_util.parse_datetime(value)
+        if parsed_dt is not None:
+            return parsed_dt.date()
+        return dt_util.parse_date(value)
+    return None
+
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
@@ -43,16 +62,8 @@ class AfvalwijzerCalendar(CalendarEntity):
 
         upcoming_events = []
         for waste_type, event_date in waste_source.items():
-            if isinstance(event_date, str):
-                try:
-                    event_date_only = datetime.strptime(event_date, "%Y-%m-%d").date()
-                except ValueError:
-                    continue
-            elif isinstance(event_date, datetime):
-                event_date_only = event_date.date()
-            elif isinstance(event_date, date):
-                event_date_only = event_date
-            else:
+            event_date_only = _to_date(event_date)
+            if event_date_only is None:
                 continue
 
             if not include_today and event_date_only == today:
@@ -88,16 +99,8 @@ class AfvalwijzerCalendar(CalendarEntity):
         collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
         for waste_type, event_date in waste_source.items():
-            if isinstance(event_date, str):
-                try:
-                    event_date_only = datetime.strptime(event_date, "%Y-%m-%d").date()
-                except ValueError:
-                    continue
-            elif isinstance(event_date, datetime):
-                event_date_only = event_date.date()
-            elif isinstance(event_date, date):
-                event_date_only = event_date
-            else:
+            event_date_only = _to_date(event_date)
+            if event_date_only is None:
                 continue
 
             if not include_today and event_date_only == today:
