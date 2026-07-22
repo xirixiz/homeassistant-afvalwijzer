@@ -125,7 +125,8 @@ class AfvalwijzerCalendar(CalendarEntity):
         include_today = self.coordinator.config.get("include_today", True)
         collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
-        for waste_type, event_date in self._full_schedule():
+        schedule = self._full_schedule()
+        for waste_type, event_date in schedule:
             if not include_today and event_date == today:
                 continue
 
@@ -144,9 +145,10 @@ class AfvalwijzerCalendar(CalendarEntity):
                 )
 
         _LOGGER.debug(
-            "Calendar returning %d event(s) between %s and %s",
+            "Calendar returning %d event(s) between %s and %s (full schedule: %d entries)",
             len(events),
             start_date.date(),
             end_date.date(),
+            len(schedule),
         )
         return events
