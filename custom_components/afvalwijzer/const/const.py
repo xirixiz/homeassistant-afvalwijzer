@@ -79,6 +79,7 @@ SENSOR_COLLECTORS_OPZET = {
     "defryskemarren": "https://afvalkalender.defryskemarren.nl",
     "denhaag": "https://huisvuilkalender.denhaag.nl",
     "gad": "https://inzamelkalender.gad.nl",
+    "geertruidenberg": "https://afval.geertruidenberg.nl",
     "hvc": "https://inzamelkalender.hvcgroep.nl",
     "lingewaard": "https://afvalwijzer.lingewaard.nl",
     "middelburg-vlissingen": "https://afvalwijzer.middelburgvlissingen.nl",

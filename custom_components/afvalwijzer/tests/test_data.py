@@ -96,6 +96,7 @@ TEST_ADDRESSES = [
     #{"provider": "gad", "postal_code": "1262BC", "house_number": "15"},
     #{"provider": "gad", "postal_code": "1272EM", "house_number": "28"},
     #{"provider": "gad", "postal_code": "1401EE", "house_number": "22"},
+    #{"provider": "geertruidenberg", "postal_code": "4941GZ", "house_number": "283"},
     #{"provider": "goes", "postal_code": "4464BW", "house_number": "7"},
     #{"provider": "groningen", "postal_code": "9725KL", "house_number": "5"},
     #{"provider": "hellendoorn", "postal_code": "7447BA", "house_number": "11"},
