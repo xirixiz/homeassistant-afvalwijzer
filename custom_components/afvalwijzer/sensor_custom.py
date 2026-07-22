@@ -17,6 +17,7 @@ from .common.sensor_utils import (
     as_utc_aware,
     build_device_info,
     date_to_local_midnight,
+    icon_for_waste_type,
     make_unique_id,
     translate_value,
 )
@@ -142,6 +143,8 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
                 raise ValueError(f"No data for custom sensor: {self.waste_type}")
 
             raw_value = waste_data_custom[self.waste_type]
+            if self.waste_type == "next_type":
+                self._attr_icon = self._next_type_icon(raw_value)
             translated_val = translate_value(raw_value, self._config, self.coordinator)
             self._apply_value(translated_val)
             self._last_update = dt_util.now().isoformat()
@@ -156,6 +159,21 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
             self._set_error_state()
 
         self.async_write_ha_state()
+
+    @staticmethod
+    def _next_type_icon(value: Any) -> str:
+        """Return the icon of the waste type the next_type sensor reports.
+
+        Falls back to the generic label icon when the value is not a single
+        known waste type (e.g. "gft, papier" or the default label).
+        """
+        if isinstance(value, str):
+            types = [t.strip().lower() for t in value.split(",") if t.strip()]
+            if len(types) == 1:
+                icon = icon_for_waste_type(types[0])
+                if icon:
+                    return icon
+        return "mdi:label-outline"
 
     def _apply_value(self, value: Any) -> None:
         """Apply collector output to sensor state."""
@@ -205,6 +223,8 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
 
     def _set_error_state(self) -> None:
         """Set a safe fallback state on errors."""
+        if self.waste_type == "next_type":
+            self._attr_icon = "mdi:label-outline"
         self._fallback_state = self._cfg.default_label
         self._days_until_collection_date = None
         self._attr_device_class = None
