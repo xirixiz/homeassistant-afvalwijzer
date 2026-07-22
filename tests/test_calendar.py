@@ -35,7 +35,7 @@ async def test_calendar_event_parsing_fallback():
     )
 
     assert len(events) == 4
-    assert events[0].summary == "Afvalthuis: Gft"
+    assert events[0].summary == "Afvalthuis: GFT"
     assert events[1].summary == "Afvalthuis: Pmd"
     assert events[2].summary == "Afvalthuis: Restafval"
     assert events[3].summary == "Afvalthuis: Papier"
@@ -117,7 +117,7 @@ async def test_calendar_respects_exclude_list():
     )
 
     assert len(events) == 1
-    assert events[0].summary == "Afvalthuis: Gft"
+    assert events[0].summary == "Afvalthuis: GFT"
 
 
 def test_calendar_next_event_groups_types_on_same_date():
@@ -137,4 +137,4 @@ def test_calendar_next_event_groups_types_on_same_date():
 
     assert event is not None
     assert event.start == date.today()
-    assert event.summary == "Mijnafvalwijzer: Gft, Papier"
+    assert event.summary == "Mijnafvalwijzer: GFT, Papier"

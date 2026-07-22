@@ -12,6 +12,18 @@ from .const.const import CONF_COLLECTOR, CONF_EXCLUDE_LIST, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+# Waste type names that are abbreviations and should be fully uppercased
+# in event summaries instead of capitalized ("GFT", not "Gft").
+_ABBREVIATIONS = {"gft", "pmd", "kca"}
+
+
+def _display_type(waste_type: str) -> str:
+    """Return a human-friendly display name for a waste type."""
+    name = waste_type.strip()
+    if name.lower() in _ABBREVIATIONS:
+        return name.upper()
+    return name.capitalize()
+
 
 def _to_date(value) -> date | None:
     """Coerce a waste data value (str, datetime or date) into a date.
@@ -81,7 +93,7 @@ class AfvalwijzerCalendar(CalendarEntity):
         for event_date, waste_type in upcoming_events:
             if event_date == next_event_date and waste_type not in types_on_next_date:
                 types_on_next_date.append(waste_type)
-        summary_text = f"{collector.capitalize()}: {', '.join([wt.capitalize() for wt in types_on_next_date])}"
+        summary_text = f"{collector.capitalize()}: {', '.join([_display_type(wt) for wt in types_on_next_date])}"
 
         return CalendarEvent(
             summary=summary_text,
@@ -138,7 +150,7 @@ class AfvalwijzerCalendar(CalendarEntity):
             end = start + timedelta(days=1)
 
             if start_date.date() <= start <= end_date.date():
-                summary_text = f"{collector.capitalize()}: {waste_type.capitalize()}"
+                summary_text = f"{collector.capitalize()}: {_display_type(waste_type)}"
 
                 events.append(
                     CalendarEvent(
