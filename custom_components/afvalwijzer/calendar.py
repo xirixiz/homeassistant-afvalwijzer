@@ -38,6 +38,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("coordinator")
 
     if coordinator:
+        _LOGGER.debug("Setting up Afvalwijzer calendar for entry: %s", entry_id)
         async_add_entities([AfvalwijzerCalendar(coordinator, entry_id)])
     else:
         _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")
@@ -95,6 +96,9 @@ class AfvalwijzerCalendar(CalendarEntity):
         if raw:
             items = ((item.get("type", ""), item.get("date")) for item in raw)
         else:
+            _LOGGER.debug(
+                "No raw schedule on coordinator; falling back to next-per-type data"
+            )
             source = self.coordinator.waste_data_with_today or {}
             items = source.items()
 
@@ -139,4 +143,10 @@ class AfvalwijzerCalendar(CalendarEntity):
                     )
                 )
 
+        _LOGGER.debug(
+            "Calendar returning %d event(s) between %s and %s",
+            len(events),
+            start_date.date(),
+            end_date.date(),
+        )
         return events
