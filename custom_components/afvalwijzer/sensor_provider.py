@@ -17,6 +17,7 @@ from .common.sensor_utils import (
     as_utc_aware,
     build_device_info,
     date_to_local_midnight,
+    icon_for_waste_type,
     make_unique_id,
     translate_value,
 )
@@ -125,34 +126,11 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
 
     @staticmethod
     def _icon_for_waste_type(waste_type: str) -> str:
-        match waste_type:
-            case "best-tas":
-                return "mdi:bag-personal"
-            case "gft":
-                return "mdi:flower"
-            case "glas":
-                return "mdi:glass-fragile"
-            case "grofvuil":
-                return "mdi:sofa"
-            case "kerstbomen":
-                return "mdi:pine-tree"
-            case "grip" | "maas" | "milieubus":
-                return "mdi:truck-cargo-container"
-            case "papier":
-                return "mdi:newspaper"
-            case "plastic" | "pmd":
-                return "mdi:bottle-soda-classic"
-            case "restafval" | "restwagen":
-                return "mdi:trash-can"
-            case "restafvalzakken":
-                return "mdi:sack"
-            case "snoeiafval" | "tuinafval":
-                return "mdi:leaf"
-            case "notifications":
-                return "mdi:bell"
-            case _:
-                _LOGGER.debug("No specific icon for: %s", waste_type)
-                return SENSOR_ICON
+        icon = icon_for_waste_type(waste_type)
+        if icon is None:
+            _LOGGER.debug("No specific icon for: %s", waste_type)
+            return SENSOR_ICON
+        return icon
 
     @staticmethod
     def _resolve_include_today(config: dict[str, Any]) -> bool:

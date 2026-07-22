@@ -60,6 +60,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.waste_data_with_today: dict[str, Any] = {}
         self.waste_data_without_today: dict[str, Any] = {}
         self.waste_data_custom: dict[str, Any] = {}
+        self.waste_data_raw: list[dict[str, Any]] = []
         self.notification_data: list[Any] = []
 
     async def async_load_cache(self) -> bool:
@@ -124,6 +125,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.waste_data_with_today = data.get("waste_data_with_today", {})
         self.waste_data_without_today = data.get("waste_data_without_today", {})
         self.waste_data_custom = data.get("waste_data_custom", {})
+        self.waste_data_raw = data.get("waste_data_raw", [])
         self.notification_data = data.get("notification_data", [])
 
     def _fetch_data(self) -> dict[str, Any]:
@@ -146,5 +148,6 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "waste_data_with_today": collector.waste_data_with_today,
             "waste_data_without_today": collector.waste_data_without_today,
             "waste_data_custom": collector.waste_data_custom,
+            "waste_data_raw": collector.waste_data_raw,
             "notification_data": collector.notification_data,
         }

@@ -27,6 +27,38 @@ from ..const.const import (
     DOMAIN,
 )
 
+# Icons per provider waste type, shared by the provider sensors and the
+# dynamic next_type sensor icon.
+WASTE_TYPE_ICONS: dict[str, str] = {
+    "best-tas": "mdi:bag-personal",
+    "gft": "mdi:flower",
+    "glas": "mdi:glass-fragile",
+    "grofvuil": "mdi:sofa",
+    "kca": "mdi:flask-outline",
+    "kerstbomen": "mdi:pine-tree",
+    "grip": "mdi:truck-cargo-container",
+    "luiers": "mdi:baby-carriage",
+    "maas": "mdi:truck-cargo-container",
+    "milieubus": "mdi:truck-cargo-container",
+    "papier": "mdi:newspaper",
+    "plastic": "mdi:bottle-soda-classic",
+    "pmd": "mdi:bottle-soda-classic",
+    "pmd-restafval": "mdi:trash-can-outline",
+    "restafval": "mdi:trash-can",
+    "sorti": "mdi:sort-variant",
+    "textiel": "mdi:tshirt-crew",
+    "restwagen": "mdi:trash-can",
+    "restafvalzakken": "mdi:sack",
+    "snoeiafval": "mdi:leaf",
+    "tuinafval": "mdi:leaf",
+    "notifications": "mdi:bell",
+}
+
+
+def icon_for_waste_type(waste_type: str, default: str | None = None) -> str | None:
+    """Return the icon for a provider waste type, or `default` if unknown."""
+    return WASTE_TYPE_ICONS.get(waste_type, default)
+
 
 def is_naive(value: datetime) -> bool:
     """Return True if the datetime is timezone-naive."""

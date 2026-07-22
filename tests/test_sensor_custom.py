@@ -98,6 +98,41 @@ def test_custom_sensor_fallback_when_no_full_timestamp():
     assert sensor.native_value == target.isoformat()
 
 
+def test_next_type_icon_follows_waste_type():
+    """The next_type sensor icon matches the waste type it reports."""
+    coordinator = FakeCoordinator(None)
+    coordinator.waste_data_custom = {"next_type": "restafval"}
+
+    cfg = {
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "1",
+        CONF_SUFFIX: "",
+        CONF_DEFAULT_LABEL: "geen",
+    }
+
+    sensor = CustomSensor(_make_hass(), "next_type", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
+
+    sensor._handle_coordinator_update()
+    assert sensor.icon == "mdi:trash-can"
+
+    # A single different type switches the icon
+    coordinator.waste_data_custom = {"next_type": "gft"}
+    sensor._handle_coordinator_update()
+    assert sensor.icon == "mdi:flower"
+
+    # Multiple types on the same date fall back to the generic label icon
+    coordinator.waste_data_custom = {"next_type": "gft, papier"}
+    sensor._handle_coordinator_update()
+    assert sensor.icon == "mdi:label-outline"
+
+    # Default label (no upcoming pickup) also falls back
+    coordinator.waste_data_custom = {"next_type": "geen"}
+    sensor._handle_coordinator_update()
+    assert sensor.icon == "mdi:label-outline"
+
+
 async def test_added_to_hass_populates_initial_state():
     """Adding the sensor applies data the coordinator already holds."""
     today = dt_util.now().date()
