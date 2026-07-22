@@ -36,7 +36,7 @@ async def test_calendar_event_parsing_fallback():
 
     assert len(events) == 4
     assert events[0].summary == "Afvalthuis: GFT"
-    assert events[1].summary == "Afvalthuis: Pmd"
+    assert events[1].summary == "Afvalthuis: PMD"
     assert events[2].summary == "Afvalthuis: Restafval"
     assert events[3].summary == "Afvalthuis: Papier"
 
