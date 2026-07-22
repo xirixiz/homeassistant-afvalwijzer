@@ -9,6 +9,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .collector.main_collector import MainCollector
 from .const.const import (
@@ -25,9 +26,20 @@ from .const.const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Cache file in .storage
-STORAGE_KEY = f"{DOMAIN}.cache"
 STORAGE_VERSION = 1
+
+# Cached data older than this is ignored at startup
+MAX_CACHE_AGE = timedelta(days=7)
+
+
+def _build_cache_store(hass: HomeAssistant, entry_id: str) -> Store[dict[str, Any]]:
+    """Return the per-entry cache store in .storage."""
+    return Store[dict[str, Any]](hass, STORAGE_VERSION, f"{DOMAIN}_{entry_id}.cache")
+
+
+async def async_remove_cache(hass: HomeAssistant, entry_id: str) -> None:
+    """Remove the cache file belonging to a removed config entry."""
+    await _build_cache_store(hass, entry_id).async_remove()
 
 
 class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -44,8 +56,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             update_interval=timedelta(hours=4),
         )
         self.config = config
-        storage_key = f"{DOMAIN}_{entry_id}.cache"
-        self._store = Store[dict[str, Any]](hass, STORAGE_VERSION, storage_key)
+        self._store = _build_cache_store(hass, entry_id)
         self.waste_data_with_today: dict[str, Any] = {}
         self.waste_data_without_today: dict[str, Any] = {}
         self.waste_data_custom: dict[str, Any] = {}
@@ -55,7 +66,11 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Load data from the cache."""
         try:
             cached_data = await self._store.async_load()
-            if cached_data and self._is_cache_for_current_config(cached_data):
+            if (
+                cached_data
+                and self._is_cache_for_current_config(cached_data)
+                and not self._is_cache_stale(cached_data)
+            ):
                 self._apply_data(cached_data["data"])
                 self.data = cached_data["data"]
                 _LOGGER.debug("Loaded Afvalwijzer data from cache")
@@ -63,6 +78,14 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         except Exception as err:
             _LOGGER.debug("Failed to load Afvalwijzer cache: %s", err)
         return False
+
+    @staticmethod
+    def _is_cache_stale(cached_data: dict[str, Any]) -> bool:
+        """Return True if the cache is too old to be trusted at startup."""
+        fetched_at = dt_util.parse_datetime(str(cached_data.get("fetched_at", "")))
+        if fetched_at is None:
+            return True
+        return dt_util.utcnow() - fetched_at > MAX_CACHE_AGE
 
     def _is_cache_for_current_config(self, cached_data: dict[str, Any]) -> bool:
         """Check if cache belongs to current postal code / house number."""
@@ -87,6 +110,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     CONF_HOUSE_NUMBER: self.config.get(CONF_HOUSE_NUMBER),
                     CONF_COLLECTOR: self.config.get(CONF_COLLECTOR),
                 },
+                "fetched_at": dt_util.utcnow().isoformat(),
                 "data": data,
             }
             await self._store.async_save(cache_payload)

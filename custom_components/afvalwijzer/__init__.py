@@ -24,7 +24,7 @@ from .const.const import (
     DEFAULT_SHOW_FULL_TIMESTAMP,
     DOMAIN,
 )
-from .coordinator import AfvalwijzerDataUpdateCoordinator
+from .coordinator import AfvalwijzerDataUpdateCoordinator, async_remove_cache
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -155,6 +155,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
+    # Holds the cancel callback of a pending jittered refresh, so unload can
+    # cancel it without registering a new async_on_unload every midnight.
+    pending_refresh: list[Any] = []
+
     @callback
     def _schedule_midnight_update(now: Any) -> None:
         """Trigger an update at midnight with a randomized jitter."""
@@ -162,10 +166,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.debug("Scheduling midnight refresh in %s seconds", jitter)
 
         async def _do_update(_: Any) -> None:
+            pending_refresh.clear()
             await coordinator.async_request_refresh()
 
-        entry.async_on_unload(async_call_later(hass, jitter, _do_update))
+        pending_refresh.clear()
+        pending_refresh.append(async_call_later(hass, jitter, _do_update))
 
+    @callback
+    def _cancel_pending_refresh() -> None:
+        for cancel in pending_refresh:
+            cancel()
+        pending_refresh.clear()
+
+    entry.async_on_unload(_cancel_pending_refresh)
     entry.async_on_unload(
         async_track_time_change(
             hass, _schedule_midnight_update, hour=0, minute=0, second=0
@@ -181,6 +194,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle options update."""
     await hass.config_entries.async_reload(entry.entry_id)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Clean up the cache file when a config entry is removed."""
+    if _skip_runtime_setup():
+        return
+
+    try:
+        await async_remove_cache(hass, entry.entry_id)
+    except Exception as err:
+        _LOGGER.debug("Failed to remove Afvalwijzer cache: %s", err)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
