@@ -186,6 +186,11 @@ class MainCollector:
             return []
 
     @property
+    def waste_data_raw(self):
+        """Return the full parsed pickup schedule (all future dates, all types)."""
+        return self._waste_data.waste_data_raw
+
+    @property
     def waste_data_with_today(self):
         """Return waste data including today's pickups."""
         return self._waste_data.waste_data_with_today

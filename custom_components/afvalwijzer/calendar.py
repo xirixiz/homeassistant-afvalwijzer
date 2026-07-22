@@ -8,7 +8,7 @@ import logging
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.util import dt as dt_util
 
-from .const.const import CONF_COLLECTOR, DOMAIN
+from .const.const import CONF_COLLECTOR, CONF_EXCLUDE_LIST, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,19 +57,14 @@ class AfvalwijzerCalendar(CalendarEntity):
         """Return the next upcoming event."""
         today = dt_util.now().date()
         include_today = self.coordinator.config.get("include_today", True)
-        waste_source = self.coordinator.waste_data_with_today or {}
         collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
         upcoming_events = []
-        for waste_type, event_date in waste_source.items():
-            event_date_only = _to_date(event_date)
-            if event_date_only is None:
+        for waste_type, event_date in self._full_schedule():
+            if not include_today and event_date == today:
                 continue
-
-            if not include_today and event_date_only == today:
-                continue
-            if event_date_only >= today:
-                upcoming_events.append((event_date_only, waste_type))
+            if event_date >= today:
+                upcoming_events.append((event_date, waste_type))
 
         if not upcoming_events:
             return None
@@ -77,7 +72,10 @@ class AfvalwijzerCalendar(CalendarEntity):
         upcoming_events.sort(key=lambda x: x[0])
         next_event_date = upcoming_events[0][0]
 
-        types_on_next_date = [wt for ed, wt in upcoming_events if ed == next_event_date]
+        types_on_next_date = []
+        for event_date, waste_type in upcoming_events:
+            if event_date == next_event_date and waste_type not in types_on_next_date:
+                types_on_next_date.append(waste_type)
         summary_text = f"{collector.capitalize()}: {', '.join([wt.capitalize() for wt in types_on_next_date])}"
 
         return CalendarEvent(
@@ -86,27 +84,48 @@ class AfvalwijzerCalendar(CalendarEntity):
             end=next_event_date + timedelta(days=1),
         )
 
+    def _full_schedule(self) -> list[tuple[str, date]]:
+        """Return the full pickup schedule as (waste_type, date) pairs.
+
+        Prefers the raw schedule (every future date for every type). Falls
+        back to the next-date-per-type data for caches written before the
+        raw schedule was stored.
+        """
+        raw = getattr(self.coordinator, "waste_data_raw", None) or []
+        if raw:
+            items = ((item.get("type", ""), item.get("date")) for item in raw)
+        else:
+            source = self.coordinator.waste_data_with_today or {}
+            items = source.items()
+
+        exclude_raw = str(self.coordinator.config.get(CONF_EXCLUDE_LIST, ""))
+        exclude = {x.strip() for x in exclude_raw.lower().split(",") if x.strip()}
+
+        schedule: list[tuple[str, date]] = []
+        for waste_type, value in items:
+            event_date = _to_date(value)
+            if event_date is None or not waste_type:
+                continue
+            if waste_type.strip().lower() in exclude:
+                continue
+            schedule.append((waste_type, event_date))
+        return schedule
+
     async def async_get_events(
         self, hass, start_date: datetime, end_date: datetime
     ) -> list[CalendarEvent]:
-        """Get the calendar events."""
+        """Get the calendar events in the requested range."""
         events = []
         today = dt_util.now().date()
 
         include_today = self.coordinator.config.get("include_today", True)
-        waste_source = self.coordinator.waste_data_with_today or {}
-
         collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
-        for waste_type, event_date in waste_source.items():
-            event_date_only = _to_date(event_date)
-            if event_date_only is None:
+        for waste_type, event_date in self._full_schedule():
+            if not include_today and event_date == today:
                 continue
 
-            if not include_today and event_date_only == today:
-                continue
-
-            start = event_date_only
+            start = event_date
             end = start + timedelta(days=1)
 
             if start_date.date() <= start <= end_date.date():

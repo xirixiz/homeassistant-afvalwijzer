@@ -25,6 +25,10 @@ _DATA = {
     "waste_data_with_today": {"restafval": "2026-07-23"},
     "waste_data_without_today": {"restafval": "2026-07-23"},
     "waste_data_custom": {"next_date": "2026-07-23"},
+    "waste_data_raw": [
+        {"type": "restafval", "date": "2026-07-23"},
+        {"type": "restafval", "date": "2026-08-06"},
+    ],
     "notification_data": ["note"],
 }
 
@@ -39,6 +43,7 @@ def _make_coordinator(config=None):
     coordinator.waste_data_with_today = {}
     coordinator.waste_data_without_today = {}
     coordinator.waste_data_custom = {}
+    coordinator.waste_data_raw = []
     coordinator.notification_data = []
     return coordinator
 
@@ -98,6 +103,7 @@ async def test_async_load_cache_applies_fresh_cache():
     assert await coordinator.async_load_cache() is True
     assert coordinator.data == _DATA
     assert coordinator.waste_data_with_today == _DATA["waste_data_with_today"]
+    assert coordinator.waste_data_raw == _DATA["waste_data_raw"]
     assert coordinator.notification_data == ["note"]
 
 
