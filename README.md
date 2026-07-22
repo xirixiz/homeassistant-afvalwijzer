@@ -15,6 +15,7 @@ _Component to integrate with the following providers/communities._
 This custom component tries to support as much as possible, but there are some municipalities which we can't support at this time.
 
 - Bergen (Limburg)
+- Eemnes
 - Gennep
 - Haaksbergen
 - Landsmeer
