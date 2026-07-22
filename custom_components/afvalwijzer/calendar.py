@@ -38,7 +38,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("coordinator")
 
     if coordinator:
-        _LOGGER.debug("Setting up Afvalwijzer calendar for entry: %s", entry_id)
+        _LOGGER.debug(
+            "Setting up Afvalwijzer calendar for entry: %s (schedule: %d entries)",
+            entry_id,
+            len(getattr(coordinator, "waste_data_raw", None) or []),
+        )
         async_add_entities([AfvalwijzerCalendar(coordinator, entry_id)])
     else:
         _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")

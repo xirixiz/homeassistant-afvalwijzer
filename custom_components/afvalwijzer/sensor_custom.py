@@ -105,7 +105,7 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
             case "next_in_days":
                 return "mdi:counter"
             case "next_type":
-                return "mdi:recycle"
+                return "mdi:label-outline"
             case _:
                 _LOGGER.debug("No specific icon for: %s", waste_type)
                 return SENSOR_ICON
