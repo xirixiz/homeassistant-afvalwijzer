@@ -133,3 +133,7 @@ fixture-parentheses = false
 
 [lint.mccabe]
 max-complexity = 25
+
+[lint.per-file-ignores]
+# Standalone dev scripts are allowed to print
+"scripts/*" = ["T201"]

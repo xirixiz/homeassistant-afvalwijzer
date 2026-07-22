@@ -13,7 +13,6 @@ from custom_components.afvalwijzer.const.const import (
     DOMAIN,
 )
 from custom_components.afvalwijzer.sensor import (
-    _setup_sensors,
     async_setup_entry,
     async_setup_platform,
 )
@@ -30,8 +29,10 @@ class _FakeCoordinator:
         self.notification_data = ["fake_notification"]
         self.data = {}
         self.config = {}
+        self.listeners = []
 
     def async_add_listener(self, cb):
+        self.listeners.append(cb)
         return lambda: None
 
 
@@ -52,25 +53,43 @@ def _make_hass():
     return hass
 
 
-async def test_setup_sensors_creates_entities_and_notification_added():
+def _make_entry(coordinator, hass, config):
+    entry = SimpleNamespace()
+    entry.entry_id = "test_entry"
+    entry.data = dict(config)
+    entry.options = {}
+    entry.async_on_unload = MagicMock()
+
+    hass.data[DOMAIN] = {
+        entry.entry_id: {
+            "coordinator": coordinator,
+            "config": dict(config),
+        }
+    }
+    return entry
+
+
+_CONFIG = {
+    CONF_COLLECTOR: "mijnafvalwijzer",
+    CONF_POSTAL_CODE: "1234AB",
+    CONF_HOUSE_NUMBER: "1",
+    CONF_SUFFIX: "",
+    CONF_DEFAULT_LABEL: "geen",
+}
+
+
+async def test_setup_entry_creates_entities_and_notification_added():
     """Setup creates provider, custom, and notification entities."""
     hass = _make_hass()
     coordinator = _FakeCoordinator()
+    entry = _make_entry(coordinator, hass, _CONFIG)
 
     added = []
 
-    def _add_entities(entities, update):
+    def _add_entities(entities):
         added.extend(entities)
 
-    cfg = {
-        CONF_COLLECTOR: "mijnafvalwijzer",
-        CONF_POSTAL_CODE: "1234AB",
-        CONF_HOUSE_NUMBER: "1",
-        CONF_SUFFIX: "",
-        CONF_DEFAULT_LABEL: "geen",
-    }
-
-    await _setup_sensors(hass, cfg, _add_entities, coordinator)
+    await async_setup_entry(hass, entry, _add_entities)
 
     # One ProviderSensor (restafval), one CustomSensor (next_date), and notifications sensor
     assert len(added) == 3
@@ -78,6 +97,33 @@ async def test_setup_sensors_creates_entities_and_notification_added():
     assert isinstance(added[1], CustomSensor)
     assert isinstance(added[2], ProviderSensor)
     assert added[2].waste_type == "notifications"
+
+
+async def test_setup_entry_adds_new_waste_types_on_refresh():
+    """New waste types appearing in a later refresh get entities without a reload."""
+    hass = _make_hass()
+    coordinator = _FakeCoordinator()
+    entry = _make_entry(coordinator, hass, _CONFIG)
+
+    added = []
+
+    def _add_entities(entities):
+        added.extend(entities)
+
+    await async_setup_entry(hass, entry, _add_entities)
+    assert len(added) == 3
+    assert len(coordinator.listeners) == 1
+
+    # Seasonal waste type appears in a later refresh
+    coordinator.waste_data_with_today["kerstbomen"] = date.today()
+    coordinator.listeners[0]()
+
+    assert len(added) == 4
+    assert added[3].waste_type == "kerstbomen"
+
+    # Unchanged data does not create duplicates
+    coordinator.listeners[0]()
+    assert len(added) == 4
 
 
 async def test_async_setup_platform_triggers_import():
@@ -101,32 +147,18 @@ async def test_async_setup_platform_triggers_import():
     hass.async_create_task.assert_called_once()
 
 
-async def test_async_setup_entry_uses_coordinator():
-    """async_setup_entry correctly retrieves the coordinator and calls _setup_sensors."""
+async def test_async_setup_entry_registers_unload_listener():
+    """async_setup_entry registers the coordinator listener for unload."""
     hass = _make_hass()
     coordinator = _FakeCoordinator()
-
-    entry = SimpleNamespace()
-    entry.entry_id = "test_entry"
-    entry.data = {
-        CONF_COLLECTOR: "mijnafvalwijzer",
-        CONF_POSTAL_CODE: "1234AB",
-        CONF_HOUSE_NUMBER: "1",
-    }
-    entry.options = {}
-
-    hass.data[DOMAIN] = {
-        "test_entry": {
-            "coordinator": coordinator,
-            "config": dict(entry.data),
-        }
-    }
+    entry = _make_entry(coordinator, hass, _CONFIG)
 
     added = []
 
-    def _add_entities(entities, update):
+    def _add_entities(entities):
         added.extend(entities)
 
     await async_setup_entry(hass, entry, _add_entities)
 
     assert len(added) == 3
+    entry.async_on_unload.assert_called_once()

@@ -27,6 +27,10 @@ class FakeCoordinator:
         self.notification_data = []
         self.data = {}
 
+    def async_add_listener(self, update_callback, context=None):
+        """Mimic the coordinator listener registration."""
+        return lambda: None
+
 
 def _make_hass():
     async def _exec(fn, *a, **k):
@@ -92,3 +96,28 @@ def test_custom_sensor_fallback_when_no_full_timestamp():
     # when full timestamp disabled, native_value returns fallback string
     assert isinstance(sensor.native_value, str)
     assert sensor.native_value == target.isoformat()
+
+
+async def test_added_to_hass_populates_initial_state():
+    """Adding the sensor applies data the coordinator already holds."""
+    today = dt_util.now().date()
+    target = today + timedelta(days=2)
+
+    coordinator = FakeCoordinator(target)
+    coordinator.data = {"waste_data_custom": {"next_date": target}}
+
+    cfg = {
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "1",
+        CONF_SUFFIX: "",
+        CONF_DEFAULT_LABEL: "geen",
+    }
+
+    sensor = CustomSensor(_make_hass(), "next_date", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
+
+    await sensor.async_added_to_hass()
+
+    assert isinstance(sensor.native_value, datetime)
+    sensor.async_write_ha_state.assert_called()

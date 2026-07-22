@@ -2,3 +2,4 @@ pytest
 pytest-timeout
 pytest-cov
 pytest-asyncio
+pytest-homeassistant-custom-component

@@ -2,6 +2,6 @@
 
 set -e
 
-cd "$(dirname "$0")/../custom_components"
+cd "$(dirname "$0")/.."
 
-python3 -m afvalwijzer.tests.test_module "$@"
+python3 -m tests.test_module "$@"

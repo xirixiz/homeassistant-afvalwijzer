@@ -28,6 +28,10 @@ class FakeCoordinator:
         self.notification_data = notifications or []
         self.data = {}
 
+    def async_add_listener(self, update_callback, context=None):
+        """Mimic the coordinator listener registration."""
+        return lambda: None
+
 
 def _make_hass():
     async def _exec(fn, *a, **k):
@@ -107,3 +111,61 @@ def test_provider_sensor_timestamp_and_days_until():
     attrs = sensor.extra_state_attributes
     assert ATTR_DAYS_UNTIL_COLLECTION_DATE in attrs
     assert attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] == 1
+
+
+async def test_added_to_hass_populates_initial_state():
+    """Adding the sensor applies data the coordinator already holds.
+
+    This replaces the old `update_before_add=True` behavior; without it a
+    sensor added after a cache load would show the default label until the
+    next refresh.
+    """
+    today = dt_util.now().date()
+    target = today + timedelta(days=1)
+
+    coordinator = FakeCoordinator(provider_data={"restafval": target})
+    coordinator.data = {"waste_data_with_today": {"restafval": target}}
+
+    sensor = ProviderSensor(
+        _make_hass(),
+        "restafval",
+        coordinator,
+        {
+            CONF_COLLECTOR: "mijnafvalwijzer",
+            CONF_POSTAL_CODE: "1234AB",
+            CONF_HOUSE_NUMBER: "1",
+            CONF_SUFFIX: "",
+            CONF_DEFAULT_LABEL: "geen",
+        },
+    )
+    sensor.async_write_ha_state = MagicMock()
+
+    await sensor.async_added_to_hass()
+
+    assert isinstance(sensor.native_value, datetime)
+    sensor.async_write_ha_state.assert_called()
+
+
+async def test_added_to_hass_without_data_keeps_default():
+    """Without coordinator data no premature state is written."""
+    coordinator = FakeCoordinator()
+    coordinator.data = None
+
+    sensor = ProviderSensor(
+        _make_hass(),
+        "restafval",
+        coordinator,
+        {
+            CONF_COLLECTOR: "mijnafvalwijzer",
+            CONF_POSTAL_CODE: "1234AB",
+            CONF_HOUSE_NUMBER: "1",
+            CONF_SUFFIX: "",
+            CONF_DEFAULT_LABEL: "geen",
+        },
+    )
+    sensor.async_write_ha_state = MagicMock()
+
+    await sensor.async_added_to_hass()
+
+    assert sensor.native_value == "geen"
+    sensor.async_write_ha_state.assert_not_called()

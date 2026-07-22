@@ -254,4 +254,4 @@ enable = [
     "use-symbolic-message-instead",
 ]
 [tool.pytest.ini_options]
-addopts = "--ignore=custom_components/afvalwijzer/tests/test_module.py --asyncio-mode=auto"
+addopts = "--ignore=tests/test_module.py --asyncio-mode=auto"

@@ -18,7 +18,7 @@ except Exception:
 # Set environment variable to skip runtime setup during tests
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 
-# Add custom_components to path for imports
+# Add the repository root to the path so `custom_components` is importable
 repo_root = Path(__file__).parent.parent
 sys.path.insert(0, str(repo_root))
 

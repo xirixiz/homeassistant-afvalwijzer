@@ -28,7 +28,7 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt
       - name: Enable all addresses
-        run: sed -i 's/#{"provider"/{"provider"/g' custom_components/afvalwijzer/tests/test_data.py
+        run: sed -i 's/#{"provider"/{"provider"/g' tests/test_data.py
       - name: Test module
         run: |
           set -o pipefail
