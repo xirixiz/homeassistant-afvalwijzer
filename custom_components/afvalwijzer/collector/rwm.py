@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from datetime import datetime
+import logging
 from typing import Any
 
 import requests
 
 from ..common.main_functions import waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_RWM
+from ..const.const import SENSOR_COLLECTORS_RWM
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 

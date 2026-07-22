@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+import logging
 import socket
 from typing import Any
 
@@ -11,10 +12,11 @@ from urllib3.util import connection as urllib3_connection
 
 from ..common.main_functions import waste_type_rename
 from ..const.const import (
-    _LOGGER,
     SENSOR_COLLECTORS_XIMMIO,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 

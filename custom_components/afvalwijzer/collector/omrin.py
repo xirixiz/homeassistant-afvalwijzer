@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
+import logging
 from typing import Any
 import uuid
 
 import requests
 
 from ..common.main_functions import format_postal_code, waste_type_rename
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_OMRIN
+from ..const.const import SENSOR_COLLECTORS_OMRIN
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 30.0)
 

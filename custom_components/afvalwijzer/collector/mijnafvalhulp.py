@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import re
 
 import requests
 
 from ..common.main_functions import format_postal_code, parse_ical_waste_data
-from ..const.const import _LOGGER, SENSOR_COLLECTORS_MIJNAFVALHULP
+from ..const.const import SENSOR_COLLECTORS_MIJNAFVALHULP
+
+_LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 

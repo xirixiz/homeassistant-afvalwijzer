@@ -1,8 +1,11 @@
 """Afvalwijzer main collector."""
 
+import logging
+
+import requests
+
 from ..common.waste_data_transformer import WasteDataTransformer
 from ..const.const import (
-    _LOGGER,
     SENSOR_COLLECTORS_AMSTERDAM,
     SENSOR_COLLECTORS_BURGERPORTAAL,
     SENSOR_COLLECTORS_CIRCULUS,
@@ -23,6 +26,8 @@ from ..const.const import (
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 try:
     from . import (
@@ -74,6 +79,9 @@ class MainCollector:
         self.exclude_pickup_today = self._normalize_bool_param(exclude_pickup_today)
         self.exclude_list = str(exclude_list).strip().lower()
         self.default_label = str(default_label).strip()
+
+        # One session for all requests in this refresh (waste + notifications)
+        self._session = requests.Session()
 
         # Get raw waste data using the appropriate provider method
         waste_data_raw = self._get_waste_data_raw()
@@ -132,7 +140,7 @@ class MainCollector:
                     ]
                     if self.provider in SENSOR_COLLECTORS_RECYCLEAPP:
                         args.append(self.street_name)
-                    return getter(*args)
+                    return getter(*args, session=self._session)
             _LOGGER.error("Unknown provider: %s", self.provider)
             raise ValueError(f"Unknown provider: {self.provider}")
 
@@ -159,16 +167,13 @@ class MainCollector:
             for sensor_set, getter in notification_providers:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
-                    result = getter(
+                    return getter(
                         self.provider,
                         self.postal_code,
                         self.house_number,
                         self.suffix,
+                        session=self._session,
                     )
-                    _LOGGER.debug(
-                        f"Retrieved {len(result)} notification(s) from {self.provider}"
-                    )
-                    return result
 
             # Provider doesn't support notifications
             _LOGGER.debug("Provider %s does not support notifications", self.provider)
@@ -176,7 +181,7 @@ class MainCollector:
 
         except Exception as err:
             _LOGGER.warning(
-                f"Could not fetch notification data for {self.provider}: {err}"
+                "Could not fetch notification data for %s: %s", self.provider, err
             )
             return []
 

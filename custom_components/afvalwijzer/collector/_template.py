@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import requests
 
-from ..const.const import _LOGGER
+_LOGGER = logging.getLogger(__name__)
+
 
 # from ..const.const import SENSOR_COLLECTORS_<NAME>
 # from ..common.main_functions import format_postal_code, waste_type_rename, ...
