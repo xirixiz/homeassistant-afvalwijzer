@@ -3,3 +3,4 @@ pre-commit
 requests
 ruff
 urllib3
+zstandard
