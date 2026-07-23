@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Download the compressed Dutch addresses CSV to data/
+set -euo pipefail
+
+OUTDIR="data"
+OUTFILE="$OUTDIR/Nederland.csv.zst"
+URL="https://raw.githubusercontent.com/LJPc-solutions/Nederlandse-adressen-en-postcodes/main/Nederland.csv.zst"
+
+mkdir -p "$OUTDIR"
+echo "Downloading $URL -> $OUTFILE"
+curl -L --progress-bar -o "$OUTFILE" "$URL"
+echo "Saved to $OUTFILE"
