@@ -58,7 +58,7 @@ jobs:
           python-version: "3.x"
           cache: "pip"
       - run: python3 -m pip install --upgrade pip
-      - run: python3 -m pip install ruff
+      - run: python3 -m pip install -c requirements.txt ruff
       - run: ruff check --output-format github .
 
   tests:

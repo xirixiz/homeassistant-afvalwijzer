@@ -34,19 +34,19 @@ updates:
       prefix: "chore"
       include: "scope"
 
-  # Pre-commit hooks (Ruff, Black, etc. if you use .pre-commit-config.yaml)
-  # - package-ecosystem: "pre-commit"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #     day: "monday"
-  #   groups:
-  #     pre-commit:
-  #       patterns:
-  #         - "*"
-  #   labels:
-  #     - "dependencies"
-  #     - "pre-commit"
-  #   commit-message:
-  #     prefix: "chore"
-  #     include: "scope"
+  # Pre-commit hooks (.pre-commit-config.yaml)
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      pre-commit:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "pre-commit"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
