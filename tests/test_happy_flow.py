@@ -27,9 +27,9 @@ def test_main_collector_happy_flow():
             "1",
             "",
             "",
-            "False",
-            "",
-            "geen",
+            exclude_pickup_today="False",
+            exclude_list="",
+            default_label="geen",
         )
 
         types = [t.lower() for t in collector.waste_types_provider]

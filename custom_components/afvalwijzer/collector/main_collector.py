@@ -65,6 +65,7 @@ class MainCollector:
         house_number: str,
         suffix: str,
         street_name: str,
+        *,
         exclude_pickup_today,
         exclude_list: str,
         default_label: str,
