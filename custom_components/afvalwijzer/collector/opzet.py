@@ -67,6 +67,7 @@ def _get_bag_id(
     postal_code: str,
     house_number: str,
     suffix: str,
+    *,
     timeout: tuple[float, float],
     verify: bool,
 ) -> str | None:
@@ -143,7 +144,13 @@ def get_waste_data_raw(
 
     try:
         bag_id = _get_bag_id(
-            session, base_url, postal_code, house_number, suffix, timeout, verify
+            session,
+            base_url,
+            postal_code,
+            house_number,
+            suffix,
+            timeout=timeout,
+            verify=verify,
         )
         if not bag_id:
             _LOGGER.warning("Address/bag_id not found!")
@@ -235,7 +242,13 @@ def get_notification_data_raw(
 
     try:
         bag_id = _get_bag_id(
-            session, base_url, postal_code, house_number, suffix, timeout, verify
+            session,
+            base_url,
+            postal_code,
+            house_number,
+            suffix,
+            timeout=timeout,
+            verify=verify,
         )
         if not bag_id:
             _LOGGER.debug("No bag_id found for notifications")

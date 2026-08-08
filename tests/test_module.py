@@ -4,7 +4,8 @@ Author: Bram van Dartel - xirixiz
 
 Usage:
 from afvalwijzer.collector.main_collector import MainCollector
-MainCollector('<provider>','<postal_code>','<house_number>','<suffix>','<street_name>','True','True','geen')
+MainCollector('<provider>','<postal_code>','<house_number>','<suffix>','<street_name>',
+              exclude_pickup_today='True', exclude_list='True', default_label='geen')
 
 Run test:
 - Update this file with your information (or the information you would like to test with, examples are in that file)
@@ -51,9 +52,9 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
         house_number,
         suffix,
         street_name,
-        exclude_pickup_today,
-        exclude_list,
-        default_label,
+        exclude_pickup_today=exclude_pickup_today,
+        exclude_list=exclude_list,
+        default_label=default_label,
     )
 
     if collector.waste_data_with_today == {} or collector.waste_types_provider == []:

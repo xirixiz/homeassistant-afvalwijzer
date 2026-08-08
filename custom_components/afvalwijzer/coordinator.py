@@ -137,9 +137,9 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self.config.get(CONF_HOUSE_NUMBER),
                 self.config.get(CONF_SUFFIX),
                 self.config.get(CONF_STREET_NAME),
-                self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
-                self.config.get(CONF_EXCLUDE_LIST),
-                self.config.get(CONF_DEFAULT_LABEL),
+                exclude_pickup_today=self.config.get(CONF_EXCLUDE_PICKUP_TODAY),
+                exclude_list=self.config.get(CONF_EXCLUDE_LIST),
+                default_label=self.config.get(CONF_DEFAULT_LABEL),
             )
         except Exception as err:
             raise UpdateFailed(f"Collector initialization failed: {err}") from err

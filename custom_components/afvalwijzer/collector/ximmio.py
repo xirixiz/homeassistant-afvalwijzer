@@ -79,8 +79,8 @@ def _fetch_address_data(
     provider: str,
     postal_code: str,
     house_number: str,
-    suffix: str,
     *,
+    suffix: str,
     timeout: tuple[float, float],
 ) -> dict[str, Any]:
     data: dict[str, Any] = {
@@ -107,10 +107,10 @@ def _fetch_waste_data_raw_temp(
     url: str,
     provider: str,
     unique_id: str,
+    *,
     community: str,
     start_date: datetime,
     end_date: str,
-    *,
     timeout: tuple[float, float],
 ) -> dict[str, Any]:
     start_date_str = start_date.strftime("%Y-%m-%d")
@@ -204,7 +204,7 @@ def get_waste_data_raw(
             provider,
             postal_code,
             house_number,
-            suffix,
+            suffix=suffix,
             timeout=timeout,
         )
 
@@ -226,9 +226,9 @@ def get_waste_data_raw(
             url,
             provider,
             unique_id,
-            community,
-            now,
-            end_date,
+            community=community,
+            start_date=now,
+            end_date=end_date,
             timeout=timeout,
         )
 

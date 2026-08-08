@@ -100,9 +100,9 @@ def _ensure_authenticated_address(
     url: str,
     response: dict[str, Any],
     logged_in_cookies: requests.cookies.RequestsCookieJar,
+    *,
     house_number: str,
     suffix: str,
-    *,
     timeout: tuple[float, float],
     verify: bool,
 ) -> None:
@@ -207,8 +207,8 @@ def get_waste_data_raw(
             url,
             response,
             logged_in_cookies,
-            house_number,
-            suffix,
+            house_number=house_number,
+            suffix=suffix,
             timeout=timeout,
             verify=verify,
         )
