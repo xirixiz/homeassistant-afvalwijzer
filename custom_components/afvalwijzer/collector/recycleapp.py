@@ -15,7 +15,6 @@ _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
-_BASE_URL = "https://api.fostplus.be/recyclecms/public/v1/"
 _X_CONSUMER = "recycleapp.be"
 
 
@@ -26,7 +25,7 @@ def _build_url(provider: str) -> str:
     if not url:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
-    return _BASE_URL.rstrip("/") + "/"
+    return url.rstrip("/") + "/"
 
 
 def _build_headers() -> dict[str, str]:
@@ -103,15 +102,6 @@ def _fetch_street_id(
     raise ValueError("RecycleApp: street_id not found")
 
 
-def _clear_location_ids() -> None:
-    """Clear cached location ids.
-
-    Kept as a separate function so callers that cache ids can reset them
-    when RecycleCMS invalidates them.
-    """
-    return
-
-
 def _fetch_waste_data_raw_temp(
     session: requests.Session,
     base_url: str,
@@ -125,9 +115,7 @@ def _fetch_waste_data_raw_temp(
 ) -> dict[str, Any]:
     """Fetch raw collection data."""
     startdate = datetime.now().strftime("%Y-%m-%d")
-    enddate = (datetime.now() + timedelta(days=days_forward)).strftime(
-        "%Y-%m-%d"
-    )
+    enddate = (datetime.now() + timedelta(days=days_forward)).strftime("%Y-%m-%d")
 
     response = session.get(
         f"{base_url}collections",
@@ -143,12 +131,6 @@ def _fetch_waste_data_raw_temp(
         timeout=timeout,
         verify=verify,
     )
-
-    # The new API returns 400 when stored location ids are no longer valid.
-    # Let the caller retry without cached ids.
-    if response.status_code in (400, 404):
-        raise ValueError("RecycleApp: invalid location ids")
-
     response.raise_for_status()
 
     return response.json() or {}
@@ -225,9 +207,7 @@ def get_waste_data_raw(
         postal_code = format_postal_code(postal_code)
 
         if not street_name:
-            _LOGGER.error(
-                "RECYCLEAPP: street_name is required"
-            )
+            _LOGGER.error("RECYCLEAPP: street_name is required")
             return []
 
         postcode_id = _fetch_postcode_id(
@@ -247,55 +227,18 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        try:
-            waste_data_raw_temp = _fetch_waste_data_raw_temp(
-                session,
-                base_url,
-                postcode_id,
-                street_id,
-                str(house_number),
-                timeout=timeout,
-                verify=verify,
-            )
-
-        except ValueError:
-            # Location ids can change in RecycleCMS.
-            # Re-resolve once and retry.
-            _LOGGER.debug(
-                "RECYCLEAPP: refreshing location ids"
-            )
-
-            postcode_id = _fetch_postcode_id(
-                session,
-                base_url,
-                postal_code,
-                timeout=timeout,
-                verify=verify,
-            )
-
-            street_id = _fetch_street_id(
-                session,
-                base_url,
-                street_name,
-                postcode_id,
-                timeout=timeout,
-                verify=verify,
-            )
-
-            waste_data_raw_temp = _fetch_waste_data_raw_temp(
-                session,
-                base_url,
-                postcode_id,
-                street_id,
-                str(house_number),
-                timeout=timeout,
-                verify=verify,
-            )
+        waste_data_raw_temp = _fetch_waste_data_raw_temp(
+            session,
+            base_url,
+            postcode_id,
+            street_id,
+            str(house_number),
+            timeout=timeout,
+            verify=verify,
+        )
 
         if not waste_data_raw_temp:
-            _LOGGER.error(
-                "No Waste data found!"
-            )
+            _LOGGER.error("No Waste data found!")
             return []
 
         return _parse_waste_data_raw(
@@ -311,9 +254,5 @@ def get_waste_data_raw(
         raise ValueError(err) from err
 
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error(
-            "RECYCLEAPP: Invalid and/or no data received"
-        )
-        raise ValueError(
-            "Invalid and/or no data received from RECYCLEAPP"
-        ) from err
+        _LOGGER.error("RECYCLEAPP: Invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from RECYCLEAPP") from err

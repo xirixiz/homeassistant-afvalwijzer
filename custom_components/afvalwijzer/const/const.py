@@ -107,7 +107,7 @@ SENSOR_COLLECTORS_RD4 = {
 }
 
 SENSOR_COLLECTORS_RECYCLEAPP = {
-    "recycleapp": "https://www.recycleapp.be/api/app/v1/",
+    "recycleapp": "https://api.fostplus.be/recyclecms/public/v1/",
 }
 
 
