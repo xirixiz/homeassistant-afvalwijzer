@@ -19,7 +19,6 @@ from .common.sensor_utils import (
     date_to_local_midnight,
     icon_for_waste_type,
     make_unique_id,
-    translate_value,
 )
 from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -145,8 +144,7 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
             raw_value = waste_data_custom[self.waste_type]
             if self.waste_type == "next_type":
                 self._attr_icon = self._next_type_icon(raw_value)
-            translated_val = translate_value(raw_value, self._config, self.coordinator)
-            self._apply_value(translated_val)
+            self._apply_value(raw_value)
             self._last_update = dt_util.now().isoformat()
             if self._native_value is not None:
                 _LOGGER.debug(

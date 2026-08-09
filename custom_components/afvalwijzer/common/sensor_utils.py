@@ -23,7 +23,6 @@ from ..const.const import (
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
     CONF_SUFFIX,
-    CONF_TRANSLATE_STATES,
     DOMAIN,
 )
 
@@ -120,34 +119,6 @@ def build_device_info(config: dict[str, Any]) -> DeviceInfo:
         model=config.get(CONF_COLLECTOR),
         entry_type=DeviceEntryType.SERVICE,
     )
-
-
-def translate_value(
-    value: Any,
-    config: dict[str, Any],
-    coordinator: Any,
-) -> Any:
-    """Translate a raw waste type value using pre-loaded translation files.
-
-    Returns the original value unchanged if translation is disabled or
-    no match is found.
-    """
-    if not isinstance(value, str) or not value:
-        return value
-
-    if not config.get(CONF_TRANSLATE_STATES, False):
-        return str(value)
-
-    sensor_translations = getattr(coordinator, "sensor_translations", {})
-
-    parts = [p.strip() for p in value.split(",")]
-    translated_parts = []
-    for part in parts:
-        safe_part = part.lower().replace(" ", "_").replace("-", "_")
-        translated_part = sensor_translations.get(safe_part, {}).get("name", part)
-        translated_parts.append(translated_part)
-
-    return ", ".join(translated_parts)
 
 
 def parse_and_apply_value(
