@@ -8,9 +8,21 @@ import logging
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er
-from homeassistant.util import dt as dt_util
+from homeassistant.util import dt as dt_util, slugify
 
-from .const.const import CONF_COLLECTOR, CONF_EXCLUDE_LIST, DOMAIN
+from .common.sensor_utils import (
+    address_key,
+    icon_for_waste_type,
+    initial_color_for_waste_type,
+)
+from .const.const import (
+    CONF_COLLECTOR,
+    CONF_EXCLUDE_LIST,
+    CONF_SEPARATE_CALENDARS,
+    DEFAULT_SEPARATE_CALENDARS,
+    DOMAIN,
+    SENSOR_PREFIX,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +63,44 @@ def _to_date(value) -> date | None:
     return None
 
 
+def _raw_schedule(
+    coordinator, *, waste_type: str | None = None
+) -> list[tuple[str, date]]:
+    """Return the pickup schedule as (waste_type, date) pairs.
+
+    Prefers the raw schedule (every future date for every type). Falls back
+    to the next-date-per-type data for caches written before the raw
+    schedule was stored. If waste_type is given, only that type's pickups
+    are returned.
+    """
+    raw = getattr(coordinator, "waste_data_raw", None) or []
+    if raw:
+        items = ((item.get("type", ""), item.get("date")) for item in raw)
+    else:
+        _LOGGER.debug(
+            "No raw schedule on coordinator; falling back to next-per-type data"
+        )
+        source = coordinator.waste_data_with_today or {}
+        items = source.items()
+
+    exclude_raw = str(coordinator.config.get(CONF_EXCLUDE_LIST, ""))
+    exclude = {x.strip() for x in exclude_raw.lower().split(",") if x.strip()}
+
+    schedule: list[tuple[str, date]] = []
+    for item_type, value in items:
+        if not item_type:
+            continue
+        if waste_type is not None and item_type.strip().lower() != waste_type.lower():
+            continue
+        if item_type.strip().lower() in exclude:
+            continue
+        event_date = _to_date(value)
+        if event_date is None:
+            continue
+        schedule.append((item_type, event_date))
+    return schedule
+
+
 @callback
 def _async_remove_legacy_calendar(hass) -> None:
     """Remove the orphaned pre-2026.1018 calendar entity, if present."""
@@ -59,32 +109,82 @@ def _async_remove_legacy_calendar(hass) -> None:
         registry.async_remove(entity_id)
 
 
+@callback
+def _async_remove_stale_calendars(hass, entry_id: str, separate: bool) -> None:
+    """Remove calendar entities that don't belong in the current mode.
+
+    An options change reloads the config entry, but HA doesn't delete
+    registry entries just because they stop being created on setup - without
+    this, switching separate_calendars leaves the old mode's entities behind
+    as permanently-unavailable orphans instead of actually going away.
+    """
+    registry = er.async_get(hass)
+    combined_unique_id = f"afvalwijzer_calendar_{entry_id}"
+
+    for entry in er.async_entries_for_config_entry(registry, entry_id):
+        if entry.domain != "calendar":
+            continue
+        is_combined = entry.unique_id == combined_unique_id
+        if is_combined == separate:
+            registry.async_remove(entry.entity_id)
+
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    """Set up the Afvalwijzer calendar."""
+    """Set up the Afvalwijzer calendar(s)."""
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
     coordinator = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("coordinator")
 
     _async_remove_legacy_calendar(hass)
 
-    if coordinator:
+    if not coordinator:
+        _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")
+        return
+
+    separate = bool(
+        coordinator.config.get(CONF_SEPARATE_CALENDARS, DEFAULT_SEPARATE_CALENDARS)
+    )
+
+    _async_remove_stale_calendars(hass, entry_id, separate)
+
+    if not separate:
         _LOGGER.debug(
             "Setting up Afvalwijzer calendar for entry: %s (schedule: %d entries)",
             entry_id,
             len(getattr(coordinator, "waste_data_raw", None) or []),
         )
         async_add_entities([AfvalwijzerCalendar(coordinator, entry_id)])
-    else:
-        _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")
+        return
+
+    known_types: set[str] = set()
+
+    @callback
+    def _async_add_new_calendars() -> None:
+        """Add a calendar for any waste type not seen before."""
+        new_entities = []
+        for waste_type in coordinator.waste_data_with_today or {}:
+            if waste_type not in known_types:
+                known_types.add(waste_type)
+                new_entities.append(
+                    AfvalwijzerTypeCalendar(coordinator, entry_id, waste_type)
+                )
+        if new_entities:
+            _LOGGER.debug("Adding %d per-type calendar(s).", len(new_entities))
+            async_add_entities(new_entities)
+
+    _async_add_new_calendars()
+    config_entry.async_on_unload(
+        coordinator.async_add_listener(_async_add_new_calendars)
+    )
 
 
-class AfvalwijzerCalendar(CalendarEntity):
-    """Representation of the Afvalwijzer calendar."""
+class _AfvalwijzerCalendarBase(CalendarEntity):
+    """Shared event logic for the combined and per-type calendar entities."""
 
-    def __init__(self, coordinator, entry_id: str):
-        """Initialize the Afvalwijzer calendar."""
+    _waste_type: str | None = None
+
+    def __init__(self, coordinator):
+        """Initialize the calendar base."""
         self.coordinator = coordinator
-        self._attr_name = "Afvalwijzer Calendar"
-        self._attr_unique_id = f"afvalwijzer_calendar_{entry_id}"
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -93,12 +193,13 @@ class AfvalwijzerCalendar(CalendarEntity):
         include_today = self.coordinator.config.get("include_today", True)
         collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
-        upcoming_events = []
-        for waste_type, event_date in self._full_schedule():
-            if not include_today and event_date == today:
-                continue
-            if event_date >= today:
-                upcoming_events.append((event_date, waste_type))
+        upcoming_events = [
+            (event_date, waste_type)
+            for waste_type, event_date in _raw_schedule(
+                self.coordinator, waste_type=self._waste_type
+            )
+            if event_date >= today and (include_today or event_date != today)
+        ]
 
         if not upcoming_events:
             return None
@@ -118,36 +219,6 @@ class AfvalwijzerCalendar(CalendarEntity):
             end=next_event_date + timedelta(days=1),
         )
 
-    def _full_schedule(self) -> list[tuple[str, date]]:
-        """Return the full pickup schedule as (waste_type, date) pairs.
-
-        Prefers the raw schedule (every future date for every type). Falls
-        back to the next-date-per-type data for caches written before the
-        raw schedule was stored.
-        """
-        raw = getattr(self.coordinator, "waste_data_raw", None) or []
-        if raw:
-            items = ((item.get("type", ""), item.get("date")) for item in raw)
-        else:
-            _LOGGER.debug(
-                "No raw schedule on coordinator; falling back to next-per-type data"
-            )
-            source = self.coordinator.waste_data_with_today or {}
-            items = source.items()
-
-        exclude_raw = str(self.coordinator.config.get(CONF_EXCLUDE_LIST, ""))
-        exclude = {x.strip() for x in exclude_raw.lower().split(",") if x.strip()}
-
-        schedule: list[tuple[str, date]] = []
-        for waste_type, value in items:
-            event_date = _to_date(value)
-            if event_date is None or not waste_type:
-                continue
-            if waste_type.strip().lower() in exclude:
-                continue
-            schedule.append((waste_type, event_date))
-        return schedule
-
     async def async_get_events(
         self, hass, start_date: datetime, end_date: datetime
     ) -> list[CalendarEvent]:
@@ -158,7 +229,7 @@ class AfvalwijzerCalendar(CalendarEntity):
         include_today = self.coordinator.config.get("include_today", True)
         collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
-        schedule = self._full_schedule()
+        schedule = _raw_schedule(self.coordinator, waste_type=self._waste_type)
         for waste_type, event_date in schedule:
             if not include_today and event_date == today:
                 continue
@@ -185,3 +256,39 @@ class AfvalwijzerCalendar(CalendarEntity):
             len(schedule),
         )
         return events
+
+
+class AfvalwijzerCalendar(_AfvalwijzerCalendarBase):
+    """The combined calendar covering every waste type."""
+
+    def __init__(self, coordinator, entry_id: str):
+        """Initialize the Afvalwijzer calendar."""
+        super().__init__(coordinator)
+        self._attr_name = "Afvalwijzer Calendar"
+        self._attr_unique_id = f"afvalwijzer_calendar_{entry_id}"
+
+        addr = address_key(coordinator.config)
+        self.entity_id = f"calendar.{slugify(SENSOR_PREFIX + addr)}"
+
+
+class AfvalwijzerTypeCalendar(_AfvalwijzerCalendarBase):
+    """A calendar scoped to a single waste type.
+
+    Lets a dashboard assign a distinct color per type, since HA's calendar
+    card supports per-calendar colors but not per-event colors.
+    """
+
+    def __init__(self, coordinator, entry_id: str, waste_type: str):
+        """Initialize a per-waste-type Afvalwijzer calendar."""
+        super().__init__(coordinator)
+        self._waste_type = waste_type
+        self._attr_name = f"Afvalwijzer {_display_type(waste_type)} Calendar"
+        self._attr_unique_id = f"afvalwijzer_calendar_{entry_id}_{waste_type}"
+        self._attr_icon = icon_for_waste_type(waste_type, default="mdi:calendar")
+        # One-time suggested color for this calendar (applied only when the
+        # entity is first created - the user can freely change it afterward).
+        if initial_color := initial_color_for_waste_type(waste_type):
+            self._attr_initial_color = initial_color
+
+        addr = address_key(coordinator.config)
+        self.entity_id = f"calendar.{slugify(SENSOR_PREFIX + addr + '_' + waste_type)}"

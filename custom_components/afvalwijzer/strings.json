@@ -51,7 +51,8 @@
           "show_full_timestamp": "Show full timestamp",
           "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
-          "exclude_list": "Waste type exclude list"
+          "exclude_list": "Waste type exclude list",
+          "separate_calendars": "Create a separate calendar per waste type"
         }
       }
     }

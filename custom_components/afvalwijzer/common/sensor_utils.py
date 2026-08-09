@@ -59,6 +59,34 @@ def icon_for_waste_type(waste_type: str, default: str | None = None) -> str | No
     return WASTE_TYPE_ICONS.get(waste_type, default)
 
 
+# Suggested initial color (hex) per provider waste type, based on
+# mijnafvalwijzer.nl's own category colors where there's a clear real-world
+# convention. This is only ever an *initial* suggestion for a per-type
+# calendar entity - HA applies it once, the first time the entity is
+# created, and the user can freely change it afterward. Types without a
+# clear convention are omitted rather than guessed.
+WASTE_TYPE_COLORS: dict[str, str] = {
+    "gft": "#4CAF50",
+    "pmd": "#800000",
+    "plastic": "#FF9800",
+    "papier": "#2196F3",
+    "restafval": "#9E9E9E",
+    "textiel": "#00695C",
+    "grofvuil": "#795548",
+    "kca": "#F44336",
+    "luiers": "#FFA000",
+    "glas": "#009688",
+    "snoeiafval": "#2E7D32",
+    "tuinafval": "#2E7D32",
+    "kerstbomen": "#1B5E20",
+}
+
+
+def initial_color_for_waste_type(waste_type: str) -> str | None:
+    """Return the suggested initial calendar color for a waste type, if any."""
+    return WASTE_TYPE_COLORS.get(waste_type)
+
+
 def is_naive(value: datetime) -> bool:
     """Return True if the datetime is timezone-naive."""
     return value.tzinfo is None or value.tzinfo.utcoffset(value) is None
