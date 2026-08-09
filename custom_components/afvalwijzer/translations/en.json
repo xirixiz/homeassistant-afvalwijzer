@@ -59,52 +59,100 @@
   "entity": {
     "sensor": {
       "best_tas": {
-        "name": "BEST-bag"
+        "name": "BEST-bag",
+        "state": {
+          "geen": "None"
+        }
       },
       "gft": {
-        "name": "Organic waste (GFT)"
+        "name": "Organic waste (GFT)",
+        "state": {
+          "geen": "None"
+        }
       },
       "glas": {
-        "name": "Glass"
+        "name": "Glass",
+        "state": {
+          "geen": "None"
+        }
       },
       "grofvuil": {
-        "name": "Bulky waste"
+        "name": "Bulky waste",
+        "state": {
+          "geen": "None"
+        }
       },
       "kerstbomen": {
-        "name": "Christmas trees"
+        "name": "Christmas trees",
+        "state": {
+          "geen": "None"
+        }
       },
       "grip": {
-        "name": "GRIP"
+        "name": "GRIP",
+        "state": {
+          "geen": "None"
+        }
       },
       "maas": {
-        "name": "Maas"
+        "name": "Maas",
+        "state": {
+          "geen": "None"
+        }
       },
       "milieubus": {
-        "name": "Mobile collection vehicle"
+        "name": "Mobile collection vehicle",
+        "state": {
+          "geen": "None"
+        }
       },
       "papier": {
-        "name": "Paper"
+        "name": "Paper",
+        "state": {
+          "geen": "None"
+        }
       },
       "plastic": {
-        "name": "Plastic"
+        "name": "Plastic",
+        "state": {
+          "geen": "None"
+        }
       },
       "pmd": {
-        "name": "PMD"
+        "name": "PMD",
+        "state": {
+          "geen": "None"
+        }
       },
       "restafval": {
-        "name": "Residual waste"
+        "name": "Residual waste",
+        "state": {
+          "geen": "None"
+        }
       },
       "restwagen": {
-        "name": "Residual waste truck"
+        "name": "Residual waste truck",
+        "state": {
+          "geen": "None"
+        }
       },
       "restafvalzakken": {
-        "name": "Residual waste bags"
+        "name": "Residual waste bags",
+        "state": {
+          "geen": "None"
+        }
       },
       "snoeiafval": {
-        "name": "Pruning waste"
+        "name": "Pruning waste",
+        "state": {
+          "geen": "None"
+        }
       },
       "tuinafval": {
-        "name": "Garden waste"
+        "name": "Garden waste",
+        "state": {
+          "geen": "None"
+        }
       },
       "notifications": {
         "name": "Notifications"

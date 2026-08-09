@@ -121,6 +121,28 @@ def build_device_info(config: dict[str, Any]) -> DeviceInfo:
     )
 
 
+def translated_type_list(value: Any, coordinator: Any) -> list[str] | None:
+    """Split a (possibly comma-joined) waste type value into translated parts.
+
+    Returns None if value isn't a non-empty string. Parts without a known
+    translation fall back to their original text.
+    """
+    if not isinstance(value, str) or not value:
+        return None
+
+    sensor_translations = getattr(coordinator, "sensor_translations", {})
+
+    parts = [p.strip() for p in value.split(",") if p.strip()]
+    translated_parts = []
+    for part in parts:
+        safe_part = part.lower().replace(" ", "_").replace("-", "_")
+        translated_parts.append(
+            sensor_translations.get(safe_part, {}).get("name", part)
+        )
+
+    return translated_parts
+
+
 def parse_and_apply_value(
     value: Any,
 ) -> tuple[Any, SensorDeviceClass | None]:
