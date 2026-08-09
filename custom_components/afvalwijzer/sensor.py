@@ -110,7 +110,7 @@ async def async_setup_entry(
                 entities.append(CustomSensor(hass, wtype, coordinator, config))
 
         if (
-            coordinator.notification_data
+            getattr(coordinator, "supports_notifications", False)
             and "notifications" not in known_provider_types
         ):
             known_provider_types.add("notifications")

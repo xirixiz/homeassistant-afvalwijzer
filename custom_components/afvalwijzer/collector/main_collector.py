@@ -29,6 +29,22 @@ from ..const.const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def provider_supports_notifications(provider: str) -> bool:
+    """Return True if the given provider is known to support notifications.
+
+    This is a static capability check based only on the provider name, so it
+    can be used before any data has been fetched (e.g. to decide whether the
+    notifications sensor entity should exist at all).
+    """
+    provider = str(provider).strip().lower()
+    for sensor_set in (SENSOR_COLLECTORS_OPZET, SENSOR_COLLECTORS_MIJNAFVALWIJZER):
+        keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
+        if provider in keys:
+            return True
+    return False
+
+
 try:
     from . import (
         amsterdam,
@@ -230,3 +246,8 @@ class MainCollector:
     def notification_count(self):
         """Returns the number of provider notifications."""
         return len(self._notification_data)
+
+    @property
+    def supports_notifications(self) -> bool:
+        """Return True if the configured provider supports notifications."""
+        return provider_supports_notifications(self.provider)

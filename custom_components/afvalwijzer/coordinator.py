@@ -11,7 +11,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .collector.main_collector import MainCollector
+from .collector.main_collector import MainCollector, provider_supports_notifications
 from .const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
@@ -62,6 +62,9 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.waste_data_custom: dict[str, Any] = {}
         self.waste_data_raw: list[dict[str, Any]] = []
         self.notification_data: list[Any] = []
+        self.supports_notifications = provider_supports_notifications(
+            config.get(CONF_COLLECTOR)
+        )
 
     async def async_load_cache(self) -> bool:
         """Load data from the cache."""

@@ -176,3 +176,36 @@ async def test_async_remove_cache_removes_store():
     build_mock.assert_called_once()
     assert build_mock.call_args.args[1] == "entry_123"
     store.async_remove.assert_awaited_once()
+
+
+def _make_real_coordinator(config):
+    """Build a coordinator by actually running AfvalwijzerDataUpdateCoordinator.__init__.
+
+    The HA base class's __init__ requires a fully set up hass (frame helper
+    etc.) that a bare MagicMock can't satisfy, so it's stubbed out here -
+    everything specific to our own __init__ body (config, supports_notifications,
+    ...) still runs for real.
+    """
+    with patch(
+        "custom_components.afvalwijzer.coordinator.DataUpdateCoordinator.__init__",
+        return_value=None,
+    ):
+        return AfvalwijzerDataUpdateCoordinator(MagicMock(), config, "entry")
+
+
+def test_init_sets_supports_notifications_for_capable_provider():
+    """A provider that supports notifications is detected at construction time.
+
+    This must be derivable from config alone (no fetch required), since
+    sensor.py decides whether to create the notifications entity before any
+    data has necessarily been fetched.
+    """
+    coordinator = _make_real_coordinator(dict(_CONFIG))
+    assert coordinator.supports_notifications is True
+
+
+def test_init_sets_supports_notifications_false_for_incapable_provider():
+    """A provider outside the known notification-capable sets is detected too."""
+    config = {**_CONFIG, CONF_COLLECTOR: "rova"}
+    coordinator = _make_real_coordinator(config)
+    assert coordinator.supports_notifications is False

@@ -21,12 +21,15 @@ from custom_components.afvalwijzer.sensor_provider import ProviderSensor
 
 
 class _FakeCoordinator:
-    def __init__(self):
+    def __init__(self, *, supports_notifications=True, notification_data=None):
         today = date.today()
         self.waste_data_with_today = {"restafval": today}
         self.waste_data_without_today = {"restafval": today}
         self.waste_data_custom = {"next_date": today + timedelta(days=1)}
-        self.notification_data = ["fake_notification"]
+        self.notification_data = (
+            ["fake_notification"] if notification_data is None else notification_data
+        )
+        self.supports_notifications = supports_notifications
         self.data = {}
         self.config = {}
         self.listeners = []
@@ -97,6 +100,48 @@ async def test_setup_entry_creates_entities_and_notification_added():
     assert isinstance(added[1], CustomSensor)
     assert isinstance(added[2], ProviderSensor)
     assert added[2].waste_type == "notifications"
+
+
+async def test_notification_sensor_created_with_zero_notifications():
+    """The notifications sensor is created even when there are none right now.
+
+    Regression test: entity creation must be gated on provider capability
+    (coordinator.supports_notifications), not on the current notification
+    count, otherwise the sensor flickers in and out of existence depending
+    on whether any notifications happen to be pending at reload time.
+    """
+    hass = _make_hass()
+    coordinator = _FakeCoordinator(supports_notifications=True, notification_data=[])
+    entry = _make_entry(coordinator, hass, _CONFIG)
+
+    added = []
+
+    def _add_entities(entities):
+        added.extend(entities)
+
+    await async_setup_entry(hass, entry, _add_entities)
+
+    notification_sensors = [
+        e for e in added if getattr(e, "waste_type", None) == "notifications"
+    ]
+    assert len(notification_sensors) == 1
+
+
+async def test_notification_sensor_not_created_when_unsupported():
+    """No notifications sensor is created for providers that don't support it."""
+    hass = _make_hass()
+    coordinator = _FakeCoordinator(supports_notifications=False, notification_data=[])
+    entry = _make_entry(coordinator, hass, _CONFIG)
+
+    added = []
+
+    def _add_entities(entities):
+        added.extend(entities)
+
+    await async_setup_entry(hass, entry, _add_entities)
+
+    assert len(added) == 2
+    assert all(getattr(e, "waste_type", None) != "notifications" for e in added)
 
 
 async def test_setup_entry_adds_new_waste_types_on_refresh():
