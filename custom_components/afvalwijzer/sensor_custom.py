@@ -50,6 +50,9 @@ class _Config:
 class CustomSensor(CoordinatorEntity, SensorEntity):
     """Representation of a custom based waste sensor."""
 
+    # Localized text, not sensor state - excluded from recorder history.
+    _unrecorded_attributes = frozenset({"translated_types"})
+
     def __init__(
         self,
         hass: Any,

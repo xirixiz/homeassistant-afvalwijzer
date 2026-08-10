@@ -240,7 +240,9 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
 
         self._fallback_state = str(value)
         self._attr_device_class = SensorDeviceClass.ENUM
-        self._attr_options = [self._cfg.default_label]
+        # From the reported value, not config - a stale cache can hold an
+        # older default_label, and options must always match the state.
+        self._attr_options = [self._fallback_state]
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False

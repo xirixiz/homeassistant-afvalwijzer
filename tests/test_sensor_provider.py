@@ -260,6 +260,34 @@ def test_default_label_options_reflect_custom_label():
     assert sensor._attr_options == ["nothing scheduled"]
 
 
+def test_options_stay_consistent_when_cached_value_differs_from_configured_label():
+    """Options always match state, even if cached data predates a default_label change.
+
+    _is_cache_for_current_config() doesn't compare default_label, so a
+    stale cache can hold an older label than what's currently configured.
+    HA's SensorEntity.state raises if state isn't in options, so both must
+    be derived from the same value rather than options coming from config.
+    """
+    coordinator = FakeCoordinator(provider_data={"restafval": "geen"})
+    hass = _make_hass()
+
+    cfg = {
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "1",
+        CONF_SUFFIX: "",
+        CONF_DEFAULT_LABEL: "niets",  # changed after the cache was written
+    }
+
+    sensor = ProviderSensor(hass, "restafval", coordinator, cfg)
+    sensor.async_write_ha_state = MagicMock()
+
+    sensor._handle_coordinator_update()
+
+    assert sensor.native_value == "geen"
+    assert sensor._attr_options == ["geen"]
+
+
 def test_error_state_uses_enum_device_class_for_non_notification_sensor():
     """An error falling back to default_label also gets enum device_class."""
     hass = _make_hass()

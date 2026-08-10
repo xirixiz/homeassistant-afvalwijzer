@@ -28,14 +28,18 @@ from .coordinator import AfvalwijzerDataUpdateCoordinator, async_remove_cache
 
 _LOGGER = logging.getLogger(__name__)
 
-# Languages we ship a translations/*.json file for; anything else falls back to English.
-_SUPPORTED_LANGUAGES = ("en", "nl")
+_TRANSLATIONS_DIR = pathlib.Path(__file__).parent / "translations"
 
 
 def _load_sensor_translations(lang: str) -> dict[str, Any]:
-    """Load the entity.sensor translation table for the given language."""
-    lang = lang if lang in _SUPPORTED_LANGUAGES else "en"
-    trans_path = pathlib.Path(__file__).parent / "translations" / f"{lang}.json"
+    """Load the entity.sensor translation table for the given language.
+
+    Falls back to the base language for regional codes, then to English.
+    """
+    base_lang = lang.split("-", maxsplit=1)[0].lower()
+    trans_path = _TRANSLATIONS_DIR / f"{base_lang}.json"
+    if not trans_path.is_file():
+        trans_path = _TRANSLATIONS_DIR / "en.json"
     try:
         with open(trans_path, encoding="utf-8") as f:
             return json.load(f).get("entity", {}).get("sensor", {})
