@@ -15,8 +15,8 @@ from .const.const import CONF_COLLECTOR, CONF_EXCLUDE_LIST, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 # unique_id used by the calendar entity before it was scoped per config
-# entry (pre-2026.1018). Anyone updating from that era has an orphaned
-# entity under this id that nothing produces anymore.
+# entry (pre-2026.1018); anyone upgrading from 2026.1017 gets an orphan
+# under it. Safe to drop once that version is far in the past.
 _LEGACY_UNIQUE_ID = "afvalwijzer_calendar_filtered"
 
 # Waste type names that are abbreviations and should be fully uppercased
@@ -52,12 +52,11 @@ def _to_date(value) -> date | None:
 
 
 @callback
-def _async_remove_legacy_calendar(hass, entry_id: str) -> None:
+def _async_remove_legacy_calendar(hass) -> None:
     """Remove the orphaned pre-2026.1018 calendar entity, if present."""
     registry = er.async_get(hass)
-    for entry in er.async_entries_for_config_entry(registry, entry_id):
-        if entry.domain == "calendar" and entry.unique_id == _LEGACY_UNIQUE_ID:
-            registry.async_remove(entry.entity_id)
+    if entity_id := registry.async_get_entity_id("calendar", DOMAIN, _LEGACY_UNIQUE_ID):
+        registry.async_remove(entity_id)
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -65,7 +64,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
     coordinator = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("coordinator")
 
-    _async_remove_legacy_calendar(hass, entry_id)
+    _async_remove_legacy_calendar(hass)
 
     if coordinator:
         _LOGGER.debug(

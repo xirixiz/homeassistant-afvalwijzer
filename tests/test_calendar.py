@@ -10,6 +10,7 @@ from custom_components.afvalwijzer.calendar import (
     AfvalwijzerCalendar,
     _async_remove_legacy_calendar,
 )
+from custom_components.afvalwijzer.const.const import DOMAIN
 
 
 def _mock_coordinator(*, raw=None, with_today=None, config=None):
@@ -18,10 +19,6 @@ def _mock_coordinator(*, raw=None, with_today=None, config=None):
     mock_data.waste_data_raw = raw or []
     mock_data.waste_data_with_today = with_today or {}
     return mock_data
-
-
-def _registry_entry(entity_id, unique_id, domain="calendar"):
-    return SimpleNamespace(entity_id=entity_id, unique_id=unique_id, domain=domain)
 
 
 @pytest.mark.asyncio
@@ -150,64 +147,28 @@ def test_calendar_next_event_groups_types_on_same_date():
 
 def test_remove_legacy_calendar_cleans_up_pre_2026_1018_orphan():
     """Anyone updating straight from 2026.1017 has an orphan under the old global unique_id."""
-    legacy = _registry_entry(
-        "calendar.afvalwijzer_calendar", "afvalwijzer_calendar_filtered"
-    )
     registry = MagicMock()
+    registry.async_get_entity_id.return_value = "calendar.afvalwijzer_calendar"
 
-    with (
-        patch(
-            "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
-        ),
-        patch(
-            "custom_components.afvalwijzer.calendar.er.async_entries_for_config_entry",
-            return_value=[legacy],
-        ),
+    with patch(
+        "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
     ):
-        _async_remove_legacy_calendar(SimpleNamespace(), "test_entry")
+        _async_remove_legacy_calendar(SimpleNamespace())
 
+    registry.async_get_entity_id.assert_called_once_with(
+        "calendar", DOMAIN, "afvalwijzer_calendar_filtered"
+    )
     registry.async_remove.assert_called_once_with("calendar.afvalwijzer_calendar")
 
 
-def test_remove_legacy_calendar_leaves_current_entity_alone():
-    """The current per-entry calendar entity is not mistaken for the legacy one."""
-    current = _registry_entry(
-        "calendar.afvalwijzer_bonenakker", "afvalwijzer_calendar_test_entry"
-    )
+def test_remove_legacy_calendar_no_op_when_absent():
+    """Nothing is removed once the legacy entity is already gone."""
     registry = MagicMock()
+    registry.async_get_entity_id.return_value = None
 
-    with (
-        patch(
-            "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
-        ),
-        patch(
-            "custom_components.afvalwijzer.calendar.er.async_entries_for_config_entry",
-            return_value=[current],
-        ),
+    with patch(
+        "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
     ):
-        _async_remove_legacy_calendar(SimpleNamespace(), "test_entry")
-
-    registry.async_remove.assert_not_called()
-
-
-def test_remove_legacy_calendar_ignores_other_domains():
-    """A sensor entity is never mistaken for the legacy calendar entity."""
-    sensor_entry = _registry_entry(
-        "sensor.afvalwijzer_calendar_filtered",
-        "afvalwijzer_calendar_filtered",
-        domain="sensor",
-    )
-    registry = MagicMock()
-
-    with (
-        patch(
-            "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
-        ),
-        patch(
-            "custom_components.afvalwijzer.calendar.er.async_entries_for_config_entry",
-            return_value=[sensor_entry],
-        ),
-    ):
-        _async_remove_legacy_calendar(SimpleNamespace(), "test_entry")
+        _async_remove_legacy_calendar(SimpleNamespace())
 
     registry.async_remove.assert_not_called()
