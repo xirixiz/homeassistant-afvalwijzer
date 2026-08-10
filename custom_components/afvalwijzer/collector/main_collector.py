@@ -54,9 +54,32 @@ try:
 except ImportError as err:
     _LOGGER.error("Import error %s", err.args)
 
+# Providers with notification support, paired with their notification getter.
+# Shared by MainCollector._get_notification_data_raw (to fetch notifications)
+# and provider_supports_notifications (to check support without fetching).
+NOTIFICATION_PROVIDERS = [
+    (SENSOR_COLLECTORS_OPZET, opzet.get_notification_data_raw),
+    (SENSOR_COLLECTORS_MIJNAFVALWIJZER, mijnafvalwijzer.get_notification_data_raw),
+]
+
 
 class MainCollector:
     """MainCollector collects and transforms waste data from various providers."""
+
+    @staticmethod
+    def provider_supports_notifications(provider: str) -> bool:
+        """Return True if the given provider is known to support notifications.
+
+        This is a static capability check based only on the provider name, so it
+        can be used before any data has been fetched (e.g. to decide whether the
+        notifications sensor entity should exist at all).
+        """
+        provider = str(provider).strip().lower()
+        for sensor_set, _getter in NOTIFICATION_PROVIDERS:
+            keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
+            if provider in keys:
+                return True
+        return False
 
     def __init__(
         self,
@@ -156,16 +179,7 @@ class MainCollector:
         """
 
         try:
-            # list of providers with notification support
-            notification_providers = [
-                (SENSOR_COLLECTORS_OPZET, opzet.get_notification_data_raw),
-                (
-                    SENSOR_COLLECTORS_MIJNAFVALWIJZER,
-                    mijnafvalwijzer.get_notification_data_raw,
-                ),
-            ]
-
-            for sensor_set, getter in notification_providers:
+            for sensor_set, getter in NOTIFICATION_PROVIDERS:
                 keys = sensor_set.keys() if isinstance(sensor_set, dict) else sensor_set
                 if self.provider in keys:
                     return getter(

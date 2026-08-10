@@ -62,6 +62,9 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.waste_data_custom: dict[str, Any] = {}
         self.waste_data_raw: list[dict[str, Any]] = []
         self.notification_data: list[Any] = []
+        self.supports_notifications = MainCollector.provider_supports_notifications(
+            config.get(CONF_COLLECTOR)
+        )
 
     async def async_load_cache(self) -> bool:
         """Load data from the cache."""
