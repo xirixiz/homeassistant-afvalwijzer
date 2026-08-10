@@ -81,6 +81,11 @@ def provider_supports_notifications(provider: str) -> bool:
 class MainCollector:
     """MainCollector collects and transforms waste data from various providers."""
 
+    @staticmethod
+    def provider_supports_notifications(provider: str) -> bool:
+        """Return True if the given provider is known to support notifications."""
+        return provider_supports_notifications(provider)
+
     def __init__(
         self,
         provider: str,
