@@ -244,8 +244,3 @@ class MainCollector:
     def notification_count(self):
         """Returns the number of provider notifications."""
         return len(self._notification_data)
-
-    @property
-    def supports_notifications(self) -> bool:
-        """Return True if the configured provider supports notifications."""
-        return provider_supports_notifications(self.provider)
