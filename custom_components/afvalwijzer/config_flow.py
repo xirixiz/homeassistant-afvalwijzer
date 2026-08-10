@@ -20,16 +20,13 @@ from .const.const import (
     CONF_FRIENDLY_NAME,
     CONF_HOUSE_NUMBER,
     CONF_INCLUDE_TODAY,
-    CONF_LANGUAGE,
     CONF_POSTAL_CODE,
     CONF_SHOW_FULL_TIMESTAMP,
     CONF_STREET_NAME,
     CONF_SUFFIX,
-    CONF_TRANSLATE_STATES,
     DEFAULT_DEFAULT_LABEL,
     DEFAULT_EXCLUDE_LIST,
     DEFAULT_INCLUDE_TODAY,
-    DEFAULT_LANGUAGE,
     DEFAULT_SHOW_FULL_TIMESTAMP,
     DOMAIN,
     SENSOR_COLLECTORS_AMSTERDAM,
@@ -54,7 +51,6 @@ from .const.const import (
 
 _POSTAL_CODE_BE_RE = re.compile(r"^\d{4}$")
 _POSTAL_CODE_NL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
-_ALL_LANGUAGES: tuple[str, ...] = ("nl", "en")
 
 _RECONFIGURE_STEP_ID = "reconfigure"
 
@@ -138,7 +134,6 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Optional(CONF_INCLUDE_TODAY, default=DEFAULT_INCLUDE_TODAY): cv.boolean,
         vol.Optional(CONF_DEFAULT_LABEL, default=DEFAULT_DEFAULT_LABEL): cv.string,
         vol.Optional(CONF_EXCLUDE_LIST, default=DEFAULT_EXCLUDE_LIST): cv.string,
-        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(_ALL_LANGUAGES),
     }
 )
 
@@ -364,14 +359,6 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                     CONF_EXCLUDE_LIST,
                     default=current.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST),
                 ): cv.string,
-                vol.Optional(
-                    CONF_TRANSLATE_STATES,
-                    default=current.get(CONF_TRANSLATE_STATES, False),
-                ): cv.boolean,
-                vol.Optional(
-                    CONF_LANGUAGE,
-                    default=current.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
-                ): vol.In(_ALL_LANGUAGES),
             }
         )
 

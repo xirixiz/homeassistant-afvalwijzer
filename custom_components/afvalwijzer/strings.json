@@ -51,9 +51,7 @@
           "show_full_timestamp": "Show full timestamp",
           "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
-          "exclude_list": "Waste type exclude list",
-          "translate_states": "Friendly display for sensor states (WARNING: Breaks automations expecting raw lowercase values)",
-          "language": "Sensor state language (Only applies if friendly display is enabled above)"
+          "exclude_list": "Waste type exclude list"
         }
       }
     }

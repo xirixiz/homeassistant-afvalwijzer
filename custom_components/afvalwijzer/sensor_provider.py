@@ -19,7 +19,6 @@ from .common.sensor_utils import (
     date_to_local_midnight,
     icon_for_waste_type,
     make_unique_id,
-    translate_value,
 )
 from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -32,7 +31,6 @@ from .const.const import (
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_INCLUDE_TODAY,
     CONF_SHOW_FULL_TIMESTAMP,
-    CONF_TRANSLATE_STATES,
     DEFAULT_INCLUDE_TODAY,
     DEFAULT_SHOW_FULL_TIMESTAMP,
     SENSOR_ICON,
@@ -47,7 +45,6 @@ class _Config:
     default_label: str
     include_today: bool
     show_full_timestamp: bool
-    translate_states: bool
 
 
 class ProviderSensor(CoordinatorEntity, SensorEntity):
@@ -73,7 +70,6 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
             show_full_timestamp=bool(
                 config.get(CONF_SHOW_FULL_TIMESTAMP, DEFAULT_SHOW_FULL_TIMESTAMP)
             ),
-            translate_states=bool(config.get(CONF_TRANSLATE_STATES, False)),
         )
 
         self._attr_has_entity_name = True
@@ -109,7 +105,7 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
             self._native_value = 0
             self._fallback_state = "0"
         else:
-            self._fallback_state = self._translate_value(str(self._cfg.default_label))
+            self._fallback_state = str(self._cfg.default_label)
             self._native_value = None
 
         self._days_until_collection_date = None
@@ -206,10 +202,6 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
 
         self.async_write_ha_state()
 
-    def _translate_value(self, value: Any) -> Any:
-        """Translate the raw waste type value using the pre-loaded translation files."""
-        return translate_value(value, self._config, self.coordinator)
-
     def _select_provider_data(self) -> dict[str, Any]:
         if self._cfg.include_today:
             return self.coordinator.waste_data_with_today or {}
@@ -239,7 +231,7 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
             self._set_timestamp(aware, date_value=value)
             return
 
-        self._fallback_state = self._translate_value(str(value))
+        self._fallback_state = str(value)
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False

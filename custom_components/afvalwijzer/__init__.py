@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-import pathlib
 from random import randint
 from typing import TYPE_CHECKING, Any
 
@@ -121,22 +119,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     coordinator = AfvalwijzerDataUpdateCoordinator(
         hass, effective_config, entry.entry_id
-    )
-
-    # Pre-load translations to avoid blocking I/O in sensor callbacks
-    lang = effective_config.get("language", "nl")
-
-    def _load_translations():
-        trans_path = pathlib.Path(__file__).parent / "translations" / f"{lang}.json"
-        try:
-            with open(trans_path, encoding="utf-8") as f:
-                return json.load(f).get("entity", {}).get("sensor", {})
-        except Exception as err:
-            _LOGGER.warning("Failed to load sensor translations for %s: %s", lang, err)
-            return {}
-
-    coordinator.sensor_translations = await hass.async_add_executor_job(
-        _load_translations
     )
 
     cache_loaded = await coordinator.async_load_cache()
