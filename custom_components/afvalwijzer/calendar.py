@@ -6,11 +6,18 @@ from datetime import date, datetime, timedelta
 import logging
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
+from homeassistant.core import callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
 from .const.const import CONF_COLLECTOR, CONF_EXCLUDE_LIST, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
+# unique_id used by the calendar entity before it was scoped per config
+# entry (pre-2026.1018). Anyone updating from that era has an orphaned
+# entity under this id that nothing produces anymore.
+_LEGACY_UNIQUE_ID = "afvalwijzer_calendar_filtered"
 
 # Waste type names that are abbreviations and should be fully uppercased
 # in event summaries instead of capitalized ("GFT", not "Gft").
@@ -44,10 +51,21 @@ def _to_date(value) -> date | None:
     return None
 
 
+@callback
+def _async_remove_legacy_calendar(hass, entry_id: str) -> None:
+    """Remove the orphaned pre-2026.1018 calendar entity, if present."""
+    registry = er.async_get(hass)
+    for entry in er.async_entries_for_config_entry(registry, entry_id):
+        if entry.domain == "calendar" and entry.unique_id == _LEGACY_UNIQUE_ID:
+            registry.async_remove(entry.entity_id)
+
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar."""
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
     coordinator = hass.data.get(DOMAIN, {}).get(entry_id, {}).get("coordinator")
+
+    _async_remove_legacy_calendar(hass, entry_id)
 
     if coordinator:
         _LOGGER.debug(
