@@ -12,6 +12,7 @@ from homeassistant.util import dt as dt_util, slugify
 
 from .common.sensor_utils import (
     address_key,
+    build_device_info,
     icon_for_waste_type,
     initial_color_for_waste_type,
 )
@@ -155,6 +156,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         async_add_entities([AfvalwijzerCalendar(coordinator, entry_id)])
         return
 
+    # Grows but never shrinks: a type that stops appearing in the feed
+    # keeps its calendar rather than having it vanish out from under
+    # anyone using it on a dashboard.
     known_types: set[str] = set()
 
     @callback
@@ -185,6 +189,11 @@ class _AfvalwijzerCalendarBase(CalendarEntity):
     def __init__(self, coordinator):
         """Initialize the calendar base."""
         self.coordinator = coordinator
+
+    @property
+    def device_info(self):
+        """Group all calendars for the same address under one device."""
+        return build_device_info(self.coordinator.config)
 
     @property
     def event(self) -> CalendarEvent | None:

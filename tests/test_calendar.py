@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import DEFAULT, MagicMock, patch
 
 import pytest
 
@@ -14,6 +14,7 @@ from custom_components.afvalwijzer.calendar import (
     async_setup_entry,
 )
 from custom_components.afvalwijzer.common.sensor_utils import (
+    build_device_info,
     initial_color_for_waste_type,
 )
 from custom_components.afvalwijzer.const.const import CONF_SEPARATE_CALENDARS, DOMAIN
@@ -228,16 +229,34 @@ def test_type_calendar_has_standalone_name_and_matching_icon():
     assert calendar._attr_unique_id == "afvalwijzer_calendar_test_entry_id_gft"
 
 
+def test_calendar_device_info_groups_under_address_device():
+    """Calendars use the same device_info as sensors, grouping under one device per address."""
+    coordinator = _mock_coordinator(
+        config={
+            "include_today": True,
+            "provider": "afvalthuis",
+            "postal_code": "1234AB",
+            "house_number": "1",
+        }
+    )
+
+    combined = AfvalwijzerCalendar(coordinator, "test_entry_id")
+    per_type = AfvalwijzerTypeCalendar(coordinator, "test_entry_id", "gft")
+
+    assert combined.device_info == build_device_info(coordinator.config)
+    assert per_type.device_info == combined.device_info
+
+
 def test_type_calendar_gets_suggested_initial_color_for_known_type():
     """A per-type calendar for a known waste type gets a one-time suggested color."""
     calendar = AfvalwijzerTypeCalendar(_mock_coordinator(), "test_entry_id", "gft")
-    assert calendar._attr_initial_color == "#4CAF50"
+    assert calendar.initial_color == "#4CAF50"
 
 
 def test_type_calendar_has_no_initial_color_for_unmapped_type():
     """A waste type without a known convention doesn't get a guessed color."""
     calendar = AfvalwijzerTypeCalendar(_mock_coordinator(), "test_entry_id", "maas")
-    assert not hasattr(calendar, "_attr_initial_color")
+    assert calendar.initial_color is None
 
 
 def test_initial_color_for_waste_type_known_and_unknown():
@@ -324,8 +343,10 @@ def test_type_calendar_next_event_only_considers_its_own_type():
     assert event.summary == "Afvalthuis: GFT"
 
 
-_NO_STALE_REMOVAL = patch(
-    "custom_components.afvalwijzer.calendar._async_remove_stale_calendars"
+_NO_STALE_REMOVAL = patch.multiple(
+    "custom_components.afvalwijzer.calendar",
+    _async_remove_stale_calendars=DEFAULT,
+    _async_remove_legacy_calendar=DEFAULT,
 )
 
 
