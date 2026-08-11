@@ -171,8 +171,6 @@ CONF_SHOW_FULL_TIMESTAMP = "show_full_timestamp"
 
 DEFAULT_INCLUDE_TODAY = True
 DEFAULT_SHOW_FULL_TIMESTAMP = True
-# State translations only cover this exact value; a custom default_label
-# has none and displays as-is.
 DEFAULT_DEFAULT_LABEL = "geen"
 DEFAULT_EXCLUDE_LIST = ""
 

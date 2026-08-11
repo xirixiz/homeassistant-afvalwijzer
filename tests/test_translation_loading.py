@@ -23,11 +23,6 @@ def test_unsupported_language_falls_back_to_english():
     assert translations["restafval"]["name"] == "Residual waste"
 
 
-def test_provider_sensor_state_translations_present():
-    """Provider waste-type keys carry a 'state' translation for the default label.
-
-    This is what lets enum device_class translate the fallback text while the
-    sensor's actual state/native_value stays the raw default_label.
-    """
-    translations = _load_sensor_translations("nl")
-    assert translations["restafval"]["state"]["geen"] == "Geen"
+def test_non_string_language_degrades_to_empty_dict():
+    """A malformed lang value (e.g. None) returns {} instead of raising."""
+    assert _load_sensor_translations(None) == {}

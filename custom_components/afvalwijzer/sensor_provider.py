@@ -88,9 +88,6 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
         self._attr_device_class: SensorDeviceClass | None = None
-        # Tracks device_class: HA shows "options" as an attribute whenever
-        # it's set, so it must be None except alongside SensorDeviceClass.ENUM.
-        self._attr_options: list[str] | None = None
         self._native_value: datetime | int | None = None
 
         fallback_val = "0" if self._is_notification_sensor else self._cfg.default_label
@@ -104,17 +101,13 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
 
     def _set_error_state(self) -> None:
         """Set sensor to error state."""
+        self._attr_device_class = None
         if self._is_notification_sensor:
             self._native_value = 0
             self._fallback_state = "0"
-            self._attr_device_class = None
-            self._attr_options = None
         else:
             self._fallback_state = str(self._cfg.default_label)
             self._native_value = None
-            self._attr_device_class = SensorDeviceClass.ENUM
-            # default_label is the only non-date value this sensor can report.
-            self._attr_options = [self._cfg.default_label]
 
         self._days_until_collection_date = None
         self._is_collection_date_today = False
@@ -239,10 +232,6 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
             return
 
         self._fallback_state = str(value)
-        self._attr_device_class = SensorDeviceClass.ENUM
-        # From the reported value, not config - a stale cache can hold an
-        # older default_label, and options must always match the state.
-        self._attr_options = [self._fallback_state]
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
@@ -257,7 +246,6 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
 
         today = dt_util.now().date()
         self._days_until_collection_date = (collection_date - today).days
-        self._attr_options = None
 
         if self._cfg.show_full_timestamp:
             self._attr_device_class = SensorDeviceClass.TIMESTAMP

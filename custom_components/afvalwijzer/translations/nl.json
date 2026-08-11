@@ -59,100 +59,52 @@
   "entity": {
     "sensor": {
       "best_tas": {
-        "name": "BEST-tas",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "BEST-tas"
       },
       "gft": {
-        "name": "GFT",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "GFT"
       },
       "glas": {
-        "name": "Glas",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Glas"
       },
       "grofvuil": {
-        "name": "Grofvuil",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Grofvuil"
       },
       "kerstbomen": {
-        "name": "Kerstbomen",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Kerstbomen"
       },
       "grip": {
-        "name": "GRIP",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "GRIP"
       },
       "maas": {
-        "name": "Maas",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Maas"
       },
       "milieubus": {
-        "name": "Milieubus",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Milieubus"
       },
       "papier": {
-        "name": "Papier",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Papier"
       },
       "plastic": {
-        "name": "Plastic",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Plastic"
       },
       "pmd": {
-        "name": "PMD",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "PMD"
       },
       "restafval": {
-        "name": "Restafval",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Restafval"
       },
       "restwagen": {
-        "name": "Restwagen",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Restwagen"
       },
       "restafvalzakken": {
-        "name": "Restafvalzakken",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Restafvalzakken"
       },
       "snoeiafval": {
-        "name": "Snoeiafval",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Snoeiafval"
       },
       "tuinafval": {
-        "name": "Tuinafval",
-        "state": {
-          "geen": "Geen"
-        }
+        "name": "Tuinafval"
       },
       "notifications": {
         "name": "Notificaties"

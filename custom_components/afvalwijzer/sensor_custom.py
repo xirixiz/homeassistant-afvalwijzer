@@ -140,7 +140,9 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
         if self.waste_type in _TRANSLATABLE_WASTE_TYPES:
             attrs["translated_types"] = translated_type_list(
-                self._fallback_state, self.coordinator
+                self._fallback_state,
+                self.coordinator,
+                default_label=self._cfg.default_label,
             )
         return attrs
 

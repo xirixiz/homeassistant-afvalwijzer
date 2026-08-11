@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from pytest_homeassistant_custom_component.common import MockEntityPlatform
+
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
     CONF_COLLECTOR,
@@ -28,6 +30,7 @@ class FakeCoordinator:
         self.waste_data_custom = {}
         self.notification_data = notifications or []
         self.data = {}
+        self.last_update_success = True
 
     def async_add_listener(self, update_callback, context=None):
         """Mimic the coordinator listener registration."""
@@ -113,15 +116,9 @@ def test_provider_sensor_timestamp_and_days_until():
     assert ATTR_DAYS_UNTIL_COLLECTION_DATE in attrs
     assert attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] == 1
 
-    # A timestamp state must not carry enum options - HA shows "options" as
-    # a capability attribute ("Possible states") whenever it's set at all,
-    # regardless of the sensor's current device_class, so a timestamp-mode
-    # sensor advertising options would be misleading.
-    assert sensor._attr_options is None
 
-
-def test_attr_options_clears_when_switching_from_default_label_to_timestamp():
-    """Options set during a default_label fallback don't leak into a later timestamp update."""
+def test_device_class_clears_when_switching_from_default_label_to_timestamp():
+    """device_class set during a default_label fallback doesn't leak into a later timestamp update."""
     today = dt_util.now().date()
     target = today + timedelta(days=1)
 
@@ -140,7 +137,7 @@ def test_attr_options_clears_when_switching_from_default_label_to_timestamp():
     sensor.async_write_ha_state = MagicMock()
 
     sensor._handle_coordinator_update()
-    assert sensor._attr_options == ["geen"]
+    assert sensor._attr_device_class is None
 
     # A pickup date now appears on a later refresh.
     coordinator.waste_data_with_today = {"restafval": target}
@@ -148,7 +145,7 @@ def test_attr_options_clears_when_switching_from_default_label_to_timestamp():
     sensor._handle_coordinator_update()
 
     assert isinstance(sensor.native_value, datetime)
-    assert sensor._attr_options is None
+    assert sensor._attr_device_class == SensorDeviceClass.TIMESTAMP
 
 
 async def test_added_to_hass_populates_initial_state():
@@ -209,13 +206,8 @@ async def test_added_to_hass_without_data_keeps_default():
     sensor.async_write_ha_state.assert_not_called()
 
 
-def test_default_label_fallback_uses_enum_device_class():
-    """When nothing is scheduled, state stays raw and enum options match it.
-
-    This is what lets HA translate the displayed text (via a "state"
-    translation) without the sensor's actual state/native_value ever being
-    anything other than the raw default_label.
-    """
+def test_default_label_fallback_state():
+    """When nothing is scheduled, state stays the raw default_label."""
     coordinator = FakeCoordinator(provider_data={"restafval": "geen"})
     hass = _make_hass()
 
@@ -233,12 +225,11 @@ def test_default_label_fallback_uses_enum_device_class():
     sensor._handle_coordinator_update()
 
     assert sensor.native_value == "geen"
-    assert sensor._attr_device_class == SensorDeviceClass.ENUM
-    assert sensor._attr_options == ["geen"]
+    assert sensor._attr_device_class is None
 
 
-def test_default_label_options_reflect_custom_label():
-    """A custom default_label is still a valid (self-consistent) enum option."""
+def test_custom_default_label_fallback_state():
+    """A custom default_label is reported as-is when nothing is scheduled."""
     coordinator = FakeCoordinator(provider_data={"restafval": "nothing scheduled"})
     hass = _make_hass()
 
@@ -256,40 +247,11 @@ def test_default_label_options_reflect_custom_label():
     sensor._handle_coordinator_update()
 
     assert sensor.native_value == "nothing scheduled"
-    assert sensor._attr_device_class == SensorDeviceClass.ENUM
-    assert sensor._attr_options == ["nothing scheduled"]
+    assert sensor._attr_device_class is None
 
 
-def test_options_stay_consistent_when_cached_value_differs_from_configured_label():
-    """Options always match state, even if cached data predates a default_label change.
-
-    _is_cache_for_current_config() doesn't compare default_label, so a
-    stale cache can hold an older label than what's currently configured.
-    HA's SensorEntity.state raises if state isn't in options, so both must
-    be derived from the same value rather than options coming from config.
-    """
-    coordinator = FakeCoordinator(provider_data={"restafval": "geen"})
-    hass = _make_hass()
-
-    cfg = {
-        CONF_COLLECTOR: "mijnafvalwijzer",
-        CONF_POSTAL_CODE: "1234AB",
-        CONF_HOUSE_NUMBER: "1",
-        CONF_SUFFIX: "",
-        CONF_DEFAULT_LABEL: "niets",  # changed after the cache was written
-    }
-
-    sensor = ProviderSensor(hass, "restafval", coordinator, cfg)
-    sensor.async_write_ha_state = MagicMock()
-
-    sensor._handle_coordinator_update()
-
-    assert sensor.native_value == "geen"
-    assert sensor._attr_options == ["geen"]
-
-
-def test_error_state_uses_enum_device_class_for_non_notification_sensor():
-    """An error falling back to default_label also gets enum device_class."""
+def test_error_state_has_no_device_class_for_non_notification_sensor():
+    """An error falling back to default_label carries no device_class."""
     hass = _make_hass()
     cfg = {
         CONF_COLLECTOR: "mijnafvalwijzer",
@@ -307,11 +269,11 @@ def test_error_state_uses_enum_device_class_for_non_notification_sensor():
     sensor._handle_coordinator_update()
 
     assert sensor.native_value == "geen"
-    assert sensor._attr_device_class == SensorDeviceClass.ENUM
+    assert sensor._attr_device_class is None
 
 
-def test_notification_sensor_never_gets_enum_device_class():
-    """The notifications sensor is a count, never an enum-classed text sensor."""
+def test_notification_sensor_never_gets_a_device_class():
+    """The notifications sensor is a count, never a classed text sensor."""
     coordinator = FakeCoordinator(notifications=[])
     hass = _make_hass()
 
@@ -328,5 +290,52 @@ def test_notification_sensor_never_gets_enum_device_class():
 
     sensor._handle_coordinator_update()
 
-    assert sensor._attr_options is None
     assert sensor._attr_device_class is None
+
+
+async def test_default_label_state_survives_real_ha_validation(hass):
+    """The default_label fallback state passes HA's real SensorEntity.state check.
+
+    Registers through a real entity platform so state/device_class run
+    through HA's own validation, rather than only reading the attributes
+    off a bare instance.
+    """
+    coordinator = FakeCoordinator(provider_data={"restafval": "geen"})
+    cfg = {
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "1",
+        CONF_SUFFIX: "",
+        CONF_DEFAULT_LABEL: "geen",
+    }
+    sensor = ProviderSensor(hass, "restafval", coordinator, cfg)
+
+    platform = MockEntityPlatform(hass, domain="sensor")
+    await platform.async_add_entities([sensor])
+    sensor._handle_coordinator_update()
+    await hass.async_block_till_done()
+
+    assert hass.states.get(sensor.entity_id).state == "geen"
+
+
+async def test_timestamp_state_survives_real_ha_validation(hass):
+    """A scheduled pickup date passes HA's real SensorEntity.state check."""
+    target = dt_util.now().date() + timedelta(days=1)
+    coordinator = FakeCoordinator(provider_data={"restafval": target})
+    cfg = {
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "1",
+        CONF_SUFFIX: "",
+        CONF_DEFAULT_LABEL: "geen",
+    }
+    sensor = ProviderSensor(hass, "restafval", coordinator, cfg)
+
+    platform = MockEntityPlatform(hass, domain="sensor")
+    await platform.async_add_entities([sensor])
+    sensor._handle_coordinator_update()
+    await hass.async_block_till_done()
+
+    state = hass.states.get(sensor.entity_id)
+    assert state.state not in (None, "unknown", "unavailable")
+    assert dt_util.parse_datetime(state.state) is not None

@@ -36,11 +36,11 @@ def _load_sensor_translations(lang: str) -> dict[str, Any]:
 
     Falls back to the base language for regional codes, then to English.
     """
-    base_lang = lang.split("-", maxsplit=1)[0].lower()
-    trans_path = _TRANSLATIONS_DIR / f"{base_lang}.json"
-    if not trans_path.is_file():
-        trans_path = _TRANSLATIONS_DIR / "en.json"
     try:
+        base_lang = lang.split("-", maxsplit=1)[0].lower()
+        trans_path = _TRANSLATIONS_DIR / f"{base_lang}.json"
+        if not trans_path.is_file():
+            trans_path = _TRANSLATIONS_DIR / "en.json"
         with open(trans_path, encoding="utf-8") as f:
             return json.load(f).get("entity", {}).get("sensor", {})
     except Exception as err:
