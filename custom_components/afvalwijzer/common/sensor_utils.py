@@ -121,6 +121,54 @@ def build_device_info(config: dict[str, Any]) -> DeviceInfo:
     )
 
 
+# entity.sensor.* also carries HA entity-name translations for these sensor
+# kinds; they must never match as if they were waste-type text.
+_RESERVED_SENSOR_KIND_KEYS = frozenset(
+    {
+        "today",
+        "tomorrow",
+        "day_after_tomorrow",
+        "next_date",
+        "next_in_days",
+        "next_type",
+        "next_item",
+        "notifications",
+    }
+)
+
+
+def translated_type_list(
+    value: Any, coordinator: Any, *, default_label: str | None = None
+) -> list[str] | None:
+    """Split a (possibly comma-joined) waste type value into translated parts.
+
+    Returns None if value isn't a non-empty string. Parts without a known
+    translation fall back to their original text. A value matching
+    default_label is kept as one part rather than split on comma.
+    """
+    if not isinstance(value, str) or not value:
+        return None
+
+    sensor_translations = getattr(coordinator, "sensor_translations", {})
+
+    parts = (
+        [value]
+        if value == default_label
+        else [p.strip() for p in value.split(",") if p.strip()]
+    )
+    translated_parts = []
+    for part in parts:
+        safe_part = part.lower().replace(" ", "_").replace("-", "_")
+        translation = (
+            {}
+            if safe_part in _RESERVED_SENSOR_KIND_KEYS
+            else sensor_translations.get(safe_part, {})
+        )
+        translated_parts.append(translation.get("name", part))
+
+    return translated_parts
+
+
 def parse_and_apply_value(
     value: Any,
 ) -> tuple[Any, SensorDeviceClass | None]:

@@ -19,6 +19,7 @@ from .common.sensor_utils import (
     date_to_local_midnight,
     icon_for_waste_type,
     make_unique_id,
+    translated_type_list,
 )
 from .const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,
@@ -33,6 +34,12 @@ from .const.const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+# waste_type keys whose value is (possibly comma-joined) waste type text,
+# as opposed to a date (next_date) or a count (next_in_days).
+_TRANSLATABLE_WASTE_TYPES = frozenset(
+    {"today", "tomorrow", "day_after_tomorrow", "next_type"}
+)
+
 
 @dataclass(slots=True)
 class _Config:
@@ -42,6 +49,9 @@ class _Config:
 
 class CustomSensor(CoordinatorEntity, SensorEntity):
     """Representation of a custom based waste sensor."""
+
+    # Localized text, not sensor state - excluded from recorder history.
+    _unrecorded_attributes = frozenset({"translated_types"})
 
     def __init__(
         self,
@@ -128,6 +138,12 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
         }
         if "next_date" in (self.waste_type or "").lower():
             attrs[ATTR_DAYS_UNTIL_COLLECTION_DATE] = self._days_until_collection_date
+        if self.waste_type in _TRANSLATABLE_WASTE_TYPES:
+            attrs["translated_types"] = translated_type_list(
+                self._fallback_state,
+                self.coordinator,
+                default_label=self._cfg.default_label,
+            )
         return attrs
 
     @callback
