@@ -1,38 +1,108 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
+"""Verify the checked-out version is releasable as the given tag.
 
-set -e
+Checks, in order:
+  1. the tag is a well-formed version (YYYY.SEQ or YYYY.SEQ.0bN)
+  2. manifest.json and const.py both carry exactly that version
+  3. the tag is newer than every other release tag using this scheme
 
-cd "$(dirname "$0")/.."
+Deliberately dependency-free: the release workflow blocks all egress except
+GitHub, so it cannot pip-install anything. Ordering is computed from the
+version grammar rather than AwesomeVersion; tests/test_version_scheme.py
+cross-checks that the two agree.
+"""
 
-TAG="${1:?usage: scripts/verify-version <tag>}"
+import json
+import pathlib
+import re
+import subprocess
+import sys
 
-MANIFEST_VERSION="$(python3 -c '
-import json, pathlib
-print(json.loads(pathlib.Path("custom_components/afvalwijzer/manifest.json").read_text())["version"])
-')"
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
 
-CONST_VERSION="$(python3 -c '
-import pathlib, re
-text = pathlib.Path("custom_components/afvalwijzer/const/const.py").read_text()
-match = re.search(r"VERSION\s*=\s*\"([^\"]+)\"", text)
-print(match.group(1) if match else "")
-')"
+from update_version import VERSION_RE, sort_key  # noqa: E402
 
-status=0
+MANIFEST_PATH = REPO_ROOT / "custom_components/afvalwijzer/manifest.json"
+CONST_PATH = REPO_ROOT / "custom_components/afvalwijzer/const/const.py"
+CONST_VERSION_RE = re.compile(r'VERSION\s*=\s*"(?P<version>[^"]+)"')
 
-if [ "$MANIFEST_VERSION" != "$TAG" ]; then
-    echo "manifest.json version '$MANIFEST_VERSION' does not match tag '$TAG'" >&2
-    status=1
-fi
 
-if [ "$CONST_VERSION" != "$TAG" ]; then
-    echo "const.py VERSION '$CONST_VERSION' does not match tag '$TAG'" >&2
-    status=1
-fi
+def _manifest_version() -> str:
+    return str(json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["version"])
 
-if [ "$status" -ne 0 ]; then
-    echo "Refusing to release: run 'python3 update_version.py' and retag." >&2
-    exit 1
-fi
 
-echo "Version OK: $TAG"
+def _const_version() -> str:
+    match = CONST_VERSION_RE.search(CONST_PATH.read_text(encoding="utf-8"))
+    return match.group("version") if match else ""
+
+
+def _existing_tags(exclude: str) -> list[str]:
+    """Return known release tags in this scheme, excluding the one being released.
+
+    Tags from older schemes (YYYY.MM.NN, the retired -bNN betas) do not parse and
+    are skipped: they predate this grammar and cannot be meaningfully compared.
+    """
+    result = subprocess.run(
+        ["git", "tag", "--list"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return [
+        tag
+        for tag in (line.strip() for line in result.stdout.splitlines())
+        if tag and tag != exclude and VERSION_RE.match(tag)
+    ]
+
+
+def main() -> int:
+    """Verify the tag passed as the first argument."""
+    if len(sys.argv) != 2:
+        print("usage: scripts/verify-version <tag>", file=sys.stderr)
+        return 2
+
+    tag = sys.argv[1].strip()
+    errors: list[str] = []
+
+    if not VERSION_RE.match(tag):
+        print(
+            f"Tag '{tag}' is not a valid version; expected YYYY.SEQ or YYYY.SEQ.0bN.\n"
+            "Note that the retired '-bNN' beta suffix is rejected by AwesomeVersion, "
+            "which Home Assistant and HACS use to compare versions.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if (manifest_version := _manifest_version()) != tag:
+        errors.append(f"manifest.json version '{manifest_version}' does not match tag")
+
+    if (const_version := _const_version()) != tag:
+        errors.append(f"const.py VERSION '{const_version}' does not match tag")
+
+    if newer := [
+        t for t in _existing_tags(exclude=tag) if sort_key(t) >= sort_key(tag)
+    ]:
+        highest = max(newer, key=sort_key)
+        errors.append(
+            f"tag is not newer than existing release '{highest}'. "
+            "A beta sorts below its own stable release, so a sequence that has "
+            "already shipped cannot be re-opened as a beta; use the next sequence."
+        )
+
+    if errors:
+        for error in errors:
+            print(f"{tag}: {error}", file=sys.stderr)
+        print(
+            "Refusing to release: run 'python3 update_version.py' and retag.",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"Version OK: {tag}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

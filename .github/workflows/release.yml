@@ -22,6 +22,10 @@ jobs:
             objects.githubusercontent.com:443
             uploads.github.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Tags are needed to check the new one is newer than every existing
+          # release; the default shallow checkout fetches none.
+          fetch-depth: 0
       - name: Verify manifest and const versions match the tag
         env:
           TAG: ${{ github.ref_name }}

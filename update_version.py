@@ -24,6 +24,25 @@ VERSION_ASSIGN_RE = re.compile(r'VERSION\s*=\s*"(?P<version>[^"]+)"')
 FIRST_SEQ = 1000
 
 
+def sort_key(version: str) -> tuple[int, int, float]:
+    """Return an ordering key for a version in this scheme.
+
+    A stable release sorts above every beta of the same sequence number, which
+    is why an already-released sequence can never be re-opened as a beta. This
+    mirrors AwesomeVersion's ordering without needing it as a dependency; see
+    tests/test_version_scheme.py for the cross-check.
+    """
+    match = VERSION_RE.match(version)
+    if not match:
+        raise ValueError(f"not a recognised version: {version!r}")
+    beta = match.group("beta")
+    return (
+        int(match.group("year")),
+        int(match.group("seq")),
+        int(beta) if beta else float("inf"),
+    )
+
+
 def compute_next_version(current_version: str | None, *, beta: bool = False) -> str:
     """Compute the next version string based on the current date and version.
 
