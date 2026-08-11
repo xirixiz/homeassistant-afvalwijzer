@@ -59,6 +59,11 @@ def icon_for_waste_type(waste_type: str, default: str | None = None) -> str | No
     return WASTE_TYPE_ICONS.get(waste_type, default)
 
 
+def normalize_waste_type_key(waste_type: str) -> str:
+    """Normalize a raw waste type into its translation_key/lookup form."""
+    return waste_type.lower().replace("-", "_")
+
+
 # Suggested initial color (hex) per provider waste type, based on
 # mijnafvalwijzer.nl's own category colors where there's a clear real-world
 # convention. This is only ever an *initial* suggestion for a per-type

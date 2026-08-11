@@ -52,6 +52,7 @@
           "include_today": "Include today's pickup",
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list",
+          "enable_calendar": "Enable calendar",
           "separate_calendars": "Create a separate calendar per waste type"
         }
       }
@@ -133,6 +134,14 @@
       },
       "geen": {
         "name": "None"
+      }
+    },
+    "calendar": {
+      "calendar": {
+        "name": "Calendar"
+      },
+      "type_calendar": {
+        "name": "{type} Calendar"
       }
     }
   }

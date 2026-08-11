@@ -8,6 +8,7 @@ import logging
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util, slugify
 
 from .common.sensor_utils import (
@@ -15,11 +16,14 @@ from .common.sensor_utils import (
     build_device_info,
     icon_for_waste_type,
     initial_color_for_waste_type,
+    normalize_waste_type_key,
 )
 from .const.const import (
     CONF_COLLECTOR,
+    CONF_ENABLE_CALENDAR,
     CONF_EXCLUDE_LIST,
     CONF_SEPARATE_CALENDARS,
+    DEFAULT_ENABLE_CALENDAR,
     DEFAULT_SEPARATE_CALENDARS,
     DOMAIN,
     SENSOR_PREFIX,
@@ -130,6 +134,34 @@ def _async_remove_stale_calendars(hass, entry_id: str, separate: bool) -> None:
             registry.async_remove(entry.entity_id)
 
 
+@callback
+def _async_remove_all_calendars(hass, entry_id: str) -> None:
+    """Remove every calendar entity for this entry (calendar creation disabled)."""
+    registry = er.async_get(hass)
+    for entry in er.async_entries_for_config_entry(registry, entry_id):
+        if entry.domain == "calendar":
+            registry.async_remove(entry.entity_id)
+
+
+async def _async_type_calendar_names(hass) -> dict[str, str]:
+    """Return the sensor platform's translated waste-type names, keyed by type.
+
+    Reused for the type_calendar name placeholder, so a per-type calendar's
+    display name matches its sibling sensor's translated name instead of a
+    plain capitalization of the raw key.
+    """
+    translations = await async_get_translations(
+        hass, hass.config.language, "entity", integrations={DOMAIN}
+    )
+    prefix = f"component.{DOMAIN}.entity.sensor."
+    suffix = ".name"
+    return {
+        key[len(prefix) : -len(suffix)]: value
+        for key, value in translations.items()
+        if key.startswith(prefix) and key.endswith(suffix)
+    }
+
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the Afvalwijzer calendar(s)."""
     entry_id = getattr(config_entry, "entry_id", "test_entry_id")
@@ -139,6 +171,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     if not coordinator:
         _LOGGER.error("Afvalwijzer Calendar: Could not find coordinator!")
+        return
+
+    if not bool(coordinator.config.get(CONF_ENABLE_CALENDAR, DEFAULT_ENABLE_CALENDAR)):
+        _async_remove_all_calendars(hass, entry_id)
         return
 
     separate = bool(
@@ -160,6 +196,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     # keeps its calendar rather than having it vanish out from under
     # anyone using it on a dashboard.
     known_types: set[str] = set()
+    type_names = await _async_type_calendar_names(hass)
 
     @callback
     def _async_add_new_calendars() -> None:
@@ -169,7 +206,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             if waste_type not in known_types:
                 known_types.add(waste_type)
                 new_entities.append(
-                    AfvalwijzerTypeCalendar(coordinator, entry_id, waste_type)
+                    AfvalwijzerTypeCalendar(
+                        coordinator,
+                        entry_id,
+                        waste_type,
+                        translated_name=type_names.get(
+                            normalize_waste_type_key(waste_type)
+                        ),
+                    )
                 )
         if new_entities:
             _LOGGER.debug("Adding %d per-type calendar(s).", len(new_entities))
@@ -273,7 +317,8 @@ class AfvalwijzerCalendar(_AfvalwijzerCalendarBase):
     def __init__(self, coordinator, entry_id: str):
         """Initialize the Afvalwijzer calendar."""
         super().__init__(coordinator)
-        self._attr_name = "Afvalwijzer Calendar"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "calendar"
         self._attr_unique_id = f"afvalwijzer_calendar_{entry_id}"
 
         addr = address_key(coordinator.config)
@@ -287,11 +332,27 @@ class AfvalwijzerTypeCalendar(_AfvalwijzerCalendarBase):
     card supports per-calendar colors but not per-event colors.
     """
 
-    def __init__(self, coordinator, entry_id: str, waste_type: str):
-        """Initialize a per-waste-type Afvalwijzer calendar."""
+    def __init__(
+        self,
+        coordinator,
+        entry_id: str,
+        waste_type: str,
+        *,
+        translated_name: str | None = None,
+    ):
+        """Initialize a per-waste-type Afvalwijzer calendar.
+
+        translated_name is the sibling sensor's translated display name for
+        this waste type (e.g. "Organic waste (GFT)"), when known. Falls
+        back to a plain capitalization of the raw key otherwise.
+        """
         super().__init__(coordinator)
         self._waste_type = waste_type
-        self._attr_name = f"Afvalwijzer {_display_type(waste_type)} Calendar"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "type_calendar"
+        self._attr_translation_placeholders = {
+            "type": translated_name or _display_type(waste_type)
+        }
         self._attr_unique_id = f"afvalwijzer_calendar_{entry_id}_{waste_type}"
         self._attr_icon = icon_for_waste_type(waste_type, default="mdi:calendar")
         # One-time suggested color for this calendar (applied only when the
