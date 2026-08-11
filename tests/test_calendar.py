@@ -5,6 +5,10 @@ from types import SimpleNamespace
 from unittest.mock import DEFAULT, MagicMock, patch
 
 import pytest
+from pytest_homeassistant_custom_component.common import (
+    MockConfigEntry,
+    MockEntityPlatform,
+)
 
 from custom_components.afvalwijzer.calendar import (
     AfvalwijzerCalendar,
@@ -18,6 +22,7 @@ from custom_components.afvalwijzer.common.sensor_utils import (
     initial_color_for_waste_type,
 )
 from custom_components.afvalwijzer.const.const import CONF_SEPARATE_CALENDARS, DOMAIN
+from homeassistant.helpers import entity_registry as er
 
 
 def _mock_coordinator(*, raw=None, with_today=None, config=None):
@@ -257,6 +262,66 @@ def test_type_calendar_has_no_initial_color_for_unmapped_type():
     """A waste type without a known convention doesn't get a guessed color."""
     calendar = AfvalwijzerTypeCalendar(_mock_coordinator(), "test_entry_id", "maas")
     assert calendar.initial_color is None
+
+
+async def test_type_calendar_initial_color_survives_real_ha_validation(hass):
+    """The suggested initial_color passes HA's own registry validation.
+
+    Registers the entity through a real entity platform, exercising
+    CalendarEntity.get_initial_entity_options() (the actual cv.color_hex()
+    check and registry write HA performs) rather than just reading the
+    attribute off a bare instance.
+    """
+    coordinator = _mock_coordinator(
+        config={
+            "include_today": True,
+            "provider": "mijnafvalwijzer",
+            "postal_code": "1234AB",
+            "house_number": "1",
+        }
+    )
+    calendar = AfvalwijzerTypeCalendar(coordinator, "test_entry_id", "gft")
+
+    platform = MockEntityPlatform(hass, domain="calendar")
+    await platform.async_add_entities([calendar])
+    await hass.async_block_till_done()
+
+    registry_entry = er.async_get(hass).async_get(calendar.entity_id)
+    assert registry_entry.options["calendar"]["color"] == "#4CAF50"
+
+
+async def test_calendars_share_one_real_device(hass):
+    """Combined and per-type calendars register under the same HA device.
+
+    Registers both through a real entity platform tied to a config entry,
+    exercising device_registry.async_get_or_create() end to end rather
+    than just comparing device_info dicts directly.
+    """
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={
+            "provider": "mijnafvalwijzer",
+            "postal_code": "1234AB",
+            "house_number": "1",
+        },
+    )
+    entry.add_to_hass(hass)
+
+    coordinator = _mock_coordinator(config=dict(entry.data))
+    combined = AfvalwijzerCalendar(coordinator, entry.entry_id)
+    per_type = AfvalwijzerTypeCalendar(coordinator, entry.entry_id, "gft")
+
+    platform = MockEntityPlatform(hass, domain="calendar")
+    platform.config_entry = entry
+    await platform.async_add_entities([combined, per_type])
+    await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    combined_entry = registry.async_get(combined.entity_id)
+    per_type_entry = registry.async_get(per_type.entity_id)
+
+    assert combined_entry.device_id is not None
+    assert combined_entry.device_id == per_type_entry.device_id
 
 
 def test_initial_color_for_waste_type_known_and_unknown():
