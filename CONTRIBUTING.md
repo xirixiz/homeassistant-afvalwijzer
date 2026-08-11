@@ -8,21 +8,31 @@ instead.
 
 ## Getting started
 
+### Dev container (recommended)
+
+Open the repository in VS Code and reopen in the container. `scripts/setup` runs
+automatically as `postCreateCommand` and you are done.
+
+### Local checkout
+
 ```bash
 git clone https://github.com/xirixiz/homeassistant-afvalwijzer.git
 cd homeassistant-afvalwijzer
 python3 -m venv .venv
 source .venv/bin/activate
-scripts/setup
+python3 -m pip install -r requirements.txt -r requirements_test.txt
+pre-commit install
 ```
 
-`scripts/setup` installs the system dependencies, `requirements.txt`, and the
-pre-commit hook. It does **not** install the test-only dependencies, so before
-running the suite:
+This is the same set of Python packages CI installs, and it is enough to run the
+test suite.
 
-```bash
-python3 -m pip install -r requirements_test.txt
-```
+Do **not** run `scripts/setup` on your own machine. It is the dev container
+bootstrap: it calls `sudo apt-get install` for `libpcap-dev` and
+`libturbojpeg0`, which are Home Assistant core build dependencies this
+integration does not need, and it installs into whatever Python happens to be
+active rather than a virtualenv. That is fine inside a disposable container on
+Debian, and intrusive or simply broken anywhere else.
 
 ## Day-to-day scripts
 
@@ -30,7 +40,7 @@ Everything you need is already in `scripts/`:
 
 | Script | Purpose |
 | --- | --- |
-| `scripts/setup` | Install dependencies and the pre-commit hook |
+| `scripts/setup` | Dev container bootstrap only, see above |
 | `scripts/test` | Run the test suite (`pytest tests`) |
 | `scripts/coverage` | Tests plus coverage and `pytest.xml`, which is what CI runs |
 | `scripts/test-module` | Run a single module against the live providers |
