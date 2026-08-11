@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+TAG="${1:?usage: scripts/verify-version <tag>}"
+
+MANIFEST_VERSION="$(python3 -c '
+import json, pathlib
+print(json.loads(pathlib.Path("custom_components/afvalwijzer/manifest.json").read_text())["version"])
+')"
+
+CONST_VERSION="$(python3 -c '
+import pathlib, re
+text = pathlib.Path("custom_components/afvalwijzer/const/const.py").read_text()
+match = re.search(r"VERSION\s*=\s*\"([^\"]+)\"", text)
+print(match.group(1) if match else "")
+')"
+
+status=0
+
+if [ "$MANIFEST_VERSION" != "$TAG" ]; then
+    echo "manifest.json version '$MANIFEST_VERSION' does not match tag '$TAG'" >&2
+    status=1
+fi
+
+if [ "$CONST_VERSION" != "$TAG" ]; then
+    echo "const.py VERSION '$CONST_VERSION' does not match tag '$TAG'" >&2
+    status=1
+fi
+
+if [ "$status" -ne 0 ]; then
+    echo "Refusing to release: run 'python3 update_version.py' and retag." >&2
+    exit 1
+fi
+
+echo "Version OK: $TAG"

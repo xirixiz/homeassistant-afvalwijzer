@@ -22,10 +22,26 @@ jobs:
             objects.githubusercontent.com:443
             uploads.github.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Verify manifest and const versions match the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: scripts/verify-version "$TAG"
+      - name: Determine release type
+        id: release_type
+        env:
+          TAG: ${{ github.ref_name }}
+        # Betas are YYYY.SEQ.0bN, so match a trailing beta counter rather than
+        # the old "-b" tag style.
+        run: |
+          if [[ "$TAG" =~ b[0-9]+$ ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
       - run: zip -r ../../afvalwijzer.zip . -x "*/__pycache__/*" "__pycache__/*"
         working-directory: custom_components/afvalwijzer
       - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           files: "afvalwijzer.zip"
           generate_release_notes: true
-          prerelease: ${{ contains(github.ref_name, '-b') }}
+          prerelease: ${{ steps.release_type.outputs.prerelease }}
