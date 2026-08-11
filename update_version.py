@@ -11,8 +11,9 @@ import re
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
-MANIFEST_PATH = Path("custom_components/afvalwijzer/manifest.json")
-CONST_PATH = Path("custom_components/afvalwijzer/const/const.py")
+REPO_ROOT = Path(__file__).resolve().parent
+MANIFEST_PATH = REPO_ROOT / "custom_components/afvalwijzer/manifest.json"
+CONST_PATH = REPO_ROOT / "custom_components/afvalwijzer/const/const.py"
 
 # YYYY.SEQ for a stable release, YYYY.SEQ.0bN for a beta. The ".0b" form is
 # what AwesomeVersion (used by HA and HACS) parses as a CalVer pre-release:

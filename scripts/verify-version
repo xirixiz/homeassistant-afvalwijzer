@@ -14,18 +14,19 @@ cross-checks that the two agree.
 
 import json
 import pathlib
-import re
 import subprocess
 import sys
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from update_version import VERSION_RE, sort_key  # noqa: E402
-
-MANIFEST_PATH = REPO_ROOT / "custom_components/afvalwijzer/manifest.json"
-CONST_PATH = REPO_ROOT / "custom_components/afvalwijzer/const/const.py"
-CONST_VERSION_RE = re.compile(r'VERSION\s*=\s*"(?P<version>[^"]+)"')
+from update_version import (  # noqa: E402
+    CONST_PATH,
+    MANIFEST_PATH,
+    VERSION_ASSIGN_RE,
+    VERSION_RE,
+    sort_key,
+)
 
 
 def _manifest_version() -> str:
@@ -33,7 +34,7 @@ def _manifest_version() -> str:
 
 
 def _const_version() -> str:
-    match = CONST_VERSION_RE.search(CONST_PATH.read_text(encoding="utf-8"))
+    match = VERSION_ASSIGN_RE.search(CONST_PATH.read_text(encoding="utf-8"))
     return match.group("version") if match else ""
 
 
