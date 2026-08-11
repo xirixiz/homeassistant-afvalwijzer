@@ -2,6 +2,7 @@
 
 from types import SimpleNamespace
 
+from custom_components.afvalwijzer import _load_sensor_translations
 from custom_components.afvalwijzer.common.sensor_utils import translated_type_list
 
 _TRANSLATIONS = {
@@ -42,6 +43,19 @@ def test_translated_type_list_unmapped_falls_back_to_original():
 def test_translated_type_list_default_label():
     """The default_label value (e.g. 'geen') translates like any other entry."""
     assert translated_type_list("geen", _coordinator()) == ["None"]
+
+
+def test_translated_type_list_default_label_pinned_to_real_translation_data():
+    """The 'geen' -> 'None' translation holds against the real shipped JSON.
+
+    entity.sensor.geen has no translation_key pointing at it (those come
+    from waste types, not default_label) - its only consumer is this
+    lookup, reached indirectly. Without this, the entry could be deleted
+    as apparently-dead and translated_types would silently start
+    reporting ["geen"] with no test failing.
+    """
+    coordinator = SimpleNamespace(sensor_translations=_load_sensor_translations("en"))
+    assert translated_type_list("geen", coordinator) == ["None"]
 
 
 def test_translated_type_list_custom_default_label_with_comma_not_split():

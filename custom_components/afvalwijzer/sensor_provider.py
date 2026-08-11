@@ -101,7 +101,6 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
 
     def _set_error_state(self) -> None:
         """Set sensor to error state."""
-        self._attr_device_class = None
         if self._is_notification_sensor:
             self._native_value = 0
             self._fallback_state = "0"
@@ -110,6 +109,7 @@ class ProviderSensor(CoordinatorEntity, SensorEntity):
             self._native_value = None
 
         self._days_until_collection_date = None
+        self._attr_device_class = None
         self._is_collection_date_today = False
         self._is_collection_date_tomorrow = False
         self._is_collection_date_day_after_tomorrow = False
