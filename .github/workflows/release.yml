@@ -12,8 +12,6 @@ jobs:
   release:
     runs-on: "ubuntu-latest"
     env:
-      # Kept out of the run scripts themselves so the tag is never expanded
-      # into a shell command.
       TAG: ${{ github.ref_name }}
     steps:
       - name: Harden Runner
@@ -27,15 +25,11 @@ jobs:
             uploads.github.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Tags are needed to check the new one is newer than every existing
-          # release; the default shallow checkout fetches none.
           fetch-depth: 0
       - name: Verify manifest and const versions match the tag
         run: scripts/verify-version "$TAG"
       - name: Determine release type
         id: release_type
-        # Betas are YYYY.SEQ.0bN, so match a trailing beta counter rather than
-        # the old "-b" tag style.
         run: |
           if [[ "$TAG" =~ b[0-9]+$ ]]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
