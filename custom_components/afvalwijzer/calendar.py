@@ -15,8 +15,8 @@ from .const.const import CONF_COLLECTOR, CONF_EXCLUDE_LIST, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 # unique_id used by the calendar entity before it was scoped per config
-# entry (pre-2026.1018); anyone upgrading from 2026.1017 gets an orphan
-# under it. Safe to drop once that version is far in the past.
+# entry in 2026.1018-b02; anyone who ran 2026.1015 through the builds
+# before that has an orphan under it. Safe to remove after 2027-08.
 _LEGACY_UNIQUE_ID = "afvalwijzer_calendar_filtered"
 
 # Waste type names that are abbreviations and should be fully uppercased
