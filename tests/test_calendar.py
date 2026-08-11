@@ -1,11 +1,16 @@
 """Test calendar for AfvalWijzer."""
 
 from datetime import date, datetime
-from unittest.mock import MagicMock
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from custom_components.afvalwijzer.calendar import AfvalwijzerCalendar
+from custom_components.afvalwijzer.calendar import (
+    AfvalwijzerCalendar,
+    _async_remove_legacy_calendar,
+)
+from custom_components.afvalwijzer.const.const import DOMAIN
 
 
 def _mock_coordinator(*, raw=None, with_today=None, config=None):
@@ -138,3 +143,32 @@ def test_calendar_next_event_groups_types_on_same_date():
     assert event is not None
     assert event.start == date.today()
     assert event.summary == "Mijnafvalwijzer: GFT, Papier"
+
+
+def test_remove_legacy_calendar_cleans_up_pre_2026_1018_orphan():
+    """Anyone updating straight from 2026.1017 has an orphan under the old global unique_id."""
+    registry = MagicMock()
+    registry.async_get_entity_id.return_value = "calendar.afvalwijzer_calendar"
+
+    with patch(
+        "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
+    ):
+        _async_remove_legacy_calendar(SimpleNamespace())
+
+    registry.async_get_entity_id.assert_called_once_with(
+        "calendar", DOMAIN, "afvalwijzer_calendar_filtered"
+    )
+    registry.async_remove.assert_called_once_with("calendar.afvalwijzer_calendar")
+
+
+def test_remove_legacy_calendar_no_op_when_absent():
+    """Nothing is removed once the legacy entity is already gone."""
+    registry = MagicMock()
+    registry.async_get_entity_id.return_value = None
+
+    with patch(
+        "custom_components.afvalwijzer.calendar.er.async_get", return_value=registry
+    ):
+        _async_remove_legacy_calendar(SimpleNamespace())
+
+    registry.async_remove.assert_not_called()
