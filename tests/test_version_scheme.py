@@ -10,7 +10,7 @@ orders the same way under both comparators.
 from awesomeversion import AwesomeVersion
 import pytest
 
-from update_version import compute_next_version, sort_key
+from version_scheme import compute_next_version, sort_key
 
 # Ascending order, mixing betas and stables across sequences and years.
 _ASCENDING = [
@@ -71,6 +71,6 @@ def test_retired_beta_suffix_is_rejected():
     ],
 )
 def test_computed_versions_move_forward(current, beta, expected):
-    """Each step update_version.py can take is an increase, never a downgrade."""
+    """Each step scripts/update-version can take is an increase, never a downgrade."""
     assert compute_next_version(current, beta=beta) == expected
     assert sort_key(current) < sort_key(expected)

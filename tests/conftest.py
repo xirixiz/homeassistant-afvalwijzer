@@ -18,9 +18,12 @@ except Exception:
 # Set environment variable to skip runtime setup during tests
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 
-# Add the repository root to the path so `custom_components` is importable
+# Add scripts/ to the path so the release tooling (version_scheme) is importable.
+# The repository root itself is already on sys.path: tests/ is a package, so
+# pytest prepends the first non-package parent. scripts/ is not a package, so it
+# has to be added by hand.
 repo_root = Path(__file__).parent.parent
-sys.path.insert(0, str(repo_root))
+sys.path.insert(0, str(repo_root / "scripts"))
 
 
 @pytest.fixture

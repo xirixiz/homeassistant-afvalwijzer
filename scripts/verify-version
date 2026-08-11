@@ -18,9 +18,9 @@ import subprocess
 import sys
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from update_version import (  # noqa: E402
+from version_scheme import (  # noqa: E402
     CONST_PATH,
     MANIFEST_PATH,
     VERSION_ASSIGN_RE,
@@ -96,7 +96,7 @@ def main() -> int:
         for error in errors:
             print(f"{tag}: {error}", file=sys.stderr)
         print(
-            "Refusing to release: run 'python3 update_version.py' and retag.",
+            "Refusing to release: run 'scripts/update-version' and retag.",
             file=sys.stderr,
         )
         return 1

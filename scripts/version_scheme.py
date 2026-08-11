@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
-"""Afvalwijzer integration."""
+"""The Afvalwijzer release version scheme.
 
-import argparse
+The grammar, ordering and file-writing shared by `scripts/update-version` and
+`scripts/verify-version`. This is a module rather than an executable because
+both of those import it, as does tests/test_version_scheme.py.
+"""
+
 from datetime import date
 import json
-import logging
 from pathlib import Path
 import re
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-LOGGER = logging.getLogger(__name__)
-
-REPO_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPO_ROOT / "custom_components/afvalwijzer/manifest.json"
 CONST_PATH = REPO_ROOT / "custom_components/afvalwijzer/const/const.py"
 
@@ -85,7 +84,13 @@ def compute_next_version(current_version: str | None, *, beta: bool = False) -> 
     return f"{current_year}.{seq + 1}"
 
 
-def _write_version(new_version: str) -> str | None:
+def current_version() -> str | None:
+    """Return the version currently recorded in the manifest, if any."""
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    return str(manifest.get("version", "")).strip() or None
+
+
+def write_version(new_version: str) -> str | None:
     """Write `new_version` to the manifest and const module, returning the old one."""
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     old_version = str(manifest.get("version", "")).strip() or None
@@ -108,40 +113,3 @@ def _write_version(new_version: str) -> str | None:
         CONST_PATH.write_text(new_const_text, encoding="utf-8")
 
     return old_version
-
-
-def main() -> None:
-    """Update version numbers in manifest.json and const.py."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "--beta",
-        action="store_true",
-        help="cut a beta (YYYY.SEQ.0bN) instead of a stable release",
-    )
-    group.add_argument(
-        "--set",
-        dest="explicit",
-        metavar="VERSION",
-        help="set an explicit version instead of computing the next one",
-    )
-    args = parser.parse_args()
-
-    if args.explicit:
-        if not VERSION_RE.match(args.explicit.strip()):
-            parser.error(
-                f"Invalid version {args.explicit!r}; expected YYYY.SEQ or YYYY.SEQ.0bN"
-            )
-        new_version = args.explicit.strip()
-    else:
-        manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        current = str(manifest.get("version", "")).strip() or None
-        new_version = compute_next_version(current, beta=args.beta)
-
-    old_version = _write_version(new_version)
-
-    LOGGER.info("Updated version from %s to %s", old_version, new_version)
-
-
-if __name__ == "__main__":
-    main()

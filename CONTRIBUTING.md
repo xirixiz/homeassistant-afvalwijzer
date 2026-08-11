@@ -42,6 +42,8 @@ Everything you need is already in `scripts/`:
 | `scripts/upgrade` | Upgrade to the latest (pre-release) Home Assistant |
 | `scripts/dev-branch` | Install Home Assistant from its `dev` branch |
 | `scripts/specific-version` | Pin a specific Home Assistant version |
+| `scripts/update-version` | Bump the version, see [Cutting a release](#cutting-a-release-maintainers) |
+| `scripts/verify-version` | Check a tag is releasable, see [Cutting a release](#cutting-a-release-maintainers) |
 
 `.pre-commit-config.yaml` runs ruff check and ruff format, and normalises JSON
 in `manifest.json`, `hacs.json`, `strings.json`, and the translation files. Hand
@@ -65,7 +67,7 @@ Versions are CalVer with a sequence number:
 - beta: `YYYY.SEQ.0bN`, for example `2026.1019.0b1`
 
 The sequence starts at `1000` each calendar year and only ever increases within
-that year. The grammar lives in `VERSION_RE` in `update_version.py`.
+that year. The grammar lives in `VERSION_RE` in `scripts/version_scheme.py`.
 
 The `.0b` spelling is load bearing. Home Assistant and HACS compare versions
 with AwesomeVersion, which rejects the retired `2026.1019-b01` form outright and
@@ -87,14 +89,14 @@ so if you change the grammar, that is the test that will tell you.
 2. Bump the version:
 
    ```bash
-   python3 update_version.py --beta          # next beta
-   python3 update_version.py                 # next stable
-   python3 update_version.py --set 2026.1020 # explicit version
+   scripts/update-version --beta          # next beta
+   scripts/update-version                 # next stable
+   scripts/update-version --set 2026.1020 # explicit version
    ```
 
    A stable bump *promotes* an in-progress beta to its final version rather than
    skipping a sequence: with `2026.1019.0b3` in the manifest, a plain
-   `update_version.py` produces `2026.1019`.
+   `scripts/update-version` produces `2026.1019`.
 
    This rewrites both `custom_components/afvalwijzer/manifest.json` and
    `custom_components/afvalwijzer/const/const.py`. Both must carry the version,
@@ -151,7 +153,7 @@ To recover, delete the tag and retag after fixing the version:
 ```bash
 git push --delete origin 2026.1019.0b1
 git tag -d 2026.1019.0b1
-python3 update_version.py --set <correct version>
+scripts/update-version --set <correct version>
 git commit -am "Prepare release <correct version>"
 git push origin main
 git tag <correct version>
