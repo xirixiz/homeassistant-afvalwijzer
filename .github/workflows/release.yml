@@ -11,6 +11,10 @@ permissions:
 jobs:
   release:
     runs-on: "ubuntu-latest"
+    env:
+      # Kept out of the run scripts themselves so the tag is never expanded
+      # into a shell command.
+      TAG: ${{ github.ref_name }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
@@ -27,13 +31,9 @@ jobs:
           # release; the default shallow checkout fetches none.
           fetch-depth: 0
       - name: Verify manifest and const versions match the tag
-        env:
-          TAG: ${{ github.ref_name }}
         run: scripts/verify-version "$TAG"
       - name: Determine release type
         id: release_type
-        env:
-          TAG: ${{ github.ref_name }}
         # Betas are YYYY.SEQ.0bN, so match a trailing beta counter rather than
         # the old "-b" tag style.
         run: |
