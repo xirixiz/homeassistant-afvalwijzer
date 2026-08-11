@@ -19,6 +19,7 @@ from .common.sensor_utils import (
     date_to_local_midnight,
     icon_for_waste_type,
     make_unique_id,
+    normalize_waste_type_key,
     translated_type_list,
 )
 from .const.const import (
@@ -78,7 +79,7 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
         self._days_until_collection_date: int | None = None
 
         self._attr_has_entity_name = True
-        self._attr_translation_key = waste_type.lower().replace("-", "_")
+        self._attr_translation_key = normalize_waste_type_key(waste_type)
 
         addr = address_key(config)
         self.entity_id = f"sensor.{slugify(SENSOR_PREFIX + addr + '_' + waste_type)}"

@@ -15,18 +15,22 @@ from homeassistant.helpers import config_validation as cv
 from .const.const import (
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
+    CONF_ENABLE_CALENDAR,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
     CONF_FRIENDLY_NAME,
     CONF_HOUSE_NUMBER,
     CONF_INCLUDE_TODAY,
     CONF_POSTAL_CODE,
+    CONF_SEPARATE_CALENDARS,
     CONF_SHOW_FULL_TIMESTAMP,
     CONF_STREET_NAME,
     CONF_SUFFIX,
     DEFAULT_DEFAULT_LABEL,
+    DEFAULT_ENABLE_CALENDAR,
     DEFAULT_EXCLUDE_LIST,
     DEFAULT_INCLUDE_TODAY,
+    DEFAULT_SEPARATE_CALENDARS,
     DEFAULT_SHOW_FULL_TIMESTAMP,
     DOMAIN,
     SENSOR_COLLECTORS_AMSTERDAM,
@@ -359,6 +363,16 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                     CONF_EXCLUDE_LIST,
                     default=current.get(CONF_EXCLUDE_LIST, DEFAULT_EXCLUDE_LIST),
                 ): cv.string,
+                vol.Optional(
+                    CONF_ENABLE_CALENDAR,
+                    default=current.get(CONF_ENABLE_CALENDAR, DEFAULT_ENABLE_CALENDAR),
+                ): cv.boolean,
+                vol.Optional(
+                    CONF_SEPARATE_CALENDARS,
+                    default=current.get(
+                        CONF_SEPARATE_CALENDARS, DEFAULT_SEPARATE_CALENDARS
+                    ),
+                ): cv.boolean,
             }
         )
 

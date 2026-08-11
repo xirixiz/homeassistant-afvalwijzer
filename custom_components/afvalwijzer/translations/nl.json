@@ -51,7 +51,9 @@
           "show_full_timestamp": "Volledige datum en tijd tonen",
           "include_today": "Ophalen van vandaag meenemen",
           "default_label": "Standaard label wanneer geen data bekend is",
-          "exclude_list": "Afvaltypes uitsluiten"
+          "exclude_list": "Afvaltypes uitsluiten",
+          "enable_calendar": "Kalender inschakelen",
+          "separate_calendars": "Maak een aparte kalender per afvaltype"
         }
       }
     }
@@ -132,6 +134,14 @@
       },
       "geen": {
         "name": "Geen"
+      }
+    },
+    "calendar": {
+      "calendar": {
+        "name": "Kalender"
+      },
+      "type_calendar": {
+        "name": "{type} Kalender"
       }
     }
   }
