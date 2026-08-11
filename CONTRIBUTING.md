@@ -10,8 +10,8 @@ instead.
 
 ### Dev container (recommended)
 
-Open the repository in VS Code and reopen in the container. `scripts/setup` runs
-automatically as `postCreateCommand` and you are done.
+Open the repository in VS Code and reopen in the container. Setup runs
+automatically and you are done.
 
 ### Local checkout
 
@@ -27,20 +27,12 @@ pre-commit install
 This is the same set of Python packages CI installs, and it is enough to run the
 test suite.
 
-Do **not** run `scripts/setup` on your own machine. It is the dev container
-bootstrap: it calls `sudo apt-get install` for `libpcap-dev` and
-`libturbojpeg0`, which are Home Assistant core build dependencies this
-integration does not need, and it installs into whatever Python happens to be
-active rather than a virtualenv. That is fine inside a disposable container on
-Debian, and intrusive or simply broken anywhere else.
-
 ## Day-to-day scripts
 
 Everything you need is already in `scripts/`:
 
 | Script | Purpose |
 | --- | --- |
-| `scripts/setup` | Dev container bootstrap only, see above |
 | `scripts/test` | Run the test suite (`pytest tests`) |
 | `scripts/coverage` | Tests plus coverage and `pytest.xml`, which is what CI runs |
 | `scripts/test-module` | Run a single module against the live providers |
