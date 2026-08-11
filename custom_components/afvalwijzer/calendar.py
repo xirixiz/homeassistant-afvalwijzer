@@ -228,6 +228,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class _AfvalwijzerCalendarBase(CalendarEntity):
     """Shared event logic for the combined and per-type calendar entities."""
 
+    _attr_has_entity_name = True
     _waste_type: str | None = None
 
     def __init__(self, coordinator):
@@ -317,7 +318,6 @@ class AfvalwijzerCalendar(_AfvalwijzerCalendarBase):
     def __init__(self, coordinator, entry_id: str):
         """Initialize the Afvalwijzer calendar."""
         super().__init__(coordinator)
-        self._attr_has_entity_name = True
         self._attr_translation_key = "calendar"
         self._attr_unique_id = f"afvalwijzer_calendar_{entry_id}"
 
@@ -348,7 +348,6 @@ class AfvalwijzerTypeCalendar(_AfvalwijzerCalendarBase):
         """
         super().__init__(coordinator)
         self._waste_type = waste_type
-        self._attr_has_entity_name = True
         self._attr_translation_key = "type_calendar"
         self._attr_translation_placeholders = {
             "type": translated_name or _display_type(waste_type)
