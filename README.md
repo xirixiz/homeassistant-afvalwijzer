@@ -504,11 +504,13 @@ description: "Notify the latest waste collector message to mobile app"
 triggers:
   - trigger: state
     entity_id: sensor.afvalwijzer_notifications
-    from: null
-    to: null
+    not_from:
+      - unknown
+      - unavailable
 conditions:
-  - condition: template
-    value_template: "{{ states('sensor.afvalwijzer_notifications') | int > 0 }}"
+  - condition: numeric_state
+    entity_id: sensor.afvalwijzer_notifications
+    above: 0
 actions:
   - action: notify.mobile_app
     data:
@@ -517,6 +519,10 @@ actions:
         {% set notifs = state_attr('sensor.afvalwijzer_notifications',
         'notifications') %} {{ notifs[-1].content }}
 ```
+
+> The `not_from` guard matters: reloading the integration briefly sets the sensor to
+> `unavailable`, so a trigger without it fires again when the sensor comes back and
+> re-sends a message you have already seen.
 
 ---
 
