@@ -125,7 +125,7 @@ voluptuous = "vol"
 
 [lint.isort]
 force-sort-within-sections = true
-known-first-party = ["homeassistant"]
+known-first-party = ["homeassistant", "version_scheme"]
 combine-as-imports = true
 
 [lint.flake8-pytest-style]

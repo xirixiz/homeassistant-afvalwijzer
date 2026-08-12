@@ -325,6 +325,15 @@ sort:
   reverse: false
 ```
 
+## Contributing
+
+Bug reports and feature requests: please read [SUPPORT.md](.github/SUPPORT.md) first.
+
+For local development, the helper scripts, and the release process, see
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
 ## Installation
 
 ### Manual Installation
