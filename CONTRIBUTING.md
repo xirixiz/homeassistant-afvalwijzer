@@ -117,8 +117,8 @@ so if you change the grammar, that is the test that will tell you.
    It prints `Version OK: <tag>` when the tag is well formed, matches both
    files, and is newer than every existing release tag.
 
-5. Tag and push. No `v` prefix: the workflow matches the tag against the version
-   grammar and compares it to the manifest verbatim, so a `v`-prefixed tag is
+5. Tag and push. The workflow matches the tag against the version
+   grammar and compares it to the manifest verbatim, so a malformed tag is
    silently ignored.
 
    ```bash
