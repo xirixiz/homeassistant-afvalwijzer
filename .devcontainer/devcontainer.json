@@ -1,6 +1,6 @@
 {
-  "name": "astrandb/dev-miele",
-  "image": "mcr.microsoft.com/devcontainers/python:1-3.13",
+  "name": "xirixiz/afvalwijzer",
+  "image": "mcr.microsoft.com/devcontainers/python:3-3.14-bookworm",
   "postCreateCommand": "scripts/setup",
   "appPort": [
     "9123:8123"
@@ -40,14 +40,9 @@
         "files.trimTrailingWhitespace": true,
         "[markdown]": {
           "files.trimTrailingWhitespace": false
-        },
-        "terminal.integrated.defaultProfile.linux": "zsh"
+        }
       }
     }
   },
-  "remoteUser": "vscode",
-  "features": {
-    "ghcr.io/devcontainers/features/rust:1": {},
-    "ghcr.io/devcontainers-extra/features/ffmpeg-apt-get:1": {}
-  }
+  "remoteUser": "vscode"
 }
