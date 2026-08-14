@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from http import HTTPStatus
 import logging
 from typing import Any
 
@@ -39,7 +40,13 @@ def _fetch_waste_data_raw_temp(
     verify: bool,
 ) -> list[dict[str, Any]]:
     response = session.get(url, timeout=timeout, verify=verify)
-    response.raise_for_status()
+
+    # RD4 answers an unknown address with HTTP 422 and a regular JSON body
+    # ({"success": false, ...}), so leave that case to the payload check below
+    # instead of turning it into a request error.
+    if response.status_code != HTTPStatus.UNPROCESSABLE_ENTITY:
+        response.raise_for_status()
+
     data = response.json() or {}
 
     if not data:
