@@ -37,15 +37,15 @@ def _build_headers() -> dict[str, str]:
     }
 
 
-def _fetch_postcode_id(
+def _fetch_postcode_ids(
     session: requests.Session,
     base_url: str,
     postal_code: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
-) -> str:
-    """Fetch postcode id."""
+) -> list[str]:
+    """Fetch postcode ids (a query can match more than one zipcode entry)."""
     response = session.get(
         f"{base_url}zipcodes",
         params={"q": postal_code},
@@ -58,10 +58,12 @@ def _fetch_postcode_id(
     data = response.json() or {}
     items = data.get("items") or []
 
-    if not items or not items[0].get("id"):
+    postcode_ids = [str(item["id"]) for item in items if item.get("id")]
+
+    if not postcode_ids:
         raise ValueError("RecycleApp: postcode_id not found")
 
-    return str(items[0]["id"])
+    return postcode_ids
 
 
 def _fetch_street_id(
@@ -72,8 +74,8 @@ def _fetch_street_id(
     *,
     timeout: tuple[float, float],
     verify: bool,
-) -> str:
-    """Fetch street id."""
+) -> str | None:
+    """Fetch street id for a single postcode id, or None if not found there."""
     response = session.get(
         f"{base_url}streets",
         params={
@@ -90,7 +92,7 @@ def _fetch_street_id(
     items = data.get("items") or []
 
     if not items:
-        raise ValueError("RecycleApp: street_id not found")
+        return None
 
     for item in items:
         if item.get("name") == street_name and item.get("id"):
@@ -98,6 +100,45 @@ def _fetch_street_id(
 
     if items[0].get("id"):
         return str(items[0]["id"])
+
+    return None
+
+
+def _fetch_postcode_and_street_id(
+    session: requests.Session,
+    base_url: str,
+    postal_code: str,
+    street_name: str,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> tuple[str, str]:
+    """Fetch the postcode id and street id, trying every matching zipcode.
+
+    RecycleApp's zipcode lookup can return more than one entry for a query
+    (e.g. shared postal codes across municipalities). The street must be
+    looked up per zipcode id, so try each one until a street is found.
+    """
+    postcode_ids = _fetch_postcode_ids(
+        session,
+        base_url,
+        postal_code,
+        timeout=timeout,
+        verify=verify,
+    )
+
+    for postcode_id in postcode_ids:
+        street_id = _fetch_street_id(
+            session,
+            base_url,
+            street_name,
+            postcode_id,
+            timeout=timeout,
+            verify=verify,
+        )
+
+        if street_id:
+            return postcode_id, street_id
 
     raise ValueError("RecycleApp: street_id not found")
 
@@ -210,19 +251,11 @@ def get_waste_data_raw(
             _LOGGER.error("RECYCLEAPP: street_name is required")
             return []
 
-        postcode_id = _fetch_postcode_id(
+        postcode_id, street_id = _fetch_postcode_and_street_id(
             session,
             base_url,
             postal_code,
-            timeout=timeout,
-            verify=verify,
-        )
-
-        street_id = _fetch_street_id(
-            session,
-            base_url,
             street_name,
-            postcode_id,
             timeout=timeout,
             verify=verify,
         )
