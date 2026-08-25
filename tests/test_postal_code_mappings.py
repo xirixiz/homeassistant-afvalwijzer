@@ -145,6 +145,17 @@ class TestWasteTypeRenameWithPostalCode:
 
         assert result == "ignore"
 
+    def test_tilburg_5043_keeps_rest_gft(self):
+        """Regression test for #664.
+
+        Postal code 5043 is Tilburg-proper (verified against the BAG/PDOK
+        address register - it has no Goirle addresses), so it must *not* be
+        caught by the Goirle "ignore" override: "rest-gft"/"rest-gfte" are
+        real, wanted collection types there and must not be silently dropped.
+        """
+        assert waste_type_rename("rest-gft", "5043AA") == "rest-gft"
+        assert waste_type_rename("rest-gfte", "5043ZZ") == "rest-gfte"
+
 
 # ---------------------------------------------------------------------------
 # Smoke test: POSTAL_CODE_OVERRIDES structure is valid
