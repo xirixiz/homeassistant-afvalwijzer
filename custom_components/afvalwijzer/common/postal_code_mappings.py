@@ -33,7 +33,7 @@ POSTAL_CODE_OVERRIDES: list[tuple[range | frozenset[int], dict[str, str]]] = [
         # postal code prefix turned out to be Tilburg-proper - a check
         # against the official BAG/PDOK address register found postal code
         # 5043 has no addresses registered in the Goirle municipality at
-        # all (every one of its ~208 full postal codes is Tilburg), where
+        # all (every full postal code under that prefix is Tilburg), where
         # "rest-gft"/"rest-gfte" is a real, wanted collection type. Applying
         # the override there silently dropped it for Tilburg residents
         # sharing that prefix (#664).
