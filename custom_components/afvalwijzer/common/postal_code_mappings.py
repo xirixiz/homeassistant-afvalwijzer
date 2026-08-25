@@ -28,7 +28,7 @@ POSTAL_CODE_OVERRIDES: list[tuple[range | frozenset[int], dict[str, str]]] = [
         },
     ),
     (
-        frozenset({5050, 5051, 5052, 5133}),
+        frozenset({5050, 5051, 5052, 5053, 5133}),
         {
             "rest-gft": "ignore",
             "rest-gfte": "ignore",
