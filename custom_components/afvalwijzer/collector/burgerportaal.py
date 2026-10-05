@@ -92,9 +92,14 @@ def _get_auth_token(
         return id_token, refresh_token
 
     if refresh_token:
-        return _refresh_id_token(
-            session, refresh_token, timeout=timeout, verify=verify
-        ), refresh_token
+        try:
+            return _refresh_id_token(
+                session, refresh_token, timeout=timeout, verify=verify
+            ), refresh_token
+        except (requests.exceptions.HTTPError, KeyError):
+            _LOGGER.warning(
+                "Burgerportaal: stored refresh token was rejected, requesting new credentials"
+            )
 
     signup = _signup_anonymous(session, timeout=timeout, verify=verify)
     if not signup:
@@ -106,6 +111,13 @@ def _get_auth_token(
 
     id_token = _refresh_id_token(session, refresh_token, timeout=timeout, verify=verify)
     return id_token, refresh_token
+
+
+def _json_or_empty(response: requests.Response) -> list[dict[str, Any]]:
+    """Return the JSON list of a response; HTTP 204 or an empty body means no data."""
+    if response.status_code == 204 or not response.text.strip():
+        return []
+    return response.json() or []
 
 
 def _fetch_address_list(
@@ -126,8 +138,7 @@ def _fetch_address_list(
         verify=verify,
     )
     response.raise_for_status()
-    data = response.json()
-    return data or []
+    return _json_or_empty(response)
 
 
 def _select_address_id(
@@ -163,8 +174,7 @@ def _fetch_waste_data_raw_temp(
         verify=verify,
     )
     response.raise_for_status()
-    data = response.json()
-    return data or []
+    return _json_or_empty(response)
 
 
 def _parse_waste_data_raw(

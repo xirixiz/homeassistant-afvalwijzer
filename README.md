@@ -40,6 +40,7 @@ This custom component tries to support as much as possible, but there are some m
 | BAR                            | burgerportaal                    |
 | Blink                          | ximmio                           |
 | Borsele                        | icalendar                        |
+| Breda                          | burgerportaal                    |
 | Circulus                       |                                  |
 | Cranendonck                    | opzet                            |
 | Cure                           | mijnafvalwijzer                  |
