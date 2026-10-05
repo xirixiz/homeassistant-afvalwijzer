@@ -52,6 +52,7 @@ TEST_ADDRESSES = [
     #{"provider": "blink", "postal_code": "5741MD", "house_number": "24"},
     #{"provider": "blink", "postal_code": "5752AC", "house_number": "2"},
     #{"provider": "borsele", "postal_code": "4453BG", "house_number": "82"},
+    #{"provider": "breda", "postal_code": "4762BJ", "house_number": "2"},
     #{"provider": "circulus", "postal_code": "6883JD", "house_number": "26"},
     #{"provider": "circulus", "postal_code": "6891BC", "house_number": "6"},
     #{"provider": "circulus", "postal_code": "6923DL", "house_number": "6"},
