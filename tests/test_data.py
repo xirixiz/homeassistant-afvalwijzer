@@ -217,7 +217,7 @@ TEST_ADDRESSES = [
     #{"provider": "mijnafvalzaken", "postal_code": "1861KJ", "house_number": "28"},
     #{"provider": "mijnafvalzaken", "postal_code": "1901XG", "house_number": "7"},
     #{"provider": "mijnafvalzaken", "postal_code": "1911LP", "house_number": "51"},
-    #{"provider": "moerdijk", "postal_code": "4762BJ", "house_number": "2"},
+    #{"provider": "moerdijk", "postal_code": "4762BD", "house_number": "22"},
     #{"provider": "montferland", "postal_code": "7041EJ", "house_number": "13"},
     #{"provider": "montfoort", "postal_code": "3461CV", "house_number": "10"},
     #{"provider": "nijkerk", "postal_code": "3861XJ", "house_number": "1"},
