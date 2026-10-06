@@ -54,6 +54,7 @@ This custom component tries to support as much as possible, but there are some m
 | GAD                            | opzet                            |
 | Geertruidenberg                | opzet                            |
 | Goes                           | icalendar                        |
+| Goirle                         | burgerportaal                    |
 | Groningen                      | burgerportaal                    |
 | Harderwijk                     | omrin                            |
 | Hellendoorn                    | ximmio                           |
