@@ -10,7 +10,6 @@ from random import randint
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import callback
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_call_later, async_track_time_change
 
 from .const.const import (
@@ -28,8 +27,6 @@ from .const.const import (
 from .coordinator import AfvalwijzerDataUpdateCoordinator, async_remove_cache
 
 _LOGGER = logging.getLogger(__name__)
-
-CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 _TRANSLATIONS_DIR = pathlib.Path(__file__).parent / "translations"
 
