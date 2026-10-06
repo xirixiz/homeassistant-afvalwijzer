@@ -40,6 +40,7 @@ This custom component tries to support as much as possible, but there are some m
 | BAR                            | burgerportaal                    |
 | Blink                          | ximmio                           |
 | Borsele                        | icalendar                        |
+| Breda                          | burgerportaal                    |
 | Circulus                       |                                  |
 | Cranendonck                    | opzet                            |
 | Cure                           | mijnafvalwijzer                  |
@@ -67,6 +68,7 @@ This custom component tries to support as much as possible, but there are some m
 | Middelburg-Vlissingen          | opzet                            |
 | Mijn Afvalwijzer               |                                  |
 | Mijnafvalzaken                 | opzet                            |
+| Moerdijk                       | burgerportaal                    |
 | Montferland                    |                                  |
 | Montfoort                      | opzet                            |
 | Nijkerk                        |                                  |
