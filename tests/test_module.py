@@ -20,6 +20,7 @@ import sys
 # skip init, required for this test module
 os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 from custom_components.afvalwijzer.collector.main_collector import MainCollector
+from custom_components.afvalwijzer.common.main_functions import WASTE_TYPE_MAPPING
 from tests.test_data import TEST_ADDRESSES
 
 # Common parameters for all tests
@@ -65,6 +66,22 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
             house_number,
         )
         return False
+
+    unmapped = sorted(
+        {
+            waste_type
+            for waste_type in collector.waste_types_provider
+            if waste_type not in WASTE_TYPE_MAPPING.values()
+        }
+    )
+    if unmapped:
+        LOGGER.warning(
+            "Unmapped waste types for provider: %s, postal_code: %s, house_number: %s: %s",
+            provider,
+            postal_code,
+            house_number,
+            unmapped,
+        )
 
     if show_failures_only:
         return True
