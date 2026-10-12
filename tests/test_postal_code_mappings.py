@@ -191,3 +191,10 @@ class TestPostalCodeOverridesStructure:
         for _, mapping in POSTAL_CODE_OVERRIDES:
             for key, value in mapping.items():
                 assert isinstance(value, str), f"Value for '{key}' should be str"
+
+
+def test_duobak_maps_to_pmd():
+    """Spaarnelanden duobak is mapped to pmd."""
+    assert (
+        waste_type_rename("plastic, blik, drinkpakken & papier (duobak)") == "pmd"
+    )
