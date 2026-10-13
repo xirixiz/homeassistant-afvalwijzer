@@ -73,6 +73,15 @@ def _parse_waste_data_raw(response: dict, postal_code: str = "") -> list[dict]:
         if not waste_type:
             continue
 
+        # Many municipalities report PMD under the generic "plastic" type code;
+        # the human readable "nameType" tells whether it is really PMD.
+        if waste_type == "plastic":
+            name_type = waste_type_rename(
+                (item.get("nameType") or "").strip().lower(), postal_code
+            )
+            if name_type == "pmd":
+                waste_type = "pmd"
+
         # Fixes original bug: previous code created a tuple and returned datetime object.
         # Keep intended output format consistent with other collectors: YYYY-MM-DD string.
         waste_date = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
