@@ -14,11 +14,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPO_ROOT / "custom_components/afvalwijzer/manifest.json"
 CONST_PATH = REPO_ROOT / "custom_components/afvalwijzer/const/const.py"
 
-# YYYY.SEQ for a stable release, YYYY.SEQ.0bN for a beta. The ".0b" form is
+# YYYY.SEQ for a stable release, YYYY.SEQ.bN for a beta. The ".b" form is
 # what AwesomeVersion (used by HA and HACS) parses as a CalVer pre-release:
 # "2026.1019-b01" is rejected outright and raises when compared, and
 # "2026.1019b1" parses but is not recognised as a beta.
-VERSION_RE = re.compile(r"^(?P<year>\d{4})\.(?P<seq>\d{4,})(?:\.0b(?P<beta>\d+))?$")
+VERSION_RE = re.compile(r"^(?P<year>\d{4})\.(?P<seq>\d{4,})(?:\.b(?P<beta>\d+))?$")
 VERSION_ASSIGN_RE = re.compile(r'VERSION\s*=\s*"(?P<version>[^"]+)"')
 
 FIRST_SEQ = 1000
@@ -62,13 +62,13 @@ def compute_next_version(current_version: str | None, *, beta: bool = False) -> 
             # nobody can install over the top of.
             raise ValueError(
                 f"Unrecognised current version {current_version!r}; "
-                "expected YYYY.SEQ or YYYY.SEQ.0bN"
+                "expected YYYY.SEQ or YYYY.SEQ.bN"
             )
         parsed = match
 
     if parsed is None or int(parsed.group("year")) != current_year:
         return (
-            f"{current_year}.{FIRST_SEQ}.0b1" if beta else f"{current_year}.{FIRST_SEQ}"
+            f"{current_year}.{FIRST_SEQ}.b1" if beta else f"{current_year}.{FIRST_SEQ}"
         )
 
     seq = int(parsed.group("seq"))
@@ -76,8 +76,8 @@ def compute_next_version(current_version: str | None, *, beta: bool = False) -> 
 
     if beta:
         if current_beta is not None:
-            return f"{current_year}.{seq}.0b{current_beta + 1}"
-        return f"{current_year}.{seq + 1}.0b1"
+            return f"{current_year}.{seq}.b{current_beta + 1}"
+        return f"{current_year}.{seq + 1}.b1"
 
     if current_beta is not None:
         return f"{current_year}.{seq}"
