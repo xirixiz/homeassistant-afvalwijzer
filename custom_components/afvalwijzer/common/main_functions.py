@@ -111,6 +111,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "plastic, blik & drinkpakken arnhem": "pmd",
     "plastic, blik & drinkpakken eemnes": "pmd",
     "plastic, blik & drinkpakken overbetuwe": "pmd",
+    "plastic, blik, drinkpakken & papier (duobak)": "pmd",
     "plastic, blik en drankkartons": "pmd",
     "plastic, blik en drinkpakken": "pmd",
     "plastic, metaal en drankenkartons": "pmd",
