@@ -64,18 +64,18 @@ on tags:
 Versions are CalVer with a sequence number:
 
 - stable: `YYYY.SEQ`, for example `2026.1019`
-- beta: `YYYY.SEQ.0bN`, for example `2026.1019.0b1`
+- beta: `YYYY.SEQ.bN`, for example `2026.1019.b1`
 
 The sequence starts at `1000` each calendar year and only ever increases within
 that year. The grammar lives in `VERSION_RE` in `scripts/version_scheme.py`.
 
-The `.0b` spelling is load bearing. Home Assistant and HACS compare versions
+The `.b` spelling is load bearing. Home Assistant and HACS compare versions
 with AwesomeVersion, which rejects the retired `2026.1019-b01` form outright and
-parses `2026.1019b1` without recognising it as a pre-release. Only `.0bN` is
+parses `2026.1019b1` without recognising it as a pre-release. Only `.bN` is
 both parseable and correctly flagged as a beta.
 
 Ordering rule worth internalising: **a beta sorts below its own stable
-release.** Once `2026.1019` has shipped, `2026.1019.0b2` is in the past and can
+release.** Once `2026.1019` has shipped, `2026.1019.b2` is in the past and can
 never be released. If you need another beta after a stable, open the next
 sequence.
 
@@ -95,7 +95,7 @@ so if you change the grammar, that is the test that will tell you.
    ```
 
    A stable bump *promotes* an in-progress beta to its final version rather than
-   skipping a sequence: with `2026.1019.0b3` in the manifest, a plain
+   skipping a sequence: with `2026.1019.b3` in the manifest, a plain
    `scripts/update-version` produces `2026.1019`.
 
    This rewrites both `custom_components/afvalwijzer/manifest.json` and
@@ -105,13 +105,13 @@ so if you change the grammar, that is the test that will tell you.
 3. Commit both files. The existing convention is:
 
    ```bash
-   git commit -am "Prepare release 2026.1019.0b1"
+   git commit -am "Prepare release 2026.1019.b1"
    ```
 
 4. Dry-run the release gate locally before pushing anything:
 
    ```bash
-   scripts/verify-version 2026.1019.0b1
+   scripts/verify-version 2026.1019.b1
    ```
 
    It prints `Version OK: <tag>` when the tag is well formed, matches both
@@ -123,8 +123,8 @@ so if you change the grammar, that is the test that will tell you.
 
    ```bash
    git push origin main
-   git tag 2026.1019.0b1
-   git push origin 2026.1019.0b1
+   git tag 2026.1019.b1
+   git push origin 2026.1019.b1
    ```
 
 6. `.github/workflows/release.yml` takes over: it re-runs
@@ -151,8 +151,8 @@ broken. It reports one of:
 To recover, delete the tag and retag after fixing the version:
 
 ```bash
-git push --delete origin 2026.1019.0b1
-git tag -d 2026.1019.0b1
+git push --delete origin 2026.1019.b1
+git tag -d 2026.1019.b1
 scripts/update-version --set <correct version>
 git commit -am "Prepare release <correct version>"
 git push origin main

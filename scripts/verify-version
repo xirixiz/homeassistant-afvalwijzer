@@ -2,7 +2,7 @@
 """Verify the checked-out version is releasable as the given tag.
 
 Checks, in order:
-  1. the tag is a well-formed version (YYYY.SEQ or YYYY.SEQ.0bN)
+  1. the tag is a well-formed version (YYYY.SEQ or YYYY.SEQ.bN)
   2. manifest.json and const.py both carry exactly that version
   3. the tag is newer than every other release tag using this scheme
 
@@ -69,7 +69,7 @@ def main() -> int:
 
     if not VERSION_RE.match(tag):
         print(
-            f"Tag '{tag}' is not a valid version; expected YYYY.SEQ or YYYY.SEQ.0bN.\n"
+            f"Tag '{tag}' is not a valid version; expected YYYY.SEQ or YYYY.SEQ.bN.\n"
             "Note that the retired '-bNN' beta suffix is rejected by AwesomeVersion, "
             "which Home Assistant and HACS use to compare versions.",
             file=sys.stderr,

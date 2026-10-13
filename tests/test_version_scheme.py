@@ -17,11 +17,11 @@ _ASCENDING = [
     "2025.1042",
     "2026.1000",
     "2026.1018",
-    "2026.1019.0b1",
-    "2026.1019.0b2",
-    "2026.1019.0b10",
+    "2026.1019.b1",
+    "2026.1019.b2",
+    "2026.1019.b10",
     "2026.1019",
-    "2026.1020.0b1",
+    "2026.1020.b1",
     "2026.1020",
 ]
 
@@ -36,7 +36,7 @@ def test_scheme_versions_are_valid_awesomeversion(version):
 @pytest.mark.parametrize("version", _ASCENDING)
 def test_beta_flag_matches_the_grammar(version):
     """AwesomeVersion agrees with the grammar about which versions are betas."""
-    assert AwesomeVersion(version).beta is ("0b" in version)
+    assert AwesomeVersion(version).beta is ("b" in version)
 
 
 def test_sort_key_orders_the_same_way_as_awesomeversion():
@@ -50,8 +50,8 @@ def test_sort_key_orders_the_same_way_as_awesomeversion():
 
 def test_beta_sorts_below_its_own_stable():
     """The rule that makes re-opening a shipped sequence impossible."""
-    assert sort_key("2026.1018.0b3") < sort_key("2026.1018")
-    assert AwesomeVersion("2026.1018.0b3") < AwesomeVersion("2026.1018")
+    assert sort_key("2026.1018.b3") < sort_key("2026.1018")
+    assert AwesomeVersion("2026.1018.b3") < AwesomeVersion("2026.1018")
 
 
 def test_retired_beta_suffix_is_rejected():
@@ -65,9 +65,9 @@ def test_retired_beta_suffix_is_rejected():
     ("current", "beta", "expected"),
     [
         ("2026.1018", False, "2026.1019"),
-        ("2026.1018", True, "2026.1019.0b1"),
-        ("2026.1019.0b1", True, "2026.1019.0b2"),
-        ("2026.1019.0b2", False, "2026.1019"),
+        ("2026.1018", True, "2026.1019.b1"),
+        ("2026.1019.b1", True, "2026.1019.b2"),
+        ("2026.1019.b2", False, "2026.1019"),
     ],
 )
 def test_computed_versions_move_forward(current, beta, expected):
