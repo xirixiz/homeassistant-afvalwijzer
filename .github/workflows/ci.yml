@@ -18,7 +18,7 @@ jobs:
     name: Hassfest validation
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -37,14 +37,14 @@ jobs:
           category: "integration"
           ignore: "brands"
       - name: Hassfest validation
-        uses: home-assistant/actions/hassfest@06749dd8c0b54f350bc69c8752456cee498808a3 # master
+        uses: home-assistant/actions/hassfest@50baf3a307f87100cf550d4ae127746595030d5d # master
 
   style:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -71,7 +71,7 @@ jobs:
       checks: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -92,7 +92,7 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt -r requirements_test.txt
       - run: scripts/coverage
-      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+      - uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a # v3.2.0
         with:
           name: Test Results
           path: pytest.xml
