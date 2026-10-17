@@ -96,6 +96,7 @@ This custom component tries to support as much as possible, but there are some m
 | Tilburg                        | burgerportaal                    |
 | Twente Milieu                  | ximmio                           |
 | Uithoorn                       | opzet                            |
+| Utrecht                        | burgerportaal                    |
 | Venlo                          | ximmio                           |
 | Venray                         |                                  |
 | Voorschoten                    | opzet                            |
