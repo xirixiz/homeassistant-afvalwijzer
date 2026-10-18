@@ -102,10 +102,20 @@ so if you change the grammar, that is the test that will tell you.
    `custom_components/afvalwijzer/const/const.py`. Both must carry the version,
    which is why the script is the only sanctioned way to bump.
 
-3. Commit both files. The existing convention is:
+3. Commit and tag. Pass `--commit` to step 2 and the script does this for you:
+   it commits both files as `Prepare release <version>` and creates an
+   annotated tag named exactly `<version>`.
+
+   ```bash
+   scripts/update-version --commit        # bump, commit and tag in one go
+   ```
+
+   Doing it by hand is equivalent. The tag must be annotated, otherwise
+   `git push --follow-tags` skips it:
 
    ```bash
    git commit -am "Prepare release 2026.1019.b1"
+   git tag -a 2026.1019.b1 -m "Release 2026.1019.b1"
    ```
 
 4. Dry-run the release gate locally before pushing anything:
@@ -117,15 +127,16 @@ so if you change the grammar, that is the test that will tell you.
    It prints `Version OK: <tag>` when the tag is well formed, matches both
    files, and is newer than every existing release tag.
 
-5. Tag and push. The workflow matches the tag against the version
-   grammar and compares it to the manifest verbatim, so a malformed tag is
-   silently ignored.
+5. Push the commit and tag together. The workflow matches the tag against the
+   version grammar and compares it to the manifest verbatim, so a malformed tag
+   is silently ignored.
 
    ```bash
-   git push origin main
-   git tag 2026.1019.b1
-   git push origin 2026.1019.b1
+   git push --follow-tags
    ```
+
+   (`git push --tags` also works, but pushes every local tag, including stray
+   ones; `--follow-tags` only pushes annotated tags on the commits being pushed.)
 
 6. `.github/workflows/release.yml` takes over: it re-runs
    `scripts/verify-version`, zips `custom_components/afvalwijzer` into

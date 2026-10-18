@@ -9,11 +9,14 @@ too so that the two can never disagree.
 import argparse
 import logging
 import pathlib
+import subprocess
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from version_scheme import (  # noqa: E402
+    CONST_PATH,
+    MANIFEST_PATH,
     VERSION_RE,
     compute_next_version,
     current_version,
@@ -22,6 +25,40 @@ from version_scheme import (  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
+
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+
+def _git(*args: str) -> str:
+    """Run a git command in the repo root and return its stdout."""
+    return subprocess.run(
+        ["git", *args],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
+def commit_and_tag(version: str) -> None:
+    """Commit the two version files and create an annotated tag for `version`.
+
+    The tag is annotated so that `git push --follow-tags` sends it together
+    with the commit; lightweight tags are ignored by --follow-tags.
+    """
+    _git("add", "--", str(MANIFEST_PATH), str(CONST_PATH))
+    _git(
+        "commit",
+        "-m",
+        f"Prepare release {version}",
+        "--",
+        str(MANIFEST_PATH),
+        str(CONST_PATH),
+    )
+    _git("tag", "-a", version, "-m", f"Release {version}")
+    LOGGER.info(
+        "Committed and tagged %s; publish with: git push --follow-tags", version
+    )
 
 
 def main() -> None:
@@ -39,6 +76,12 @@ def main() -> None:
         metavar="VERSION",
         help="set an explicit version instead of computing the next one",
     )
+    parser.add_argument(
+        "--commit",
+        action="store_true",
+        help="commit the version files as 'Prepare release X' and tag X "
+        "(then publish with 'git push --follow-tags')",
+    )
     args = parser.parse_args()
 
     if args.explicit:
@@ -50,9 +93,15 @@ def main() -> None:
     else:
         new_version = compute_next_version(current_version(), beta=args.beta)
 
+    if args.commit and new_version in _git("tag", "--list", new_version).split():
+        parser.error(f"Tag {new_version} already exists")
+
     old_version = write_version(new_version)
 
     LOGGER.info("Updated version from %s to %s", old_version, new_version)
+
+    if args.commit:
+        commit_and_tag(new_version)
 
 
 if __name__ == "__main__":
