@@ -46,6 +46,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "gft-afval": "gft",
     "gfte": "gft",
     "gfte afval": "gft",
+    "gkbp": "pmd",
     "glass": "glas",
     "green": "gft",
     "greenbasket": "gft",
