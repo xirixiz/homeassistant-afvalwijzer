@@ -60,7 +60,6 @@ def _get_session_cookie(
     raw_response = session.post(
         f"{url}/register/zipcode.json",
         data=data,
-        cookies=cookies,
         timeout=timeout,
         verify=verify,
     )
@@ -99,7 +98,6 @@ def _ensure_authenticated_address(
     session: requests.Session,
     url: str,
     response: dict[str, Any],
-    logged_in_cookies: requests.cookies.RequestsCookieJar,
     *,
     house_number: str,
     suffix: str,
@@ -115,9 +113,10 @@ def _ensure_authenticated_address(
     if not authentication_url:
         return
 
+    # Rely on the session cookie jar: this call refreshes CB_SESSION, and passing
+    # older cookies explicitly would override it on later requests.
     session.get(
         url + authentication_url,
-        cookies=logged_in_cookies,
         timeout=timeout,
         verify=verify,
     ).raise_for_status()
@@ -126,7 +125,6 @@ def _ensure_authenticated_address(
 def _fetch_waste_data_raw_temp(
     session: requests.Session,
     url: str,
-    logged_in_cookies: requests.cookies.RequestsCookieJar,
     *,
     days_back: int = 14,
     days_forward: int = 90,
@@ -140,7 +138,6 @@ def _fetch_waste_data_raw_temp(
     response = session.get(
         f"{url}/afvalkalender.json?from={start_date}&till={end_date}",
         headers={"Content-Type": "application/json"},
-        cookies=logged_in_cookies,
         timeout=timeout,
         verify=verify,
     )
@@ -206,7 +203,6 @@ def get_waste_data_raw(
             session,
             url,
             response,
-            logged_in_cookies,
             house_number=house_number,
             suffix=suffix,
             timeout=timeout,
@@ -216,7 +212,6 @@ def get_waste_data_raw(
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
             session,
             url,
-            logged_in_cookies,
             timeout=timeout,
             verify=verify,
         )
