@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from html import unescape
 import logging
 import re
@@ -102,6 +102,71 @@ def _fetch_waste_data_raw_temp(
     return data or []
 
 
+def _fetch_calendar_raw_temp(
+    session: requests.Session,
+    base_url: str,
+    bag_id: str,
+    year: int,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> list[dict[str, Any]]:
+    """Fetch the full-year calendar; return an empty list if it is unavailable.
+
+    The calendar endpoint is what the municipalities' own websites use. Not every
+    Opzet instance offers it, and next year's calendar may not be published yet.
+    """
+    url_calendar = f"{base_url}/rest/adressen/{bag_id}/kalender/{year}"
+    try:
+        response = session.get(url_calendar, timeout=timeout, verify=verify)
+        if response.status_code != 200:
+            return []
+        data = response.json()
+    except (requests.exceptions.RequestException, ValueError) as err:
+        _LOGGER.debug("OPZET: calendar for %s not available: %s", year, err)
+        return []
+
+    return data if isinstance(data, list) else []
+
+
+def _calendar_as_waste_data(
+    calendar: list[dict[str, Any]],
+    waste_streams: list[dict[str, Any]],
+    today: date,
+) -> list[dict[str, Any]]:
+    """Turn calendar entries into the shape of the waste streams (title and date).
+
+    Entries that can't be used (not an object, unknown stream, missing or invalid
+    date, in the past) are skipped, so one bad entry doesn't cost the rest.
+    """
+    titles = {
+        stream.get("id"): stream.get("menu_title")
+        for stream in waste_streams
+        if isinstance(stream, dict)
+    }
+
+    items: list[dict[str, Any]] = []
+    for entry in calendar:
+        if not isinstance(entry, dict):
+            continue
+
+        title = titles.get(entry.get("afvalstroom_id"))
+        date_str = entry.get("ophaaldatum")
+        if not title or not date_str:
+            continue
+
+        try:
+            entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except (TypeError, ValueError):
+            _LOGGER.debug("OPZET: skipping calendar entry with invalid date: %r", entry)
+            continue
+
+        if entry_date >= today:
+            items.append({"menu_title": title, "ophaaldatum": date_str})
+
+    return items
+
+
 def _parse_waste_data_raw(
     waste_data_raw_temp: list[dict[str, Any]],
     postal_code: str = "",
@@ -164,7 +229,37 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
+        # The waste streams only hold the next pickup per stream. Add the calendar for
+        # this and next year, so the schedule covers more than the next pickup. A
+        # stream the calendar leaves out still keeps its next pickup.
+        today = datetime.now().date()
+        calendar_items: list[dict[str, Any]] = []
+        for year in (today.year, today.year + 1):
+            calendar_items.extend(
+                _calendar_as_waste_data(
+                    _fetch_calendar_raw_temp(
+                        session,
+                        base_url,
+                        bag_id,
+                        year,
+                        timeout=timeout,
+                        verify=verify,
+                    ),
+                    waste_data_raw_temp,
+                    today,
+                )
+            )
+
+        waste_data_raw: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for entry in _parse_waste_data_raw(
+            waste_data_raw_temp + calendar_items, postal_code
+        ):
+            key = (entry["type"], entry["date"])
+            if key not in seen:
+                seen.add(key)
+                waste_data_raw.append(entry)
+
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
