@@ -72,7 +72,7 @@ def _run(session, suffix=""):
 
 
 def test_parses_iso_datetimes_and_skips_placeholder_dates():
-    """ISO datetimes are parsed and placeholder dates skipped; "overig" without a known id is left as is."""
+    """ISO datetimes are parsed and placeholder dates skipped; unknown "overig" is left as is."""
     session = FakeSession(
         {
             "/api/auth/login": [_login()],
@@ -180,45 +180,50 @@ def test_rejected_access_token_logs_in_again_once():
 
 
 @pytest.mark.parametrize(
-    ("stream_id", "expected"),
+    ("description", "expected"),
     [
-        ("f08536f9-9190-4b1c-970c-c0166b297cc5", "kerstbomen"),
-        ("3b3c91d7-79e1-423e-a948-ae5bb6be7ce7", "kca"),
-        ("9a914aa8-3d75-4d00-9aa7-ccce91332a7e", "snoeiafval"),
-        ("C54D0705-1594-4BD4-93F6-6321932C21DB", "elektrische-apparaten"),
-        ("00000000-0000-0000-0000-000000000000", "overig"),
+        (
+            "Natuurlijke kerstbomen worden op de aangegeven datum opgehaald.",
+            "kerstbomen",
+        ),
+        ("Op de aangegeven dag worden er kerstbomen ingezameld.", "kerstbomen"),
+        (
+            "Meld chemisch afval minimaal 2 werkdagen voor de aangegeven datum aan.",
+            "kca",
+        ),
+        ("Breng het chemisch afval op de aangegeven datum bij de inzamelauto.", "kca"),
+        (
+            "Kca kan aan huis worden gehaald. Aanmelden kan tot donderdag 12.00 uur.",
+            "kca",
+        ),
+        ("Lever chemisch afval op de aangegeven datum in bij de inzamelauto.", "kca"),
+        (
+            "Meld snoeiafval minimaal 2 werkdagen voor de aangegeven datum aan.",
+            "snoeiafval",
+        ),
+        (
+            "Meld elektrische apparaten minimaal 2 werkdagen voor de aangegeven datum aan.",
+            "elektrische-apparaten",
+        ),
+        ("Iets heel anders.", "overig"),
         (None, "overig"),
     ],
 )
-def test_overig_is_resolved_through_its_id(stream_id, expected):
-    """The catch-all type "overig" becomes the stream its id names."""
-    item = {"id": stream_id, "date": "2026-01-14", "type": "OVERIG"}
+def test_overig_is_resolved_through_its_description(description, expected):
+    """The catch-all type "overig" becomes the stream its description names."""
+    item = {"date": "2026-01-14", "type": "OVERIG", "description": description}
 
     assert omrin._parse_waste_data_raw([item]) == [
         {"type": expected, "date": "2026-01-14"}
     ]
 
 
-def test_overig_ignores_the_description():
-    """A changed or misleading description doesn't influence the result."""
+def test_other_types_ignore_the_description():
+    """Only "overig" is resolved through the description."""
     item = {
-        "id": "3b3c91d7-79e1-423e-a948-ae5bb6be7ce7",
-        "date": "2026-01-14",
-        "type": "OVERIG",
-        "description": "Heel andere tekst over kerstbomen",
-    }
-
-    assert omrin._parse_waste_data_raw([item]) == [
-        {"type": "kca", "date": "2026-01-14"}
-    ]
-
-
-def test_other_types_ignore_the_id():
-    """Only "overig" is resolved through the id."""
-    item = {
-        "id": "3b3c91d7-79e1-423e-a948-ae5bb6be7ce7",
         "date": "2026-01-14",
         "type": "RESTAFVAL",
+        "description": "Zet de Sortibak ... chemisch afval ... kerstbomen",
     }
 
     assert omrin._parse_waste_data_raw([item]) == [

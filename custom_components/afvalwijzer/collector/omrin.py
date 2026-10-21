@@ -20,14 +20,14 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 30.0)
 # Placeholder date Omrin returns for entries without a pickup.
 _EMPTY_DATE_PREFIX = "0001-01-01"
 
-# Omrin reports several different streams as type "overig" (other). Their ids are stable
-# and identical across municipalities, so the id tells them apart.
-_OVERIG_ID_TYPES: dict[str, str] = {
-    "f08536f9-9190-4b1c-970c-c0166b297cc5": "kerstbomen",
-    "3b3c91d7-79e1-423e-a948-ae5bb6be7ce7": "kca",
-    "9a914aa8-3d75-4d00-9aa7-ccce91332a7e": "snoeiafval",
-    "c54d0705-1594-4bd4-93f6-6321932c21db": "elektrische-apparaten",
-}
+# Omrin reports several different streams as type "overig" (other); only the description
+# tells them apart. Checked in order, first keyword found wins.
+_OVERIG_DESCRIPTION_TYPES: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("kerstbo",), "kerstbomen"),
+    (("chemisch", "kca"), "kca"),
+    (("snoeiafval", "snoeihout"), "snoeiafval"),
+    (("elektrische apparaten",), "elektrische-apparaten"),
+)
 
 # Refresh the access token when it expires within this margin.
 _TOKEN_EXPIRY_MARGIN = timedelta(minutes=1)
@@ -267,20 +267,15 @@ def _fetch_calendar(
 
 
 def _raw_type(item: dict[str, Any]) -> str:
-    """Return the item's type, resolving the catch-all "overig" through its id."""
+    """Return the item's type, resolving the catch-all "overig" through its description."""
     raw_type = (item.get("type") or "").strip().lower()
     if raw_type != "overig":
         return raw_type
 
-    resolved = _OVERIG_ID_TYPES.get(str(item.get("id") or "").lower())
-    if resolved:
-        return resolved
-
-    _LOGGER.debug(
-        "Omrin: unknown 'overig' stream, id %s: %s",
-        item.get("id"),
-        item.get("description"),
-    )
+    description = (item.get("description") or "").lower()
+    for keywords, resolved in _OVERIG_DESCRIPTION_TYPES:
+        if any(keyword in description for keyword in keywords):
+            return resolved
     return raw_type
 
 
