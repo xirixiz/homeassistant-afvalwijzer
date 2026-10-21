@@ -177,6 +177,15 @@ def _fetch_waste_data_raw_temp(
     return response.json() or {}
 
 
+def _parse_timestamp(timestamp: str) -> str:
+    """Return the date of an ISO timestamp as YYYY-MM-DD.
+
+    RecycleCMS timestamps may or may not carry fractional seconds, and end in
+    either ``Z`` or an explicit offset (e.g. ``2026-10-05T00:00:00.123Z``).
+    """
+    return datetime.fromisoformat(timestamp.replace("Z", "+00:00")).strftime("%Y-%m-%d")
+
+
 def _parse_waste_data_raw(
     waste_data_raw_temp: dict[str, Any],
     postal_code: str = "",
@@ -207,10 +216,7 @@ def _parse_waste_data_raw(
         if not waste_type:
             continue
 
-        waste_date = datetime.strptime(
-            timestamp,
-            "%Y-%m-%dT%H:%M:%S.000Z",
-        ).strftime("%Y-%m-%d")
+        waste_date = _parse_timestamp(timestamp)
 
         waste_data_raw.append(
             {
