@@ -72,7 +72,7 @@ def _run(session, suffix=""):
 
 
 def test_parses_iso_datetimes_and_skips_placeholder_dates():
-    """ISO datetimes are parsed and placeholder dates skipped; "overig" is left as is."""
+    """ISO datetimes are parsed and placeholder dates skipped; unknown "overig" is left as is."""
     session = FakeSession(
         {
             "/api/auth/login": [_login()],
@@ -177,3 +177,62 @@ def test_rejected_access_token_logs_in_again_once():
 
     assert _run(session) == [{"type": "gft", "date": "2026-03-04"}]
     assert session.calls[-1][1]["headers"]["Authorization"] == "Bearer tok2"
+
+
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [
+        (
+            "Natuurlijke kerstbomen worden op de aangegeven datum opgehaald.",
+            "kerstbomen",
+        ),
+        ("Op de aangegeven dag worden er kerstbomen ingezameld.", "kerstbomen"),
+        (
+            "Meld chemisch afval minimaal 2 werkdagen voor de aangegeven datum aan.",
+            "kca",
+        ),
+        ("Breng het chemisch afval op de aangegeven datum bij de inzamelauto.", "kca"),
+        (
+            "Kca kan aan huis worden gehaald. Aanmelden kan tot donderdag 12.00 uur.",
+            "kca",
+        ),
+        ("Lever chemisch afval op de aangegeven datum in bij de inzamelauto.", "kca"),
+        (
+            "Meld snoeiafval minimaal 2 werkdagen voor de aangegeven datum aan.",
+            "snoeiafval",
+        ),
+        (
+            "Meld elektrische apparaten minimaal 2 werkdagen voor de aangegeven datum aan.",
+            "elektrische-apparaten",
+        ),
+        ("Iets heel anders.", "overig"),
+        (None, "overig"),
+    ],
+)
+def test_overig_is_resolved_through_its_description(description, expected):
+    """The catch-all type "overig" becomes the stream its description names."""
+    item = {"date": "2026-01-14", "type": "OVERIG", "description": description}
+
+    assert omrin._parse_waste_data_raw([item]) == [
+        {"type": expected, "date": "2026-01-14"}
+    ]
+
+
+def test_other_types_ignore_the_description():
+    """Only "overig" is resolved through the description."""
+    item = {
+        "date": "2026-01-14",
+        "type": "RESTAFVAL",
+        "description": "Zet de Sortibak ... chemisch afval ... kerstbomen",
+    }
+
+    assert omrin._parse_waste_data_raw([item]) == [
+        {"type": "restafval", "date": "2026-01-14"}
+    ]
+
+
+def test_entries_without_a_date_are_skipped():
+    """Public containers come without date or description."""
+    item = {"date": None, "type": "PAPIER", "description": None}
+
+    assert omrin._parse_waste_data_raw([item]) == []

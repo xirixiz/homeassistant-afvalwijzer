@@ -20,6 +20,15 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 30.0)
 # Placeholder date Omrin returns for entries without a pickup.
 _EMPTY_DATE_PREFIX = "0001-01-01"
 
+# Omrin reports several different streams as type "overig" (other); only the description
+# tells them apart. Checked in order, first keyword found wins.
+_OVERIG_DESCRIPTION_TYPES: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("kerstbo",), "kerstbomen"),
+    (("chemisch", "kca"), "kca"),
+    (("snoeiafval", "snoeihout"), "snoeiafval"),
+    (("elektrische apparaten",), "elektrische-apparaten"),
+)
+
 # Refresh the access token when it expires within this margin.
 _TOKEN_EXPIRY_MARGIN = timedelta(minutes=1)
 
@@ -257,6 +266,19 @@ def _fetch_calendar(
     return (result.get("data") or {}).get("fetchCalendar") or []
 
 
+def _raw_type(item: dict[str, Any]) -> str:
+    """Return the item's type, resolving the catch-all "overig" through its description."""
+    raw_type = (item.get("type") or "").strip().lower()
+    if raw_type != "overig":
+        return raw_type
+
+    description = (item.get("description") or "").lower()
+    for keywords, resolved in _OVERIG_DESCRIPTION_TYPES:
+        if any(keyword in description for keyword in keywords):
+            return resolved
+    return raw_type
+
+
 def _parse_waste_data_raw(
     waste_data_raw_temp: Sequence[dict[str, Any]],
     postal_code: str = "",
@@ -268,9 +290,7 @@ def _parse_waste_data_raw(
         if not date_str or date_str.startswith(_EMPTY_DATE_PREFIX):
             continue
 
-        waste_type = waste_type_rename(
-            (item.get("type") or "").strip().lower(), postal_code
-        )
+        waste_type = waste_type_rename(_raw_type(item), postal_code)
         if not waste_type:
             continue
 
