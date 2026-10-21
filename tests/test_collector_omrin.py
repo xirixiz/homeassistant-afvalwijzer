@@ -72,7 +72,7 @@ def _run(session, suffix=""):
 
 
 def test_parses_iso_datetimes_and_skips_placeholder_dates():
-    """ISO datetimes are parsed, placeholder dates skipped and "overig" mapped to kca."""
+    """ISO datetimes are parsed and placeholder dates skipped; "overig" is left as is."""
     session = FakeSession(
         {
             "/api/auth/login": [_login()],
@@ -88,7 +88,7 @@ def test_parses_iso_datetimes_and_skips_placeholder_dates():
 
     assert _run(session) == [
         {"type": "gft", "date": "2026-03-04"},
-        {"type": "kca", "date": "2026-03-05"},
+        {"type": "overig", "date": "2026-03-05"},
     ]
 
 

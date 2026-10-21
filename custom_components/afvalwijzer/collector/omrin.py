@@ -268,12 +268,9 @@ def _parse_waste_data_raw(
         if not date_str or date_str.startswith(_EMPTY_DATE_PREFIX):
             continue
 
-        raw_type = (item.get("type") or "").strip().lower()
-        # "overig" (other) is Omrin's label for chemical waste (KCA).
-        if raw_type == "overig":
-            raw_type = "kca"
-
-        waste_type = waste_type_rename(raw_type, postal_code)
+        waste_type = waste_type_rename(
+            (item.get("type") or "").strip().lower(), postal_code
+        )
         if not waste_type:
             continue
 
