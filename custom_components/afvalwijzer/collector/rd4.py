@@ -16,18 +16,19 @@ _LOGGER = logging.getLogger(__name__)
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 
-def _build_url(provider: str, postal_code: str, house_number: str, suffix: str) -> str:
+def _build_url(
+    provider: str, postal_code: str, house_number: str, suffix: str, year: int
+) -> str:
     if provider not in SENSOR_COLLECTORS_RD4:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
     corrected_postal_code = format_postal_code(postal_code)
-    year_current = datetime.now().year
 
     return SENSOR_COLLECTORS_RD4[provider].format(
         corrected_postal_code,
         house_number,
         suffix,
-        year_current,
+        year,
     )
 
 
@@ -90,7 +91,8 @@ def get_waste_data_raw(
     """Return waste_data_raw."""
 
     session = session or requests.Session()
-    url = _build_url(provider, postal_code, house_number, suffix)
+    current_year = datetime.now().year
+    url = _build_url(provider, postal_code, house_number, suffix, current_year)
 
     try:
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
@@ -99,6 +101,21 @@ def get_waste_data_raw(
             timeout=timeout,
             verify=verify,
         )
+
+        # Also fetch next year, so the schedule does not run dry at the end of the
+        # year. Next year's calendar may not be published yet, so failures are ignored.
+        next_url = _build_url(
+            provider, postal_code, house_number, suffix, current_year + 1
+        )
+        try:
+            waste_data_raw_temp = waste_data_raw_temp + _fetch_waste_data_raw_temp(
+                session,
+                next_url,
+                timeout=timeout,
+                verify=verify,
+            )
+        except (requests.exceptions.RequestException, ValueError, TypeError) as err:
+            _LOGGER.debug("RD4: no data for %s: %s", current_year + 1, err)
 
         if not waste_data_raw_temp:
             # Match original semantics: log based on likely cause
