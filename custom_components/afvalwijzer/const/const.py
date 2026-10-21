@@ -139,6 +139,7 @@ SENSOR_COLLECTORS_XIMMIO = {
     "meerlanden": "https://wasteprod2api.ximmio.com",
     "oostzaan": "https://wasteprod2api.ximmio.com",
     "rad": "https://wasteprod2api.ximmio.com",
+    "westland": "https://wasteprod2api.ximmio.com",
     "woerden": "https://wasteprod2api.ximmio.com",
     "ximmio": "https://wasteapi.ximmio.com",
 }
