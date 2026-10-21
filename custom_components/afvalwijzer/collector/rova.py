@@ -59,8 +59,8 @@ def _parse_waste_data_raw(
         if not date_str:
             continue
 
-        # Input format: 2024-01-01T00:00:00Z
-        waste_date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").strftime(
+        # Input format: 2024-01-01T00:00:00Z, or with an explicit offset (+01:00)
+        waste_date = datetime.fromisoformat(date_str.replace("Z", "+00:00")).strftime(
             "%Y-%m-%d"
         )
         waste_data_raw.append({"type": waste_type, "date": waste_date})
