@@ -89,3 +89,15 @@ async def test_user_step_rejects_text_that_is_not_a_listed_entry():
     assert result["step_id"] == "user"
     assert result["errors"] == {CONF_COLLECTOR: "invalid_collector"}
     flow.async_step_address.assert_not_awaited()
+
+
+async def test_user_step_rejects_an_empty_choice():
+    """Submitting the blank entry shows invalid_collector instead of picking a collector."""
+    flow = AfvalwijzerConfigFlow()
+    flow.async_step_address = AsyncMock()
+    flow.async_show_form = lambda **kwargs: kwargs
+
+    result = await flow.async_step_user({CONF_COLLECTOR: ""})
+
+    assert result["errors"] == {CONF_COLLECTOR: "invalid_collector"}
+    flow.async_step_address.assert_not_awaited()
