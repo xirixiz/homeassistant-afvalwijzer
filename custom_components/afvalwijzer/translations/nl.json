@@ -33,6 +33,7 @@
       }
     },
     "error": {
+      "invalid_collector": "Kies een gemeente of collector uit de lijst",
       "invalid_postal_code": "Ongeldig postcode formaat",
       "invalid_house_number": "Huisnummer moet numeriek zijn"
     },
