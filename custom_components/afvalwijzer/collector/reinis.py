@@ -56,18 +56,28 @@ def _fetch_waste_data_raw_temp(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Fetch waste calendar and waste stream data.
 
-    Return a tuple containing the calendar entries and the afvalstroom lookup data.
+    Return a tuple containing the calendar entries (this year and next year) and the
+    afvalstroom lookup data.
     """
-    kalender_url = f"{base_url}/rest/adressen/{bagid}/kalender/{year}"
     afvalstromen_url = f"{base_url}/rest/adressen/{bagid}/afvalstromen"
 
-    waste_response = session.get(kalender_url, timeout=timeout, verify=verify)
-    waste_response.raise_for_status()
+    calendar: list[dict[str, Any]] = []
+    for calendar_year in (year, year + 1):
+        kalender_url = f"{base_url}/rest/adressen/{bagid}/kalender/{calendar_year}"
+        try:
+            waste_response = session.get(kalender_url, timeout=timeout, verify=verify)
+            waste_response.raise_for_status()
+            calendar.extend(waste_response.json() or [])
+        except (requests.exceptions.RequestException, ValueError) as err:
+            # Next year's calendar may not be published yet.
+            if calendar_year == year:
+                raise
+            _LOGGER.debug("Reinis: no calendar for %s: %s", calendar_year, err)
 
     afvalstroom_response = session.get(afvalstromen_url, timeout=timeout, verify=verify)
     afvalstroom_response.raise_for_status()
 
-    return (waste_response.json() or []), (afvalstroom_response.json() or [])
+    return calendar, (afvalstroom_response.json() or [])
 
 
 def _parse_waste_data_raw(
