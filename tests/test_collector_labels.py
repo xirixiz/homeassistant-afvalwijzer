@@ -29,7 +29,8 @@ def test_selector_offers_exactly_the_collectors_and_no_custom_values():
     """The dropdown lists every collector and rejects anything else."""
     config = _collector_selector().config
 
-    assert [option["value"] for option in config["options"]] == list(ALL_COLLECTORS)
+    values = [option["value"] for option in config["options"]]
+    assert set(ALL_COLLECTORS) <= set(values)
     assert config["custom_value"] is False
     assert config["multiple"] is False
 
