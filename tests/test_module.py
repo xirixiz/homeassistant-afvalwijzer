@@ -32,12 +32,24 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 
+def _collector(entry: dict, exclude_today: str) -> MainCollector:
+    """Return a collector for the test entry, with today's pickup in or out."""
+    return MainCollector(
+        entry.get("provider"),
+        entry.get("postal_code").strip().upper(),
+        entry.get("house_number"),
+        entry.get("suffix", ""),
+        entry.get("street_name", ""),
+        exclude_pickup_today=exclude_today,
+        exclude_list=exclude_list,
+        default_label=default_label,
+    )
+
+
 def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
     house_number = entry.get("house_number")
-    suffix = entry.get("suffix", "")
-    street_name = entry.get("street_name", "")
 
     if not show_failures_only:
         LOGGER.info(
@@ -47,16 +59,7 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
             house_number,
         )
 
-    collector = MainCollector(
-        provider,
-        postal_code,
-        house_number,
-        suffix,
-        street_name,
-        exclude_pickup_today=exclude_pickup_today,
-        exclude_list=exclude_list,
-        default_label=default_label,
-    )
+    collector = _collector(entry, exclude_pickup_today)
 
     if collector.waste_data_with_today == {} or collector.waste_types_provider == []:
         LOGGER.error(
@@ -87,7 +90,10 @@ def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
         return True
 
     LOGGER.info("Waste data with today: %s", collector.waste_data_with_today)
-    LOGGER.info("Waste data without today: %s", collector.waste_data_without_today)
+    collector_without_today = _collector(entry, "True")
+    LOGGER.info(
+        "Waste data without today: %s", collector_without_today.waste_data_without_today
+    )
     LOGGER.info("Waste data custom: %s", collector.waste_data_custom)
     LOGGER.info("Waste types provider: %s", collector.waste_types_provider)
     LOGGER.info("Waste types custom: %s", collector.waste_types_custom)
