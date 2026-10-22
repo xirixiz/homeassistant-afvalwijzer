@@ -91,56 +91,68 @@ ALL_COLLECTORS = sorted(
 )
 
 
-_MUNICIPALITY_PREFIX = "municipality:"
-
-
-def _resolve_collector(choice: str) -> str:
-    """Return the collector for a dropdown choice (a collector or a municipality)."""
-    if choice.startswith(_MUNICIPALITY_PREFIX):
-        municipality = choice[len(_MUNICIPALITY_PREFIX) :]
-        return MUNICIPALITY_COLLECTORS.get(municipality, choice)
-    return choice
-
-
-def _collector_options() -> list[SelectOptionDict]:
-    """Return the dropdown options: municipalities and collectors.
+def _collector_choices() -> dict[str, str]:
+    """Return the dropdown entries: display text -> collector.
 
     A municipality is listed with the collector that serves it (e.g. "Harderwijk
     (Omrin)"), so users can search on where they live. The collectors themselves
     stay selectable. A municipality named like its own collector (Amsterdam) is not
     listed twice.
     """
-    options = [
-        SelectOptionDict(
-            value=collector, label=COLLECTOR_LABELS.get(collector, collector)
-        )
+    choices = {
+        COLLECTOR_LABELS.get(collector, collector): collector
         for collector in ALL_COLLECTORS
-    ]
-    taken = {option["label"].casefold() for option in options}
+    }
+    taken = {text.casefold() for text in choices}
 
     for municipality, collector in MUNICIPALITY_COLLECTORS.items():
         if municipality.casefold() in taken:
             continue
         label = COLLECTOR_LABELS.get(collector, collector)
-        options.append(
-            SelectOptionDict(
-                value=f"{_MUNICIPALITY_PREFIX}{municipality}",
-                label=f"{municipality} ({label})",
-            )
-        )
-    return options
+        choices[f"{municipality} ({label})"] = collector
+    return choices
+
+
+COLLECTOR_CHOICES = _collector_choices()
+_CHOICES_CASEFOLD = {text.casefold(): key for text, key in COLLECTOR_CHOICES.items()}
+
+
+def _resolve_collector(choice: str) -> str | None:
+    """Return the collector for a dropdown entry, or None if it isn't a valid one.
+
+    Accepts the displayed text (case-insensitive) or the collector key itself.
+    """
+    choice = choice.strip().casefold()
+    if choice in _CHOICES_CASEFOLD:
+        return _CHOICES_CASEFOLD[choice]
+    if choice in ALL_COLLECTORS:
+        return choice
+    return None
+
+
+def _collector_label(collector: str) -> str:
+    """Return the displayed text of a collector."""
+    return COLLECTOR_LABELS.get(collector, collector)
+
+
+def _display_collector(value: str) -> str:
+    """Return the text to show for a stored collector key or an unresolved entry."""
+    return _collector_label(value) if value in ALL_COLLECTORS else value
 
 
 def _collector_selector() -> SelectSelector:
-    """Return a dropdown with all municipalities and collectors.
+    """Return a searchable dropdown with all municipalities and collectors.
 
-    Only the listed entries can be chosen (no custom values).
+    custom_value is on because Home Assistant only offers type-to-search then, so
+    the steps must reject anything that isn't a listed entry (invalid_collector).
     """
     return SelectSelector(
         SelectSelectorConfig(
-            options=_collector_options(),
+            options=[
+                SelectOptionDict(value=text, label=text) for text in COLLECTOR_CHOICES
+            ],
             mode=SelectSelectorMode.DROPDOWN,
-            custom_value=False,
+            custom_value=True,  # allows to properly search while typing in the dropdown
             multiple=False,
             sort=True,
         )
@@ -172,7 +184,8 @@ def _reconfigure_schema_for(current: dict[str, Any]) -> vol.Schema:
 
     schema_dict: dict[vol.Marker, Any] = {
         vol.Required(
-            CONF_COLLECTOR, default=current.get(CONF_COLLECTOR, "")
+            CONF_COLLECTOR,
+            default=_collector_label(current.get(CONF_COLLECTOR, "")),
         ): _collector_selector(),
         vol.Required(
             CONF_POSTAL_CODE, default=current.get(CONF_POSTAL_CODE, "")
@@ -271,11 +284,15 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            self._collector = _resolve_collector(str(user_input[CONF_COLLECTOR]))
-            return await self.async_step_address()
-        return self.async_show_form(
-            step_id="user", data_schema=COLLECTOR_SCHEMA, errors=errors
-        )
+            collector = _resolve_collector(str(user_input[CONF_COLLECTOR]))
+            if collector is None:
+                errors[CONF_COLLECTOR] = "invalid_collector"
+            else:
+                self._collector = collector
+                return await self.async_step_address()
+
+        schema = self.add_suggested_values_to_schema(COLLECTOR_SCHEMA, user_input or {})
+        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     async def async_step_address(
         self,
@@ -335,13 +352,17 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             cleaned = _clean_user_input(user_input)
-            cleaned[CONF_COLLECTOR] = _resolve_collector(str(cleaned[CONF_COLLECTOR]))
+            typed_collector = str(cleaned[CONF_COLLECTOR])
+            resolved = _resolve_collector(typed_collector)
+            cleaned[CONF_COLLECTOR] = resolved or typed_collector
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             house_number = str(cleaned[CONF_HOUSE_NUMBER])
             collector = str(cleaned[CONF_COLLECTOR])
 
-            if not self._validate_postal_code(postal_code, collector):
+            if resolved is None:
+                errors[CONF_COLLECTOR] = "invalid_collector"
+            elif not self._validate_postal_code(postal_code, collector):
                 errors["base"] = "invalid_postal_code"
             elif not self._validate_house_number(house_number):
                 errors["base"] = "invalid_house_number"
@@ -368,6 +389,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         suggested = current.copy()
         if user_input:
             suggested.update(user_input)
+        suggested[CONF_COLLECTOR] = _display_collector(
+            str(suggested.get(CONF_COLLECTOR, ""))
+        )
 
         schema = self.add_suggested_values_to_schema(
             _reconfigure_schema_for(suggested), suggested

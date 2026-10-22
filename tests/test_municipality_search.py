@@ -3,16 +3,14 @@
 from unittest.mock import AsyncMock
 
 import pytest
-import voluptuous as vol
 
 from custom_components.afvalwijzer.config_flow import (
     ALL_COLLECTORS,
-    COLLECTOR_SCHEMA,
+    COLLECTOR_CHOICES,
     AfvalwijzerConfigFlow,
-    _collector_options,
     _resolve_collector,
 )
-from custom_components.afvalwijzer.const.const import COLLECTOR_LABELS, CONF_COLLECTOR
+from custom_components.afvalwijzer.const.const import CONF_COLLECTOR
 from custom_components.afvalwijzer.const.municipalities import MUNICIPALITY_COLLECTORS
 
 
@@ -28,67 +26,66 @@ def test_table_is_not_empty_and_has_known_municipalities():
     assert MUNICIPALITY_COLLECTORS["Utrecht"] == "utrecht"
 
 
-def test_option_values_are_unique():
-    """Every dropdown option has its own value."""
-    values = [option["value"] for option in _collector_options()]
-
-    assert len(values) == len(set(values))
-
-
-def test_options_contain_collectors_and_municipalities():
-    """Both collectors and municipalities (with their collector) are listed."""
-    labels = {option["value"]: option["label"] for option in _collector_options()}
-
-    assert labels["omrin"] == COLLECTOR_LABELS["omrin"]
-    assert labels["municipality:Harderwijk"] == "Harderwijk (Omrin)"
+def test_municipalities_are_listed_with_their_collector():
+    """A municipality is shown together with the collector that serves it."""
+    assert COLLECTOR_CHOICES["Harderwijk (Omrin)"] == "omrin"
+    assert COLLECTOR_CHOICES["Omrin"] == "omrin"
 
 
 def test_municipality_named_like_its_collector_is_listed_once():
     """Amsterdam is both a municipality and a collector: only the collector shows."""
-    labels = [option["label"] for option in _collector_options()]
-
-    assert labels.count("Amsterdam") == 1
-    assert not any(label.startswith("Amsterdam (") for label in labels)
+    assert "Amsterdam" in COLLECTOR_CHOICES
+    assert not any(text.startswith("Amsterdam (") for text in COLLECTOR_CHOICES)
 
 
 @pytest.mark.parametrize(
     ("choice", "expected"),
     [
+        ("Omrin", "omrin"),
         ("omrin", "omrin"),
-        ("municipality:Harderwijk", "omrin"),
-        ("municipality:'s-Gravenhage", MUNICIPALITY_COLLECTORS["'s-Gravenhage"]),
+        ("  OMRIN ", "omrin"),
+        ("Harderwijk (Omrin)", "omrin"),
+        ("harderwijk (omrin)", "omrin"),
+        ("Súdwest-Fryslân", "sudwestfryslan"),
+        ("Nergens", None),
+        ("Harderwijk", None),
+        ("", None),
     ],
 )
 def test_resolve_collector(choice, expected):
-    """A municipality choice resolves to its collector, a collector stays as is."""
+    """Listed entries (and collector keys) resolve; anything else doesn't."""
     assert _resolve_collector(choice) == expected
 
 
-def test_schema_accepts_a_municipality_and_rejects_unknown_ones():
-    """Only listed municipalities can be chosen."""
-    assert COLLECTOR_SCHEMA({CONF_COLLECTOR: "municipality:Harderwijk"}) == {
-        CONF_COLLECTOR: "municipality:Harderwijk"
-    }
-    with pytest.raises(vol.Invalid):
-        COLLECTOR_SCHEMA({CONF_COLLECTOR: "municipality:Nergens"})
-
-
-async def test_user_step_stores_the_collector_of_the_chosen_municipality():
+async def test_user_step_continues_with_the_collector_of_the_municipality():
     """Choosing a municipality continues the flow with that municipality's collector."""
     flow = AfvalwijzerConfigFlow()
     flow.async_step_address = AsyncMock(return_value={"type": "form"})
 
-    await flow.async_step_user({CONF_COLLECTOR: "municipality:Harderwijk"})
+    await flow.async_step_user({CONF_COLLECTOR: "Harderwijk (Omrin)"})
 
     assert flow._collector == "omrin"
     flow.async_step_address.assert_awaited_once()
 
 
-async def test_user_step_still_accepts_a_collector():
-    """Choosing a collector directly keeps working."""
+async def test_user_step_still_accepts_a_collector_key():
+    """A collector key keeps working (existing flows and YAML imports)."""
     flow = AfvalwijzerConfigFlow()
     flow.async_step_address = AsyncMock(return_value={"type": "form"})
 
     await flow.async_step_user({CONF_COLLECTOR: "mijnafvalwijzer"})
 
     assert flow._collector == "mijnafvalwijzer"
+
+
+async def test_user_step_rejects_text_that_is_not_a_listed_entry():
+    """Free text is rejected with invalid_collector and the flow stays on the step."""
+    flow = AfvalwijzerConfigFlow()
+    flow.async_step_address = AsyncMock()
+    flow.async_show_form = lambda **kwargs: kwargs
+
+    result = await flow.async_step_user({CONF_COLLECTOR: "Nergens"})
+
+    assert result["step_id"] == "user"
+    assert result["errors"] == {CONF_COLLECTOR: "invalid_collector"}
+    flow.async_step_address.assert_not_awaited()

@@ -130,7 +130,7 @@ async def test_reconfigure_with_a_municipality_stores_its_collector(hass):
 
     result = await entry.start_reconfigure_flow(hass)
     user_input = _user_input("9999ZZ", "3")
-    user_input[CONF_COLLECTOR] = "municipality:Harderwijk"
+    user_input[CONF_COLLECTOR] = "Harderwijk (Omrin)"
 
     with patch.object(
         hass.config_entries, "async_reload", AsyncMock(return_value=True)
@@ -142,3 +142,22 @@ async def test_reconfigure_with_a_municipality_stores_its_collector(hass):
     assert result["type"] == "abort"
     assert result["reason"] == "reconfigure_successful"
     assert entry.data[CONF_COLLECTOR] == "omrin"
+
+
+async def test_reconfigure_rejects_an_unknown_collector(hass):
+    """Free text that isn't a listed entry shows invalid_collector and changes nothing."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+
+    result = await entry.start_reconfigure_flow(hass)
+    user_input = _user_input("9999ZZ", "3")
+    user_input[CONF_COLLECTOR] = "Nergens"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input
+    )
+
+    assert result["type"] == "form"
+    assert result["errors"] == {CONF_COLLECTOR: "invalid_collector"}
+    assert entry.data[CONF_COLLECTOR] == "mijnafvalwijzer"
+    assert entry.data[CONF_POSTAL_CODE] == "1234AB"

@@ -33,6 +33,7 @@
       }
     },
     "error": {
+      "invalid_collector": "Choose a municipality or collector from the list",
       "invalid_postal_code": "Invalid postal code format",
       "invalid_house_number": "House number must be numeric"
     },
