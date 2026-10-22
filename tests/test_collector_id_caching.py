@@ -185,3 +185,35 @@ def test_recycleapp_looks_up_location_again_on_404():
 
     assert result == [{"type": "gft", "date": "2026-10-05"}]
     assert recycleapp._LOCATION_ID_CACHE[("9000", "Straat")] == ("z1", "s1")
+
+
+def test_burgerportaal_looks_up_address_again_when_cached_id_gives_no_data():
+    """An unknown address id is answered with 204 (empty), which also drops the cache."""
+    burgerportaal._ADDRESS_ID_CACHE[("138204213565303512", "1234AB", "1", "")] = "stale"
+    session = FakeSession(
+        [
+            ("signupNewUser", FakeResponse({"refreshToken": "ref"})),
+            ("securetoken", FakeResponse({"id_token": "id"})),
+            ("/address?", FakeResponse([{"addressId": "a1", "addition": None}])),
+            (
+                "/calendar",
+                [
+                    FakeResponse([], status_code=204),
+                    FakeResponse(
+                        [{"collectionDate": "2026-10-05T00:00:00", "fraction": "gft"}]
+                    ),
+                ],
+            ),
+        ]
+    )
+
+    result = burgerportaal.get_waste_data_raw(
+        "assen", "1234AB", "1", "", session=session
+    )
+
+    assert result == [{"type": "gft", "date": "2026-10-05"}]
+    assert session.count("/address?") == 1
+    assert (
+        burgerportaal._ADDRESS_ID_CACHE[("138204213565303512", "1234AB", "1", "")]
+        == "a1"
+    )

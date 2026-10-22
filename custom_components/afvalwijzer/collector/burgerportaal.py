@@ -255,12 +255,14 @@ def get_waste_data_raw(
                     timeout=timeout,
                     verify=verify,
                 )
-                return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
+                # An unknown address id is answered with HTTP 204 (no data), not an error,
+                # so an empty calendar also means the cached id is stale.
+                if waste_data_raw_temp:
+                    return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
             except requests.exceptions.HTTPError:
-                _LOGGER.debug(
-                    "Burgerportaal: cached address id rejected, looking up again"
-                )
-                _ADDRESS_ID_CACHE.pop(cache_key, None)
+                pass
+            _LOGGER.debug("Burgerportaal: cached address id rejected, looking up again")
+            _ADDRESS_ID_CACHE.pop(cache_key, None)
 
         address_list = _fetch_address_list(
             session,
