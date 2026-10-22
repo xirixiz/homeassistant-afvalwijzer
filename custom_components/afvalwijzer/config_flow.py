@@ -11,8 +11,15 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.selector import (
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
 from .const.const import (
+    COLLECTOR_LABELS,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_ENABLE_CALENDAR,
@@ -82,7 +89,29 @@ ALL_COLLECTORS = sorted(
     }
 )
 
-COLLECTOR_SCHEMA = vol.Schema({vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS)})
+
+def _collector_selector() -> SelectSelector:
+    """Return a dropdown with all collectors, labelled with their display name.
+
+    Only the listed collectors can be chosen (no custom values).
+    """
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=[
+                SelectOptionDict(
+                    value=collector, label=COLLECTOR_LABELS.get(collector, collector)
+                )
+                for collector in ALL_COLLECTORS
+            ],
+            mode=SelectSelectorMode.DROPDOWN,
+            custom_value=False,
+            multiple=False,
+            sort=True,
+        )
+    )
+
+
+COLLECTOR_SCHEMA = vol.Schema({vol.Required(CONF_COLLECTOR): _collector_selector()})
 
 
 def _address_schema_for(collector: str | None) -> vol.Schema:
@@ -106,9 +135,9 @@ def _reconfigure_schema_for(current: dict[str, Any]) -> vol.Schema:
     collector = current.get(CONF_COLLECTOR, "")
 
     schema_dict: dict[vol.Marker, Any] = {
-        vol.Required(CONF_COLLECTOR, default=current.get(CONF_COLLECTOR, "")): vol.In(
-            ALL_COLLECTORS
-        ),
+        vol.Required(
+            CONF_COLLECTOR, default=current.get(CONF_COLLECTOR, "")
+        ): _collector_selector(),
         vol.Required(
             CONF_POSTAL_CODE, default=current.get(CONF_POSTAL_CODE, "")
         ): cv.string,
