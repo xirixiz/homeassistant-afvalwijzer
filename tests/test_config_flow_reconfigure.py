@@ -160,3 +160,24 @@ def test_reconfigure_form_asks_for_the_street_name_only_for_recycleapp():
     assert CONF_STREET_NAME not in {str(key) for key in other.schema}
     default = next(k for k in recycleapp.schema if str(k) == CONF_STREET_NAME).default()
     assert default == "Teststraat"
+
+
+async def test_reconfigure_with_a_municipality_stores_its_collector(hass):
+    """Choosing a municipality while reconfiguring stores the collector, not the choice."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+
+    result = await entry.start_reconfigure_flow(hass)
+    user_input = _user_input("9999ZZ", "3")
+    user_input[CONF_COLLECTOR] = "municipality:Harderwijk"
+
+    with patch.object(
+        hass.config_entries, "async_reload", AsyncMock(return_value=True)
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input
+        )
+
+    assert result["type"] == "abort"
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data[CONF_COLLECTOR] == "omrin"

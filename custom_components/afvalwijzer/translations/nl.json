@@ -5,7 +5,7 @@
         "title": "Configureer Afvalwijzer",
         "description": "Stel de Afvalwijzer-integratie in.",
         "data": {
-          "provider": "Collector (bijv. mijnafvalwijzer)"
+          "provider": "Gemeente of collector"
         }
       },
       "address": {
@@ -23,7 +23,7 @@
         "title": "Afvalwijzer herconfigureren",
         "description": "Pas de adresgegevens voor deze Afvalwijzer-configuratie aan.",
         "data": {
-          "provider": "Collector",
+          "provider": "Gemeente of collector",
           "postal_code": "Postcode",
           "house_number": "Huisnummer",
           "suffix": "Huisnummer toevoeging",
