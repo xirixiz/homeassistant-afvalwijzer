@@ -59,6 +59,7 @@ from .const.const import (
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
+from .const.municipalities import MUNICIPALITY_COLLECTORS
 
 _POSTAL_CODE_BE_RE = re.compile(r"^\d{4}$")
 _POSTAL_CODE_NL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
@@ -90,19 +91,54 @@ ALL_COLLECTORS = sorted(
 )
 
 
-def _collector_selector() -> SelectSelector:
-    """Return a dropdown with all collectors, labelled with their display name.
+_MUNICIPALITY_PREFIX = "municipality:"
 
-    Only the listed collectors can be chosen (no custom values).
+
+def _resolve_collector(choice: str) -> str:
+    """Return the collector for a dropdown choice (a collector or a municipality)."""
+    if choice.startswith(_MUNICIPALITY_PREFIX):
+        municipality = choice[len(_MUNICIPALITY_PREFIX) :]
+        return MUNICIPALITY_COLLECTORS.get(municipality, choice)
+    return choice
+
+
+def _collector_options() -> list[SelectOptionDict]:
+    """Return the dropdown options: municipalities and collectors.
+
+    A municipality is listed with the collector that serves it (e.g. "Harderwijk
+    (Omrin)"), so users can search on where they live. The collectors themselves
+    stay selectable. A municipality named like its own collector (Amsterdam) is not
+    listed twice.
+    """
+    options = [
+        SelectOptionDict(
+            value=collector, label=COLLECTOR_LABELS.get(collector, collector)
+        )
+        for collector in ALL_COLLECTORS
+    ]
+    taken = {option["label"].casefold() for option in options}
+
+    for municipality, collector in MUNICIPALITY_COLLECTORS.items():
+        if municipality.casefold() in taken:
+            continue
+        label = COLLECTOR_LABELS.get(collector, collector)
+        options.append(
+            SelectOptionDict(
+                value=f"{_MUNICIPALITY_PREFIX}{municipality}",
+                label=f"{municipality} ({label})",
+            )
+        )
+    return options
+
+
+def _collector_selector() -> SelectSelector:
+    """Return a dropdown with all municipalities and collectors.
+
+    Only the listed entries can be chosen (no custom values).
     """
     return SelectSelector(
         SelectSelectorConfig(
-            options=[
-                SelectOptionDict(
-                    value=collector, label=COLLECTOR_LABELS.get(collector, collector)
-                )
-                for collector in ALL_COLLECTORS
-            ],
+            options=_collector_options(),
             mode=SelectSelectorMode.DROPDOWN,
             custom_value=False,
             multiple=False,
@@ -235,7 +271,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            self._collector = str(user_input[CONF_COLLECTOR])
+            self._collector = _resolve_collector(str(user_input[CONF_COLLECTOR]))
             return await self.async_step_address()
         return self.async_show_form(
             step_id="user", data_schema=COLLECTOR_SCHEMA, errors=errors
@@ -299,6 +335,7 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             cleaned = _clean_user_input(user_input)
+            cleaned[CONF_COLLECTOR] = _resolve_collector(str(cleaned[CONF_COLLECTOR]))
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             house_number = str(cleaned[CONF_HOUSE_NUMBER])
