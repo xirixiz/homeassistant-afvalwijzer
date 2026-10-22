@@ -1,11 +1,8 @@
 """Tests for the collector selection in the config flow."""
 
-import pytest
-import voluptuous as vol
-
 from custom_components.afvalwijzer.config_flow import (
     ALL_COLLECTORS,
-    COLLECTOR_SCHEMA,
+    COLLECTOR_CHOICES,
     _collector_selector,
     _reconfigure_schema_for,
 )
@@ -25,38 +22,29 @@ def test_no_label_without_collector():
     assert set(COLLECTOR_LABELS) - set(ALL_COLLECTORS) == set()
 
 
-def test_selector_offers_exactly_the_collectors_and_no_custom_values():
-    """The dropdown lists every collector and rejects anything else."""
+def test_selector_is_searchable_and_shows_the_display_text():
+    """The dropdown allows typing (that is what enables search) and shows readable text."""
     config = _collector_selector().config
 
-    values = [option["value"] for option in config["options"]]
-    assert set(ALL_COLLECTORS) <= set(values)
-    assert config["custom_value"] is False
+    assert config["custom_value"] is True
     assert config["multiple"] is False
+    assert all(option["value"] == option["label"] for option in config["options"])
+    assert {option["value"] for option in config["options"]} == set(COLLECTOR_CHOICES)
 
 
-def test_selector_labels_are_the_display_names():
-    """Options carry the display name as label and the collector as value."""
-    options = {
-        option["value"]: option["label"]
-        for option in _collector_selector().config["options"]
-    }
-
-    assert options["cyclus"] == "Cyclus NV"
-    assert options["sudwestfryslan"] == "Súdwest-Fryslân"
+def test_every_collector_is_offered_under_its_display_name():
+    """All collectors stay selectable."""
+    assert {COLLECTOR_CHOICES[COLLECTOR_LABELS[key]] for key in ALL_COLLECTORS} == set(
+        ALL_COLLECTORS
+    )
+    assert COLLECTOR_CHOICES["Cyclus NV"] == "cyclus"
+    assert COLLECTOR_CHOICES["Súdwest-Fryslân"] == "sudwestfryslan"
 
 
-def test_user_step_accepts_a_collector_and_rejects_unknown_ones():
-    """The form validates the chosen value against the list."""
-    assert COLLECTOR_SCHEMA({CONF_COLLECTOR: "cyclus"}) == {CONF_COLLECTOR: "cyclus"}
-    with pytest.raises(vol.Invalid):
-        COLLECTOR_SCHEMA({CONF_COLLECTOR: "not-a-collector"})
-
-
-def test_reconfigure_schema_uses_the_same_selector():
-    """Reconfiguring offers the same labelled dropdown, pre-filled."""
+def test_reconfigure_schema_is_prefilled_with_the_display_name():
+    """Reconfiguring shows the collector's display name, not its key."""
     schema = _reconfigure_schema_for({CONF_COLLECTOR: "omrin"})
 
-    assert schema({"postal_code": "1234AB", "house_number": "1"})[CONF_COLLECTOR] == (
-        "omrin"
-    )
+    result = schema({"postal_code": "1234AB", "house_number": "1"})
+
+    assert result[CONF_COLLECTOR] == "Omrin"
