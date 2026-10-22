@@ -24,7 +24,7 @@ from custom_components.afvalwijzer.common.main_functions import WASTE_TYPE_MAPPI
 from tests.test_data import TEST_ADDRESSES
 
 # Common parameters for all tests
-exclude_pickup_today = "False"
+exclude_pickup_today = "True"
 exclude_list = ""
 default_label = "geen"
 
