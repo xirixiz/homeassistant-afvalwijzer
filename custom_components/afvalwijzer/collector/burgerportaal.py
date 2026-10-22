@@ -18,6 +18,12 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 # Keep existing behavior: static API key in code (not ideal, but not changing functionality)
 _API_KEY = "AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk"
 
+# The anonymous Firebase user's refresh token is long-lived, so keep it for the process
+# lifetime instead of creating a new anonymous user on every refresh. Address ids are
+# cached per organisation and address.
+_AUTH_CACHE: dict[str, str] = {}
+_ADDRESS_ID_CACHE: dict[tuple[str, str, str, str], str] = {}
+
 _BASE_GOOGLE_SIGNUP_URL = (
     "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser"
 )
@@ -231,8 +237,32 @@ def get_waste_data_raw(
             timeout=timeout,
             verify=verify,
             id_token=id_token,
-            refresh_token=refresh_token,
+            refresh_token=refresh_token or _AUTH_CACHE.get("refresh_token"),
         )
+        if refresh_token:
+            _AUTH_CACHE["refresh_token"] = refresh_token
+
+        cache_key = (org_id, postal_code, house_number, suffix)
+        cached_address_id = _ADDRESS_ID_CACHE.get(cache_key)
+
+        if cached_address_id:
+            try:
+                waste_data_raw_temp = _fetch_waste_data_raw_temp(
+                    session,
+                    org_id,
+                    cached_address_id,
+                    id_token,
+                    timeout=timeout,
+                    verify=verify,
+                )
+                # An unknown address id is answered with HTTP 204 (no data), not an error,
+                # so an empty calendar also means the cached id is stale.
+                if waste_data_raw_temp:
+                    return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
+            except requests.exceptions.HTTPError:
+                pass
+            _LOGGER.debug("Burgerportaal: cached address id rejected, looking up again")
+            _ADDRESS_ID_CACHE.pop(cache_key, None)
 
         address_list = _fetch_address_list(
             session,
@@ -251,6 +281,7 @@ def get_waste_data_raw(
         if not address_id:
             _LOGGER.warning("Burgerportaal: Address not found!")
             return []
+        _ADDRESS_ID_CACHE[cache_key] = address_id
 
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
             session,
