@@ -48,3 +48,18 @@ def test_reconfigure_schema_is_prefilled_with_the_display_name():
     result = schema({"postal_code": "1234AB", "house_number": "1"})
 
     assert result[CONF_COLLECTOR] == "Omrin"
+
+
+def test_setup_dropdown_starts_with_a_blank_entry():
+    """Nothing is preselected in the setup step: the first entry is empty."""
+    options = _collector_selector(blank=True).config["options"]
+
+    assert options[0] == {"value": "", "label": ""}
+    assert [o["value"] for o in options[1:]] == list(COLLECTOR_CHOICES)
+
+
+def test_reconfigure_dropdown_has_no_blank_entry():
+    """The reconfigure dropdown is pre-filled, so it has no blank entry."""
+    options = _collector_selector().config["options"]
+
+    assert all(option["value"] for option in options)
