@@ -38,7 +38,7 @@ Everything you need is already in `scripts/`:
 | `scripts/test-module` | Run a single module against the live providers |
 | `scripts/check-municipality-coverage` | Check which municipalities are covered |
 | `scripts/lint` | `ruff check . --fix` |
-| `scripts/develop` | `docker compose up` to run Home Assistant locally with the component mounted |
+| `scripts/develop` | `docker compose up --watch` to run Home Assistant locally with the component mounted; it restarts when the component changes |
 | `scripts/upgrade` | Upgrade to the latest (pre-release) Home Assistant |
 | `scripts/dev-branch` | Install Home Assistant from its `dev` branch |
 | `scripts/specific-version` | Pin a specific Home Assistant version |
