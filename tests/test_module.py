@@ -24,6 +24,7 @@ from custom_components.afvalwijzer.common.main_functions import WASTE_TYPE_MAPPI
 from tests.test_data import TEST_ADDRESSES
 
 # Common parameters for all tests
+exclude_pickup_today = "False"
 exclude_list = ""
 default_label = "geen"
 
@@ -31,14 +32,24 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 LOGGER = logging.getLogger(__name__)
 
 
-def _run_for_entry(
-    entry: dict, show_failures_only: bool = False, exclude_today: bool = False
-) -> bool:
+def _collector(entry: dict, exclude_today: str) -> MainCollector:
+    """Return a collector for the test entry, with today's pickup in or out."""
+    return MainCollector(
+        entry.get("provider"),
+        entry.get("postal_code").strip().upper(),
+        entry.get("house_number"),
+        entry.get("suffix", ""),
+        entry.get("street_name", ""),
+        exclude_pickup_today=exclude_today,
+        exclude_list=exclude_list,
+        default_label=default_label,
+    )
+
+
+def _run_for_entry(entry: dict, show_failures_only: bool = False) -> bool:
     provider = entry.get("provider")
     postal_code = entry.get("postal_code").strip().upper()
     house_number = entry.get("house_number")
-    suffix = entry.get("suffix", "")
-    street_name = entry.get("street_name", "")
 
     if not show_failures_only:
         LOGGER.info(
@@ -48,16 +59,7 @@ def _run_for_entry(
             house_number,
         )
 
-    collector = MainCollector(
-        provider,
-        postal_code,
-        house_number,
-        suffix,
-        street_name,
-        exclude_pickup_today=str(exclude_today),
-        exclude_list=exclude_list,
-        default_label=default_label,
-    )
+    collector = _collector(entry, exclude_pickup_today)
 
     if collector.waste_data_with_today == {} or collector.waste_types_provider == []:
         LOGGER.error(
@@ -88,8 +90,10 @@ def _run_for_entry(
         return True
 
     LOGGER.info("Waste data with today: %s", collector.waste_data_with_today)
-    if exclude_today:
-        LOGGER.info("Waste data without today: %s", collector.waste_data_without_today)
+    collector_without_today = _collector(entry, "True")
+    LOGGER.info(
+        "Waste data without today: %s", collector_without_today.waste_data_without_today
+    )
     LOGGER.info("Waste data custom: %s", collector.waste_data_custom)
     LOGGER.info("Waste types provider: %s", collector.waste_types_provider)
     LOGGER.info("Waste types custom: %s", collector.waste_types_custom)
@@ -104,25 +108,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Only show failures, skip success logs",
     )
-    parser.add_argument(
-        "--exclude-pickup-today",
-        action="store_true",
-        help=(
-            "Exclude today's pickup (exclude_pickup_today=True) and show the "
-            "'without today' data. This also moves the custom data (next_date, ...) "
-            "to start from tomorrow."
-        ),
-    )
     args = parser.parse_args()
 
     failures = 0
     for entry in TEST_ADDRESSES:
         try:
-            if not _run_for_entry(
-                entry,
-                show_failures_only=args.show_failures_only,
-                exclude_today=args.exclude_pickup_today,
-            ):
+            if not _run_for_entry(entry, show_failures_only=args.show_failures_only):
                 failures += 1
         except Exception as exc:  # pragma: no cover - manual test runner
             LOGGER.exception("Error while running entry %s: %s", entry, exc)
