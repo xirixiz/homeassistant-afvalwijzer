@@ -209,3 +209,54 @@ def test_init_sets_supports_notifications_false_for_incapable_provider():
     config = {**_CONFIG, CONF_COLLECTOR: "rova"}
     coordinator = _make_real_coordinator(config)
     assert coordinator.supports_notifications is False
+
+
+async def test_update_keeps_previous_schedule_when_provider_returns_nothing():
+    """An empty result must not replace a schedule we already have."""
+    coordinator = _make_coordinator()
+    coordinator.data = dict(_DATA)
+    coordinator._apply_data(coordinator.data)
+
+    async def _exec(fn, *args):
+        return fn(*args)
+
+    coordinator.hass = SimpleNamespace(async_add_executor_job=_exec)
+    coordinator._fetch_data = lambda: {
+        "waste_data_with_today": {},
+        "waste_data_without_today": {},
+        "waste_data_custom": {},
+        "waste_data_raw": [],
+        "notification_data": [],
+    }
+    save_mock = AsyncMock()
+    coordinator._store = SimpleNamespace(async_save=save_mock)
+
+    result = await coordinator._async_update_data()
+
+    assert result == _DATA
+    assert coordinator.waste_data_raw == _DATA["waste_data_raw"]
+    assert coordinator.waste_data_with_today == _DATA["waste_data_with_today"]
+    save_mock.assert_not_awaited()
+
+
+async def test_update_accepts_empty_result_without_previous_schedule():
+    """With nothing to keep, an empty result is applied as before."""
+    coordinator = _make_coordinator()
+
+    async def _exec(fn, *args):
+        return fn(*args)
+
+    coordinator.hass = SimpleNamespace(async_add_executor_job=_exec)
+    empty = {
+        "waste_data_with_today": {},
+        "waste_data_without_today": {},
+        "waste_data_custom": {},
+        "waste_data_raw": [],
+        "notification_data": [],
+    }
+    coordinator._fetch_data = lambda: dict(empty)
+    save_mock = AsyncMock()
+    coordinator._store = SimpleNamespace(async_save=save_mock)
+
+    assert await coordinator._async_update_data() == empty
+    save_mock.assert_awaited_once()

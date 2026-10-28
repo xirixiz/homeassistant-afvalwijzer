@@ -105,6 +105,15 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Fetch data from API."""
         try:
             data = await self.hass.async_add_executor_job(self._fetch_data)
+
+            # Providers answer "no data" / "address not found" with an empty schedule instead
+            # of an error. Don't let that replace a schedule we already have.
+            if not data.get("waste_data_raw") and self._has_schedule():
+                _LOGGER.warning(
+                    "Provider returned no pickup data, keeping the previous schedule"
+                )
+                return self.data
+
             self._apply_data(data)
 
             # Save to cache
@@ -122,6 +131,10 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return data
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
+
+    def _has_schedule(self) -> bool:
+        """Return True if a non-empty schedule was fetched or loaded from the cache."""
+        return bool(self.data and self.data.get("waste_data_raw"))
 
     def _apply_data(self, data: dict[str, Any]) -> None:
         """Apply fetched or cached data."""
