@@ -161,7 +161,7 @@ def _parse_waste_data_raw(
         if not isinstance(item, dict):
             continue
 
-        pickup_dates = sorted(item.get("pickupDates") or [])
+        pickup_dates = item.get("pickupDates") or []
         if not pickup_dates:
             continue
 
@@ -170,11 +170,16 @@ def _parse_waste_data_raw(
         if not waste_type:
             continue
 
-        waste_date = _parse_ximmio_date(pickup_dates[0])
-        if not waste_date:
-            continue
-
-        waste_data_raw.append({"type": waste_type, "date": waste_date})
+        # The request covers a year ahead, so keep every pickup instead of only the next.
+        waste_dates = {
+            waste_date
+            for waste_date in map(_parse_ximmio_date, pickup_dates)
+            if waste_date
+        }
+        waste_data_raw.extend(
+            {"type": waste_type, "date": waste_date}
+            for waste_date in sorted(waste_dates)
+        )
 
     return waste_data_raw
 
