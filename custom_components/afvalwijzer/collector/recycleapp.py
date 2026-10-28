@@ -17,6 +17,10 @@ _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
 _X_CONSUMER = "recycleapp.be"
 
+# (postcode id, street id) per postal code and street name, kept for the process
+# lifetime so a refresh needs one request instead of a lookup first.
+_LOCATION_ID_CACHE: dict[tuple[str, str], tuple[str, str]] = {}
+
 
 def _build_url(provider: str) -> str:
     """Build the base URL for the RecycleApp collector."""
@@ -251,24 +255,48 @@ def get_waste_data_raw(
             _LOGGER.error("RECYCLEAPP: street_name is required")
             return []
 
-        postcode_id, street_id = _fetch_postcode_and_street_id(
-            session,
-            base_url,
-            postal_code,
-            street_name,
-            timeout=timeout,
-            verify=verify,
-        )
+        cache_key = (postal_code, street_name)
+        cached = _LOCATION_ID_CACHE.get(cache_key)
+        waste_data_raw_temp = None
 
-        waste_data_raw_temp = _fetch_waste_data_raw_temp(
-            session,
-            base_url,
-            postcode_id,
-            street_id,
-            str(house_number),
-            timeout=timeout,
-            verify=verify,
-        )
+        if cached:
+            try:
+                waste_data_raw_temp = _fetch_waste_data_raw_temp(
+                    session,
+                    base_url,
+                    *cached,
+                    str(house_number),
+                    timeout=timeout,
+                    verify=verify,
+                )
+            except requests.exceptions.HTTPError as err:
+                if err.response is None or err.response.status_code not in (400, 404):
+                    raise
+                _LOGGER.debug(
+                    "RECYCLEAPP: cached location ids rejected, looking up again"
+                )
+                _LOCATION_ID_CACHE.pop(cache_key, None)
+
+        if waste_data_raw_temp is None:
+            postcode_id, street_id = _fetch_postcode_and_street_id(
+                session,
+                base_url,
+                postal_code,
+                street_name,
+                timeout=timeout,
+                verify=verify,
+            )
+            _LOCATION_ID_CACHE[cache_key] = (postcode_id, street_id)
+
+            waste_data_raw_temp = _fetch_waste_data_raw_temp(
+                session,
+                base_url,
+                postcode_id,
+                street_id,
+                str(house_number),
+                timeout=timeout,
+                verify=verify,
+            )
 
         if not waste_data_raw_temp:
             _LOGGER.error("No Waste data found!")
