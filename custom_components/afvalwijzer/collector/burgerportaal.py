@@ -15,6 +15,9 @@ _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
+# Burgerportaal blocks the default python-requests User-Agent
+_USER_AGENT = "Afvalwijzer (+https://github.com/xirixiz/homeassistant-afvalwijzer)"
+
 # Keep existing behavior: static API key in code (not ideal, but not changing functionality)
 _API_KEY = "AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk"
 
@@ -41,6 +44,7 @@ def _signup_anonymous(
 ) -> dict[str, Any]:
     response = session.post(
         f"{_BASE_GOOGLE_SIGNUP_URL}?key={_API_KEY}",
+        headers={"User-Agent": _USER_AGENT},
         timeout=timeout,
         verify=verify,
     )
@@ -57,7 +61,10 @@ def _refresh_id_token(
 ) -> str:
     response = session.post(
         f"{_BASE_GOOGLE_SECURETOKEN_URL}?key={_API_KEY}",
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": _USER_AGENT,
+        },
         data={"grant_type": "refresh_token", "refresh_token": refresh_token},
         timeout=timeout,
         verify=verify,
@@ -133,7 +140,7 @@ def _fetch_address_list(
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address"
         f"?zipcode={postal_code}&housenumber={house_number}",
-        headers={"authorization": id_token},
+        headers={"authorization": id_token, "User-Agent": _USER_AGENT},
         timeout=timeout,
         verify=verify,
     )
@@ -169,7 +176,7 @@ def _fetch_waste_data_raw_temp(
 ) -> list[dict[str, Any]]:
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address/{address_id}/calendar",
-        headers={"authorization": id_token},
+        headers={"authorization": id_token, "User-Agent": _USER_AGENT},
         timeout=timeout,
         verify=verify,
     )
