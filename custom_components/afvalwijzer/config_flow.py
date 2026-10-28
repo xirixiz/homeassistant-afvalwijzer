@@ -11,8 +11,15 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.selector import (
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 
 from .const.const import (
+    COLLECTOR_LABELS,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_ENABLE_CALENDAR,
@@ -52,6 +59,7 @@ from .const.const import (
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
+from .const.municipalities import MUNICIPALITY_COLLECTORS
 
 _POSTAL_CODE_BE_RE = re.compile(r"^\d{4}$")
 _POSTAL_CODE_NL_RE = re.compile(r"^\d{4}\s?[A-Za-z]{2}$")
@@ -82,7 +90,85 @@ ALL_COLLECTORS = sorted(
     }
 )
 
-COLLECTOR_SCHEMA = vol.Schema({vol.Required(CONF_COLLECTOR): vol.In(ALL_COLLECTORS)})
+
+def _collector_choices() -> dict[str, str]:
+    """Return the dropdown entries: display text -> collector.
+
+    A municipality is listed with the collector that serves it (e.g. "Harderwijk
+    (Omrin)"), so users can search on where they live. The collectors themselves
+    stay selectable. A municipality named like its own collector (Amsterdam) is not
+    listed twice.
+    """
+    choices = {
+        COLLECTOR_LABELS.get(collector, collector): collector
+        for collector in ALL_COLLECTORS
+    }
+    taken = {text.casefold() for text in choices}
+
+    for municipality, collector in MUNICIPALITY_COLLECTORS.items():
+        if municipality.casefold() in taken:
+            continue
+        label = COLLECTOR_LABELS.get(collector, collector)
+        choices[f"{municipality} ({label})"] = collector
+    return choices
+
+
+COLLECTOR_CHOICES = _collector_choices()
+_CHOICES_CASEFOLD = {text.casefold(): key for text, key in COLLECTOR_CHOICES.items()}
+
+
+def _resolve_collector(choice: str) -> str | None:
+    """Return the collector for a dropdown entry, or None if it isn't a valid one.
+
+    Accepts the displayed text (case-insensitive) or the collector key itself.
+    """
+    choice = choice.strip().casefold()
+    if choice in _CHOICES_CASEFOLD:
+        return _CHOICES_CASEFOLD[choice]
+    if choice in ALL_COLLECTORS:
+        return choice
+    return None
+
+
+def _collector_label(collector: str) -> str:
+    """Return the displayed text of a collector."""
+    return COLLECTOR_LABELS.get(collector, collector)
+
+
+def _display_collector(value: str) -> str:
+    """Return the text to show for a stored collector key or an unresolved entry."""
+    return _collector_label(value) if value in ALL_COLLECTORS else value
+
+
+def _collector_selector(*, blank: bool = False) -> SelectSelector:
+    """Return a searchable dropdown with all municipalities and collectors.
+
+    With blank, an empty entry comes first, so nothing is preselected (otherwise the
+    frontend picks the first collector).
+
+    custom_value is on because Home Assistant only offers type-to-search then, so
+    the steps must reject anything that isn't a listed entry (invalid_collector).
+    """
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=[
+                *([SelectOptionDict(value="", label="")] if blank else []),
+                *(
+                    SelectOptionDict(value=text, label=text)
+                    for text in COLLECTOR_CHOICES
+                ),
+            ],
+            mode=SelectSelectorMode.DROPDOWN,
+            custom_value=True,  # allows to properly search while typing in the dropdown
+            multiple=False,
+            sort=True,
+        )
+    )
+
+
+COLLECTOR_SCHEMA = vol.Schema(
+    {vol.Required(CONF_COLLECTOR): _collector_selector(blank=True)}
+)
 
 
 def _address_schema_for(collector: str | None) -> vol.Schema:
@@ -106,9 +192,10 @@ def _reconfigure_schema_for(current: dict[str, Any]) -> vol.Schema:
     collector = current.get(CONF_COLLECTOR, "")
 
     schema_dict: dict[vol.Marker, Any] = {
-        vol.Required(CONF_COLLECTOR, default=current.get(CONF_COLLECTOR, "")): vol.In(
-            ALL_COLLECTORS
-        ),
+        vol.Required(
+            CONF_COLLECTOR,
+            default=_collector_label(current.get(CONF_COLLECTOR, "")),
+        ): _collector_selector(),
         vol.Required(
             CONF_POSTAL_CODE, default=current.get(CONF_POSTAL_CODE, "")
         ): cv.string,
@@ -206,11 +293,15 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            self._collector = str(user_input[CONF_COLLECTOR])
-            return await self.async_step_address()
-        return self.async_show_form(
-            step_id="user", data_schema=COLLECTOR_SCHEMA, errors=errors
-        )
+            collector = _resolve_collector(str(user_input[CONF_COLLECTOR]))
+            if collector is None:
+                errors[CONF_COLLECTOR] = "invalid_collector"
+            else:
+                self._collector = collector
+                return await self.async_step_address()
+
+        schema = self.add_suggested_values_to_schema(COLLECTOR_SCHEMA, user_input or {})
+        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     async def async_step_address(
         self,
@@ -270,12 +361,17 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             cleaned = _clean_user_input(user_input)
+            typed_collector = str(cleaned[CONF_COLLECTOR])
+            resolved = _resolve_collector(typed_collector)
+            cleaned[CONF_COLLECTOR] = resolved or typed_collector
 
             postal_code = str(cleaned[CONF_POSTAL_CODE])
             house_number = str(cleaned[CONF_HOUSE_NUMBER])
             collector = str(cleaned[CONF_COLLECTOR])
 
-            if not self._validate_postal_code(postal_code, collector):
+            if resolved is None:
+                errors[CONF_COLLECTOR] = "invalid_collector"
+            elif not self._validate_postal_code(postal_code, collector):
                 errors["base"] = "invalid_postal_code"
             elif not self._validate_house_number(house_number):
                 errors["base"] = "invalid_house_number"
@@ -302,6 +398,9 @@ class AfvalwijzerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         suggested = current.copy()
         if user_input:
             suggested.update(user_input)
+        suggested[CONF_COLLECTOR] = _display_collector(
+            str(suggested.get(CONF_COLLECTOR, ""))
+        )
 
         schema = self.add_suggested_values_to_schema(
             _reconfigure_schema_for(suggested), suggested
