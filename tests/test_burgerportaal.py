@@ -18,6 +18,16 @@ def _response(data=None, status=200, text=None):
     return response
 
 
+@pytest.fixture(autouse=True)
+def _clear_caches():
+    """Keep the module-level id caches from leaking between tests."""
+    burgerportaal._AUTH_CACHE.clear()
+    burgerportaal._ADDRESS_ID_CACHE.clear()
+    yield
+    burgerportaal._AUTH_CACHE.clear()
+    burgerportaal._ADDRESS_ID_CACHE.clear()
+
+
 @pytest.fixture
 def session():
     """Return a mocked session with a full happy-flow response sequence."""
