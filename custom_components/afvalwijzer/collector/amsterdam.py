@@ -122,6 +122,28 @@ def _generate_dates_for_year(
     return dates
 
 
+def _is_first_of_month_frequency(frequency: str) -> bool:
+    """Check if the frequency means the first matching weekday of each month."""
+    return frequency.strip().lower().replace(" ", "") == "1evandemaand"
+
+
+def _generate_first_weekday_dates_for_year(
+    week_day: int, today: datetime
+) -> list[datetime]:
+    """Generate the first matching weekday of each month for roughly one year.
+
+    Today's pickup is kept for the whole collection day.
+    """
+    dates: list[datetime] = []
+    for month_offset in range(13):
+        year = today.year + (today.month - 1 + month_offset) // 12
+        month = (today.month - 1 + month_offset) % 12 + 1
+        first_of_month = datetime(year, month, 1)
+        day_delta = (week_day - first_of_month.isoweekday()) % 7
+        dates.append(first_of_month + timedelta(days=day_delta))
+    return [d for d in dates if d.date() >= today.date()]
+
+
 def _build_query_params(
     postal_code: str, house_number: str, suffix: str
 ) -> list[dict[str, str]]:
@@ -232,6 +254,10 @@ def _process_collection_dates(item: dict[str, Any], today: datetime) -> list[dat
         if not frequency:
             day_delta = _calculate_day_delta(week_day, today)
             future_dates.extend(_generate_dates_for_year(day_delta, 1, today))
+            continue
+
+        if _is_first_of_month_frequency(frequency):
+            future_dates.extend(_generate_first_weekday_dates_for_year(week_day, today))
             continue
 
         if "week" in frequency or "weken" in frequency:
