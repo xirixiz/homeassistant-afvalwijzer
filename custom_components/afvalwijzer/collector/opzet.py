@@ -48,12 +48,15 @@ def _select_bag_id(
     if not response_address:
         return None
 
-    # Original behavior: if multiple and suffix, match huisletter or huisnummerToevoeging
+    # If multiple and suffix, match huisletter or huisnummerToevoeging.
+    # Compare case-insensitively: some APIs (e.g. Saver) return the
+    # huisletter in lowercase while the configured suffix is uppercased.
+    suffix = (suffix or "").strip().upper()
     if len(response_address) > 1 and suffix:
         for item in response_address:
             if (
-                item.get("huisletter") == suffix
-                or item.get("huisnummerToevoeging") == suffix
+                str(item.get("huisletter") or "").strip().upper() == suffix
+                or str(item.get("huisnummerToevoeging") or "").strip().upper() == suffix
             ):
                 return item.get("bagId")
         return None
