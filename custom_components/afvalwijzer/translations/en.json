@@ -5,7 +5,7 @@
         "title": "Configure Afvalwijzer",
         "description": "Set up your Afvalwijzer integration.",
         "data": {
-          "provider": "Collector (e.g. mijnafvalwijzer)"
+          "provider": "Municipality or collector"
         }
       },
       "address": {
@@ -23,7 +23,7 @@
         "title": "Reconfigure Afvalwijzer",
         "description": "Update the address details for this Afvalwijzer configuration.",
         "data": {
-          "provider": "Collector",
+          "provider": "Municipality or collector",
           "postal_code": "Postal code",
           "house_number": "House number",
           "suffix": "House number suffix",
@@ -33,6 +33,7 @@
       }
     },
     "error": {
+      "invalid_collector": "Choose a municipality or collector from the list",
       "invalid_postal_code": "Invalid postal code format",
       "invalid_house_number": "House number must be numeric"
     },
