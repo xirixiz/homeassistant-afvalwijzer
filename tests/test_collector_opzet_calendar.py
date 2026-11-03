@@ -139,3 +139,40 @@ def test_invalid_calendar_entries_are_skipped():
 
     assert _dates(result, "gft") == [IN_5]
     assert _dates(result, "restafval") == sorted([IN_12, IN_19])
+
+
+SAVER_ADDRESSES = [
+    {"bagId": "bag-no-letter", "huisletter": "", "huisnummerToevoeging": ""},
+    {"bagId": "bag-letter-a", "huisletter": "a", "huisnummerToevoeging": ""},
+    {"bagId": "bag-toev-2", "huisletter": "", "huisnummerToevoeging": "2"},
+]
+
+
+@pytest.mark.parametrize("suffix", ["A", "a", " a "])
+def test_select_bag_id_matches_huisletter_case_insensitively(suffix):
+    """A lowercase huisletter from the API matches any case of the suffix (#733)."""
+    assert opzet._select_bag_id(SAVER_ADDRESSES, suffix) == "bag-letter-a"
+
+
+def test_select_bag_id_matches_huisnummertoevoeging():
+    """A suffix can also match huisnummerToevoeging."""
+    assert opzet._select_bag_id(SAVER_ADDRESSES, "2") == "bag-toev-2"
+
+
+def test_select_bag_id_handles_missing_fields():
+    """Addresses with null or missing letter fields don't break matching."""
+    addresses = [
+        {"bagId": "bag1", "huisletter": None},
+        {"bagId": "bag2", "huisletter": "B", "huisnummerToevoeging": None},
+    ]
+    assert opzet._select_bag_id(addresses, "b") == "bag2"
+
+
+def test_select_bag_id_unknown_suffix_returns_none():
+    """An unknown suffix with multiple addresses returns None."""
+    assert opzet._select_bag_id(SAVER_ADDRESSES, "Z") is None
+
+
+def test_select_bag_id_without_suffix_returns_first():
+    """Without a suffix the first address is used."""
+    assert opzet._select_bag_id(SAVER_ADDRESSES, "") == "bag-no-letter"
