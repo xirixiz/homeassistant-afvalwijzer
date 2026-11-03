@@ -33,7 +33,12 @@ def _fetch_waste_data_raw_temp(
     timeout: tuple[float, float],
     verify: bool,
 ) -> str:
-    response = session.get(url, timeout=timeout, verify=verify)
+    # Never follow a redirect that could send the address over plain HTTP.
+    response = session.get(url, timeout=timeout, verify=verify, allow_redirects=False)
+    if 300 <= response.status_code < 400:
+        raise requests.exceptions.RequestException(
+            "DeAfvalApp returned an unexpected redirect"
+        )
     response.raise_for_status()
     # Keep original behavior: treat body as text (CSV-ish)
     return response.text or ""
