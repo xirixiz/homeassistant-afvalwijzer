@@ -2,4 +2,4 @@ pytest
 pytest-timeout
 pytest-cov
 pytest-asyncio
-pytest-homeassistant-custom-component
+pytest-homeassistant==2026.11.0

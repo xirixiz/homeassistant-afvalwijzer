@@ -28,14 +28,17 @@ def _collect_constants(const_path: Path):
 
 def _is_referenced(repo_root: Path, name: str, const_path: Path) -> bool:
     pattern = re.compile(r"\b" + re.escape(name) + r"\b")
-    for path in repo_root.rglob("*"):
-        if path.resolve() == const_path.resolve() or not path.is_file():
-            continue
-        if path.suffix not in {".py", ".json"}:
-            continue
-        text = path.read_text(encoding="utf8")
-        if pattern.search(text):
-            return True
+    for directory, dirnames, filenames in repo_root.walk():
+        dirnames[:] = [name for name in dirnames if name not in {".git", ".venv"}]
+        for filename in filenames:
+            path = directory / filename
+            if path.resolve() == const_path.resolve() or not path.is_file():
+                continue
+            if path.suffix not in {".py", ".json"}:
+                continue
+            text = path.read_text(encoding="utf8")
+            if pattern.search(text):
+                return True
     return False
 
 
