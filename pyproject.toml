@@ -254,4 +254,7 @@ enable = [
     "use-symbolic-message-instead",
 ]
 [tool.pytest.ini_options]
-addopts = "--ignore=tests/test_module.py --asyncio-mode=auto"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+# Let Home Assistant install its httpx alias before respx is imported.
+addopts = "-p no:respx --ignore=tests/test_module.py"
