@@ -39,7 +39,6 @@ _CHUNK_PATTERN = re.compile(r"/_next/static/chunks/[\w.-]+\.js")
 _ACTION_ID_PATTERN = re.compile(
     r'"([0-9a-f]{40,})"[^"]{0,200}"ensureAnonSessionAction"'
 )
-_SUMMARY_SUFFIX_PATTERN = re.compile(r"\s+inzameling\s*$", re.IGNORECASE)
 
 # (postal code, house number, suffix) -> iCal feed URL
 _ICAL_URL_CACHE: dict[tuple[str, str, str], str] = {}
@@ -179,16 +178,6 @@ def _fetch_ical(
     return text
 
 
-def _normalize_summaries(ical_text: str) -> str:
-    """Drop the " inzameling" suffix, so "GFT inzameling" maps to "gft"."""
-    lines = []
-    for line in ical_text.splitlines():
-        if line.startswith("SUMMARY"):
-            line = _SUMMARY_SUFFIX_PATTERN.sub("", line)
-        lines.append(line)
-    return "\n".join(lines)
-
-
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
@@ -237,9 +226,7 @@ def get_waste_data_raw(
             ical_text = _fetch_ical(session, ical_url, timeout=timeout, verify=verify)
             _ICAL_URL_CACHE[cache_key] = ical_url
 
-        waste_data_raw = parse_ical_waste_data(
-            _normalize_summaries(ical_text), postal_code
-        )
+        waste_data_raw = parse_ical_waste_data(ical_text, postal_code)
         if not waste_data_raw:
             # Addresses served by underground containers have no kerbside rounds.
             _LOGGER.warning(
