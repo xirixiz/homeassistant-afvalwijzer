@@ -1,6 +1,6 @@
 homeassistant
 pre-commit==4.7.0
 requests
-ruff==0.17.3
+ruff==0.17.4
 urllib3==2.8.0
 zstandard==0.25.0
