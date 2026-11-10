@@ -86,6 +86,7 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "luiers": "luiers",
     "mobiletransferpoint": "grip",
     "opk": "papier",
+    "opk / oud papier": "papier",
     "oud papier": "papier",
     "oud papier & karton": "papier",
     "oud papier brengcontainer cgk de westereen": "papier",

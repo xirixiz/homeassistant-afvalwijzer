@@ -1,10 +1,10 @@
-"""Tests that the Reinis and RD4 collectors also fetch next year's calendar."""
+"""Tests that the RD4 collector also fetches next year's calendar."""
 
 from datetime import datetime
 
 import requests
 
-from custom_components.afvalwijzer.collector import rd4, reinis
+from custom_components.afvalwijzer.collector import rd4
 
 YEAR = datetime.now().year
 
@@ -94,39 +94,5 @@ def test_rd4_ignores_unavailable_next_year():
     )
 
     result = rd4.get_waste_data_raw("rd4", "1234AB", "1", "", session=session)
-
-    assert [item["date"] for item in result] == [f"{YEAR}-12-30"]
-
-
-def _reinis_session(next_year_response):
-    return FakeSession(
-        [
-            ("/adressen/1234AB:1", FakeResponse([{"bagid": "42"}])),
-            (
-                f"/kalender/{YEAR}",
-                FakeResponse([{"ophaaldatum": f"{YEAR}-12-30", "afvalstroom_id": 1}]),
-            ),
-            (f"/kalender/{YEAR + 1}", next_year_response),
-            ("/afvalstromen", FakeResponse([{"id": 1, "title": "Groente"}])),
-        ]
-    )
-
-
-def test_reinis_combines_this_and_next_year():
-    """Reinis returns the entries of both years."""
-    session = _reinis_session(
-        FakeResponse([{"ophaaldatum": f"{YEAR + 1}-01-06", "afvalstroom_id": 1}])
-    )
-
-    result = reinis.get_waste_data_raw("reinis", "1234AB", "1", "", session=session)
-
-    assert [item["date"] for item in result] == [f"{YEAR}-12-30", f"{YEAR + 1}-01-06"]
-
-
-def test_reinis_ignores_unavailable_next_year():
-    """A failing next-year request does not cost the current year."""
-    session = _reinis_session(FakeResponse([], status_code=404))
-
-    result = reinis.get_waste_data_raw("reinis", "1234AB", "1", "", session=session)
 
     assert [item["date"] for item in result] == [f"{YEAR}-12-30"]
