@@ -267,7 +267,7 @@ TEST_ADDRESSES = [
     #{"provider": "recycleapp", "postal_code": "8700", "house_number": "1", "street_name": "Aarsele-Dorp"},
     #{"provider": "recycleapp", "postal_code": "9090", "house_number": "1", "street_name": "Tuinstraat"},
     #{"provider": "reinis", "postal_code": "3209BS", "house_number": "14"},
-    #{"provider": "reinis", "postal_code": "3232GG", "house_number": "10"},
+    #{"provider": "reinis", "postal_code": "3232PW", "house_number": "19"},
     #{"provider": "rmn", "postal_code": "3402TA", "house_number": "1"},
     #{"provider": "rmn", "postal_code": "3437GS", "house_number": "2"},
     #{"provider": "rmn", "postal_code": "3701XK", "house_number": "24"},

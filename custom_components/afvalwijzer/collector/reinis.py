@@ -1,19 +1,47 @@
-"""Afvalwijzer reinis."""
+"""Afvalwijzer reinis.
+
+Reinis moved to the Scoop resident platform in November 2026. There is no
+public address API anymore, but every address has a personal iCal feed:
+
+1. ``/postcode`` sets the visitor's address through a Next.js server action.
+   Its id is generated per build, so it is read from the page's JavaScript.
+2. With the resulting session cookies, ``/api/proxy/pickups/ical-subscription``
+   returns the address' iCal feed URL (with a long-lived token).
+3. The feed itself needs no session and holds about a year of pickups.
+
+The feed URL is cached per address, so steps 1 and 2 only run once per
+Home Assistant start, or again when the cached feed URL stops working.
+"""
 
 from __future__ import annotations
 
-from datetime import datetime
+import json
 import logging
+import re
 from typing import Any
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import format_postal_code, parse_ical_waste_data
 from ..const.const import SENSOR_COLLECTORS_REINIS
 
 _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
+
+_POSTCODE_PATH = "/postcode?next=/kalender"
+_ICAL_SUBSCRIPTION_PATH = "/api/proxy/pickups/ical-subscription"
+_ADDRESS_ID_COOKIE = "scoop_address_id"
+
+_CHUNK_PATTERN = re.compile(r"/_next/static/chunks/[\w.-]+\.js")
+# The action id is a hex string passed to createServerReference next to the
+# action's name; allow some slack in between for minifier changes.
+_ACTION_ID_PATTERN = re.compile(
+    r'"([0-9a-f]{40,})"[^"]{0,200}"ensureAnonSessionAction"'
+)
+
+# (postal code, house number, suffix) -> iCal feed URL
+_ICAL_URL_CACHE: dict[tuple[str, str, str], str] = {}
 
 
 def _build_base_url(provider: str) -> str:
@@ -22,98 +50,132 @@ def _build_base_url(provider: str) -> str:
     return SENSOR_COLLECTORS_REINIS[provider]
 
 
-def _fetch_address_data(
+def _find_action_id(
     session: requests.Session,
     base_url: str,
-    corrected_postal_code: str,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> str:
+    """Return the id of the server action that sets the visitor's address."""
+    response = session.get(
+        f"{base_url}{_POSTCODE_PATH}", timeout=timeout, verify=verify
+    )
+    response.raise_for_status()
+
+    # Page-specific chunks come last, so search from the end.
+    chunks = list(dict.fromkeys(_CHUNK_PATTERN.findall(response.text)))
+    for chunk in reversed(chunks):
+        chunk_response = session.get(
+            f"{base_url}{chunk}", timeout=timeout, verify=verify
+        )
+        if not chunk_response.ok:
+            continue
+        if match := _ACTION_ID_PATTERN.search(chunk_response.text):
+            return match.group(1)
+
+    raise ValueError("Reinis: could not find the address action on the website")
+
+
+def _set_address(
+    session: requests.Session,
+    base_url: str,
+    action_id: str,
+    *,
+    postal_code: str,
+    house_number: str,
+    suffix: str,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> str | None:
+    """Set the visitor's address and return its Scoop address id, if known."""
+    payload = [
+        {
+            "postcode": postal_code,
+            "huisnummer": house_number,
+            "toev": suffix or "$undefined",
+        }
+    ]
+    response = session.post(
+        f"{base_url}{_POSTCODE_PATH}",
+        data=json.dumps(payload),
+        headers={
+            "Next-Action": action_id,
+            "Content-Type": "text/plain;charset=UTF-8",
+            "Accept": "text/x-component",
+        },
+        timeout=timeout,
+        verify=verify,
+    )
+    response.raise_for_status()
+    return session.cookies.get(_ADDRESS_ID_COOKIE)
+
+
+def _fetch_ical_url(
+    session: requests.Session,
+    base_url: str,
+    address_id: str,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> str:
+    response = session.get(
+        f"{base_url}{_ICAL_SUBSCRIPTION_PATH}",
+        params={"addressId": address_id},
+        headers={"Accept": "application/json"},
+        timeout=timeout,
+        verify=verify,
+    )
+    response.raise_for_status()
+    data: dict[str, Any] = response.json() or {}
+    url = (data.get("data") or {}).get("url") if data.get("ok") else None
+    if not url:
+        raise ValueError("Reinis: no iCal subscription URL received")
+    return url
+
+
+def _lookup_ical_url(
+    session: requests.Session,
+    base_url: str,
+    postal_code: str,
     house_number: str,
     suffix: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
-) -> list[dict[str, Any]]:
-    address_url = f"{base_url}/adressen/{corrected_postal_code}:{house_number}{suffix}"
-    response = session.get(address_url, timeout=timeout, verify=verify)
-    response.raise_for_status()
-    data = response.json()
-    return data or []
-
-
-def _extract_bagid(address_data: list[dict[str, Any]]) -> str | None:
-    if not address_data:
+) -> str | None:
+    """Run the website flow and return the address' iCal feed URL."""
+    action_id = _find_action_id(session, base_url, timeout=timeout, verify=verify)
+    address_id = _set_address(
+        session,
+        base_url,
+        action_id,
+        postal_code=postal_code,
+        house_number=house_number,
+        suffix=suffix,
+        timeout=timeout,
+        verify=verify,
+    )
+    if not address_id:
         return None
-    return (address_data[0] or {}).get("bagid")
+    return _fetch_ical_url(
+        session, base_url, address_id, timeout=timeout, verify=verify
+    )
 
 
-def _fetch_waste_data_raw_temp(
+def _fetch_ical(
     session: requests.Session,
-    base_url: str,
-    bagid: str,
-    year: int,
+    url: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Fetch waste calendar and waste stream data.
-
-    Return a tuple containing the calendar entries (this year and next year) and the
-    afvalstroom lookup data.
-    """
-    afvalstromen_url = f"{base_url}/rest/adressen/{bagid}/afvalstromen"
-
-    calendar: list[dict[str, Any]] = []
-    for calendar_year in (year, year + 1):
-        kalender_url = f"{base_url}/rest/adressen/{bagid}/kalender/{calendar_year}"
-        try:
-            waste_response = session.get(kalender_url, timeout=timeout, verify=verify)
-            waste_response.raise_for_status()
-            calendar.extend(waste_response.json() or [])
-        except (requests.exceptions.RequestException, ValueError) as err:
-            # Next year's calendar may not be published yet.
-            if calendar_year == year:
-                raise
-            _LOGGER.debug("Reinis: no calendar for %s: %s", calendar_year, err)
-
-    afvalstroom_response = session.get(afvalstromen_url, timeout=timeout, verify=verify)
-    afvalstroom_response.raise_for_status()
-
-    return calendar, (afvalstroom_response.json() or [])
-
-
-def _parse_waste_data_raw(
-    waste_data_raw_temp: list[dict[str, Any]],
-    afvalstroom_response: list[dict[str, Any]],
-    postal_code: str = "",
-) -> list[dict[str, str]]:
-    # Build lookup dict once (faster and clearer than next(...) per item)
-    afvalstroom_map: dict[Any, str] = {}
-    for a in afvalstroom_response:
-        afval_id = a.get("id")
-        title = a.get("title")
-        if afval_id is None or not title:
-            continue
-        afvalstroom_map[afval_id] = title
-
-    waste_data_raw: list[dict[str, str]] = []
-
-    for item in waste_data_raw_temp:
-        ophalen = item.get("ophaaldatum")
-        afvalstroom_id = item.get("afvalstroom_id")
-        if not ophalen or afvalstroom_id is None:
-            continue
-
-        title = afvalstroom_map.get(afvalstroom_id)
-        if not title:
-            continue
-
-        afval_type = waste_type_rename(title, postal_code)
-        if not afval_type:
-            continue
-
-        # Original code kept date as-is (already YYYY-MM-DD); keep that behavior.
-        waste_data_raw.append({"type": afval_type, "date": ophalen})
-
-    return waste_data_raw
+) -> str:
+    response = session.get(url, timeout=timeout, verify=verify)
+    response.raise_for_status()
+    text = response.text or ""
+    if "BEGIN:VCALENDAR" not in text:
+        raise ValueError("Reinis: response is not an iCal feed")
+    return text
 
 
 def get_waste_data_raw(
@@ -133,41 +195,50 @@ def get_waste_data_raw(
 
     try:
         corrected_postal_code = format_postal_code(postal_code)
-        suffix = suffix or ""
+        suffix = (suffix or "").strip()
+        cache_key = (corrected_postal_code, str(house_number), suffix.lower())
 
-        address_data = _fetch_address_data(
-            session,
-            base_url,
-            corrected_postal_code,
-            house_number,
-            suffix,
-            timeout=timeout,
-            verify=verify,
-        )
+        ical_text = None
+        if cached_url := _ICAL_URL_CACHE.get(cache_key):
+            try:
+                ical_text = _fetch_ical(
+                    session, cached_url, timeout=timeout, verify=verify
+                )
+            except (requests.exceptions.RequestException, ValueError) as err:
+                _LOGGER.debug(
+                    "Reinis: cached iCal URL rejected (%s), looking up again", err
+                )
+                _ICAL_URL_CACHE.pop(cache_key, None)
 
-        bagid = _extract_bagid(address_data)
-        if not bagid:
-            _LOGGER.error("No address found, missing bagid!")
-            return []
+        if ical_text is None:
+            ical_url = _lookup_ical_url(
+                session,
+                base_url,
+                corrected_postal_code,
+                str(house_number),
+                suffix,
+                timeout=timeout,
+                verify=verify,
+            )
+            if not ical_url:
+                _LOGGER.error("Reinis: address not found!")
+                return []
+            ical_text = _fetch_ical(session, ical_url, timeout=timeout, verify=verify)
+            _ICAL_URL_CACHE[cache_key] = ical_url
 
-        year = datetime.now().year
-        waste_data_raw_temp, afvalstroom_response = _fetch_waste_data_raw_temp(
-            session,
-            base_url,
-            bagid,
-            year,
-            timeout=timeout,
-            verify=verify,
-        )
-
-        waste_data_raw = _parse_waste_data_raw(
-            waste_data_raw_temp, afvalstroom_response, postal_code
-        )
+        waste_data_raw = parse_ical_waste_data(ical_text, postal_code)
+        if not waste_data_raw:
+            # Addresses served by underground containers have no kerbside rounds.
+            _LOGGER.warning(
+                "Reinis: no kerbside pickups for this address (underground containers?)"
+            )
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
         _LOGGER.error("Reinis request error: %s", err)
         raise ValueError(err) from err
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error("Reinis: Invalid and/or no data received from %s", base_url)
+        _LOGGER.error(
+            "Reinis: Invalid and/or no data received from %s: %s", base_url, err
+        )
         raise ValueError(f"Invalid and/or no data received from {base_url}") from err
