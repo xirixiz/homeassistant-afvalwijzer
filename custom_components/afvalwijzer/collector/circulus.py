@@ -68,6 +68,17 @@ def _get_session_cookie(
     return raw_response.json(), raw_response.cookies
 
 
+def _address_suffix(address: str, house_number: str) -> str | None:
+    """Return the suffix of an address line like "Kerklaan 3 c, 7311AA Apeldoorn".
+
+    Return "" for the bare house number and None when the number doesn't match.
+    """
+    match = re.search(rf" {re.escape(str(house_number))}(?: ([^,]+))?,", address)
+    if not match:
+        return None
+    return (match.group(1) or "").strip()
+
+
 def _maybe_select_address(
     response: dict[str, Any],
     house_number: str,
@@ -75,22 +86,29 @@ def _maybe_select_address(
 ) -> str:
     """Select an address when multiple options are returned.
 
-    Return an authentication URL or an empty string if no selection is required.
+    A postal code can cover several streets, so the list can hold other
+    addresses with the same house number. Prefer the one whose suffix matches
+    the configured suffix (case-insensitively), or the bare house number when
+    no suffix is configured. Return its authentication URL, or an empty string
+    when no address matches.
     """
     addresses = (response.get("customData") or {}).get("addresses") or []
     if not addresses:
         return ""
 
+    for address in addresses:
+        found = _address_suffix(address.get("address") or "", house_number)
+        if found is not None and found.lower() == suffix.lower():
+            return address.get("authenticationUrl") or ""
+
     if suffix:
-        search_pattern = (
-            rf" {re.escape(str(house_number))} {re.escape(suffix.lower())}\b"
-        )
-        for address in addresses:
-            address_str = address.get("address") or ""
-            if re.search(search_pattern, address_str):
-                return address.get("authenticationUrl") or ""
         return ""
 
+    _LOGGER.warning(
+        "Circulus: %d addresses found for this postal code and house number, none "
+        "without a suffix; using the first. Configure a suffix to choose another.",
+        len(addresses),
+    )
     return addresses[0].get("authenticationUrl") or ""
 
 
@@ -103,15 +121,17 @@ def _ensure_authenticated_address(
     suffix: str,
     timeout: tuple[float, float],
     verify: bool,
-) -> None:
-    """Authenticate a specific address when required."""
-    flash_message = response.get("flashMessage")
-    if not flash_message:
-        return
+) -> bool:
+    """Authenticate a specific address when required.
+
+    Return False when Circulus offered several addresses and none matched.
+    """
+    if not (response.get("customData") or {}).get("addresses"):
+        return True
 
     authentication_url = _maybe_select_address(response, house_number, suffix)
     if not authentication_url:
-        return
+        return False
 
     # Rely on the session cookie jar: this call refreshes CB_SESSION, and passing
     # older cookies explicitly would override it on later requests.
@@ -120,6 +140,7 @@ def _ensure_authenticated_address(
         timeout=timeout,
         verify=verify,
     ).raise_for_status()
+    return True
 
 
 def _fetch_waste_data_raw_temp(
@@ -199,7 +220,15 @@ def get_waste_data_raw(
             _LOGGER.error("Circulus: No waste data found (login/session failed)")
             return []
 
-        _ensure_authenticated_address(
+        if response.get("success") is False:
+            # e.g. "Het opgegeven adres is niet bij ons bekend."
+            _LOGGER.error(
+                "Circulus did not accept the address: %s",
+                response.get("flashMessage") or "no reason given",
+            )
+            return []
+
+        if not _ensure_authenticated_address(
             session,
             url,
             response,
@@ -207,7 +236,13 @@ def get_waste_data_raw(
             suffix=suffix,
             timeout=timeout,
             verify=verify,
-        )
+        ):
+            _LOGGER.error(
+                "Circulus: no address with suffix '%s' among the %d addresses found",
+                suffix,
+                len((response.get("customData") or {}).get("addresses") or []),
+            )
+            return []
 
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
             session,
@@ -217,7 +252,7 @@ def get_waste_data_raw(
         )
 
         if not waste_data_raw_temp:
-            _LOGGER.error("Circulus: No Waste data found!")
+            _LOGGER.error("Circulus: No Waste data found for the selected address!")
             return []
 
         return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
