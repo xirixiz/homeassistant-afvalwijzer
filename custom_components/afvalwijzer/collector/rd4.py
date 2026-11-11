@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from html import unescape
 import logging
+import re
 from typing import Any
 
 import requests
@@ -132,3 +134,154 @@ def get_waste_data_raw(
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("RD4: Invalid and/or no data received from %s", url)
         raise ValueError(f"Invalid and/or no data received from {url}") from err
+
+
+# Notifications come from the app API (v2), not from the calendar API (v1). It
+# accepts an address-only session, just like the RD4 app does before linking a
+# waste card, and validates X-Rd4-Client against the app's own client id.
+_APP_API_URL = "https://data.rd4.nl/api/v2"
+_APP_CLIENT = "android/app.rd4.nl/4.6.2"
+_USER_AGENT = "homeassistant-afvalwijzer"
+# "personal-news" is a message for this address, "news" one for everybody.
+# "waste-calendar" reminders duplicate the calendar, "ticket" needs an account.
+_NOTIFICATION_TYPES = ("personal-news", "news")
+
+
+def _app_headers(token: str | None = None) -> dict[str, str]:
+    headers = {
+        "X-Rd4-Client": _APP_CLIENT,
+        "User-Agent": _USER_AGENT,
+        "Accept-Language": "nl-NL",
+        "Accept": "application/json",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def _app_data(response: requests.Response) -> Any:
+    """Return the payload of an app API response (wrapped in "data" or not)."""
+    response.raise_for_status()
+    payload = response.json()
+    if isinstance(payload, dict) and "data" in payload:
+        return payload["data"]
+    return payload
+
+
+def _start_app_session(
+    session: requests.Session,
+    postal_code: str,
+    house_number: int,
+    suffix: str,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> str | None:
+    """Start an address-only app session and return its token."""
+    response = session.post(
+        f"{_APP_API_URL}/auth/session",
+        json={
+            "type": "waste-card",
+            "postalCode": postal_code,
+            "houseNr": house_number,
+            "houseNrExt": suffix,
+            "wasteCardNr": None,
+        },
+        headers=_app_headers(),
+        timeout=timeout,
+        verify=verify,
+    )
+    data = _app_data(response)
+    return data.get("authToken") if isinstance(data, dict) else None
+
+
+def _fetch_notifications(
+    session: requests.Session,
+    token: str,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> list[dict[str, Any]]:
+    response = session.get(
+        f"{_APP_API_URL}/notifications",
+        # One page (the app uses the same cursor-based Page) is plenty for an inbox.
+        params={"types[]": list(_NOTIFICATION_TYPES), "limit": 50},
+        headers=_app_headers(token),
+        timeout=timeout,
+        verify=verify,
+    )
+    data = _app_data(response)
+    if isinstance(data, dict):
+        data = data.get("items", [])
+    return data if isinstance(data, list) else []
+
+
+def _parse_notifications(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    notifications: list[dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict) or item.get("type") not in _NOTIFICATION_TYPES:
+            continue
+        title = unescape(re.sub(r"<[^>]*>", "", item.get("title") or "")).strip()
+        content = unescape(
+            re.sub(r"<[^>]*>", "", item.get("description") or "")
+        ).strip()
+        if not title and not content:
+            continue
+        notifications.append(
+            {
+                "id": item.get("id"),
+                "type": item["type"],
+                "title": title,
+                "content": content,
+                "date": item.get("date"),
+                "dismissable": False,
+            }
+        )
+    return notifications
+
+
+def get_notification_data_raw(
+    provider: str,
+    postal_code: str,
+    house_number: str,
+    suffix: str = "",
+    *,
+    session: requests.Session | None = None,
+    timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
+    verify: bool = True,
+) -> list[dict[str, Any]]:
+    """Return the RD4 app messages for this address."""
+    if provider not in SENSOR_COLLECTORS_RD4:
+        raise ValueError(f"Invalid provider: {provider}, please verify")
+
+    session = session or requests.Session()
+    try:
+        house_number_int = int(str(house_number).strip())
+    except ValueError:
+        _LOGGER.debug(
+            "RD4: house number %r is not numeric, no notifications", house_number
+        )
+        return []
+
+    try:
+        token = _start_app_session(
+            session,
+            format_postal_code(postal_code),
+            house_number_int,
+            (suffix or "").strip().upper(),
+            timeout=timeout,
+            verify=verify,
+        )
+        if not token:
+            _LOGGER.debug("RD4: no app session for this address, no notifications")
+            return []
+        return _parse_notifications(
+            _fetch_notifications(session, token, timeout=timeout, verify=verify)
+        )
+    except requests.exceptions.RequestException as err:
+        # The error may carry the session token in its request, so log the type only.
+        _LOGGER.warning("RD4: could not fetch notifications (%s)", type(err).__name__)
+        return []
+    except (KeyError, TypeError, ValueError) as err:
+        _LOGGER.warning("RD4: invalid notification data (%s)", type(err).__name__)
+        return []
