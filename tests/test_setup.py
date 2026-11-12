@@ -36,9 +36,9 @@ def test_async_setup_entry(mock_hass):
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.data = {
-        "collector": "mijnafvalwijzer",
-        "postal_code": "1234AB",
-        "house_number": "1",
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "1",
     }
 
     result = asyncio.run(async_setup_entry(mock_hass, entry))
