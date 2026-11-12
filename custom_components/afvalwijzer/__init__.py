@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import pathlib
 from random import randint
 from typing import TYPE_CHECKING, Any
@@ -67,11 +66,6 @@ except ImportError:  # pragma: no cover
     # Standalone test run, no Home Assistant installed
     PLATFORMS = []
     CONFIG_SCHEMA = {}  # type: ignore[assignment]
-
-
-def _skip_runtime_setup() -> bool:
-    """Return True when runtime setup should be skipped (test mode)."""
-    return os.getenv("AFVALWIJZER_SKIP_INIT") == "1"
 
 
 def _derive_include_today_from_legacy(entry: ConfigEntry) -> bool:
@@ -144,18 +138,12 @@ def _build_effective_config(
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Afvalwijzer integration."""
-    if _skip_runtime_setup():
-        return True
-
     hass.data.setdefault(DOMAIN, {})
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Afvalwijzer from a config entry."""
-    if _skip_runtime_setup():
-        return True
-
     hass.data.setdefault(DOMAIN, {})
 
     options = _migrate_options_if_needed(hass, entry)
@@ -230,9 +218,6 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> Non
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Clean up the cache file when a config entry is removed."""
-    if _skip_runtime_setup():
-        return
-
     try:
         await async_remove_cache(hass, entry.entry_id)
     except Exception as err:
@@ -241,9 +226,6 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload an Afvalwijzer config entry."""
-    if _skip_runtime_setup():
-        return True
-
     if not PLATFORMS:
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
         return True
