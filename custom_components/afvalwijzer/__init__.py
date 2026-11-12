@@ -10,13 +10,17 @@ from random import randint
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import callback
+from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers.event import async_call_later, async_track_time_change
 
 from .const.const import (
+    CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_HOUSE_NUMBER,
     CONF_INCLUDE_TODAY,
+    CONF_POSTAL_CODE,
     CONF_SHOW_FULL_TIMESTAMP,
     DEFAULT_DEFAULT_LABEL,
     DEFAULT_EXCLUDE_LIST,
@@ -113,6 +117,24 @@ def _migrate_options_if_needed(
     return options
 
 
+# Every collector needs these. They are validated when the entry is created, but
+# an entry whose stored data lost one (an old beta, a manual edit) would otherwise
+# be sent to the provider empty and only end in a vague "no data" error.
+_REQUIRED_CONFIG = (CONF_COLLECTOR, CONF_POSTAL_CODE, CONF_HOUSE_NUMBER)
+
+
+def _validate_required_config(config: dict[str, Any]) -> None:
+    """Fail the setup with a clear message when required address data is missing."""
+    missing = [
+        key for key in _REQUIRED_CONFIG if not str(config.get(key) or "").strip()
+    ]
+    if missing:
+        raise ConfigEntryError(
+            f"Missing {', '.join(missing)} in the configuration. "
+            "Please reconfigure the integration."
+        )
+
+
 def _build_effective_config(
     entry: ConfigEntry, options: dict[str, Any]
 ) -> dict[str, Any]:
@@ -138,6 +160,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     options = _migrate_options_if_needed(hass, entry)
     effective_config = _build_effective_config(entry, options)
+    _validate_required_config(effective_config)
 
     coordinator = AfvalwijzerDataUpdateCoordinator(
         hass, effective_config, entry.entry_id
