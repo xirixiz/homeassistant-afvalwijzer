@@ -1,15 +1,14 @@
 """Test basic integration setup."""
 
 import asyncio
-import os
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
+from pytest_homeassistant.common import MockConfigEntry
 
 from custom_components.afvalwijzer import (
     CONFIG_SCHEMA,
     PLATFORMS,
-    _skip_runtime_setup,
     _validate_required_config,
     async_setup,
     async_setup_entry,
@@ -18,8 +17,11 @@ from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
     CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
+    CONF_SUFFIX,
     DOMAIN,
 )
+from custom_components.afvalwijzer.coordinator import AfvalwijzerDataUpdateCoordinator
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.exceptions import ConfigEntryError
 
 
@@ -30,19 +32,41 @@ def test_async_setup(mock_hass):
     assert result is True
 
 
-def test_async_setup_entry(mock_hass):
-    """Test the async_setup_entry function."""
+@pytest.mark.usefixtures("enable_custom_integrations")
+async def test_async_setup_entry(hass, monkeypatch):
+    """The entry is set up with a coordinator, and the platforms are forwarded."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={
+            CONF_COLLECTOR: "mijnafvalwijzer",
+            CONF_POSTAL_CODE: "1234AB",
+            CONF_HOUSE_NUMBER: "1",
+            CONF_SUFFIX: "",
+        },
+        options={},
+    )
+    entry.add_to_hass(hass)
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator,
+        "async_load_cache",
+        AsyncMock(return_value=True),
+    )
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator, "async_request_refresh", AsyncMock()
+    )
+    forward = AsyncMock(return_value=True)
+    monkeypatch.setattr(hass.config_entries, "async_forward_entry_setups", forward)
 
-    entry = MagicMock()
-    entry.entry_id = "test_entry"
-    entry.data = {
-        CONF_COLLECTOR: "mijnafvalwijzer",
-        CONF_POSTAL_CODE: "1234AB",
-        CONF_HOUSE_NUMBER: "1",
-    }
+    assert await async_setup_entry(hass, entry) is True
+    await hass.async_block_till_done()
 
-    result = asyncio.run(async_setup_entry(mock_hass, entry))
-    assert result is True
+    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    assert coordinator.config[CONF_HOUSE_NUMBER] == "1"
+    forward.assert_awaited_once_with(entry, PLATFORMS)
+
+    # Run the unload callbacks so the midnight timer doesn't linger after the test
+    await entry._async_process_on_unload(hass)
+    await hass.async_block_till_done()
 
 
 def test_domain_constant():
@@ -59,21 +83,6 @@ def test_platforms_list():
 def test_config_schema_exists():
     """Test that CONFIG_SCHEMA is defined."""
     assert CONFIG_SCHEMA is not None
-
-
-def test_skip_runtime_setup():
-    """Test that runtime setup can be skipped in test mode."""
-
-    assert os.getenv("AFVALWIJZER_SKIP_INIT") == "1"
-    assert _skip_runtime_setup() is True
-
-
-def _entry(data):
-    entry = MagicMock()
-    entry.entry_id = "test_entry"
-    entry.data = data
-    entry.options = {}
-    return entry
 
 
 def test_validate_required_config_accepts_a_complete_config():
@@ -133,16 +142,29 @@ def test_validate_required_config_lists_every_missing_field():
     assert "reconfigure" in str(err.value)
 
 
-def test_setup_entry_fails_before_fetching_when_house_number_is_empty(
-    mock_hass, monkeypatch
+@pytest.mark.usefixtures("enable_custom_integrations")
+async def test_setup_fails_with_a_clear_error_when_house_number_is_empty(
+    hass, monkeypatch
 ):
-    """The setup stops with a ConfigEntryError instead of querying the provider."""
-    monkeypatch.setenv("AFVALWIJZER_SKIP_INIT", "0")
-    entry = _entry(
-        {CONF_COLLECTOR: "circulus", CONF_POSTAL_CODE: "7300AA", CONF_HOUSE_NUMBER: ""}
+    """Home Assistant reports a setup error instead of querying the provider."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={
+            CONF_COLLECTOR: "circulus",
+            CONF_POSTAL_CODE: "7300AA",
+            CONF_HOUSE_NUMBER: "",
+            CONF_SUFFIX: "",
+        },
+        options={},
+    )
+    entry.add_to_hass(hass)
+    load_cache = AsyncMock(return_value=False)
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator, "async_load_cache", load_cache
     )
 
-    with pytest.raises(ConfigEntryError, match=CONF_HOUSE_NUMBER):
-        asyncio.run(async_setup_entry(mock_hass, entry))
+    assert not await hass.config_entries.async_setup(entry.entry_id)
 
-    assert DOMAIN not in mock_hass.data or entry.entry_id not in mock_hass.data[DOMAIN]
+    assert entry.state is ConfigEntryState.SETUP_ERROR
+    assert CONF_HOUSE_NUMBER in entry.reason
+    load_cache.assert_not_awaited()
