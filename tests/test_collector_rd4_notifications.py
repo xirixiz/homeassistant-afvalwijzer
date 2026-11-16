@@ -242,6 +242,29 @@ def test_unknown_address_returns_nothing(caplog):
     assert rd4._TOKEN_CACHE == {}
 
 
+@pytest.mark.parametrize("status", [401, 403])
+def test_address_not_served_by_the_app_api_is_not_a_warning(status, caplog):
+    """403 (another client's region) or 401 (unknown address) at login is quiet."""
+    session = FakeSession(session_status=status)
+
+    with caplog.at_level("DEBUG"):
+        assert _run(session) == []
+
+    assert not [r for r in caplog.records if r.levelname == "WARNING"]
+    assert "doesn't serve this address" in caplog.text
+    assert session.urls() == ["POST /auth/session"]
+    assert rd4._TOKEN_CACHE == {}
+
+
+def test_other_login_errors_are_still_warnings(caplog):
+    """A server error at login is reported."""
+    session = FakeSession(session_status=503)
+
+    assert _run(session) == []
+
+    assert "could not fetch notifications (HTTPError)" in caplog.text
+
+
 def test_non_numeric_house_number_skips_notifications():
     """The app API wants a numeric house number."""
     session = FakeSession()
