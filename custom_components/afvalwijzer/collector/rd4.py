@@ -137,30 +137,36 @@ def get_waste_data_raw(
 
 
 # Notifications come from the app API (v2), not from the calendar API (v1). It
-# accepts an address-only session, just like the RD4 app does before linking a
-# waste card, and validates X-Rd4-Client against the app's own client id.
+# accepts an address-only session, just like the RD4 apps do before linking a
+# waste card. It checks X-Rd4-Client against the address's region, so an address
+# is only accepted for the client of its own app (answering 403 for the other).
 _APP_API_URL = "https://data.rd4.nl/api/v2"
-_APP_CLIENT = "android/app.rd4.nl/4.6.2"
+_APP_CLIENTS = (
+    # RD4's own municipalities (Heerlen, Kerkrade, ...)
+    "android/app.rd4.nl/4.6.2",
+    # Maastricht, Meerssen and Valkenburg aan de Geul, which RD4 runs as Geul en Maas
+    "android/app.geulenmaas.nl/4.6.2",
+)
 _USER_AGENT = "homeassistant-afvalwijzer"
 # "personal-news" is a message for this address, "news" one for everybody.
 # "waste-calendar" reminders duplicate the calendar, "ticket" needs an account.
 _NOTIFICATION_TYPES = ("personal-news", "news")
 # A rejected session token (expired, or new terms to accept) starts a new session.
 _REJECTED_TOKEN_STATUS = (401, 403)
-# Starting a session is refused for addresses the app API doesn't serve: 403 when
-# the address belongs to another client (e.g. Geul en Maas), 401 when it is unknown.
+# Starting a session is refused for addresses a client doesn't serve: 403 when the
+# address belongs to another client, 401 when it is unknown.
 _NOT_SERVED_STATUS = (401, 403)
 # RD4 never sets an end date on its messages and keeps them in the inbox for
 # good, so only show the recent ones.
 _MAX_MESSAGE_AGE = timedelta(days=30)
 
-# (postal code, house number, suffix) -> app session token
-_TOKEN_CACHE: dict[tuple[str, int, str], str] = {}
+# (postal code, house number, suffix) -> (client, app session token)
+_SESSION_CACHE: dict[tuple[str, int, str], tuple[str, str]] = {}
 
 
-def _app_headers(token: str | None = None) -> dict[str, str]:
+def _app_headers(client: str, token: str | None = None) -> dict[str, str]:
     headers = {
-        "X-Rd4-Client": _APP_CLIENT,
+        "X-Rd4-Client": client,
         "User-Agent": _USER_AGENT,
         "Accept-Language": "nl-NL",
         "Accept": "application/json",
@@ -181,6 +187,7 @@ def _app_data(response: requests.Response) -> Any:
 
 def _start_app_session(
     session: requests.Session,
+    client: str,
     postal_code: str,
     house_number: int,
     suffix: str,
@@ -198,7 +205,7 @@ def _start_app_session(
             "houseNrExt": suffix,
             "wasteCardNr": None,
         },
-        headers=_app_headers(),
+        headers=_app_headers(client),
         timeout=timeout,
         verify=verify,
     )
@@ -208,27 +215,28 @@ def _start_app_session(
 
 def _accept_terms(
     session: requests.Session,
+    client: str,
     token: str,
     *,
     timeout: tuple[float, float],
     verify: bool,
 ) -> None:
-    """Agree to the current Rd4-app terms, as the app does during onboarding.
+    """Agree to the app's current terms, as the app does during onboarding.
 
-    Without this the notifications endpoint answers 403 ("The Terms of Service
-    haven't been accepted").
+    Each app has its own terms. Without agreeing the notifications endpoint
+    answers 403 ("The Terms of Service haven't been accepted").
     """
     terms = _app_data(
         session.get(
             f"{_APP_API_URL}/tos/current",
-            headers=_app_headers(token),
+            headers=_app_headers(client, token),
             timeout=timeout,
             verify=verify,
         )
     )
     session.put(
         f"{_APP_API_URL}/tos/{terms['id']}/agree",
-        headers=_app_headers(token),
+        headers=_app_headers(client, token),
         timeout=timeout,
         verify=verify,
     ).raise_for_status()
@@ -236,6 +244,7 @@ def _accept_terms(
 
 def _fetch_notifications(
     session: requests.Session,
+    client: str,
     token: str,
     *,
     timeout: tuple[float, float],
@@ -245,7 +254,7 @@ def _fetch_notifications(
         f"{_APP_API_URL}/notifications",
         # One page (the app uses the same cursor-based Page) is plenty for an inbox.
         params={"types[]": list(_NOTIFICATION_TYPES), "limit": 50},
-        headers=_app_headers(token),
+        headers=_app_headers(client, token),
         timeout=timeout,
         verify=verify,
     )
@@ -295,6 +304,43 @@ def _parse_notifications(
     return notifications
 
 
+def _start_session_for_address(
+    session: requests.Session,
+    postal_code: str,
+    house_number: int,
+    suffix: str,
+    preferred_client: str | None,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> tuple[str, str | None] | None:
+    """Start a session with the client that serves the address.
+
+    Try the preferred client first (the one that worked before), then the others.
+    Return (client, token), or None when no client serves the address.
+    """
+    clients = sorted(_APP_CLIENTS, key=lambda client: client != preferred_client)
+    for client in clients:
+        try:
+            token = _start_app_session(
+                session,
+                client,
+                postal_code,
+                house_number,
+                suffix,
+                timeout=timeout,
+                verify=verify,
+            )
+        except requests.exceptions.HTTPError as err:
+            status = getattr(err.response, "status_code", None)
+            if status not in _NOT_SERVED_STATUS:
+                raise
+            _LOGGER.debug("RD4: %s doesn't serve this address (%s)", client, status)
+            continue
+        return client, token
+    return None
+
+
 def get_notification_data_raw(
     provider: str,
     postal_code: str,
@@ -305,7 +351,7 @@ def get_notification_data_raw(
     timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
     verify: bool = True,
 ) -> list[dict[str, Any]]:
-    """Return the RD4 app messages for this address."""
+    """Return the app messages (RD4 or Geul en Maas) for this address."""
     if provider not in SENSOR_COLLECTORS_RD4:
         raise ValueError(f"Invalid provider: {provider}, please verify")
 
@@ -323,11 +369,17 @@ def get_notification_data_raw(
     cache_key = (corrected_postal_code, house_number_int, suffix)
 
     try:
-        if cached_token := _TOKEN_CACHE.get(cache_key):
+        preferred_client = None
+        if cached := _SESSION_CACHE.get(cache_key):
+            preferred_client, cached_token = cached
             try:
                 return _parse_notifications(
                     _fetch_notifications(
-                        session, cached_token, timeout=timeout, verify=verify
+                        session,
+                        preferred_client,
+                        cached_token,
+                        timeout=timeout,
+                        verify=verify,
                     )
                 )
             except requests.exceptions.HTTPError as err:
@@ -337,31 +389,29 @@ def get_notification_data_raw(
                 _LOGGER.debug(
                     "RD4: app session rejected (%s), starting a new one", status
                 )
-                _TOKEN_CACHE.pop(cache_key, None)
+                _SESSION_CACHE.pop(cache_key, None)
 
-        try:
-            token = _start_app_session(
-                session,
-                corrected_postal_code,
-                house_number_int,
-                suffix,
-                timeout=timeout,
-                verify=verify,
-            )
-        except requests.exceptions.HTTPError as err:
-            status = getattr(err.response, "status_code", None)
-            if status not in _NOT_SERVED_STATUS:
-                raise
-            _LOGGER.debug("RD4: the app API doesn't serve this address (%s)", status)
+        started = _start_session_for_address(
+            session,
+            corrected_postal_code,
+            house_number_int,
+            suffix,
+            preferred_client,
+            timeout=timeout,
+            verify=verify,
+        )
+        if started is None:
+            _LOGGER.debug("RD4: no app serves this address, no notifications")
             return []
+        client, token = started
         if not token:
             _LOGGER.debug("RD4: no app session for this address, no notifications")
             return []
-        _accept_terms(session, token, timeout=timeout, verify=verify)
+        _accept_terms(session, client, token, timeout=timeout, verify=verify)
         notifications = _parse_notifications(
-            _fetch_notifications(session, token, timeout=timeout, verify=verify)
+            _fetch_notifications(session, client, token, timeout=timeout, verify=verify)
         )
-        _TOKEN_CACHE[cache_key] = token
+        _SESSION_CACHE[cache_key] = (client, token)
         return notifications
     except requests.exceptions.RequestException as err:
         # The error may carry the session token in its request, so log the type only.
