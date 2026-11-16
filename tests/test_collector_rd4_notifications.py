@@ -10,6 +10,7 @@ from custom_components.afvalwijzer.collector.main_collector import MainCollector
 
 API = "https://data.rd4.nl/api/v2"
 TOKEN = "session-token"
+RD4_CLIENT, GEUL_EN_MAAS_CLIENT = rd4._APP_CLIENTS
 RECENT = (datetime.now(UTC) - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -57,10 +58,22 @@ PERSONAL = {
 class FakeSession:
     """Session answering the app login, terms and notifications requests."""
 
-    def __init__(self, notifications=None, *, token=TOKEN, session_status=201):
-        """Store the answers; notifications may be a list of answers in order."""
+    def __init__(
+        self,
+        notifications=None,
+        *,
+        token=TOKEN,
+        session_status=201,
+        served_clients=None,
+    ):
+        """Store the answers; notifications may be a list of answers in order.
+
+        served_clients limits the clients that get a session, like the real API
+        does per region. The others are answered with 403. None serves all.
+        """
         self.token = token
         self.session_status = session_status
+        self.served_clients = served_clients
         self.notifications = (
             notifications if notifications is not None else [_page(PERSONAL)]
         )
@@ -69,6 +82,11 @@ class FakeSession:
     def post(self, url, json=None, headers=None, **_kwargs):
         """Answer the login."""
         self.calls.append(("POST", url, json, headers))
+        if self.served_clients is not None and (
+            headers["X-Rd4-Client"] not in self.served_clients
+        ):
+            message = "Client isn't allowed to make this request"
+            return FakeResponse({"code": 4, "message": message}, 403)
         payload = {"authToken": self.token, "authLevel": 1} if self.token else {}
         return FakeResponse(payload, self.session_status)
 
@@ -88,6 +106,10 @@ class FakeSession:
             return self.notifications
         raise AssertionError(f"unexpected URL {url}")
 
+    def clients(self):
+        """Return the X-Rd4-Client header of every request, in order."""
+        return [headers["X-Rd4-Client"] for _, _, _, headers in self.calls]
+
     def urls(self):
         """Return the requests as 'METHOD path'."""
         return [f"{method} {url.removeprefix(API)}" for method, url, _, _ in self.calls]
@@ -95,14 +117,14 @@ class FakeSession:
 
 @pytest.fixture(autouse=True)
 def _clear_cache():
-    rd4._TOKEN_CACHE.clear()
+    rd4._SESSION_CACHE.clear()
     yield
-    rd4._TOKEN_CACHE.clear()
+    rd4._SESSION_CACHE.clear()
 
 
-def _run(session, house_number="32", suffix=""):
+def _run(session, house_number="32", suffix="", postal_code="6417 at"):
     return rd4.get_notification_data_raw(
-        "rd4", "6417 at", house_number, suffix, session=session
+        "rd4", postal_code, house_number, suffix, session=session
     )
 
 
@@ -178,7 +200,7 @@ def test_server_error_keeps_the_cached_session(caplog):
 
     assert _run(session) == []
     assert session.urls() == ["GET /notifications"]
-    assert rd4._TOKEN_CACHE
+    assert rd4._SESSION_CACHE
     assert "HTTPError" in caplog.text
     assert TOKEN not in caplog.text
 
@@ -239,7 +261,7 @@ def test_unknown_address_returns_nothing(caplog):
 
     assert _run(session) == []
     assert "HTTPError" in caplog.text
-    assert rd4._TOKEN_CACHE == {}
+    assert rd4._SESSION_CACHE == {}
 
 
 @pytest.mark.parametrize("status", [401, 403])
@@ -251,9 +273,10 @@ def test_address_not_served_by_the_app_api_is_not_a_warning(status, caplog):
         assert _run(session) == []
 
     assert not [r for r in caplog.records if r.levelname == "WARNING"]
-    assert "doesn't serve this address" in caplog.text
-    assert session.urls() == ["POST /auth/session"]
-    assert rd4._TOKEN_CACHE == {}
+    assert "no app serves this address" in caplog.text
+    assert session.urls() == ["POST /auth/session", "POST /auth/session"]
+    assert session.clients() == [RD4_CLIENT, GEUL_EN_MAAS_CLIENT]
+    assert rd4._SESSION_CACHE == {}
 
 
 def test_other_login_errors_are_still_warnings(caplog):
@@ -263,6 +286,62 @@ def test_other_login_errors_are_still_warnings(caplog):
     assert _run(session) == []
 
     assert "could not fetch notifications (HTTPError)" in caplog.text
+    assert session.urls() == ["POST /auth/session"]  # no fallback on a server error
+
+
+def test_rd4_address_uses_only_the_rd4_client():
+    """The first client serves RD4's own municipalities, so no second attempt."""
+    session = FakeSession(served_clients={RD4_CLIENT})
+
+    assert len(_run(session)) == 1
+    assert set(session.clients()) == {RD4_CLIENT}
+
+
+def test_geul_en_maas_address_falls_back_to_the_geul_en_maas_client():
+    """Maastricht, Meerssen and Valkenburg are refused by the RD4 client."""
+    session = FakeSession(served_clients={GEUL_EN_MAAS_CLIENT})
+
+    result = _run(session, "11", postal_code="6225 ch")
+
+    assert len(result) == 1
+    assert session.urls() == [
+        "POST /auth/session",  # refused (403) for the RD4 client
+        "POST /auth/session",
+        "GET /tos/current",
+        "PUT /tos/1/agree",
+        "GET /notifications",
+    ]
+    assert session.clients() == [RD4_CLIENT] + [GEUL_EN_MAAS_CLIENT] * 4
+    assert rd4._SESSION_CACHE[("6225CH", 11, "")][0] == GEUL_EN_MAAS_CLIENT
+
+
+def test_cached_geul_en_maas_session_keeps_using_its_client():
+    """A refresh is one request, with the client that worked."""
+    _run(FakeSession(served_clients={GEUL_EN_MAAS_CLIENT}), "11", postal_code="6225CH")
+    session = FakeSession(served_clients={GEUL_EN_MAAS_CLIENT})
+
+    assert len(_run(session, "11", postal_code="6225CH")) == 1
+    assert session.urls() == ["GET /notifications"]
+    assert session.clients() == [GEUL_EN_MAAS_CLIENT]
+
+
+def test_rejected_geul_en_maas_session_tries_its_own_client_first():
+    """After a rejected token the client that worked before is tried first."""
+    _run(FakeSession(served_clients={GEUL_EN_MAAS_CLIENT}), "11", postal_code="6225CH")
+    rejected = FakeResponse({"code": 3}, status_code=403)
+    session = FakeSession(
+        [rejected, _page(PERSONAL)], served_clients={GEUL_EN_MAAS_CLIENT}
+    )
+
+    assert len(_run(session, "11", postal_code="6225CH")) == 1
+    assert session.urls() == [
+        "GET /notifications",
+        "POST /auth/session",
+        "GET /tos/current",
+        "PUT /tos/1/agree",
+        "GET /notifications",
+    ]
+    assert set(session.clients()) == {GEUL_EN_MAAS_CLIENT}  # no RD4 attempt
 
 
 def test_non_numeric_house_number_skips_notifications():
