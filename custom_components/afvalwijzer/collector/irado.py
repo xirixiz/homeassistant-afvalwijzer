@@ -51,7 +51,20 @@ def _fetch_waste_data_raw_temp(
         verify=verify,
     )
     raw_response.raise_for_status()
-    return raw_response.json()
+    try:
+        return raw_response.json()
+    except ValueError:
+        # Seen from CI: a response that is not JSON (an empty body or a block page).
+        # Log what came back, without the URL: it holds the address.
+        snippet = " ".join((raw_response.text or "")[:200].split())
+        _LOGGER.error(
+            "Irado: response is not JSON (HTTP %s, %s, %d bytes): %r",
+            raw_response.status_code,
+            raw_response.headers.get("Content-Type", "no content type"),
+            len(raw_response.content or b""),
+            snippet,
+        )
+        raise
 
 
 def _parse_waste_data_raw(

@@ -147,6 +147,9 @@ _USER_AGENT = "homeassistant-afvalwijzer"
 _NOTIFICATION_TYPES = ("personal-news", "news")
 # A rejected session token (expired, or new terms to accept) starts a new session.
 _REJECTED_TOKEN_STATUS = (401, 403)
+# Starting a session is refused for addresses the app API doesn't serve: 403 when
+# the address belongs to another client (e.g. Geul en Maas), 401 when it is unknown.
+_NOT_SERVED_STATUS = (401, 403)
 # RD4 never sets an end date on its messages and keeps them in the inbox for
 # good, so only show the recent ones.
 _MAX_MESSAGE_AGE = timedelta(days=30)
@@ -336,14 +339,21 @@ def get_notification_data_raw(
                 )
                 _TOKEN_CACHE.pop(cache_key, None)
 
-        token = _start_app_session(
-            session,
-            corrected_postal_code,
-            house_number_int,
-            suffix,
-            timeout=timeout,
-            verify=verify,
-        )
+        try:
+            token = _start_app_session(
+                session,
+                corrected_postal_code,
+                house_number_int,
+                suffix,
+                timeout=timeout,
+                verify=verify,
+            )
+        except requests.exceptions.HTTPError as err:
+            status = getattr(err.response, "status_code", None)
+            if status not in _NOT_SERVED_STATUS:
+                raise
+            _LOGGER.debug("RD4: the app API doesn't serve this address (%s)", status)
+            return []
         if not token:
             _LOGGER.debug("RD4: no app session for this address, no notifications")
             return []
