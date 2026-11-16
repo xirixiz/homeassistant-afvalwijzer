@@ -2,7 +2,7 @@
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2026.1025.b3"
+VERSION = "2026.1025.b4"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
