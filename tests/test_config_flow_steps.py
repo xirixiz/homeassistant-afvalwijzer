@@ -23,7 +23,7 @@ from custom_components.afvalwijzer.const.const import (
     CONF_SUFFIX,
     DOMAIN,
 )
-from homeassistant.data_entry_flow import FlowResultType, InvalidData
+from homeassistant.data_entry_flow import FlowResultType
 
 pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
@@ -174,16 +174,19 @@ async def test_the_same_address_cannot_be_added_twice(hass):
     assert result["reason"] == "already_configured"
 
 
-async def test_user_step_only_offers_known_collectors(hass):
-    """Anything outside the list of collectors is refused by the form."""
+async def test_user_step_refuses_an_unknown_collector(hass):
+    """Typed text that is no collector gives a form error, not a new entry."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": "user"}
     )
 
-    with pytest.raises(InvalidData):
-        await hass.config_entries.flow.async_configure(
-            result["flow_id"], {CONF_COLLECTOR: "nonexistent"}
-        )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_COLLECTOR: "nonexistent"}
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "user"
+    assert result["errors"] == {CONF_COLLECTOR: "invalid_collector"}
 
 
 # --- import from configuration.yaml ---------------------------------------------------
