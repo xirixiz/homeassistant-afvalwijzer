@@ -153,3 +153,11 @@ def test_a_failing_request_is_a_value_error_without_the_address():
     ) as raised:
         _run(session)
     assert "7311AA" not in str(raised.value)
+
+
+def test_dates_that_are_not_a_list_are_invalid_data():
+    """A calendar entry whose dates can't be read is reported as invalid data."""
+    session = FakeSession(HOME, REGISTERED, _calendar([{"code": "gft", "dates": 5}]))
+
+    with pytest.raises(ValueError, match="Invalid and/or no data received"):
+        _run(session)

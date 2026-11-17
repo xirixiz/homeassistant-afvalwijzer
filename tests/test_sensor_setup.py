@@ -1,6 +1,7 @@
 """Tests for sensor.py setup and behavior."""
 
 from datetime import date, timedelta
+import logging
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -207,3 +208,19 @@ async def test_async_setup_entry_registers_unload_listener():
 
     assert len(added) == 3
     entry.async_on_unload.assert_called_once()
+
+
+async def test_setup_entry_without_any_data_warns(caplog):
+    """With no waste types yet, the setup says that no entities were created."""
+    hass = _make_hass()
+    coordinator = _FakeCoordinator(supports_notifications=False)
+    coordinator.waste_data_with_today = {}
+    coordinator.waste_data_custom = {}
+    entry = _make_entry(coordinator, hass, _CONFIG)
+    added = []
+
+    with caplog.at_level(logging.WARNING):
+        await async_setup_entry(hass, entry, added.extend)
+
+    assert added == []
+    assert "No entities created yet" in caplog.text

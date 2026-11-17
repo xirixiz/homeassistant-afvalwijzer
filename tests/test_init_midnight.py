@@ -1,7 +1,7 @@
 """Tests for the midnight refresh scheduling in async_setup_entry."""
 
 from datetime import timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from pytest_homeassistant.common import (
@@ -9,7 +9,7 @@ from pytest_homeassistant.common import (
     async_fire_time_changed,
 )
 
-from custom_components.afvalwijzer import async_setup_entry
+from custom_components.afvalwijzer import _async_update_listener, async_setup_entry
 from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
     CONF_HOUSE_NUMBER,
@@ -99,3 +99,32 @@ async def test_midnight_scheduling_does_not_leak_unload_callbacks(hass, monkeypa
     assert len(entry._on_unload) == baseline
 
     await _teardown_entry(hass, entry)
+
+
+async def test_unloading_cancels_a_pending_midnight_refresh(hass, monkeypatch):
+    """A refresh waiting for its jitter doesn't fire after the entry is unloaded."""
+    entry, refresh_mock = await _setup_entry_with_mocks(hass, monkeypatch)
+    baseline_calls = refresh_mock.await_count
+
+    midnight = dt_util.start_of_local_day() + timedelta(days=1)
+    async_fire_time_changed(hass, midnight)
+    await hass.async_block_till_done()
+
+    await _teardown_entry(hass, entry)
+
+    async_fire_time_changed(hass, midnight + timedelta(seconds=601))
+    await hass.async_block_till_done()
+
+    assert refresh_mock.await_count == baseline_calls
+
+
+async def test_changing_the_options_reloads_the_entry(hass):
+    """The update listener reloads the entry so the new options apply."""
+    entry = MockConfigEntry(domain=DOMAIN, data={})
+
+    with patch.object(
+        hass.config_entries, "async_reload", AsyncMock(return_value=True)
+    ) as reload:
+        await _async_update_listener(hass, entry)
+
+    reload.assert_awaited_once_with(entry.entry_id)
