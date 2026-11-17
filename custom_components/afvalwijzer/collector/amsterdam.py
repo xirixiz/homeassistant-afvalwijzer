@@ -19,6 +19,9 @@ _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
+# Amsterdam collects plastic together with the rest waste.
+_TYPE_ALIASES = {"plastic": "pmd-restafval"}
+
 WEEKDAY_MAP: dict[str, int] = {
     "maandag": 1,
     "dinsdag": 2,
@@ -213,7 +216,7 @@ def _parse_waste_data_raw(
             continue
 
         code = (item.get("afvalwijzerFractieCode") or "").strip().lower()
-        waste_type = waste_type_rename(code, postal_code)
+        waste_type = waste_type_rename(_TYPE_ALIASES.get(code, code), postal_code)
         if not waste_type:
             continue
 

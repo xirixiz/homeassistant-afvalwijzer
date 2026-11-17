@@ -1,6 +1,9 @@
 {
   "domain": "afvalwijzer",
   "name": "Afvalwijzer",
+  "categories": [
+    "local_services"
+  ],
   "codeowners": [
     "@xirixiz"
   ],
