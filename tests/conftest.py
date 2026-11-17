@@ -1,6 +1,5 @@
 """Pytest configuration for Afvalwijzer tests."""
 
-import os
 from pathlib import Path
 import sys
 from unittest.mock import MagicMock
@@ -14,9 +13,6 @@ try:
 except Exception:
     requests = None
     _REQUESTS_AVAILABLE = False
-
-# Set environment variable to skip runtime setup during tests
-os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 
 # Add scripts/ to the path so the release tooling (version_scheme) is importable.
 # The repository root itself is already on sys.path: tests/ is a package, so

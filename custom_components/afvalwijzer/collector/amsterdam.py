@@ -8,7 +8,11 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_AMSTERDAM
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,10 +47,12 @@ def _parse_date(date_str: str, today: datetime) -> datetime | None:
 
     for fmt in ("%d-%m-%y", "%d-%m-%Y", "%d-%m"):
         try:
-            parsed = datetime.strptime(date_str, fmt)
             if fmt == "%d-%m":
-                parsed = datetime(today.year, parsed.month, parsed.day)
-            return parsed
+                # Without a year the date is in the year of today. Add it to the
+                # text: parsing a day and month alone is deprecated (it changes in
+                # Python 3.15) and cannot parse 29 February.
+                return datetime.strptime(f"{date_str}-{today.year}", "%d-%m-%Y")
+            return datetime.strptime(date_str, fmt)
         except ValueError:
             continue
 
@@ -180,8 +186,6 @@ def _fetch_waste_data_raw_temp(
     verify: bool,
 ) -> dict[str, Any]:
     """Fetch raw waste data using multiple suffix variants."""
-    last_url = None
-
     for params in params_list:
         response = session.get(
             f"{base_url}/",
@@ -190,12 +194,11 @@ def _fetch_waste_data_raw_temp(
             verify=verify,
         )
         response.raise_for_status()
-        last_url = str(response.url)
 
         if _check_response_is_valid(response.text):
             return response.json()
 
-    raise ValueError(f"Invalid and/or no data received from {last_url or base_url}")
+    raise ValueError("Invalid and/or no data received from AMSTERDAM")
 
 
 def _parse_waste_data_raw(
@@ -279,7 +282,9 @@ def _process_collection_dates(item: dict[str, Any], today: datetime) -> list[dat
                 dates.append(parsed)
         future_dates.extend(_date_in_future(dates, today))
 
-    return future_dates
+    # Explicit dates don't depend on the weekday, so they were added once per
+    # collection day.
+    return list(dict.fromkeys(future_dates))
 
 
 def get_waste_data_raw(
@@ -319,8 +324,9 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("AMSTERDAM request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("AMSTERDAM request error (%s)", detail)
+        raise ValueError(f"AMSTERDAM request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("AMSTERDAM: Invalid and/or no data received")
         raise ValueError("Invalid and/or no data received from AMSTERDAM") from err

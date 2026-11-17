@@ -14,11 +14,8 @@ Run test:
 
 import argparse
 import logging
-import os
 import sys
 
-# skip init, required for this test module
-os.environ["AFVALWIJZER_SKIP_INIT"] = "1"
 from custom_components.afvalwijzer.collector.main_collector import MainCollector
 from custom_components.afvalwijzer.common.main_functions import WASTE_TYPE_MAPPING
 from tests.test_data import TEST_ADDRESSES

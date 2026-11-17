@@ -8,7 +8,11 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_RECYCLEAPP
 
 _LOGGER = logging.getLogger(__name__)
@@ -308,11 +312,9 @@ def get_waste_data_raw(
         )
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error(
-            "RECYCLEAPP request error: %s",
-            err,
-        )
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("RECYCLEAPP request error (%s)", detail)
+        raise ValueError(f"RECYCLEAPP request failed ({detail})") from err
 
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("RECYCLEAPP: Invalid and/or no data received")

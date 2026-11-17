@@ -40,7 +40,6 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "gft afval": "gft",
     "gft en etensresten": "gft",
     "gft groente- fruit en tuinafval": "gft",
-    "gft inzameling": "gft",
     "gft ophaal": "gft",
     "gft verzamelcontainer": "gft",
     "gft+e": "gft",
@@ -87,7 +86,6 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "luiers": "luiers",
     "mobiletransferpoint": "grip",
     "opk": "papier",
-    "opk / oud papier inzameling": "papier",
     "oud papier": "papier",
     "oud papier & karton": "papier",
     "oud papier brengcontainer cgk de westereen": "papier",
@@ -142,7 +140,6 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "plastic, metalen verpakkingen en drankkartons": "pmd",
     "plastic, metalen verpakkingen en drinkpakken": "pmd",
     "pmd in zakken": "pmd",
-    "pmd inzameling": "pmd",
     "pmd plastic, metalen en drankkartons": "pmd",
     "pmd+": "pmd",
     "pmd+ ophaal": "pmd",
@@ -172,6 +169,19 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "verpakking van plastic, blik en drinkpakken": "pmd",
     "zak_blauw": "restafval",
 }
+
+
+def describe_request_error(err: BaseException) -> str:
+    """Describe a request error by its type and HTTP status, without its message.
+
+    The message of a requests exception includes the request URL, and for most
+    collectors that URL holds the postal code and house number. It would end up in
+    the log, and in the logs people paste into issues. The type and the status are
+    what helps to find the cause.
+    """
+    status = getattr(getattr(err, "response", None), "status_code", None)
+    name = type(err).__name__
+    return f"{name} {status}" if status else name
 
 
 def format_postal_code(postal_code: str) -> str:

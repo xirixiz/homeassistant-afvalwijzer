@@ -9,7 +9,11 @@ import re
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_MIJNAFVALWIJZER
 
 _LOGGER = logging.getLogger(__name__)
@@ -121,11 +125,12 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("MijnAfvalWijzer request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("MijnAfvalWijzer request error (%s)", detail)
+        raise ValueError(f"MijnAfvalWijzer request failed ({detail})") from err
     except KeyError as err:
-        _LOGGER.error("MijnAfvalWijzer invalid response from %s", url)
-        raise KeyError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("MijnAfvalWijzer invalid response")
+        raise KeyError("Invalid and/or no data received from MijnAfvalWijzer") from err
 
 
 def _parse_notification_data_raw(response: dict) -> list[dict]:
@@ -219,10 +224,11 @@ def get_notification_data_raw(
         return notification_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.warning("MijnAfvalWijzer notification request error: %s", err)
+        _LOGGER.warning(
+            "MijnAfvalWijzer notification request error (%s)",
+            describe_request_error(err),
+        )
         return []
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.warning(
-            "MijnAfvalWijzer: Invalid notification data from %s: %s", url, err
-        )
+        _LOGGER.warning("MijnAfvalWijzer: Invalid notification data: %s", err)
         return []

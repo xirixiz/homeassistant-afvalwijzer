@@ -31,6 +31,19 @@ STORAGE_VERSION = 1
 # Cached data older than this is ignored at startup
 MAX_CACHE_AGE = timedelta(days=7)
 
+# The regular interval between refreshes.
+UPDATE_INTERVAL = timedelta(hours=4)
+
+# After a failed refresh, retry sooner than the regular interval and back off while
+# the provider stays unreachable (a reboot before the network is up, a short
+# outage). A success returns to the regular interval.
+RETRY_INTERVALS = (
+    timedelta(minutes=5),
+    timedelta(minutes=15),
+    timedelta(minutes=30),
+    timedelta(hours=1),
+)
+
 
 def _build_cache_store(hass: HomeAssistant, entry_id: str) -> Store[dict[str, Any]]:
     """Return the per-entry cache store in .storage."""
@@ -53,9 +66,10 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(hours=4),
+            update_interval=UPDATE_INTERVAL,
         )
         self.config = config
+        self._failed_refreshes = 0
         self._store = _build_cache_store(hass, entry_id)
         self.waste_data_with_today: dict[str, Any] = {}
         self.waste_data_without_today: dict[str, Any] = {}
@@ -91,14 +105,28 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return True
         return dt_util.utcnow() - fetched_at > MAX_CACHE_AGE
 
+    @staticmethod
+    def _cache_scope(config: dict[str, Any]) -> tuple[str, ...]:
+        """Return what identifies the address and collector a schedule belongs to.
+
+        A missing value counts as empty, so caches written before the suffix and
+        street name were stored still match an address without them.
+        """
+        return tuple(
+            str(config.get(key) or "").strip().casefold()
+            for key in (
+                CONF_COLLECTOR,
+                CONF_POSTAL_CODE,
+                CONF_HOUSE_NUMBER,
+                CONF_SUFFIX,
+                CONF_STREET_NAME,
+            )
+        )
+
     def _is_cache_for_current_config(self, cached_data: dict[str, Any]) -> bool:
-        """Check if cache belongs to current postal code / house number."""
-        cache_config = cached_data.get("config", {})
-        return (
-            cache_config.get(CONF_POSTAL_CODE) == self.config.get(CONF_POSTAL_CODE)
-            and cache_config.get(CONF_HOUSE_NUMBER)
-            == self.config.get(CONF_HOUSE_NUMBER)
-            and cache_config.get(CONF_COLLECTOR) == self.config.get(CONF_COLLECTOR)
+        """Check if cache belongs to the current collector and full address."""
+        return self._cache_scope(cached_data.get("config") or {}) == self._cache_scope(
+            self.config
         )
 
     async def _async_update_data(self) -> dict[str, Any]:
@@ -112,6 +140,7 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 _LOGGER.warning(
                     "Provider returned no pickup data, keeping the previous schedule"
                 )
+                self._record_refresh_result(success=True)
                 return self.data
 
             self._apply_data(data)
@@ -122,15 +151,33 @@ class AfvalwijzerDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     CONF_POSTAL_CODE: self.config.get(CONF_POSTAL_CODE),
                     CONF_HOUSE_NUMBER: self.config.get(CONF_HOUSE_NUMBER),
                     CONF_COLLECTOR: self.config.get(CONF_COLLECTOR),
+                    CONF_SUFFIX: self.config.get(CONF_SUFFIX),
+                    CONF_STREET_NAME: self.config.get(CONF_STREET_NAME),
                 },
                 "fetched_at": dt_util.utcnow().isoformat(),
                 "data": data,
             }
             await self._store.async_save(cache_payload)
 
+            self._record_refresh_result(success=True)
             return data
         except Exception as err:
+            self._record_refresh_result(success=False)
             raise UpdateFailed(f"Error communicating with API: {err}") from err
+
+    def _record_refresh_result(self, *, success: bool) -> None:
+        """Set the interval until the next refresh: regular, or a backoff after a failure.
+
+        Home Assistant schedules the next refresh right after this one, using the
+        current update_interval.
+        """
+        if success:
+            self._failed_refreshes = 0
+            self.update_interval = UPDATE_INTERVAL
+            return
+        retry = RETRY_INTERVALS[min(self._failed_refreshes, len(RETRY_INTERVALS) - 1)]
+        self._failed_refreshes += 1
+        self.update_interval = min(retry, UPDATE_INTERVAL)
 
     def _has_schedule(self) -> bool:
         """Return True if a non-empty schedule was fetched or loaded from the cache."""
