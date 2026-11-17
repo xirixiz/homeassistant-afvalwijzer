@@ -271,6 +271,27 @@ def test_explicit_dates_without_a_year_use_the_current_year():
     assert dates == [datetime(2027, 3, 12)]
 
 
+def test_explicit_dates_are_not_repeated_per_collection_day():
+    """With two collection days a listed date must still appear once."""
+    item = _item("dinsdag, vrijdag", "05-03-27, 19-03-27")
+
+    dates = amsterdam._process_collection_dates(item, TODAY)
+
+    assert dates == [datetime(2027, 3, 5), datetime(2027, 3, 19)]
+
+
+def test_leap_day_without_a_year_parses_in_a_leap_year():
+    """29 February exists in 2028 and not in 2027.
+
+    Parsing a day and month alone cannot do that (and is deprecated since
+    Python 3.13), so the year is added to the text before parsing.
+    """
+    assert amsterdam._parse_date("29-02", datetime(2028, 1, 10)) == datetime(
+        2028, 2, 29
+    )
+    assert amsterdam._parse_date("29-02", TODAY) is None
+
+
 # --- API items ---------------------------------------------------------------------
 
 
