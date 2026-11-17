@@ -129,7 +129,11 @@ def _fetch_calendar_raw_temp(
             return []
         data = response.json()
     except (requests.exceptions.RequestException, ValueError) as err:
-        _LOGGER.debug("OPZET: calendar for %s not available: %s", year, err)
+        _LOGGER.debug(
+            "OPZET: calendar for %s not available (%s)",
+            year,
+            describe_request_error(err),
+        )
         return []
 
     return data if isinstance(data, list) else []
