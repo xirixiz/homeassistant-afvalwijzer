@@ -216,8 +216,5 @@ def parse_and_apply_value(
         parsed = dt_util.parse_datetime(value)
         if parsed is not None:
             return parsed, None
-        parsed_date = dt_util.parse_date(value)
-        if parsed_date is not None:
-            return parsed_date, None
 
     return value, None
