@@ -42,14 +42,3 @@ def test_validate_house_number_invalid():
     assert flow._validate_house_number("12a") is False
     assert flow._validate_house_number("abc") is False
     assert flow._validate_house_number("12-34") is False
-
-
-def test_postal_code_normalization():
-    """Test that postal codes are properly normalized."""
-    # Test that spaces are removed and uppercased in the actual flow logic
-    postal_input = "1234 ab"
-    expected = "1234AB"
-
-    # This tests the normalization logic that happens in async_step_user
-    normalized = postal_input.replace(" ", "").upper()
-    assert normalized == expected
