@@ -4,19 +4,22 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import pathlib
 from random import randint
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import callback
+from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers.event import async_call_later, async_track_time_change
 
 from .const.const import (
+    CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_EXCLUDE_LIST,
     CONF_EXCLUDE_PICKUP_TODAY,
+    CONF_HOUSE_NUMBER,
     CONF_INCLUDE_TODAY,
+    CONF_POSTAL_CODE,
     CONF_SHOW_FULL_TIMESTAMP,
     DEFAULT_DEFAULT_LABEL,
     DEFAULT_EXCLUDE_LIST,
@@ -65,11 +68,6 @@ except ImportError:  # pragma: no cover
     CONFIG_SCHEMA = {}  # type: ignore[assignment]
 
 
-def _skip_runtime_setup() -> bool:
-    """Return True when runtime setup should be skipped (test mode)."""
-    return os.getenv("AFVALWIJZER_SKIP_INIT") == "1"
-
-
 def _derive_include_today_from_legacy(entry: ConfigEntry) -> bool:
     raw = entry.data.get(CONF_EXCLUDE_PICKUP_TODAY)
     if raw is None:
@@ -113,6 +111,24 @@ def _migrate_options_if_needed(
     return options
 
 
+# Every collector needs these. They are validated when the entry is created, but
+# an entry whose stored data lost one (an old beta, a manual edit) would otherwise
+# be sent to the provider empty and only end in a vague "no data" error.
+_REQUIRED_CONFIG = (CONF_COLLECTOR, CONF_POSTAL_CODE, CONF_HOUSE_NUMBER)
+
+
+def _validate_required_config(config: dict[str, Any]) -> None:
+    """Fail the setup with a clear message when required address data is missing."""
+    missing = [
+        key for key in _REQUIRED_CONFIG if not str(config.get(key) or "").strip()
+    ]
+    if missing:
+        raise ConfigEntryError(
+            f"Missing {', '.join(missing)} in the configuration. "
+            "Please reconfigure the integration."
+        )
+
+
 def _build_effective_config(
     entry: ConfigEntry, options: dict[str, Any]
 ) -> dict[str, Any]:
@@ -122,22 +138,17 @@ def _build_effective_config(
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Afvalwijzer integration."""
-    if _skip_runtime_setup():
-        return True
-
     hass.data.setdefault(DOMAIN, {})
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Afvalwijzer from a config entry."""
-    if _skip_runtime_setup():
-        return True
-
     hass.data.setdefault(DOMAIN, {})
 
     options = _migrate_options_if_needed(hass, entry)
     effective_config = _build_effective_config(entry, options)
+    _validate_required_config(effective_config)
 
     coordinator = AfvalwijzerDataUpdateCoordinator(
         hass, effective_config, entry.entry_id
@@ -207,9 +218,6 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> Non
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Clean up the cache file when a config entry is removed."""
-    if _skip_runtime_setup():
-        return
-
     try:
         await async_remove_cache(hass, entry.entry_id)
     except Exception as err:
@@ -218,9 +226,6 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload an Afvalwijzer config entry."""
-    if _skip_runtime_setup():
-        return True
-
     if not PLATFORMS:
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
         return True

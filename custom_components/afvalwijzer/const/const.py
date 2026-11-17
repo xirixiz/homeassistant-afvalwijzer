@@ -2,7 +2,7 @@
 
 API = "api"
 NAME = "afvalwijzer"
-VERSION = "2026.1022.b5"
+VERSION = "2026.1025.b5"
 
 ISSUE_URL = "https://github.com/xirixiz/homeassistant-afvalwijzer/issues"
 
@@ -61,10 +61,7 @@ SENSOR_COLLECTORS_MIJNAFVALWIJZER = {
 }
 
 SENSOR_COLLECTORS_MONTFERLAND = {
-    # Plain HTTP is intentional: the vendor does not serve this API over TLS.
-    # Port 443 on this host presents a certificate for *.data-interface.nl
-    # and returns 404 for the API paths (verified 2026-07).
-    "montferland": "http://afvalwijzer.afvaloverzicht.nl",
+    "montferland": "https://montferlandapp-api-prod.azurewebsites.net",
 }
 
 SENSOR_COLLECTORS_OMRIN = {

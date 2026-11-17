@@ -4,7 +4,7 @@ from datetime import timedelta
 from unittest.mock import AsyncMock
 
 import pytest
-from pytest_homeassistant_custom_component.common import (
+from pytest_homeassistant.common import (
     MockConfigEntry,
     async_fire_time_changed,
 )
@@ -25,9 +25,6 @@ pytestmark = pytest.mark.usefixtures("enable_custom_integrations")
 
 async def _setup_entry_with_mocks(hass, monkeypatch):
     """Run the real async_setup_entry with collector I/O mocked out."""
-    # Re-enable the runtime setup that conftest disables globally
-    monkeypatch.delenv("AFVALWIJZER_SKIP_INIT", raising=False)
-
     entry = MockConfigEntry(
         domain=DOMAIN,
         data={

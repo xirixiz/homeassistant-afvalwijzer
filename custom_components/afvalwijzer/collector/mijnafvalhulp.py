@@ -7,7 +7,11 @@ import re
 
 import requests
 
-from ..common.main_functions import format_postal_code, parse_ical_waste_data
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    parse_ical_waste_data,
+)
 from ..const.const import SENSOR_COLLECTORS_MIJNAFVALHULP
 
 _LOGGER = logging.getLogger(__name__)
@@ -125,8 +129,9 @@ def get_waste_data_raw(
             verify=verify,
         )
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("mijnafvalhulp request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("mijnafvalhulp request error (%s)", detail)
+        raise ValueError(f"mijnafvalhulp request failed ({detail})") from err
 
     if not waste_data_raw_temp:
         _LOGGER.error("No waste data found for mijnafvalhulp!")

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from pytest_homeassistant_custom_component.common import MockEntityPlatform
+from pytest_homeassistant.common import MockEntityPlatform
 
 from custom_components.afvalwijzer.const.const import (
     ATTR_DAYS_UNTIL_COLLECTION_DATE,

@@ -60,6 +60,7 @@ except ImportError as err:
 NOTIFICATION_PROVIDERS = [
     (SENSOR_COLLECTORS_OPZET, opzet.get_notification_data_raw),
     (SENSOR_COLLECTORS_MIJNAFVALWIJZER, mijnafvalwijzer.get_notification_data_raw),
+    (SENSOR_COLLECTORS_RD4, rd4.get_notification_data_raw),
 ]
 
 

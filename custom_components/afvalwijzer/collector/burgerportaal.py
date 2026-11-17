@@ -8,15 +8,24 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_BURGERPORTAAL
 
 _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
+# Burgerportaal blocks the default python-requests User-Agent
+_USER_AGENT = "Afvalwijzer (+https://github.com/xirixiz/homeassistant-afvalwijzer)"
+
 # Keep existing behavior: static API key in code (not ideal, but not changing functionality)
 _API_KEY = "AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk"
+
+# The anonymous Firebase user's refresh token is long-lived, so keep it for the process
+# lifetime instead of creating a new anonymous user on every refresh. Address ids are
+# cached per organisation and address.
+_AUTH_CACHE: dict[str, str] = {}
+_ADDRESS_ID_CACHE: dict[tuple[str, str, str, str], str] = {}
 
 _BASE_GOOGLE_SIGNUP_URL = (
     "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser"
@@ -41,6 +50,7 @@ def _signup_anonymous(
 ) -> dict[str, Any]:
     response = session.post(
         f"{_BASE_GOOGLE_SIGNUP_URL}?key={_API_KEY}",
+        headers={"User-Agent": _USER_AGENT},
         timeout=timeout,
         verify=verify,
     )
@@ -57,7 +67,10 @@ def _refresh_id_token(
 ) -> str:
     response = session.post(
         f"{_BASE_GOOGLE_SECURETOKEN_URL}?key={_API_KEY}",
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": _USER_AGENT,
+        },
         data={"grant_type": "refresh_token", "refresh_token": refresh_token},
         timeout=timeout,
         verify=verify,
@@ -133,7 +146,7 @@ def _fetch_address_list(
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address"
         f"?zipcode={postal_code}&housenumber={house_number}",
-        headers={"authorization": id_token},
+        headers={"authorization": id_token, "User-Agent": _USER_AGENT},
         timeout=timeout,
         verify=verify,
     )
@@ -169,7 +182,7 @@ def _fetch_waste_data_raw_temp(
 ) -> list[dict[str, Any]]:
     response = session.get(
         f"{_BASE_BURGERPORTAAL_URL}/organisations/{org_id}/address/{address_id}/calendar",
-        headers={"authorization": id_token},
+        headers={"authorization": id_token, "User-Agent": _USER_AGENT},
         timeout=timeout,
         verify=verify,
     )
@@ -231,8 +244,32 @@ def get_waste_data_raw(
             timeout=timeout,
             verify=verify,
             id_token=id_token,
-            refresh_token=refresh_token,
+            refresh_token=refresh_token or _AUTH_CACHE.get("refresh_token"),
         )
+        if refresh_token:
+            _AUTH_CACHE["refresh_token"] = refresh_token
+
+        cache_key = (org_id, postal_code, house_number, suffix)
+        cached_address_id = _ADDRESS_ID_CACHE.get(cache_key)
+
+        if cached_address_id:
+            try:
+                waste_data_raw_temp = _fetch_waste_data_raw_temp(
+                    session,
+                    org_id,
+                    cached_address_id,
+                    id_token,
+                    timeout=timeout,
+                    verify=verify,
+                )
+                # An unknown address id is answered with HTTP 204 (no data), not an error,
+                # so an empty calendar also means the cached id is stale.
+                if waste_data_raw_temp:
+                    return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
+            except requests.exceptions.HTTPError:
+                pass
+            _LOGGER.debug("Burgerportaal: cached address id rejected, looking up again")
+            _ADDRESS_ID_CACHE.pop(cache_key, None)
 
         address_list = _fetch_address_list(
             session,
@@ -251,6 +288,7 @@ def get_waste_data_raw(
         if not address_id:
             _LOGGER.warning("Burgerportaal: Address not found!")
             return []
+        _ADDRESS_ID_CACHE[cache_key] = address_id
 
         waste_data_raw_temp = _fetch_waste_data_raw_temp(
             session,
@@ -265,8 +303,9 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("Burgerportaal request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("Burgerportaal request error (%s)", detail)
+        raise ValueError(f"Burgerportaal request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("Burgerportaal: Invalid and/or no data received")
         raise ValueError("Invalid and/or no data received from Burgerportaal") from err
