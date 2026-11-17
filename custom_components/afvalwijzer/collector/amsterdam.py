@@ -43,10 +43,12 @@ def _parse_date(date_str: str, today: datetime) -> datetime | None:
 
     for fmt in ("%d-%m-%y", "%d-%m-%Y", "%d-%m"):
         try:
-            parsed = datetime.strptime(date_str, fmt)
             if fmt == "%d-%m":
-                parsed = datetime(today.year, parsed.month, parsed.day)
-            return parsed
+                # Without a year the date is in the year of today. Add it to the
+                # text: parsing a day and month alone is deprecated (it changes in
+                # Python 3.15) and cannot parse 29 February.
+                return datetime.strptime(f"{date_str}-{today.year}", "%d-%m-%Y")
+            return datetime.strptime(date_str, fmt)
         except ValueError:
             continue
 
@@ -279,7 +281,9 @@ def _process_collection_dates(item: dict[str, Any], today: datetime) -> list[dat
                 dates.append(parsed)
         future_dates.extend(_date_in_future(dates, today))
 
-    return future_dates
+    # Explicit dates don't depend on the weekday, so they were added once per
+    # collection day.
+    return list(dict.fromkeys(future_dates))
 
 
 def get_waste_data_raw(
