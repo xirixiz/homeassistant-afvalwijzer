@@ -1,13 +1,18 @@
 """Tests for MainCollector.provider_supports_notifications in main_collector.py."""
 
+import contextlib
+import json
 import logging
 
 import pytest
+import requests
 
 from custom_components.afvalwijzer.collector import main_collector
 from custom_components.afvalwijzer.collector.main_collector import MainCollector
 from custom_components.afvalwijzer.config_flow import ALL_COLLECTORS
 from custom_components.afvalwijzer.const import const
+
+from .fakes import FakeResponse
 
 
 def test_opzet_provider_supports_notifications():
@@ -293,3 +298,79 @@ def test_a_failing_notification_fetch_is_only_a_warning(monkeypatch, caplog):
     assert collector.notification_data == []
     assert collector.waste_types_provider == ["gft"]
     assert "Could not fetch notification data for rova: boom" in caplog.text
+
+
+# --- answers of the wrong shape ----------------------------------------------------
+
+
+@pytest.mark.parametrize("error", [AttributeError("x"), KeyError("x"), TypeError("x")])
+def test_a_collector_that_chokes_on_its_data_is_reported_as_invalid_data(
+    monkeypatch, error, caplog
+):
+    """Whatever the collector trips over, the user sees one clear message."""
+    _stub_all(monkeypatch)
+
+    def _failing(*_args, **_kwargs):
+        raise error
+
+    monkeypatch.setattr(main_collector.rova, "get_waste_data_raw", _failing)
+
+    with caplog.at_level(logging.ERROR), pytest.raises(ValueError) as raised:
+        _build("rova")
+
+    assert str(raised.value) == "Invalid and/or no data received from rova"
+    assert raised.value.__cause__ is error
+    assert "Invalid and/or no data received from rova" in caplog.text
+
+
+# JSON a provider could answer with, whatever the collector expects
+MALFORMED_ANSWERS = [
+    [],
+    "text",
+    5,
+    None,
+    {"a": []},
+    {"data": 5},
+    {"customData": []},
+    [[]],
+    [5],
+    {"items": 5},
+    {"dataList": 5},
+    {"calendar": []},
+]
+
+
+class _AnsweringSession:
+    """Session answering every request with the same payload."""
+
+    def __init__(self, payload):
+        self.response = FakeResponse(
+            payload,
+            text=json.dumps(payload) if payload is not None else "",
+            url="https://x/",
+            cookies={"CB_SESSION": "x__AT=t&___TS=1"},
+        )
+        self.cookies = requests.cookies.RequestsCookieJar()
+        self.headers = {}
+
+    def _answer(self, *_args, **_kwargs):
+        return self.response
+
+    get = post = put = request = _answer
+
+
+@pytest.mark.parametrize("payload", MALFORMED_ANSWERS, ids=repr)
+@pytest.mark.parametrize("module", sorted(PROVIDER_SETS))
+def test_every_collector_survives_an_answer_of_the_wrong_shape(
+    monkeypatch, module, payload
+):
+    """No collector lets an AttributeError, KeyError or TypeError through."""
+    provider = next(name for name in PROVIDER_SETS[module])
+    monkeypatch.setattr(
+        main_collector.requests, "Session", lambda: _AnsweringSession(payload)
+    )
+    monkeypatch.setattr(main_collector, "NOTIFICATION_PROVIDERS", [])
+
+    # a ValueError is fine (the user sees a clear message); anything else fails
+    with contextlib.suppress(ValueError):
+        _build(provider)

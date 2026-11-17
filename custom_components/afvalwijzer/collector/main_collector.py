@@ -169,6 +169,14 @@ class MainCollector:
         except ValueError as err:
             _LOGGER.error("Check afvalwijzer platform settings: %s", err)
             raise
+        except (AttributeError, KeyError, TypeError) as err:
+            # An answer of another shape than the collector expects (a list where a
+            # dict was expected, a missing key). Report it like any unreadable answer;
+            # the exception itself isn't logged, as it can quote the data.
+            _LOGGER.error("Invalid and/or no data received from %s", self.provider)
+            raise ValueError(
+                f"Invalid and/or no data received from {self.provider}"
+            ) from err
 
     def _get_notification_data_raw(self):
         """Retrieve notification data from providers that support it.
