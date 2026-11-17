@@ -22,7 +22,6 @@ from ..const.const import (
     SENSOR_COLLECTORS_RECYCLEAPP,
     SENSOR_COLLECTORS_REINIS,
     SENSOR_COLLECTORS_ROVA,
-    SENSOR_COLLECTORS_RWM,
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
@@ -47,7 +46,6 @@ try:
         recycleapp,
         reinis,
         rova,
-        rwm,
         straatbeeld,
         ximmio,
     )
@@ -149,7 +147,6 @@ class MainCollector:
                 (SENSOR_COLLECTORS_RECYCLEAPP, recycleapp.get_waste_data_raw),
                 (SENSOR_COLLECTORS_REINIS, reinis.get_waste_data_raw),
                 (SENSOR_COLLECTORS_ROVA, rova.get_waste_data_raw),
-                (SENSOR_COLLECTORS_RWM, rwm.get_waste_data_raw),
                 (SENSOR_COLLECTORS_STRAATBEELD, straatbeeld.get_waste_data_raw),
                 (SENSOR_COLLECTORS_XIMMIO_IDS, ximmio.get_waste_data_raw),
             ]
