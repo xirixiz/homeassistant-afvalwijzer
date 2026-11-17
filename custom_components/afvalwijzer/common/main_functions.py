@@ -287,12 +287,9 @@ def parse_ical_waste_data(
         if ":" not in line:
             continue
 
-        parts = line.split(":", 1)
-        if len(parts) < 2:
-            continue
-
-        field = parts[0].split(";")[0].strip()
-        value = parts[1].strip()
+        key, value = line.split(":", 1)
+        field = key.split(";")[0].strip()
+        value = value.strip()
 
         if field == "BEGIN" and value == "VEVENT":
             event = {}
@@ -305,7 +302,7 @@ def parse_ical_waste_data(
             else:
                 _LOGGER.warning("Unsupported waste_date format: %s", value)
         elif field == "END" and value == "VEVENT":
-            if "date" in event and "type" in event:
+            if "date" in event and event.get("type"):
                 waste_data.append(event)
             else:
                 _LOGGER.warning("Incomplete iCal event data encountered: %s", event)
