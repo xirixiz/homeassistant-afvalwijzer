@@ -5,11 +5,13 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from pytest_homeassistant.common import MockConfigEntry
 
+from custom_components.afvalwijzer.config_flow import _reconfigure_schema_for
 from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
     CONF_FRIENDLY_NAME,
     CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
+    CONF_STREET_NAME,
     CONF_SUFFIX,
     DOMAIN,
 )
@@ -121,3 +123,40 @@ async def test_reconfigure_invalid_postal_code_shows_error(hass):
     assert result["type"] == "form"
     assert result["errors"] == {"base": "invalid_postal_code"}
     assert entry.data[CONF_POSTAL_CODE] == "1234AB"
+
+
+async def test_reconfigure_of_an_entry_that_is_gone_aborts(hass):
+    """A reconfigure flow for an entry that no longer exists aborts."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "reconfigure", "entry_id": "gone"}
+    )
+
+    assert result["type"] == "abort"
+    assert result["reason"] == "reconfigure_failed"
+
+
+async def test_reconfigure_with_an_invalid_house_number_shows_the_error(hass):
+    """A house number that isn't a number is refused on the form."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await entry.start_reconfigure_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], _user_input("1234AB", "abc")
+    )
+
+    assert result["type"] == "form"
+    assert result["errors"] == {"base": "invalid_house_number"}
+
+
+def test_reconfigure_form_asks_for_the_street_name_only_for_recycleapp():
+    """The Belgian collector needs a street; the others don't."""
+    recycleapp = _reconfigure_schema_for(
+        {CONF_COLLECTOR: "recycleapp", CONF_STREET_NAME: "Teststraat"}
+    )
+    other = _reconfigure_schema_for({CONF_COLLECTOR: "mijnafvalwijzer"})
+
+    assert CONF_STREET_NAME in {str(key) for key in recycleapp.schema}
+    assert CONF_STREET_NAME not in {str(key) for key in other.schema}
+    default = next(k for k in recycleapp.schema if str(k) == CONF_STREET_NAME).default()
+    assert default == "Teststraat"

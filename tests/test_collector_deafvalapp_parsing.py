@@ -93,3 +93,13 @@ def test_an_unknown_provider_is_refused():
     with pytest.raises(ValueError, match="Invalid provider"):
         _run(session, provider="nonexistent")
     assert session.calls == []
+
+
+def test_a_blank_line_between_rows_is_skipped():
+    """An empty line in the middle of the answer doesn't end the parsing."""
+    text = "gft;13-11-2026;\n\n  \npapier;20-11-2026;\n"
+
+    assert deafvalapp._parse_waste_data_raw(text) == [
+        {"type": "gft", "date": "2026-11-13"},
+        {"type": "papier", "date": "2026-11-20"},
+    ]
