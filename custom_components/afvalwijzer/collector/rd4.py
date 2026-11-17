@@ -10,7 +10,11 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_RD4
 
 _LOGGER = logging.getLogger(__name__)
@@ -129,11 +133,12 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("RD4 request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("RD4 request error (%s)", detail)
+        raise ValueError(f"RD4 request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error("RD4: Invalid and/or no data received from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("RD4: Invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from RD4") from err
 
 
 # Notifications come from the app API (v2), not from the calendar API (v1). It

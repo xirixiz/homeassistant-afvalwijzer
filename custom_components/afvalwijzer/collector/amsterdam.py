@@ -8,7 +8,11 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_AMSTERDAM
 
 _LOGGER = logging.getLogger(__name__)
@@ -180,8 +184,6 @@ def _fetch_waste_data_raw_temp(
     verify: bool,
 ) -> dict[str, Any]:
     """Fetch raw waste data using multiple suffix variants."""
-    last_url = None
-
     for params in params_list:
         response = session.get(
             f"{base_url}/",
@@ -190,12 +192,11 @@ def _fetch_waste_data_raw_temp(
             verify=verify,
         )
         response.raise_for_status()
-        last_url = str(response.url)
 
         if _check_response_is_valid(response.text):
             return response.json()
 
-    raise ValueError(f"Invalid and/or no data received from {last_url or base_url}")
+    raise ValueError("Invalid and/or no data received from AMSTERDAM")
 
 
 def _parse_waste_data_raw(
@@ -319,8 +320,9 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("AMSTERDAM request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("AMSTERDAM request error (%s)", detail)
+        raise ValueError(f"AMSTERDAM request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("AMSTERDAM: Invalid and/or no data received")
         raise ValueError("Invalid and/or no data received from AMSTERDAM") from err

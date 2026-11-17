@@ -171,6 +171,19 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
 }
 
 
+def describe_request_error(err: BaseException) -> str:
+    """Describe a request error by its type and HTTP status, without its message.
+
+    The message of a requests exception includes the request URL, and for most
+    collectors that URL holds the postal code and house number. It would end up in
+    the log, and in the logs people paste into issues. The type and the status are
+    what helps to find the cause.
+    """
+    status = getattr(getattr(err, "response", None), "status_code", None)
+    name = type(err).__name__
+    return f"{name} {status}" if status else name
+
+
 def format_postal_code(postal_code: str) -> str:
     """Format a Dutch postal code as `1234AB`.
 
