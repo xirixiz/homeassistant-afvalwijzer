@@ -159,7 +159,8 @@ def get_waste_data_raw(
     try:
         waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
         return waste_data_raw
-    except (ValueError, KeyError, TypeError) as err:
-        # ValueError can happen on datetime parsing if upstream format changes
+    except (ValueError, KeyError, TypeError, AttributeError) as err:
+        # ValueError can happen on datetime parsing if upstream format changes;
+        # AttributeError when a level of the calendar changes from a dict to a list.
         _LOGGER.error("Irado invalid and/or no data received")
         raise ValueError("Invalid and/or no data received from Irado") from err
