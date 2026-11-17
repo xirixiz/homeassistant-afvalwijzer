@@ -14,14 +14,16 @@ class FakeResponse:
         json_error=False,
         text="",
         url="",
+        cookies=None,
     ):
-        """Store the payload, the status code, the text and the final URL.
+        """Store the payload, the status code, the text, the final URL and cookies.
 
         json_error makes json() fail like requests does for a body that isn't JSON.
         """
         self._payload = payload
         self.text = text
         self.url = url
+        self.cookies = cookies or {}
         self.status_code = status_code
         self.json_error = json_error
         self.content = b"" if payload is None and not json_error else b"x"
