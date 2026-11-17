@@ -305,7 +305,7 @@ def test_notification_request_errors_do_not_expose_the_address(
     ("module", "provider"), [("rova", "rova"), ("klikogroep", "oudeijsselstreek")]
 )
 def test_a_body_that_is_not_json_is_a_request_error(module, provider, caplog):
-    """requests' JSONDecodeError is a RequestException, so it takes that path."""
+    """Requests' JSONDecodeError is a RequestException, so it takes that path."""
     collector = importlib.import_module(
         f"custom_components.afvalwijzer.collector.{module}"
     )
