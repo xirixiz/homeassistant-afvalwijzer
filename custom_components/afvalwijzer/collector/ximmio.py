@@ -20,6 +20,9 @@ _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
 
+# Ximmio reports PMD as "plastic".
+_TYPE_ALIASES = {"plastic": "pmd"}
+
 
 def _post_ipv4_then_ipv6(
     session: requests.Session,
@@ -169,6 +172,7 @@ def _parse_waste_data_raw(
             continue
 
         waste_type_text = (item.get("_pickupTypeText") or "").strip().lower()
+        waste_type_text = _TYPE_ALIASES.get(waste_type_text, waste_type_text)
         waste_type = waste_type_rename(waste_type_text, postal_code)
         if not waste_type:
             continue

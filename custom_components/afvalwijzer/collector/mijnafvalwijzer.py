@@ -77,6 +77,11 @@ def _parse_waste_data_raw(response: dict, postal_code: str = "") -> list[dict]:
         if not waste_type:
             continue
 
+        # VET-goed (fats, electrical appliances, textile) is reported under another
+        # type (e.g. "keukenafval"), so it can only be told apart by its nameType.
+        if (item.get("nameType") or "").strip().lower() == "vet-goed":
+            waste_type = "vet-goed"
+
         # Many municipalities report PMD under the generic "plastic" type code;
         # the human readable "nameType" tells whether it is really PMD.
         if waste_type == "plastic":

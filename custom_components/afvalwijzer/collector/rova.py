@@ -94,9 +94,6 @@ def get_waste_data_raw(
         detail = describe_request_error(err)
         _LOGGER.error("ROVA request error (%s)", detail)
         raise ValueError(f"ROVA request failed ({detail})") from err
-    except ValueError as err:
-        _LOGGER.error("ROVA invalid JSON")
-        raise ValueError("Invalid and/or no data received from ROVA") from err
 
     if not waste_data_raw_temp:
         _LOGGER.error("No waste data found!")
