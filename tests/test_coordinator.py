@@ -9,6 +9,9 @@ from pytest_homeassistant.common import async_fire_time_changed
 
 from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
+    CONF_DEFAULT_LABEL,
+    CONF_EXCLUDE_LIST,
+    CONF_EXCLUDE_PICKUP_TODAY,
     CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
     CONF_STREET_NAME,
@@ -437,3 +440,81 @@ async def test_scheduler_retries_sooner_and_returns_to_the_regular_interval(
 
     unsubscribe()
     await coordinator.async_shutdown()
+
+
+# --- fetching ----------------------------------------------------------------------
+
+
+def _fetch_config():
+    return {
+        CONF_COLLECTOR: "mijnafvalwijzer",
+        CONF_POSTAL_CODE: "1234AB",
+        CONF_HOUSE_NUMBER: "5",
+        CONF_SUFFIX: "b",
+        CONF_STREET_NAME: "Teststraat",
+        CONF_EXCLUDE_PICKUP_TODAY: True,
+        CONF_EXCLUDE_LIST: "pmd",
+        CONF_DEFAULT_LABEL: "geen",
+    }
+
+
+def test_fetch_data_hands_the_settings_to_the_collector_and_returns_its_data():
+    """The collector gets the address and the options, and its data is returned."""
+    coordinator = _make_real_coordinator(_fetch_config())
+
+    with patch("custom_components.afvalwijzer.coordinator.MainCollector") as collector:
+        instance = collector.return_value
+        instance.waste_data_with_today = {"gft": "a"}
+        instance.waste_data_without_today = {"gft": "b"}
+        instance.waste_data_custom = {"next_type": "gft"}
+        instance.waste_data_raw = [{"type": "gft"}]
+        instance.notification_data = [{"title": "Storing"}]
+
+        data = coordinator._fetch_data()
+
+    collector.assert_called_once_with(
+        "mijnafvalwijzer",
+        "1234AB",
+        "5",
+        "b",
+        "Teststraat",
+        exclude_pickup_today=True,
+        exclude_list="pmd",
+        default_label="geen",
+    )
+    assert data == {
+        "waste_data_with_today": {"gft": "a"},
+        "waste_data_without_today": {"gft": "b"},
+        "waste_data_custom": {"next_type": "gft"},
+        "waste_data_raw": [{"type": "gft"}],
+        "notification_data": [{"title": "Storing"}],
+    }
+
+
+def test_fetch_data_turns_any_collector_error_into_update_failed():
+    """Whatever the collector raises, Home Assistant sees an UpdateFailed."""
+    coordinator = _make_real_coordinator(_fetch_config())
+
+    with (
+        patch(
+            "custom_components.afvalwijzer.coordinator.MainCollector",
+            side_effect=ValueError("Rova request failed (HTTPError 503)"),
+        ),
+        pytest.raises(UpdateFailed, match="HTTPError 503") as raised,
+    ):
+        coordinator._fetch_data()
+
+    assert isinstance(raised.value.__cause__, ValueError)
+
+
+def test_apply_data_uses_empty_defaults_for_missing_keys():
+    """Data without a key (an old cache) leaves that part empty."""
+    coordinator = _make_real_coordinator(_fetch_config())
+
+    coordinator._apply_data({"waste_data_raw": [{"type": "gft"}]})
+
+    assert coordinator.waste_data_raw == [{"type": "gft"}]
+    assert coordinator.waste_data_with_today == {}
+    assert coordinator.waste_data_without_today == {}
+    assert coordinator.waste_data_custom == {}
+    assert coordinator.notification_data == []

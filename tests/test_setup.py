@@ -1,7 +1,8 @@
 """Test basic integration setup."""
 
 import asyncio
-from unittest.mock import AsyncMock
+import logging
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from pytest_homeassistant.common import MockConfigEntry
@@ -9,12 +10,16 @@ from pytest_homeassistant.common import MockConfigEntry
 from custom_components.afvalwijzer import (
     CONFIG_SCHEMA,
     PLATFORMS,
+    _derive_include_today_from_legacy,
     _validate_required_config,
+    async_remove_entry,
     async_setup,
     async_setup_entry,
+    async_unload_entry,
 )
 from custom_components.afvalwijzer.const.const import (
     CONF_COLLECTOR,
+    CONF_EXCLUDE_PICKUP_TODAY,
     CONF_HOUSE_NUMBER,
     CONF_POSTAL_CODE,
     CONF_SUFFIX,
@@ -168,3 +173,153 @@ async def test_setup_fails_with_a_clear_error_when_house_number_is_empty(
     assert entry.state is ConfigEntryState.SETUP_ERROR
     assert CONF_HOUSE_NUMBER in entry.reason
     load_cache.assert_not_awaited()
+
+
+# --- legacy options, first refresh, removal and unload ------------------------------
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (None, True),
+        ("true", False),
+        ("TRUE", False),
+        ("yes", False),
+        ("1", False),
+        ("on", False),
+        (True, False),
+        ("false", True),
+        ("no", True),
+        (False, True),
+        ("", True),
+    ],
+)
+def test_legacy_exclude_pickup_today_becomes_include_today(raw, expected):
+    """Old entries stored exclude-today; the options store include-today."""
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_EXCLUDE_PICKUP_TODAY: raw})
+    if raw is None:
+        entry = MockConfigEntry(domain=DOMAIN, data={})
+
+    assert _derive_include_today_from_legacy(entry) is expected
+
+
+def _entry():
+    return MockConfigEntry(
+        domain=DOMAIN,
+        data={
+            CONF_COLLECTOR: "mijnafvalwijzer",
+            CONF_POSTAL_CODE: "1234AB",
+            CONF_HOUSE_NUMBER: "1",
+            CONF_SUFFIX: "",
+        },
+    )
+
+
+@pytest.mark.usefixtures("enable_custom_integrations")
+async def test_setup_without_a_cache_waits_for_the_first_refresh(hass, monkeypatch):
+    """With no usable cache the setup fetches before it finishes."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+    first_refresh = AsyncMock()
+    request_refresh = AsyncMock()
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator,
+        "async_load_cache",
+        AsyncMock(return_value=False),
+    )
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator,
+        "async_config_entry_first_refresh",
+        first_refresh,
+    )
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator, "async_request_refresh", request_refresh
+    )
+    monkeypatch.setattr(
+        hass.config_entries, "async_forward_entry_setups", AsyncMock(return_value=True)
+    )
+
+    assert await async_setup_entry(hass, entry) is True
+    await hass.async_block_till_done()
+
+    first_refresh.assert_awaited_once()
+    request_refresh.assert_not_awaited()
+    await entry._async_process_on_unload(hass)
+    await hass.async_block_till_done()
+
+
+@pytest.mark.usefixtures("enable_custom_integrations")
+async def test_setup_with_a_cache_refreshes_in_the_background(hass, monkeypatch):
+    """With a cache the entities start at once and a refresh follows."""
+    entry = _entry()
+    entry.add_to_hass(hass)
+    first_refresh = AsyncMock()
+    request_refresh = AsyncMock()
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator,
+        "async_load_cache",
+        AsyncMock(return_value=True),
+    )
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator,
+        "async_config_entry_first_refresh",
+        first_refresh,
+    )
+    monkeypatch.setattr(
+        AfvalwijzerDataUpdateCoordinator, "async_request_refresh", request_refresh
+    )
+    monkeypatch.setattr(
+        hass.config_entries, "async_forward_entry_setups", AsyncMock(return_value=True)
+    )
+
+    assert await async_setup_entry(hass, entry) is True
+    await hass.async_block_till_done()
+
+    first_refresh.assert_not_awaited()
+    request_refresh.assert_awaited_once()
+    await entry._async_process_on_unload(hass)
+    await hass.async_block_till_done()
+
+
+async def test_removing_an_entry_removes_its_cache(hass):
+    """The cache file of the removed entry is deleted."""
+    entry = _entry()
+
+    with patch(
+        "custom_components.afvalwijzer.async_remove_cache", AsyncMock()
+    ) as remove_cache:
+        await async_remove_entry(hass, entry)
+
+    remove_cache.assert_awaited_once_with(hass, entry.entry_id)
+
+
+async def test_a_failing_cache_removal_does_not_block_removing_the_entry(hass, caplog):
+    """A cache file that can't be removed is only logged."""
+    entry = _entry()
+
+    with (
+        patch(
+            "custom_components.afvalwijzer.async_remove_cache",
+            AsyncMock(side_effect=OSError("disk")),
+        ),
+        caplog.at_level(logging.DEBUG),
+    ):
+        await async_remove_entry(hass, entry)
+
+    assert "Failed to remove Afvalwijzer cache: disk" in caplog.text
+
+
+@pytest.mark.parametrize("unloaded", [True, False])
+async def test_unloading_forgets_the_entry_only_when_the_platforms_unloaded(
+    hass, unloaded
+):
+    """The stored data stays when a platform refuses to unload."""
+    entry = _entry()
+    hass.data[DOMAIN] = {entry.entry_id: {"coordinator": object()}}
+
+    with patch.object(
+        hass.config_entries, "async_unload_platforms", AsyncMock(return_value=unloaded)
+    ):
+        assert await async_unload_entry(hass, entry) is unloaded
+
+    assert (entry.entry_id in hass.data[DOMAIN]) is (not unloaded)
