@@ -288,3 +288,9 @@ def test_get_notification_data_raw_rejects_an_unknown_provider():
         opzet.get_notification_data_raw(
             "amsterdam", "1234AB", "1", "", session=FakeSession()
         )
+
+
+def test_no_addresses_selects_no_bag_id():
+    """An empty address list has no bag id to select."""
+    assert opzet._select_bag_id([], "") is None
+    assert opzet._select_bag_id([], "A") is None

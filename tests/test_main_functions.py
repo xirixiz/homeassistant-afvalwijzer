@@ -192,3 +192,18 @@ def test_waste_type_rename_logs_unmapped_types(caplog):
         waste_type_rename("Nog onbekend")
 
     assert "Unmapped waste type encountered: 'nog onbekend'" in caplog.text
+
+
+@pytest.mark.parametrize("dtstart", ["00000000", "20261399", "20260230", "2026111"])
+def test_ical_event_with_an_impossible_date_is_skipped(dtstart, caplog):
+    """A date that doesn't exist skips that event, not the whole refresh."""
+    text = _calendar(
+        _event("Groene container", f"DTSTART;VALUE=DATE:{dtstart}"),
+        _event("Papierinzameling", "DTSTART;VALUE=DATE:20261127"),
+    )
+
+    with caplog.at_level(logging.WARNING):
+        result = parse_ical_waste_data(text)
+
+    assert result == [{"type": "papier", "date": "2026-11-27"}]
+    assert "Unsupported waste_date format" in caplog.text

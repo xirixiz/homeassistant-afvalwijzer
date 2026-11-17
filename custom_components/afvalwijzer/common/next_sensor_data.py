@@ -38,14 +38,10 @@ class NextSensorData:
         self.data = self._gen_next_sensor_data()
 
     def _get_next_waste_date(self):
-        if self.waste_data_after_date_selected == []:
+        if not self.waste_data_after_date_selected:
             return self.default_label
 
-        try:
-            return self.waste_data_after_date_selected[0]["date"]
-        except IndexError:
-            _LOGGER.error("No waste data found after the selected date.")
-            return self.default_label
+        return self.waste_data_after_date_selected[0]["date"]
 
     def _get_next_waste_in_days(self):
         if self.next_waste_date == self.default_label:

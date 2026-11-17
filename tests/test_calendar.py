@@ -1,6 +1,7 @@
 """Test calendar for AfvalWijzer."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+import logging
 from types import SimpleNamespace
 from unittest.mock import DEFAULT, AsyncMock, MagicMock, patch
 
@@ -16,6 +17,7 @@ from custom_components.afvalwijzer.calendar import (
     _async_remove_all_calendars,
     _async_remove_legacy_calendar,
     _async_remove_stale_calendars,
+    _to_date,
     async_setup_entry,
 )
 from custom_components.afvalwijzer.common.sensor_utils import (
@@ -28,6 +30,7 @@ from custom_components.afvalwijzer.const.const import (
     DOMAIN,
 )
 from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util
 
 
 def _mock_coordinator(*, raw=None, with_today=None, config=None):
@@ -760,3 +763,72 @@ def test_remove_all_calendars_ignores_other_domains():
         _async_remove_all_calendars(_make_hass(), "test_entry")
 
     registry.async_remove.assert_not_called()
+
+
+# --- dates, empty types, today and a missing coordinator --------------------------
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (datetime(2026, 7, 9, 12, 30), date(2026, 7, 9)),
+        (date(2026, 7, 9), date(2026, 7, 9)),
+        ("2026-07-09T00:00:00", date(2026, 7, 9)),
+        ("2026-07-09", date(2026, 7, 9)),
+        ("not a date", None),
+        (5, None),
+        (None, None),
+    ],
+)
+def test_to_date_accepts_dates_datetimes_and_their_text(value, expected):
+    """Cached data holds text, fresh data holds objects; anything else is no date."""
+    assert _to_date(value) == expected
+
+
+async def test_calendar_skips_pickups_without_a_type():
+    """An item without a type has nothing to show in the calendar."""
+    mock_data = _mock_coordinator(
+        raw=[{"type": "", "date": "2026-07-09"}, {"type": "gft", "date": "2026-07-16"}]
+    )
+    calendar = AfvalwijzerCalendar(mock_data, "test_entry_id")
+
+    events = await calendar.async_get_events(
+        None, datetime(2026, 7, 1), datetime(2026, 7, 31)
+    )
+
+    assert [event.start for event in events] == [date(2026, 7, 16)]
+
+
+async def test_calendar_leaves_out_today_when_today_is_excluded():
+    """With include_today off, a pickup today isn't an event."""
+    today = dt_util.now().date()
+    tomorrow = today + timedelta(days=1)
+    mock_data = _mock_coordinator(
+        raw=[
+            {"type": "gft", "date": today.isoformat()},
+            {"type": "gft", "date": tomorrow.isoformat()},
+        ],
+        config={"include_today": False, "provider": "afvalthuis"},
+    )
+    calendar = AfvalwijzerCalendar(mock_data, "test_entry_id")
+
+    events = await calendar.async_get_events(
+        None,
+        datetime.combine(today, datetime.min.time()),
+        datetime.combine(tomorrow + timedelta(days=1), datetime.min.time()),
+    )
+
+    assert [event.start for event in events] == [tomorrow]
+
+
+async def test_setup_entry_without_a_coordinator_adds_nothing(caplog):
+    """Without a coordinator the setup logs an error and adds no calendar."""
+    hass = _make_hass()
+    entry = SimpleNamespace(entry_id="missing", async_on_unload=MagicMock())
+    added = []
+
+    with _NO_STALE_REMOVAL, caplog.at_level(logging.ERROR):
+        await async_setup_entry(hass, entry, added.extend)
+
+    assert added == []
+    assert "Could not find coordinator" in caplog.text

@@ -200,10 +200,6 @@ class CustomSensor(CoordinatorEntity, SensorEntity):
             parsed = dt_util.parse_datetime(value)
             if parsed is not None:
                 value = parsed
-            else:
-                parsed_date = dt_util.parse_date(value)
-                if parsed_date is not None:
-                    value = parsed_date
 
         if isinstance(value, datetime):
             aware = as_utc_aware(value)

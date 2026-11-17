@@ -121,7 +121,11 @@ def get_waste_data_raw(
                 verify=verify,
             )
         except (requests.exceptions.RequestException, ValueError, TypeError) as err:
-            _LOGGER.debug("RD4: no data for %s: %s", current_year + 1, err)
+            _LOGGER.debug(
+                "RD4: no data for %s (%s)",
+                current_year + 1,
+                describe_request_error(err),
+            )
 
         if not waste_data_raw_temp:
             # Match original semantics: log based on likely cause
@@ -364,9 +368,7 @@ def get_notification_data_raw(
     try:
         house_number_int = int(str(house_number).strip())
     except ValueError:
-        _LOGGER.debug(
-            "RD4: house number %r is not numeric, no notifications", house_number
-        )
+        _LOGGER.debug("RD4: the house number is not numeric, no notifications")
         return []
 
     corrected_postal_code = format_postal_code(postal_code)

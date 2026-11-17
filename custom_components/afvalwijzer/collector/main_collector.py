@@ -22,37 +22,32 @@ from ..const.const import (
     SENSOR_COLLECTORS_RECYCLEAPP,
     SENSOR_COLLECTORS_REINIS,
     SENSOR_COLLECTORS_ROVA,
-    SENSOR_COLLECTORS_RWM,
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
+)
+from . import (
+    amsterdam,
+    burgerportaal,
+    circulus,
+    deafvalapp,
+    icalendar,
+    irado,
+    klikogroep,
+    mijnafvalhulp,
+    mijnafvalwijzer,
+    montferland,
+    omrin,
+    opzet,
+    rd4,
+    recycleapp,
+    reinis,
+    rova,
+    straatbeeld,
+    ximmio,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-try:
-    from . import (
-        amsterdam,
-        burgerportaal,
-        circulus,
-        deafvalapp,
-        icalendar,
-        irado,
-        klikogroep,
-        mijnafvalhulp,
-        mijnafvalwijzer,
-        montferland,
-        omrin,
-        opzet,
-        rd4,
-        recycleapp,
-        reinis,
-        rova,
-        rwm,
-        straatbeeld,
-        ximmio,
-    )
-except ImportError as err:
-    _LOGGER.error("Import error %s", err.args)
 
 # Providers with notification support, paired with their notification getter.
 # Shared by MainCollector._get_notification_data_raw (to fetch notifications)
@@ -149,7 +144,6 @@ class MainCollector:
                 (SENSOR_COLLECTORS_RECYCLEAPP, recycleapp.get_waste_data_raw),
                 (SENSOR_COLLECTORS_REINIS, reinis.get_waste_data_raw),
                 (SENSOR_COLLECTORS_ROVA, rova.get_waste_data_raw),
-                (SENSOR_COLLECTORS_RWM, rwm.get_waste_data_raw),
                 (SENSOR_COLLECTORS_STRAATBEELD, straatbeeld.get_waste_data_raw),
                 (SENSOR_COLLECTORS_XIMMIO_IDS, ximmio.get_waste_data_raw),
             ]
@@ -172,6 +166,14 @@ class MainCollector:
         except ValueError as err:
             _LOGGER.error("Check afvalwijzer platform settings: %s", err)
             raise
+        except (AttributeError, KeyError, TypeError) as err:
+            # An answer of another shape than the collector expects (a list where a
+            # dict was expected, a missing key). Report it like any unreadable answer;
+            # the exception itself isn't logged, as it can quote the data.
+            _LOGGER.error("Invalid and/or no data received from %s", self.provider)
+            raise ValueError(
+                f"Invalid and/or no data received from {self.provider}"
+            ) from err
 
     def _get_notification_data_raw(self):
         """Retrieve notification data from providers that support it.

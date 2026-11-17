@@ -6,12 +6,24 @@ import requests
 class FakeResponse:
     """Minimal requests.Response stand-in."""
 
-    def __init__(self, payload=None, *, status_code=200, json_error=False):
-        """Store the payload and status code.
+    def __init__(
+        self,
+        payload=None,
+        *,
+        status_code=200,
+        json_error=False,
+        text="",
+        url="",
+        cookies=None,
+    ):
+        """Store the payload, the status code, the text, the final URL and cookies.
 
         json_error makes json() fail like requests does for a body that isn't JSON.
         """
         self._payload = payload
+        self.text = text
+        self.url = url
+        self.cookies = cookies or {}
         self.status_code = status_code
         self.json_error = json_error
         self.content = b"" if payload is None and not json_error else b"x"
@@ -21,6 +33,11 @@ class FakeResponse:
         if self.json_error:
             raise requests.exceptions.JSONDecodeError("Expecting value", "", 0)
         return self._payload
+
+    @property
+    def ok(self):
+        """Return True for a status below 400, like requests does."""
+        return self.status_code < 400
 
     def raise_for_status(self):
         """Raise HTTPError for error statuses."""

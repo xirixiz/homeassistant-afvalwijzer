@@ -6,6 +6,7 @@ codes) and mapping provider-specific waste type labels to standardized keys.
 
 from __future__ import annotations
 
+from datetime import datetime
 import logging
 import re
 
@@ -287,25 +288,27 @@ def parse_ical_waste_data(
         if ":" not in line:
             continue
 
-        parts = line.split(":", 1)
-        if len(parts) < 2:
-            continue
-
-        field = parts[0].split(";")[0].strip()
-        value = parts[1].strip()
+        key, value = line.split(":", 1)
+        field = key.split(";")[0].strip()
+        value = value.strip()
 
         if field == "BEGIN" and value == "VEVENT":
             event = {}
         elif field == "SUMMARY":
             event["type"] = waste_type_rename(value.lower(), postal_code)
         elif field == "DTSTART":
-            if len(value) >= 8 and value[:8].isdigit():
-                date_str = value[:8]
-                event["date"] = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
-            else:
+            try:
+                if len(value) < 8 or not value[:8].isdigit():
+                    raise ValueError(value)
+                # A date that doesn't exist (month 13, day 00) would fail the whole
+                # refresh later on, so it is refused here, like any unsupported format.
+                event["date"] = datetime.strptime(value[:8], "%Y%m%d").strftime(
+                    "%Y-%m-%d"
+                )
+            except ValueError:
                 _LOGGER.warning("Unsupported waste_date format: %s", value)
         elif field == "END" and value == "VEVENT":
-            if "date" in event and "type" in event:
+            if "date" in event and event.get("type"):
                 waste_data.append(event)
             else:
                 _LOGGER.warning("Incomplete iCal event data encountered: %s", event)

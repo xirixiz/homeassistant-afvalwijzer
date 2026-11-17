@@ -121,11 +121,6 @@ SENSOR_COLLECTORS_ROVA = {
     "rova": "https://www.rova.nl",
 }
 
-SENSOR_COLLECTORS_RWM = {
-    "getAddress": "https://rwm.nl/adressen/{0}:{1}",
-    "getSchedule": "https://rwm.nl/rest/adressen/{0}/afvalstromen",
-}
-
 SENSOR_COLLECTORS_STRAATBEELD = {
     "straatbeeld": "https://drimmelen.api.straatbeeld.online",
 }

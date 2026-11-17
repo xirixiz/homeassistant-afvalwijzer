@@ -133,3 +133,25 @@ def test_invalid_provider():
         montferland.get_waste_data_raw("unknown", "7041EJ", "13", "", session=session)
 
     session.get.assert_not_called()
+
+
+def test_an_answer_that_is_not_a_dict_is_invalid_data():
+    """A list or text where an object was expected is reported as invalid data."""
+    session = _session(_response(["not", "a", "dict"]))
+
+    with pytest.raises(ValueError, match="Invalid and/or no data received"):
+        montferland.get_waste_data_raw(
+            "montferland", "1234AB", "5", "", session=session
+        )
+
+
+def test_collections_without_a_date_are_skipped():
+    """A pickup without a date is ignored, the others are kept."""
+    items = [{"fraction": 2}, {"fraction": 2, "collectionDate": ""}]
+    items += [{"fraction": 2, "collectionDate": "2026-11-13T00:00:00"}]
+
+    result = montferland.get_waste_data_raw(
+        "montferland", "1234AB", "5", "", session=_session(_response(_payload(items)))
+    )
+
+    assert result == [{"type": "gft", "date": "2026-11-13"}]
