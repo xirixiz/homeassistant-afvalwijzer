@@ -55,7 +55,7 @@ async def test_the_entry_sets_up_sensors_and_a_calendar(hass):
 
     with patch(GETTER, return_value=_raw()):
         assert await hass.config_entries.async_setup(entry.entry_id)
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
 
     assert entry.state is ConfigEntryState.LOADED
     registry = er.async_get(hass)
@@ -94,7 +94,7 @@ async def test_a_failing_first_refresh_retries_the_setup(hass):
         GETTER, side_effect=ValueError("Mijnafvalwijzer request failed (HTTPError 503)")
     ):
         await hass.config_entries.async_setup(entry.entry_id)
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
 
     assert entry.state is ConfigEntryState.SETUP_RETRY
 
@@ -113,20 +113,20 @@ async def test_a_refresh_that_fails_later_makes_the_sensors_unavailable_then_rec
     entry.add_to_hass(hass)
     with patch(GETTER, return_value=_raw()):
         await hass.config_entries.async_setup(entry.entry_id)
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
     gft = _sensor(hass, entry, "_gft")
     assert hass.states.get(gft).state != "unavailable"
 
     # the regular refresh is every 4 hours; the provider is down then
     with patch(GETTER, side_effect=ValueError("down")):
         async_fire_time_changed(hass, dt_util.utcnow() + timedelta(hours=4, minutes=1))
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
     failed_state = hass.states.get(gft).state
 
     # a quick retry follows, and the provider is back
     with patch(GETTER, return_value=_raw()):
         async_fire_time_changed(hass, dt_util.utcnow() + timedelta(hours=4, minutes=7))
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
 
     assert failed_state == "unavailable"
     assert hass.states.get(gft).state not in ("unavailable", "unknown")
@@ -138,7 +138,7 @@ async def test_changing_the_options_reloads_the_entry_with_the_new_settings(hass
     entry.add_to_hass(hass)
     with patch(GETTER, return_value=_raw()):
         await hass.config_entries.async_setup(entry.entry_id)
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
         registry = er.async_get(hass)
         before = [
             item.domain
@@ -148,7 +148,7 @@ async def test_changing_the_options_reloads_the_entry_with_the_new_settings(hass
         hass.config_entries.async_update_entry(
             entry, options={"enable_calendar": False}
         )
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
 
     after = [
         item.domain
@@ -166,11 +166,11 @@ async def test_unloading_the_entry_stops_it_cleanly(hass):
     entry.add_to_hass(hass)
     with patch(GETTER, return_value=_raw()):
         await hass.config_entries.async_setup(entry.entry_id)
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
     gft = _sensor(hass, entry, "_gft")
 
     assert await hass.config_entries.async_unload(entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     assert entry.state is ConfigEntryState.NOT_LOADED
     assert hass.states.get(gft).state == "unavailable"
@@ -183,10 +183,10 @@ async def test_removing_the_entry_removes_its_entities_and_cache(hass):
     entry.add_to_hass(hass)
     with patch(GETTER, return_value=_raw()):
         await hass.config_entries.async_setup(entry.entry_id)
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
 
     await hass.config_entries.async_remove(entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     registry = er.async_get(hass)
     assert er.async_entries_for_config_entry(registry, entry.entry_id) == []
