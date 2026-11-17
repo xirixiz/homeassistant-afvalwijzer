@@ -299,3 +299,27 @@ def test_notification_request_errors_do_not_expose_the_address(
     assert f"{notify} notification request error (HTTPError 503)" in caplog.text
     assert POSTAL_CODE not in caplog.text
     assert HOUSE_NUMBER not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("module", "provider"), [("rova", "rova"), ("klikogroep", "oudeijsselstreek")]
+)
+def test_a_body_that_is_not_json_is_a_request_error(module, provider, caplog):
+    """requests' JSONDecodeError is a RequestException, so it takes that path."""
+    collector = importlib.import_module(
+        f"custom_components.afvalwijzer.collector.{module}"
+    )
+
+    def _not_json():
+        raise requests.exceptions.JSONDecodeError("Expecting value", "<html>", 0)
+
+    answer = _Answer()
+    answer.json = _not_json
+
+    with caplog.at_level(logging.DEBUG), pytest.raises(ValueError) as raised:
+        collector.get_waste_data_raw(
+            provider, POSTAL_CODE, HOUSE_NUMBER, "", session=_AnsweringSession(answer)
+        )
+
+    assert "request failed (JSONDecodeError)" in str(raised.value)
+    assert POSTAL_CODE not in caplog.text
