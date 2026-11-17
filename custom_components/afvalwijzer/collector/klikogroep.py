@@ -8,7 +8,7 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_KLIKOGROEP
 
 _LOGGER = logging.getLogger(__name__)
@@ -97,11 +97,12 @@ def get_waste_data_raw(
             verify=verify,
         )
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("KlikoGroep request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("KlikoGroep request error (%s)", detail)
+        raise ValueError(f"KlikoGroep request failed ({detail})") from err
     except ValueError as err:
-        _LOGGER.error("KlikoGroep invalid JSON from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("KlikoGroep invalid JSON")
+        raise ValueError("Invalid and/or no data received from KlikoGroep") from err
 
     if not waste_data_raw_temp:
         _LOGGER.error("No waste data found!")
@@ -111,5 +112,5 @@ def get_waste_data_raw(
         waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
         return waste_data_raw
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error("KlikoGroep: Invalid and/or no data received from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("KlikoGroep: Invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from KlikoGroep") from err

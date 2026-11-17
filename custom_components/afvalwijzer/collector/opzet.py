@@ -10,7 +10,7 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_OPZET
 
 _LOGGER = logging.getLogger(__name__)
@@ -266,8 +266,9 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("OPZET request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("OPZET request error (%s)", detail)
+        raise ValueError(f"OPZET request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("OPZET: Invalid and/or no data received from %s", base_url)
         raise ValueError(f"Invalid and/or no data received from {base_url}") from err
@@ -368,7 +369,9 @@ def get_notification_data_raw(
         return notification_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.warning("OPZET notification request error: %s", err)
+        _LOGGER.warning(
+            "OPZET notification request error (%s)", describe_request_error(err)
+        )
         return []
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.warning("OPZET: Invalid notification data from %s: %s", base_url, err)

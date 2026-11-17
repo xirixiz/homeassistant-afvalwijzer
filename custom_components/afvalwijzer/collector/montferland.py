@@ -14,7 +14,11 @@ from urllib.parse import quote
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_MONTFERLAND
 
 _LOGGER = logging.getLogger(__name__)
@@ -133,9 +137,9 @@ def get_waste_data_raw(
             session, url, timeout=timeout, verify=verify
         )
     except requests.exceptions.RequestException as err:
-        # Request errors can include the address URL; log only the type.
-        _LOGGER.error("MONTFERLAND request error (%s)", type(err).__name__)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("MONTFERLAND request error (%s)", detail)
+        raise ValueError(f"MONTFERLAND request failed ({detail})") from err
 
     try:
         waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)

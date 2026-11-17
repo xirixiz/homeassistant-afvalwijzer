@@ -8,7 +8,7 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_BURGERPORTAAL
 
 _LOGGER = logging.getLogger(__name__)
@@ -303,8 +303,9 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("Burgerportaal request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("Burgerportaal request error (%s)", detail)
+        raise ValueError(f"Burgerportaal request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("Burgerportaal: Invalid and/or no data received")
         raise ValueError("Invalid and/or no data received from Burgerportaal") from err

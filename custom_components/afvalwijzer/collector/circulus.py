@@ -9,7 +9,7 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_CIRCULUS
 
 _LOGGER = logging.getLogger(__name__)
@@ -258,8 +258,9 @@ def get_waste_data_raw(
         return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("Circulus request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("Circulus request error (%s)", detail)
+        raise ValueError(f"Circulus request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error("Circulus: Invalid and/or no data received from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("Circulus: Invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from Circulus") from err
