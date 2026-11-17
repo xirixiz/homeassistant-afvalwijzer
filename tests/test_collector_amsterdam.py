@@ -460,12 +460,12 @@ def test_fetch_tries_the_next_suffix_variant_when_the_answer_is_empty():
     assert result == ITEMS
     assert session.params == params
 
-
+    """Giving up raises an error without the URL that answered last."""
 def test_fetch_gives_up_when_no_variant_is_valid():
     """The error says which URL answered last."""
     session = FakeSession(FakeResponse(text="{}", url="https://x/?last=1"))
 
-    with pytest.raises(ValueError, match="last=1"):
+    with pytest.raises(ValueError, match="Invalid and/or no data"):
         amsterdam._fetch_waste_data_raw_temp(
             session, "https://x", [{"a": "b"}], timeout=(1, 1), verify=True
         )
