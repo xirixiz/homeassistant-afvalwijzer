@@ -5,6 +5,8 @@ from typing import Any
 
 import requests
 
+from ..common.main_functions import describe_request_error
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -77,8 +79,10 @@ def get_waste_data_raw(
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("%s request error: %s", __name__, err)
-        raise ValueError(err) from err
+        # The message of a request error holds the URL, which has the address in it.
+        detail = describe_request_error(err)
+        _LOGGER.error("%s request error (%s)", __name__, detail)
+        raise ValueError(f"{__name__} request failed ({detail})") from err
     except KeyError:
-        _LOGGER.error("%s invalid response from %s", __name__, url)
+        _LOGGER.error("%s invalid response", __name__)
         raise

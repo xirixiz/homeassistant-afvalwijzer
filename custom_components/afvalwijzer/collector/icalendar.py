@@ -7,7 +7,7 @@ import logging
 
 import requests
 
-from ..common.main_functions import parse_ical_waste_data
+from ..common.main_functions import describe_request_error, parse_ical_waste_data
 from ..const.const import SENSOR_COLLECTORS_ICALENDAR
 
 _LOGGER = logging.getLogger(__name__)
@@ -67,8 +67,9 @@ def get_waste_data_raw(
         )
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("iCalendar request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("iCalendar request error (%s)", detail)
+        raise ValueError(f"iCalendar request failed ({detail})") from err
 
     if not waste_data_raw_temp:
         _LOGGER.error("No waste data found!")
@@ -79,5 +80,5 @@ def get_waste_data_raw(
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes
-        _LOGGER.error("iCalendar invalid and/or no data received from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("iCalendar invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from iCalendar") from err

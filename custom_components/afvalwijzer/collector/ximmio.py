@@ -10,7 +10,7 @@ from typing import Any
 import requests
 from urllib3.util import connection as urllib3_connection
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import (
     SENSOR_COLLECTORS_XIMMIO,
     SENSOR_COLLECTORS_XIMMIO_IDS,
@@ -45,7 +45,10 @@ def _post_ipv4_then_ipv6(
         urllib3_connection.allowed_gai_family = lambda: socket.AF_INET6
         return session.post(url=url, **kwargs)
     except requests.exceptions.RequestException as err_v6:
-        raise ValueError(f"POST failed (IPv4 then IPv6): {last_err}") from err_v6
+        # The message of a request error holds the URL; describe the error instead.
+        raise ValueError(
+            f"POST failed (IPv4 then IPv6): {describe_request_error(last_err)}"
+        ) from err_v6
     finally:
         urllib3_connection.allowed_gai_family = original_allowed
 
@@ -164,7 +167,7 @@ def _parse_waste_data_raw(
         if not isinstance(item, dict):
             continue
 
-        pickup_dates = sorted(item.get("pickupDates") or [])
+        pickup_dates = item.get("pickupDates") or []
         if not pickup_dates:
             continue
 
@@ -174,11 +177,16 @@ def _parse_waste_data_raw(
         if not waste_type:
             continue
 
-        waste_date = _parse_ximmio_date(pickup_dates[0])
-        if not waste_date:
-            continue
-
-        waste_data_raw.append({"type": waste_type, "date": waste_date})
+        # The request covers a year ahead, so keep every pickup instead of only the next.
+        waste_dates = {
+            waste_date
+            for waste_date in map(_parse_ximmio_date, pickup_dates)
+            if waste_date
+        }
+        waste_data_raw.extend(
+            {"type": waste_type, "date": waste_date}
+            for waste_date in sorted(waste_dates)
+        )
 
     return waste_data_raw
 
@@ -243,8 +251,9 @@ def get_waste_data_raw(
         return _parse_waste_data_raw(waste_data_raw_temp, postal_code)
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("XIMMIO request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("XIMMIO request error (%s)", detail)
+        raise ValueError(f"XIMMIO request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("XIMMIO: Invalid and/or no data received: %s", err)
         raise ValueError("Invalid and/or no data received from XIMMIO") from err

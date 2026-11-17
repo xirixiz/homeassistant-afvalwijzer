@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from html import unescape
 import logging
 import re
@@ -10,7 +10,7 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_OPZET
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,12 +51,15 @@ def _select_bag_id(
     if not response_address:
         return None
 
-    # Original behavior: if multiple and suffix, match huisletter or huisnummerToevoeging
+    # If multiple and suffix, match huisletter or huisnummerToevoeging.
+    # Compare case-insensitively: some APIs (e.g. Saver) return the
+    # huisletter in lowercase while the configured suffix is uppercased.
+    suffix = (suffix or "").strip().upper()
     if len(response_address) > 1 and suffix:
         for item in response_address:
             if (
-                item.get("huisletter") == suffix
-                or item.get("huisnummerToevoeging") == suffix
+                str(item.get("huisletter") or "").strip().upper() == suffix
+                or str(item.get("huisnummerToevoeging") or "").strip().upper() == suffix
             ):
                 return item.get("bagId")
         return None
@@ -103,6 +106,71 @@ def _fetch_waste_data_raw_temp(
     response.raise_for_status()
     data = response.json()
     return data or []
+
+
+def _fetch_calendar_raw_temp(
+    session: requests.Session,
+    base_url: str,
+    bag_id: str,
+    year: int,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> list[dict[str, Any]]:
+    """Fetch the full-year calendar; return an empty list if it is unavailable.
+
+    The calendar endpoint is what the municipalities' own websites use. Not every
+    Opzet instance offers it, and next year's calendar may not be published yet.
+    """
+    url_calendar = f"{base_url}/rest/adressen/{bag_id}/kalender/{year}"
+    try:
+        response = session.get(url_calendar, timeout=timeout, verify=verify)
+        if response.status_code != 200:
+            return []
+        data = response.json()
+    except (requests.exceptions.RequestException, ValueError) as err:
+        _LOGGER.debug("OPZET: calendar for %s not available: %s", year, err)
+        return []
+
+    return data if isinstance(data, list) else []
+
+
+def _calendar_as_waste_data(
+    calendar: list[dict[str, Any]],
+    waste_streams: list[dict[str, Any]],
+    today: date,
+) -> list[dict[str, Any]]:
+    """Turn calendar entries into the shape of the waste streams (title and date).
+
+    Entries that can't be used (not an object, unknown stream, missing or invalid
+    date, in the past) are skipped, so one bad entry doesn't cost the rest.
+    """
+    titles = {
+        stream.get("id"): stream.get("menu_title")
+        for stream in waste_streams
+        if isinstance(stream, dict)
+    }
+
+    items: list[dict[str, Any]] = []
+    for entry in calendar:
+        if not isinstance(entry, dict):
+            continue
+
+        title = titles.get(entry.get("afvalstroom_id"))
+        date_str = entry.get("ophaaldatum")
+        if not title or not date_str:
+            continue
+
+        try:
+            entry_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except (TypeError, ValueError):
+            _LOGGER.debug("OPZET: skipping calendar entry with invalid date: %r", entry)
+            continue
+
+        if entry_date >= today:
+            items.append({"menu_title": title, "ophaaldatum": date_str})
+
+    return items
 
 
 def _parse_waste_data_raw(
@@ -168,12 +236,43 @@ def get_waste_data_raw(
             verify=verify,
         )
 
-        waste_data_raw = _parse_waste_data_raw(waste_data_raw_temp, postal_code)
+        # The waste streams only hold the next pickup per stream. Add the calendar for
+        # this and next year, so the schedule covers more than the next pickup. A
+        # stream the calendar leaves out still keeps its next pickup.
+        today = datetime.now().date()
+        calendar_items: list[dict[str, Any]] = []
+        for year in (today.year, today.year + 1):
+            calendar_items.extend(
+                _calendar_as_waste_data(
+                    _fetch_calendar_raw_temp(
+                        session,
+                        base_url,
+                        bag_id,
+                        year,
+                        timeout=timeout,
+                        verify=verify,
+                    ),
+                    waste_data_raw_temp,
+                    today,
+                )
+            )
+
+        waste_data_raw: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for entry in _parse_waste_data_raw(
+            waste_data_raw_temp + calendar_items, postal_code
+        ):
+            key = (entry["type"], entry["date"])
+            if key not in seen:
+                seen.add(key)
+                waste_data_raw.append(entry)
+
         return waste_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("OPZET request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("OPZET request error (%s)", detail)
+        raise ValueError(f"OPZET request failed ({detail})") from err
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("OPZET: Invalid and/or no data received from %s", base_url)
         raise ValueError(f"Invalid and/or no data received from {base_url}") from err
@@ -274,7 +373,9 @@ def get_notification_data_raw(
         return notification_data_raw
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.warning("OPZET notification request error: %s", err)
+        _LOGGER.warning(
+            "OPZET notification request error (%s)", describe_request_error(err)
+        )
         return []
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.warning("OPZET: Invalid notification data from %s: %s", base_url, err)

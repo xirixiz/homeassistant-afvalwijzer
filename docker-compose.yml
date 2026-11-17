@@ -7,3 +7,12 @@ services:
     restart: unless-stopped
     ports:
       - 8123:8123
+    # Restart Home Assistant when the component changes (needs Docker Compose 2.32+).
+    # Run with `docker compose up --watch`, or `scripts/develop`.
+    develop:
+      watch:
+        - action: restart
+          path: ./custom_components/afvalwijzer
+          ignore:
+            - "**/__pycache__/"
+            - "**/*.pyc"

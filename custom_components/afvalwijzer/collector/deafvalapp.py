@@ -7,7 +7,7 @@ import logging
 
 import requests
 
-from ..common.main_functions import waste_type_rename
+from ..common.main_functions import describe_request_error, waste_type_rename
 from ..const.const import SENSOR_COLLECTORS_DEAFVALAPP
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,7 +33,12 @@ def _fetch_waste_data_raw_temp(
     timeout: tuple[float, float],
     verify: bool,
 ) -> str:
-    response = session.get(url, timeout=timeout, verify=verify)
+    # Never follow a redirect that could send the address over plain HTTP.
+    response = session.get(url, timeout=timeout, verify=verify, allow_redirects=False)
+    if 300 <= response.status_code < 400:
+        raise requests.exceptions.RequestException(
+            "DeAfvalApp returned an unexpected redirect"
+        )
     response.raise_for_status()
     # Keep original behavior: treat body as text (CSV-ish)
     return response.text or ""
@@ -101,8 +106,9 @@ def get_waste_data_raw(
         )
 
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("DeAfvalApp request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("DeAfvalApp request error (%s)", detail)
+        raise ValueError(f"DeAfvalApp request failed ({detail})") from err
 
     if not waste_data_raw_temp:
         _LOGGER.error("No waste data found!")
@@ -113,5 +119,5 @@ def get_waste_data_raw(
         return waste_data_raw
     except (ValueError, KeyError) as err:
         # ValueError can occur on datetime parsing if upstream format changes
-        _LOGGER.error("DeAfvalApp invalid and/or no data received from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("DeAfvalApp invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from DeAfvalApp") from err

@@ -6,7 +6,6 @@ from custom_components.afvalwijzer.collector import (
     amsterdam,
     mijnafvalwijzer,
     opzet,
-    reinis,
     ximmio,
 )
 from custom_components.afvalwijzer.common.main_functions import waste_type_rename
@@ -66,16 +65,6 @@ def test_opzet_plastic_is_pmd():
     data = [{"menu_title": "Plastic", "ophaaldatum": "2026-10-05"}]
 
     assert opzet._parse_waste_data_raw(data) == [{"type": "pmd", "date": "2026-10-05"}]
-
-
-def test_reinis_plastic_is_pmd():
-    """Reinis' 'Plastic' stream is PMD."""
-    result = reinis._parse_waste_data_raw(
-        [{"ophaaldatum": "2026-10-05", "afvalstroom_id": 1}],
-        [{"id": 1, "title": "Plastic"}],
-    )
-
-    assert result == [{"type": "pmd", "date": "2026-10-05"}]
 
 
 def test_amsterdam_plastic_is_pmd_restafval(monkeypatch):

@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import DEFAULT, AsyncMock, MagicMock, patch
 
 import pytest
-from pytest_homeassistant_custom_component.common import (
+from pytest_homeassistant.common import (
     MockConfigEntry,
     MockEntityPlatform,
 )
@@ -170,6 +170,7 @@ async def test_calendar_respects_exclude_list():
     assert events[0].summary == "Afvalthuis: GFT"
 
 
+@pytest.mark.freeze_time("2026-11-05T12:00:00Z")
 def test_calendar_next_event_groups_types_on_same_date():
     """The next-event state groups all types collected on the same day."""
     today = date.today().isoformat()

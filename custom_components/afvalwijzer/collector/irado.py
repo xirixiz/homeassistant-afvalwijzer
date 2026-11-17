@@ -8,7 +8,11 @@ from typing import Any
 
 import requests
 
-from ..common.main_functions import format_postal_code, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    format_postal_code,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_IRADO
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,7 +55,20 @@ def _fetch_waste_data_raw_temp(
         verify=verify,
     )
     raw_response.raise_for_status()
-    return raw_response.json()
+    try:
+        return raw_response.json()
+    except ValueError:
+        # Seen from CI: a response that is not JSON (an empty body or a block page).
+        # Log what came back, without the URL: it holds the address.
+        snippet = " ".join((raw_response.text or "")[:200].split())
+        _LOGGER.error(
+            "Irado: response is not JSON (HTTP %s, %s, %d bytes): %r",
+            raw_response.status_code,
+            raw_response.headers.get("Content-Type", "no content type"),
+            len(raw_response.content or b""),
+            snippet,
+        )
+        raise
 
 
 def _parse_waste_data_raw(
@@ -127,8 +144,9 @@ def get_waste_data_raw(
             verify=verify,
         )
     except requests.exceptions.RequestException as err:
-        _LOGGER.error("Irado request error: %s", err)
-        raise ValueError(err) from err
+        detail = describe_request_error(err)
+        _LOGGER.error("Irado request error (%s)", detail)
+        raise ValueError(f"Irado request failed ({detail})") from err
 
     if not waste_data_raw_temp:
         _LOGGER.error("No waste data found!")
@@ -143,5 +161,5 @@ def get_waste_data_raw(
         return waste_data_raw
     except (ValueError, KeyError, TypeError) as err:
         # ValueError can happen on datetime parsing if upstream format changes
-        _LOGGER.error("Irado invalid and/or no data received from %s", url)
-        raise ValueError(f"Invalid and/or no data received from {url}") from err
+        _LOGGER.error("Irado invalid and/or no data received")
+        raise ValueError("Invalid and/or no data received from Irado") from err

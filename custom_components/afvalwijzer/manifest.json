@@ -7,8 +7,9 @@
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/xirixiz/homeassistant-afvalwijzer/blob/main/README.md",
+  "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/xirixiz/homeassistant-afvalwijzer/issues",
   "requirements": [],
-  "version": "2026.1022.b5"
+  "version": "2026.1025.b5"
 }
