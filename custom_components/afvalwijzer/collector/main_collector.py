@@ -25,32 +25,29 @@ from ..const.const import (
     SENSOR_COLLECTORS_STRAATBEELD,
     SENSOR_COLLECTORS_XIMMIO_IDS,
 )
+from . import (
+    amsterdam,
+    burgerportaal,
+    circulus,
+    deafvalapp,
+    icalendar,
+    irado,
+    klikogroep,
+    mijnafvalhulp,
+    mijnafvalwijzer,
+    montferland,
+    omrin,
+    opzet,
+    rd4,
+    recycleapp,
+    reinis,
+    rova,
+    straatbeeld,
+    ximmio,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-try:
-    from . import (
-        amsterdam,
-        burgerportaal,
-        circulus,
-        deafvalapp,
-        icalendar,
-        irado,
-        klikogroep,
-        mijnafvalhulp,
-        mijnafvalwijzer,
-        montferland,
-        omrin,
-        opzet,
-        rd4,
-        recycleapp,
-        reinis,
-        rova,
-        straatbeeld,
-        ximmio,
-    )
-except ImportError as err:
-    _LOGGER.error("Import error %s", err.args)
 
 # Providers with notification support, paired with their notification getter.
 # Shared by MainCollector._get_notification_data_raw (to fetch notifications)

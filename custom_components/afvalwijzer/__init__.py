@@ -8,8 +8,10 @@ import pathlib
 from random import randint
 from typing import TYPE_CHECKING, Any
 
+from homeassistant.const import Platform
 from homeassistant.core import callback
 from homeassistant.exceptions import ConfigEntryError
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_call_later, async_track_time_change
 
 from .const.const import (
@@ -56,16 +58,8 @@ if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.typing import ConfigType
 
-try:
-    from homeassistant.const import Platform
-    from homeassistant.helpers import config_validation as cv
-
-    PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
-    CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-except ImportError:  # pragma: no cover
-    # Standalone test run, no Home Assistant installed
-    PLATFORMS = []
-    CONFIG_SCHEMA = {}  # type: ignore[assignment]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 def _derive_include_today_from_legacy(entry: ConfigEntry) -> bool:
@@ -205,8 +199,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     )
 
-    if PLATFORMS:
-        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
 
@@ -226,10 +219,6 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload an Afvalwijzer config entry."""
-    if not PLATFORMS:
-        hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
-        return True
-
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
