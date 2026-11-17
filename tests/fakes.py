@@ -32,6 +32,11 @@ class FakeResponse:
             raise requests.exceptions.JSONDecodeError("Expecting value", "", 0)
         return self._payload
 
+    @property
+    def ok(self):
+        """Return True for a status below 400, like requests does."""
+        return self.status_code < 400
+
     def raise_for_status(self):
         """Raise HTTPError for error statuses."""
         if self.status_code >= 400:
