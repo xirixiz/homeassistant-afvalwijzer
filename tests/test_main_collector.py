@@ -6,6 +6,7 @@ import pytest
 
 from custom_components.afvalwijzer.collector import main_collector
 from custom_components.afvalwijzer.collector.main_collector import MainCollector
+from custom_components.afvalwijzer.config_flow import ALL_COLLECTORS
 from custom_components.afvalwijzer.const import const
 
 
@@ -67,10 +68,6 @@ ALL_PROVIDERS = [
 ]
 RAW = [{"type": "gft", "date": "2099-01-05"}]
 
-# The RWM collector is listed under the names of its two URLs, not under a provider
-# name, so no provider can select it. Its provider "rwm" is an Opzet provider.
-_RWM_COLLECTOR_IS_NOT_SELECTABLE = ("getAddress", "getSchedule")
-
 
 def _build(provider="rova", **overrides):
     arguments = {
@@ -119,17 +116,15 @@ def test_every_provider_reaches_its_own_collector(monkeypatch, module, provider)
     assert "session" in kwargs
 
 
-def test_rwm_is_served_by_the_opzet_collector(monkeypatch):
-    """Provider rwm is an Opzet provider; the dedicated rwm module is not used."""
+def test_rwm_is_an_opzet_provider(monkeypatch):
+    """RWM has no collector of its own: its provider goes to the Opzet collector."""
     calls = _stub_all(monkeypatch)
-    monkeypatch.setattr(
-        main_collector.rwm, "get_waste_data_raw", lambda *a, **k: calls.append(("rwm",))
-    )
 
     _build("rwm")
 
     assert [call[0] for call in calls] == ["opzet"]
-    assert set(const.SENSOR_COLLECTORS_RWM) == set(_RWM_COLLECTOR_IS_NOT_SELECTABLE)
+    assert not hasattr(main_collector, "rwm")
+    assert "rwm" in ALL_COLLECTORS
 
 
 def test_only_recycleapp_gets_the_street_name(monkeypatch):

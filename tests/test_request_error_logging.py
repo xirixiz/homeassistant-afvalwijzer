@@ -39,7 +39,6 @@ COLLECTORS = [
     ("recycleapp", "recycleapp", {"street_name": "Teststraat"}),
     ("reinis", "reinis", {}),
     ("rova", "rova", {}),
-    ("rwm", "rwm", {}),
     ("straatbeeld", "straatbeeld", {}),
     ("ximmio", "avalex", {}),
 ]

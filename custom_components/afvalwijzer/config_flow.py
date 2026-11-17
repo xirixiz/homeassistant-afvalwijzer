@@ -76,7 +76,6 @@ ALL_COLLECTORS = sorted(
         *SENSOR_COLLECTORS_RECYCLEAPP.keys(),
         *SENSOR_COLLECTORS_REINIS.keys(),
         *SENSOR_COLLECTORS_ROVA.keys(),
-        "rwm",
         *SENSOR_COLLECTORS_STRAATBEELD.keys(),
         *SENSOR_COLLECTORS_XIMMIO_IDS.keys(),
     }
