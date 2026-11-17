@@ -16,6 +16,9 @@ from ..const.const import SENSOR_COLLECTORS_OPZET
 _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_TIMEOUT: tuple[float, float] = (5.0, 60.0)
+
+# Opzet reports PMD as "plastic".
+_TYPE_ALIASES = {"plastic": "pmd"}
 _BAG_ID_CACHE: dict[str, str] = {}
 
 
@@ -181,8 +184,9 @@ def _parse_waste_data_raw(
         if not date_str:
             continue
 
+        menu_title = (item.get("menu_title") or "").strip().lower()
         waste_type = waste_type_rename(
-            (item.get("menu_title") or "").strip().lower(), postal_code
+            _TYPE_ALIASES.get(menu_title, menu_title), postal_code
         )
         if not waste_type:
             continue
