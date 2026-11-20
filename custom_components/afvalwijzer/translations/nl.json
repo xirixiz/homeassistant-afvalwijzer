@@ -53,7 +53,8 @@
           "default_label": "Standaard label wanneer geen data bekend is",
           "exclude_list": "Afvaltypes uitsluiten",
           "enable_calendar": "Kalender inschakelen",
-          "separate_calendars": "Maak een aparte kalender per afvaltype"
+          "separate_calendars": "Maak een aparte kalender per afvaltype",
+          "calendar_show_collector": "Toon de naam van de ophaaldienst in kalenderafspraken"
         }
       }
     }

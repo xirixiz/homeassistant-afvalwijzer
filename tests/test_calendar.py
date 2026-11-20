@@ -25,6 +25,7 @@ from custom_components.afvalwijzer.common.sensor_utils import (
     initial_color_for_waste_type,
 )
 from custom_components.afvalwijzer.const.const import (
+    CONF_CALENDAR_SHOW_COLLECTOR,
     CONF_ENABLE_CALENDAR,
     CONF_SEPARATE_CALENDARS,
     DOMAIN,
@@ -192,6 +193,50 @@ def test_calendar_next_event_groups_types_on_same_date():
     assert event is not None
     assert event.start == date.today()
     assert event.summary == "Mijnafvalwijzer: GFT, Papier"
+
+
+_NO_COLLECTOR_CONFIG = {
+    "include_today": True,
+    "provider": "mijnafvalwijzer",
+    CONF_CALENDAR_SHOW_COLLECTOR: False,
+}
+
+
+@pytest.mark.asyncio
+async def test_calendar_events_leave_out_collector_name_when_disabled():
+    """With the collector name turned off, events show only the waste type."""
+    mock_data = _mock_coordinator(
+        raw=[
+            {"type": "gft", "date": "2026-07-09"},
+            {"type": "pmd", "date": "2026-07-10"},
+        ],
+        config=_NO_COLLECTOR_CONFIG,
+    )
+
+    calendar = AfvalwijzerCalendar(mock_data, "test_entry_id")
+    events = await calendar.async_get_events(
+        None, datetime(2026, 7, 1), datetime(2026, 7, 31)
+    )
+
+    assert [event.summary for event in events] == ["GFT", "PMD"]
+
+
+@pytest.mark.freeze_time("2026-11-05T12:00:00Z")
+def test_calendar_next_event_leaves_out_collector_name_when_disabled():
+    """The next-event state drops the collector prefix too when it is turned off."""
+    today = date.today().isoformat()
+    mock_data = _mock_coordinator(
+        raw=[
+            {"type": "gft", "date": today},
+            {"type": "papier", "date": today},
+        ],
+        config=_NO_COLLECTOR_CONFIG,
+    )
+
+    event = AfvalwijzerCalendar(mock_data, "test_entry_id").event
+
+    assert event is not None
+    assert event.summary == "GFT, Papier"
 
 
 def test_remove_legacy_calendar_cleans_up_pre_2026_1018_orphan():
