@@ -53,7 +53,8 @@
           "default_label": "Default label when no data is available",
           "exclude_list": "Waste type exclude list",
           "enable_calendar": "Enable calendar",
-          "separate_calendars": "Create a separate calendar per waste type"
+          "separate_calendars": "Create a separate calendar per waste type",
+          "calendar_show_collector": "Show collector name in calendar events"
         }
       }
     }

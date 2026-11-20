@@ -19,10 +19,12 @@ from .common.sensor_utils import (
     normalize_waste_type_key,
 )
 from .const.const import (
+    CONF_CALENDAR_SHOW_COLLECTOR,
     CONF_COLLECTOR,
     CONF_ENABLE_CALENDAR,
     CONF_EXCLUDE_LIST,
     CONF_SEPARATE_CALENDARS,
+    DEFAULT_CALENDAR_SHOW_COLLECTOR,
     DEFAULT_ENABLE_CALENDAR,
     DEFAULT_SEPARATE_CALENDARS,
     DOMAIN,
@@ -47,6 +49,17 @@ def _display_type(waste_type: str) -> str:
     if name.lower() in _ABBREVIATIONS:
         return name.upper()
     return name.capitalize()
+
+
+def _summary(config, waste_types) -> str:
+    """Build an event summary, prefixed with the collector name unless disabled."""
+    text = ", ".join(_display_type(wt) for wt in waste_types)
+    if not bool(
+        config.get(CONF_CALENDAR_SHOW_COLLECTOR, DEFAULT_CALENDAR_SHOW_COLLECTOR)
+    ):
+        return text
+    collector = config.get(CONF_COLLECTOR, "Afvalwijzer")
+    return f"{collector.capitalize()}: {text}"
 
 
 def _to_date(value) -> date | None:
@@ -245,7 +258,6 @@ class _AfvalwijzerCalendarBase(CalendarEntity):
         """Return the next upcoming event."""
         today = dt_util.now().date()
         include_today = self.coordinator.config.get("include_today", True)
-        collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
         upcoming_events = [
             (event_date, waste_type)
@@ -265,7 +277,7 @@ class _AfvalwijzerCalendarBase(CalendarEntity):
         for event_date, waste_type in upcoming_events:
             if event_date == next_event_date and waste_type not in types_on_next_date:
                 types_on_next_date.append(waste_type)
-        summary_text = f"{collector.capitalize()}: {', '.join([_display_type(wt) for wt in types_on_next_date])}"
+        summary_text = _summary(self.coordinator.config, types_on_next_date)
 
         return CalendarEvent(
             summary=summary_text,
@@ -281,7 +293,6 @@ class _AfvalwijzerCalendarBase(CalendarEntity):
         today = dt_util.now().date()
 
         include_today = self.coordinator.config.get("include_today", True)
-        collector = self.coordinator.config.get(CONF_COLLECTOR, "Afvalwijzer")
 
         schedule = _raw_schedule(self.coordinator, waste_type=self._waste_type)
         for waste_type, event_date in schedule:
@@ -292,7 +303,7 @@ class _AfvalwijzerCalendarBase(CalendarEntity):
             end = start + timedelta(days=1)
 
             if start_date.date() <= start <= end_date.date():
-                summary_text = f"{collector.capitalize()}: {_display_type(waste_type)}"
+                summary_text = _summary(self.coordinator.config, [waste_type])
 
                 events.append(
                     CalendarEvent(

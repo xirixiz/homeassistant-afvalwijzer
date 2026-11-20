@@ -13,6 +13,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 
 from .const.const import (
+    CONF_CALENDAR_SHOW_COLLECTOR,
     CONF_COLLECTOR,
     CONF_DEFAULT_LABEL,
     CONF_ENABLE_CALENDAR,
@@ -26,6 +27,7 @@ from .const.const import (
     CONF_SHOW_FULL_TIMESTAMP,
     CONF_STREET_NAME,
     CONF_SUFFIX,
+    DEFAULT_CALENDAR_SHOW_COLLECTOR,
     DEFAULT_DEFAULT_LABEL,
     DEFAULT_ENABLE_CALENDAR,
     DEFAULT_EXCLUDE_LIST,
@@ -370,6 +372,12 @@ class AfvalwijzerOptionsFlow(config_entries.OptionsFlow):
                     CONF_SEPARATE_CALENDARS,
                     default=current.get(
                         CONF_SEPARATE_CALENDARS, DEFAULT_SEPARATE_CALENDARS
+                    ),
+                ): cv.boolean,
+                vol.Optional(
+                    CONF_CALENDAR_SHOW_COLLECTOR,
+                    default=current.get(
+                        CONF_CALENDAR_SHOW_COLLECTOR, DEFAULT_CALENDAR_SHOW_COLLECTOR
                     ),
                 ): cv.boolean,
             }
