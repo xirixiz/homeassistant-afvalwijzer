@@ -271,6 +271,47 @@ def test_flow_keeps_the_cache_when_the_server_fails(status):
     assert ("1000", "Teststraat") in recycleapp._LOCATION_ID_CACHE
 
 
+def test_flow_looks_up_again_when_cached_ids_return_no_collections():
+    """Stale ids answering 200 with nothing are replaced and retried once."""
+    recycleapp._LOCATION_ID_CACHE[("1000", "Teststraat")] = ("old-zip", "old-street")
+    session = RoutedSession(
+        zipcodes=ZIPCODES,
+        streets=STREETS,
+        collections=[_ok({"items": []}), COLLECTIONS],
+    )
+
+    assert len(_run(session)) == 2
+    assert session.names() == ["collections", "zipcodes", "streets", "collections"]
+    assert recycleapp._LOCATION_ID_CACHE[("1000", "Teststraat")] == (
+        "zip-1",
+        "street-1",
+    )
+
+
+def test_flow_keeps_cached_ids_when_the_lookup_fails_on_no_collections():
+    """A failing lookup keeps the old ids and gives no pickups."""
+    recycleapp._LOCATION_ID_CACHE[("1000", "Teststraat")] = ("old-zip", "old-street")
+    session = RoutedSession(zipcodes=_http_error(500), collections=_ok({"items": []}))
+
+    assert _run(session) == []
+    assert session.names() == ["collections", "zipcodes"]
+    assert recycleapp._LOCATION_ID_CACHE[("1000", "Teststraat")] == (
+        "old-zip",
+        "old-street",
+    )
+
+
+def test_flow_does_not_retry_when_the_looked_up_ids_are_unchanged():
+    """Genuinely empty answers cost one lookup, not a second collections call."""
+    recycleapp._LOCATION_ID_CACHE[("1000", "Teststraat")] = ("zip-1", "street-1")
+    session = RoutedSession(
+        zipcodes=ZIPCODES, streets=STREETS, collections=_ok({"items": []})
+    )
+
+    assert _run(session) == []
+    assert session.names() == ["collections", "zipcodes", "streets"]
+
+
 def test_flow_without_a_street_name_is_empty(caplog):
     """The street name is required; without it nothing is requested."""
     session = RoutedSession()

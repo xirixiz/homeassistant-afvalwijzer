@@ -233,6 +233,59 @@ def _parse_waste_data_raw(
     )
 
 
+def _refresh_stale_ids(
+    session: requests.Session,
+    base_url: str,
+    waste_data_raw_temp: dict[str, Any],
+    *,
+    postal_code: str,
+    street_name: str,
+    house_number: str,
+    cache_key: tuple[str, str],
+    timeout: tuple[float, float],
+    verify: bool,
+) -> dict[str, Any]:
+    """Look the ids up again when cached ids return no collections.
+
+    Stale ids (for example after a municipality merger) can make the API answer
+    200 with an empty list. The cached ids are kept when the lookup fails or
+    returns the same ids, so a temporary problem does not discard them.
+    """
+    if (waste_data_raw_temp or {}).get("items"):
+        return waste_data_raw_temp
+
+    _LOGGER.debug("RECYCLEAPP: no collections, checking for changed location ids")
+    old_ids = _LOCATION_ID_CACHE[cache_key]
+    try:
+        new_ids = _fetch_postcode_and_street_id(
+            session,
+            base_url,
+            postal_code,
+            street_name,
+            timeout=timeout,
+            verify=verify,
+        )
+    except (requests.exceptions.RequestException, ValueError) as err:
+        _LOGGER.debug(
+            "RECYCLEAPP: location id lookup failed (%s), keeping ids",
+            describe_request_error(err),
+        )
+        return waste_data_raw_temp
+
+    if new_ids == old_ids:
+        return waste_data_raw_temp
+
+    _LOCATION_ID_CACHE[cache_key] = new_ids
+    return _fetch_waste_data_raw_temp(
+        session,
+        base_url,
+        *new_ids,
+        house_number,
+        timeout=timeout,
+        verify=verify,
+    )
+
+
 def get_waste_data_raw(
     provider: str,
     postal_code: str,
@@ -280,6 +333,18 @@ def get_waste_data_raw(
                     "RECYCLEAPP: cached location ids rejected, looking up again"
                 )
                 _LOCATION_ID_CACHE.pop(cache_key, None)
+            else:
+                waste_data_raw_temp = _refresh_stale_ids(
+                    session,
+                    base_url,
+                    waste_data_raw_temp,
+                    postal_code=postal_code,
+                    street_name=street_name,
+                    house_number=str(house_number),
+                    cache_key=cache_key,
+                    timeout=timeout,
+                    verify=verify,
+                )
 
         if waste_data_raw_temp is None:
             postcode_id, street_id = _fetch_postcode_and_street_id(
