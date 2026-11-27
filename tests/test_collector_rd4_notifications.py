@@ -65,12 +65,16 @@ class FakeSession:
         token=TOKEN,
         session_status=201,
         served_clients=None,
+        articles=None,
     ):
         """Store the answers; notifications may be a list of answers in order.
 
         served_clients limits the clients that get a session, like the real API
         does per region. The others are answered with 403. None serves all.
+        articles maps a newsId to the article behind a message; others are 404.
         """
+        self.articles = articles or {}
+        self.article_calls = []
         self.token = token
         self.session_status = session_status
         self.served_clients = served_clients
@@ -97,6 +101,13 @@ class FakeSession:
 
     def get(self, url, params=None, headers=None, **_kwargs):
         """Answer the current terms or the notifications."""
+        if url.startswith(f"{API}/news/"):
+            # Kept apart from calls: every message has an article to look up.
+            news_id = url.removeprefix(f"{API}/news/")
+            self.article_calls.append(news_id)
+            if news_id in self.articles:
+                return FakeResponse(self.articles[news_id])
+            return FakeResponse({"code": 5}, 404)
         self.calls.append(("GET", url, params, headers))
         if url == f"{API}/tos/current":
             return FakeResponse({"id": 1, "contents": "<p>Algemene voorwaarden</p>"})
@@ -374,3 +385,62 @@ def test_message_keeps_links_as_markdown():
 
     assert result["content"] == "Zie [het nieuws](https://www.rd4.nl/nieuws)."
     assert result["links"] == [{"text": "het nieuws", "url": "https://www.rd4.nl/nieuws"}]
+
+
+ARTICLE = {
+    "id": "1",
+    "contents": (
+        "<p>Meer info in de "
+        '<a href="https://rd4.nl/afvalstoffenheffing">tarieven</a>.</p>'
+    ),
+    "cta": {"title": "Lees meer over minder GFT-afval", "link": "https://rd4.nl/mindergft"},
+}
+
+
+def test_article_links_are_added_to_the_message():
+    """The call to action and the links in the article show up with the message."""
+    session = FakeSession(articles={"1": ARTICLE})
+
+    [result] = _run(session)
+
+    assert session.article_calls == ["1"]
+    assert result["links"] == [
+        {"text": "Lees meer over minder GFT-afval", "url": "https://rd4.nl/mindergft"},
+        {"text": "tarieven", "url": "https://rd4.nl/afvalstoffenheffing"},
+    ]
+    assert result["content"].endswith(
+        "\n\n[Lees meer over minder GFT-afval](https://rd4.nl/mindergft)"
+        "\n\n[tarieven](https://rd4.nl/afvalstoffenheffing)"
+    )
+
+
+def test_article_without_links_leaves_the_message_alone():
+    session = FakeSession(
+        articles={"1": {"contents": "<p>Geen links</p>", "cta": None}}
+    )
+
+    [result] = _run(session)
+
+    assert "links" not in result
+    assert result["content"].startswith("Jouw GFT-container")
+
+
+def test_unavailable_article_keeps_the_message():
+    """A 404 (or any request error) on the article doesn't cost the message."""
+    session = FakeSession()  # every article answers 404
+
+    [result] = _run(session)
+
+    assert session.article_calls == ["1"]
+    assert result["title"] == "Aangepaste ophaaldag"
+    assert "links" not in result
+
+
+def test_unsafe_call_to_action_is_ignored():
+    session = FakeSession(
+        articles={"1": {"cta": {"title": "x", "link": "javascript:alert(1)"}}}
+    )
+
+    [result] = _run(session)
+
+    assert "links" not in result
