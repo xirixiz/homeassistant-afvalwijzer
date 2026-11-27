@@ -321,3 +321,20 @@ def test_notification_drops_unsafe_links():
     )
 
     assert result == {"id": None, "title": "", "content": "klik", "dismissable": False}
+
+
+def test_outlook_safelinks_are_unwrapped():
+    """A pasted mail's tracking wrapper is replaced by the real address."""
+    wrapped = (
+        "https://eur01.safelinks.protection.outlook.com/?url="
+        "https%3A%2F%2Fwww.oisterwijk.nl%2Fduurzaam%3Fa%3D1&amp;data=05%7C02%7Cx"
+        "&amp;sdata=abc&amp;reserved=0"
+    )
+    [result] = opzet._parse_notification_data_raw(
+        [{"content": f'<p>Bekijk <a href="{wrapped}">hier</a>.</p>'}]
+    )
+
+    assert result["content"] == "Bekijk [hier](https://www.oisterwijk.nl/duurzaam?a=1)."
+    assert result["links"] == [
+        {"text": "hier", "url": "https://www.oisterwijk.nl/duurzaam?a=1"}
+    ]

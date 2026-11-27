@@ -10,6 +10,7 @@ from datetime import datetime
 from html import unescape
 import logging
 import re
+from urllib.parse import parse_qs, urlsplit
 
 from .postal_code_mappings import get_postal_code_override
 
@@ -204,6 +205,21 @@ _TAG_PATTERN = re.compile(r"<[^>]*>")
 _SAFE_LINK_PATTERN = re.compile(r"(?:https?://|mailto:|tel:)", re.IGNORECASE)
 
 
+def _unwrap_safelink(url: str) -> str:
+    """Return the real URL of an Outlook SafeLinks wrapper, else the URL itself.
+
+    Municipalities paste mails into their messages, which leaves long tracking
+    links (with the sender's details) around the address the reader wants.
+    """
+    parts = urlsplit(url)
+    host = (parts.hostname or "").lower()
+    if host.endswith(".safelinks.protection.outlook.com"):
+        target = parse_qs(parts.query).get("url", [""])[0]
+        if _SAFE_LINK_PATTERN.match(target):
+            return target
+    return url
+
+
 def _strip_html(fragment: str) -> str:
     return unescape(_TAG_PATTERN.sub("", fragment))
 
@@ -225,7 +241,7 @@ def html_to_text_with_links(html: str) -> tuple[str, list[dict[str, str]]]:
         parts.append(_strip_html(html[position : match.start()]))
         position = match.end()
 
-        url = unescape((match.group(1) or match.group(2) or "").strip())
+        url = _unwrap_safelink(unescape((match.group(1) or match.group(2) or "").strip()))
         text = " ".join(_strip_html(match.group(3)).split())
 
         if not _SAFE_LINK_PATTERN.match(url):
