@@ -294,3 +294,30 @@ def test_no_addresses_selects_no_bag_id():
     """An empty address list has no bag id to select."""
     assert opzet._select_bag_id([], "") is None
     assert opzet._select_bag_id([], "A") is None
+
+
+def test_notification_keeps_links_as_markdown():
+    """A link in the content stays clickable in Home Assistant (Markdown)."""
+    [result] = opzet._parse_notification_data_raw(
+        [
+            {
+                "id": 76,
+                "kop": "Het vriest!",
+                "content": '<p>Bekijk onze <a href="https://www.dar.nl/tips/?a=1&amp;b=2">tips</a> nu.</p>',
+                "afwijsbaar": 1,
+            }
+        ]
+    )
+
+    assert result["content"] == "Bekijk onze [tips](https://www.dar.nl/tips/?a=1&b=2) nu."
+    assert result["links"] == [
+        {"text": "tips", "url": "https://www.dar.nl/tips/?a=1&b=2"}
+    ]
+
+
+def test_notification_drops_unsafe_links():
+    [result] = opzet._parse_notification_data_raw(
+        [{"content": '<a href="javascript:alert(1)">klik</a>'}]
+    )
+
+    assert result == {"id": None, "title": "", "content": "klik", "dismissable": False}
