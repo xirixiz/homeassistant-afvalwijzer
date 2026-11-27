@@ -241,7 +241,9 @@ def html_to_text_with_links(html: str) -> tuple[str, list[dict[str, str]]]:
         parts.append(_strip_html(html[position : match.start()]))
         position = match.end()
 
-        url = _unwrap_safelink(unescape((match.group(1) or match.group(2) or "").strip()))
+        url = _unwrap_safelink(
+            unescape((match.group(1) or match.group(2) or "").strip())
+        )
         text = " ".join(_strip_html(match.group(3)).split())
 
         if not _SAFE_LINK_PATTERN.match(url):

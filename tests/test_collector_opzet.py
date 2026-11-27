@@ -309,13 +309,16 @@ def test_notification_keeps_links_as_markdown():
         ]
     )
 
-    assert result["content"] == "Bekijk onze [tips](https://www.dar.nl/tips/?a=1&b=2) nu."
+    assert (
+        result["content"] == "Bekijk onze [tips](https://www.dar.nl/tips/?a=1&b=2) nu."
+    )
     assert result["links"] == [
         {"text": "tips", "url": "https://www.dar.nl/tips/?a=1&b=2"}
     ]
 
 
 def test_notification_drops_unsafe_links():
+    """A javascript: link is reduced to its text."""
     [result] = opzet._parse_notification_data_raw(
         [{"content": '<a href="javascript:alert(1)">klik</a>'}]
     )

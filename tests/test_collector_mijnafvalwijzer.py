@@ -325,6 +325,7 @@ def test_get_notification_data_raw_ignores_invalid_data(caplog):
 
 @pytest.mark.freeze_time("2026-11-17 09:00:00")
 def test_notification_keeps_links_as_markdown():
+    """A link in a message stays clickable (Markdown) and is listed in links."""
     notice = _notice(text='<p>Zie <a href="https://example.nl/a">de tips</a>.</p>')
 
     [result] = mijnafvalwijzer._parse_notification_data_raw(_notices(notice))

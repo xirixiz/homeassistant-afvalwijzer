@@ -384,7 +384,9 @@ def test_message_keeps_links_as_markdown():
     [result] = rd4._parse_notifications([item])
 
     assert result["content"] == "Zie [het nieuws](https://www.rd4.nl/nieuws)."
-    assert result["links"] == [{"text": "het nieuws", "url": "https://www.rd4.nl/nieuws"}]
+    assert result["links"] == [
+        {"text": "het nieuws", "url": "https://www.rd4.nl/nieuws"}
+    ]
 
 
 ARTICLE = {
@@ -393,7 +395,10 @@ ARTICLE = {
         "<p>Meer info in de "
         '<a href="https://rd4.nl/afvalstoffenheffing">tarieven</a>.</p>'
     ),
-    "cta": {"title": "Lees meer over minder GFT-afval", "link": "https://rd4.nl/mindergft"},
+    "cta": {
+        "title": "Lees meer over minder GFT-afval",
+        "link": "https://rd4.nl/mindergft",
+    },
 }
 
 
@@ -415,6 +420,7 @@ def test_article_links_are_added_to_the_message():
 
 
 def test_article_without_links_leaves_the_message_alone():
+    """An article without a call to action or links changes nothing."""
     session = FakeSession(
         articles={"1": {"contents": "<p>Geen links</p>", "cta": None}}
     )
@@ -437,6 +443,7 @@ def test_unavailable_article_keeps_the_message():
 
 
 def test_unsafe_call_to_action_is_ignored():
+    """A call to action that is not http(s) is not used."""
     session = FakeSession(
         articles={"1": {"cta": {"title": "x", "link": "javascript:alert(1)"}}}
     )
