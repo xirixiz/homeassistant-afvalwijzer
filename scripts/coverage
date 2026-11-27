@@ -4,7 +4,6 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-bash scripts/test
 python3 -m pytest \
     --junitxml=pytest.xml \
     --cov=custom_components.afvalwijzer \
