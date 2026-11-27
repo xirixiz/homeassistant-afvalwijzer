@@ -361,3 +361,16 @@ def test_unknown_provider_is_rejected():
 def test_rd4_advertises_notifications():
     """The notifications sensor is created for RD4."""
     assert MainCollector.provider_supports_notifications("rd4")
+
+
+def test_message_keeps_links_as_markdown():
+    """A link in the description stays clickable (Markdown) and is listed in links."""
+    item = {
+        **PERSONAL,
+        "description": '<p>Zie <a href="https://www.rd4.nl/nieuws">het nieuws</a>.</p>',
+    }
+
+    [result] = rd4._parse_notifications([item])
+
+    assert result["content"] == "Zie [het nieuws](https://www.rd4.nl/nieuws)."
+    assert result["links"] == [{"text": "het nieuws", "url": "https://www.rd4.nl/nieuws"}]

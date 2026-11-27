@@ -13,6 +13,7 @@ import requests
 from ..common.main_functions import (
     describe_request_error,
     format_postal_code,
+    html_to_text_with_links,
     waste_type_rename,
 )
 from ..const.const import SENSOR_COLLECTORS_RD4
@@ -295,21 +296,22 @@ def _parse_notifications(
         if not _is_recent(item.get("date"), now):
             continue
         title = unescape(re.sub(r"<[^>]*>", "", item.get("title") or "")).strip()
-        content = unescape(
-            re.sub(r"<[^>]*>", "", item.get("description") or "")
-        ).strip()
+        # Keep links as Markdown (and in "links"), like the other collectors.
+        content, links = html_to_text_with_links(item.get("description") or "")
+        content = content.strip()
         if not title and not content:
             continue
-        notifications.append(
-            {
-                "id": item.get("id"),
-                "type": item["type"],
-                "title": title,
-                "content": content,
-                "date": item.get("date"),
-                "dismissable": False,
-            }
-        )
+        notification: dict[str, Any] = {
+            "id": item.get("id"),
+            "type": item["type"],
+            "title": title,
+            "content": content,
+            "date": item.get("date"),
+            "dismissable": False,
+        }
+        if links:
+            notification["links"] = links
+        notifications.append(notification)
     return notifications
 
 
