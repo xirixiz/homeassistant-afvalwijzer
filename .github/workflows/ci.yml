@@ -93,14 +93,6 @@ jobs:
       - run: python3 -m pip install --upgrade pip
       - run: python3 -m pip install -r requirements.txt -r requirements_test.txt
       - run: scripts/coverage
-      - name: Coverage summary
-        if: ${{ !cancelled() }}
-        run: |
-          {
-            echo "## Coverage"
-            echo
-            python3 -m coverage report --format=markdown --skip-empty
-          } >> "$GITHUB_STEP_SUMMARY"
       - uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a # v3.2.0
         with:
           name: Test Results
