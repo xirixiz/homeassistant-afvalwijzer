@@ -60,8 +60,6 @@ def _parse_waste_data_raw(
             continue
 
         parts = row.split(";")
-        if not parts:
-            continue
 
         waste_type_raw = parts[0].strip().lower()
         waste_type = waste_type_rename(waste_type_raw, postal_code)

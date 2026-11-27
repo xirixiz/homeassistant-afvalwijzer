@@ -344,6 +344,17 @@ def test_item_validity(item, valid):
     assert amsterdam._is_item_valid(item) is valid
 
 
+@pytest.mark.parametrize("even", [True, False])
+def test_fortnightly_dates_are_unique_and_increasing_across_years(even):
+    """Week 53 followed by week 1 (two odd weeks in a row) never repeats a date."""
+    for start in range(0, 365 * 12, 5):
+        today = datetime(2019, 1, 1, 12) + timedelta(days=start)
+        for day_delta in range(7):
+            dates = amsterdam._generate_dates_for_year(day_delta, 2, today, even)
+
+            assert dates == sorted(set(dates))
+
+
 @pytest.mark.freeze_time("2027-03-03 12:00:00")
 def test_parse_waste_data_raw_sorts_and_skips_invalid_items():
     """The schedule is formatted, sorted by date and type, and skips bad items."""

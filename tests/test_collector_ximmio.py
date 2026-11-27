@@ -38,6 +38,14 @@ def test_build_url_falls_back_to_the_generic_host():
     assert ximmio._build_url("almere") == "https://wasteapi.ximmio.com"
 
 
+def test_build_url_refuses_a_provider_without_any_host(monkeypatch):
+    """A known company code without a host, and no generic host, is rejected."""
+    monkeypatch.setattr(ximmio, "SENSOR_COLLECTORS_XIMMIO", {})
+
+    with pytest.raises(ValueError, match="Invalid provider"):
+        ximmio._build_url("almere")
+
+
 def test_build_url_refuses_an_unknown_provider():
     """A provider without a company code is rejected."""
     with pytest.raises(ValueError, match="Invalid provider"):

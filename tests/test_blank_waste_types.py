@@ -8,7 +8,9 @@ from custom_components.afvalwijzer.collector import (
     circulus,
     deafvalapp,
     irado,
+    montferland,
     recycleapp,
+    reinis,
     straatbeeld,
 )
 from custom_components.afvalwijzer.common.main_functions import (
@@ -125,3 +127,47 @@ def test_ical_events_with_a_blank_summary_are_skipped(blank):
     )
 
     assert parse_ical_waste_data(text) == [{"type": "gft", "date": "2026-11-20"}]
+
+
+def _nothing(*_args):
+    return ""
+
+
+def test_irado_skips_a_type_that_maps_to_nothing(monkeypatch):
+    """A pickup whose type maps to nothing is dropped."""
+    monkeypatch.setattr(irado, "waste_type_rename", _nothing)
+    day = [{"date": "20/11/2026", "type": "gft"}]
+    data = {"valid": True, "calendar_data": {"pickups": {"2026": {"11": {"1": day}}}}}
+
+    assert irado._parse_waste_data_raw(data) == []
+
+
+def test_montferland_skips_a_type_that_maps_to_nothing(monkeypatch):
+    """A collection whose type maps to nothing is dropped."""
+    monkeypatch.setattr(montferland, "waste_type_rename", _nothing)
+    data = {
+        "errorCode": 0,
+        "collections": [{"fraction": 2, "collectionDate": "2026-11-20T00:00:00"}],
+    }
+
+    assert montferland._parse_waste_data_raw(data) == []
+
+
+def test_reinis_skips_a_type_that_maps_to_nothing(monkeypatch):
+    """A pickup whose type maps to nothing is dropped."""
+    monkeypatch.setattr(reinis, "waste_type_rename", _nothing)
+    days = [{"pickups": [{"date": "2026-11-20", "streamId": "gft"}]}]
+
+    assert reinis._parse_waste_data_raw(days) == []
+
+
+def test_amsterdam_skips_a_type_that_maps_to_nothing(monkeypatch):
+    """An item whose type maps to nothing gives no pickups."""
+    monkeypatch.setattr(amsterdam, "waste_type_rename", _nothing)
+    item = {
+        "afvalwijzerFractieCode": "GFT",
+        "afvalwijzerOphaaldagen": "vrijdag",
+        "afvalwijzerAfvalkalenderFrequentie": "05-03-27",
+    }
+
+    assert amsterdam._parse_waste_data_raw([item]) == []
