@@ -451,3 +451,20 @@ def test_unsafe_call_to_action_is_ignored():
     [result] = _run(session)
 
     assert "links" not in result
+
+
+def test_a_message_without_a_news_id_has_no_article_to_read():
+    """Only messages that point to an article trigger an article request."""
+    message = {key: value for key, value in PERSONAL.items() if key != "newsId"}
+    session = FakeSession(_page(message), articles={"1": ARTICLE})
+
+    [result] = _run(session)
+
+    assert session.article_calls == []
+    assert "links" not in result
+
+
+@pytest.mark.parametrize("article", [None, [], "text"])
+def test_an_article_that_is_not_an_object_has_no_links(article):
+    """An unexpected article body is ignored."""
+    assert rd4._article_links(article) == []
