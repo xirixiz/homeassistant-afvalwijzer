@@ -7,8 +7,10 @@ codes) and mapping provider-specific waste type labels to standardized keys.
 from __future__ import annotations
 
 from datetime import datetime
+from html import unescape
 import logging
 import re
+from urllib.parse import parse_qs, urlsplit
 
 from .postal_code_mappings import get_postal_code_override
 
@@ -193,6 +195,69 @@ WASTE_TYPE_MAPPING: dict[str, str] = {
     "zak_blauw": "restafval",
     "zwakra": "pmd",
 }
+
+
+_ANCHOR_PATTERN = re.compile(
+    r"<a\s[^>]*?href\s*=\s*(?:\"([^\"]*)\"|'([^']*)')[^>]*>(.*?)</a\s*>",
+    re.IGNORECASE | re.DOTALL,
+)
+_TAG_PATTERN = re.compile(r"<[^>]*>")
+_SAFE_LINK_PATTERN = re.compile(r"(?:https?://|mailto:|tel:)", re.IGNORECASE)
+
+
+def _unwrap_safelink(url: str) -> str:
+    """Return the real URL of an Outlook SafeLinks wrapper, else the URL itself.
+
+    Municipalities paste mails into their messages, which leaves long tracking
+    links (with the sender's details) around the address the reader wants.
+    """
+    parts = urlsplit(url)
+    host = (parts.hostname or "").lower()
+    if host.endswith(".safelinks.protection.outlook.com"):
+        target = parse_qs(parts.query).get("url", [""])[0]
+        if _SAFE_LINK_PATTERN.match(target):
+            return target
+    return url
+
+
+def _strip_html(fragment: str) -> str:
+    return unescape(_TAG_PATTERN.sub("", fragment))
+
+
+def html_to_text_with_links(html: str) -> tuple[str, list[dict[str, str]]]:
+    """Strip HTML to text, keeping links.
+
+    Links become Markdown (``[text](url)``): clickable in Home Assistant
+    Markdown cards and persistent notifications, and still readable as plain text.
+    Returns the text and the links as ``{"text", "url"}`` dicts, for use in
+    automations (e.g. the click action of a mobile notification). Only http(s),
+    mailto and tel links are kept; any other link is reduced to its text.
+    """
+    parts: list[str] = []
+    links: list[dict[str, str]] = []
+    position = 0
+
+    for match in _ANCHOR_PATTERN.finditer(html):
+        parts.append(_strip_html(html[position : match.start()]))
+        position = match.end()
+
+        url = _unwrap_safelink(
+            unescape((match.group(1) or match.group(2) or "").strip())
+        )
+        text = " ".join(_strip_html(match.group(3)).split())
+
+        if not _SAFE_LINK_PATTERN.match(url):
+            parts.append(text)
+        elif not text or text == url:
+            parts.append(url)
+            links.append({"text": url, "url": url})
+        else:
+            markdown_url = url.replace("(", "%28").replace(")", "%29")
+            parts.append(f"[{text}]({markdown_url})")
+            links.append({"text": text, "url": url})
+
+    parts.append(_strip_html(html[position:]))
+    return "".join(parts), links
 
 
 def describe_request_error(err: BaseException) -> str:

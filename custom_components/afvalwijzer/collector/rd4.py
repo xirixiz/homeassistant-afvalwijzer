@@ -13,6 +13,7 @@ import requests
 from ..common.main_functions import (
     describe_request_error,
     format_postal_code,
+    html_to_text_with_links,
     waste_type_rename,
 )
 from ..const.const import SENSOR_COLLECTORS_RD4
@@ -295,22 +296,120 @@ def _parse_notifications(
         if not _is_recent(item.get("date"), now):
             continue
         title = unescape(re.sub(r"<[^>]*>", "", item.get("title") or "")).strip()
-        content = unescape(
-            re.sub(r"<[^>]*>", "", item.get("description") or "")
-        ).strip()
+        # Keep links as Markdown (and in "links"), like the other collectors.
+        content, links = html_to_text_with_links(item.get("description") or "")
+        content = content.strip()
         if not title and not content:
             continue
-        notifications.append(
-            {
-                "id": item.get("id"),
-                "type": item["type"],
-                "title": title,
-                "content": content,
-                "date": item.get("date"),
-                "dismissable": False,
-            }
-        )
+        notification: dict[str, Any] = {
+            "id": item.get("id"),
+            "type": item["type"],
+            "title": title,
+            "content": content,
+            "date": item.get("date"),
+            "dismissable": False,
+        }
+        if links:
+            notification["links"] = links
+        notifications.append(notification)
     return notifications
+
+
+def _article_links(article: Any) -> list[dict[str, str]]:
+    """Return the links of a news article: its call to action, then those in the text."""
+    if not isinstance(article, dict):
+        return []
+
+    links: list[dict[str, str]] = []
+    cta = article.get("cta")
+    if isinstance(cta, dict):
+        url = str(cta.get("link") or "").strip()
+        if url.lower().startswith(("https://", "http://")):
+            title = str(cta.get("title") or "").strip()
+            links.append({"text": title or url, "url": url})
+
+    _text, body_links = html_to_text_with_links(str(article.get("contents") or ""))
+    links.extend(body_links)
+    return links
+
+
+def _add_article_links(
+    session: requests.Session,
+    client: str,
+    token: str,
+    items: list[dict[str, Any]],
+    notifications: list[dict[str, Any]],
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> list[dict[str, Any]]:
+    """Add the links of the full article, which the inbox only holds a teaser of.
+
+    The inbox message ("description") is a short summary without links. The
+    article behind it (/news/<newsId>) has the call to action ("Lees meer ...")
+    and any links in its text, like the app shows them. An article that can't be
+    read keeps its message as it was.
+    """
+    news_ids = {
+        item.get("id"): item.get("newsId") for item in items if isinstance(item, dict)
+    }
+    for notification in notifications:
+        news_id = news_ids.get(notification["id"])
+        if not news_id:
+            continue
+        try:
+            article = _app_data(
+                session.get(
+                    f"{_APP_API_URL}/news/{news_id}",
+                    headers=_app_headers(client, token),
+                    timeout=timeout,
+                    verify=verify,
+                )
+            )
+        except (requests.exceptions.RequestException, ValueError) as err:
+            _LOGGER.debug("RD4: article not available (%s)", type(err).__name__)
+            continue
+
+        links = list(notification.get("links", []))
+        known = {link["url"] for link in links}
+        for link in _article_links(article):
+            if link["url"] not in known:
+                known.add(link["url"])
+                links.append(link)
+        if not links:
+            continue
+
+        notification["links"] = links
+        # Show links the message doesn't have yet where it is read, as Markdown.
+        extra = [
+            f"[{link['text']}]({link['url']})"
+            for link in links
+            if link["url"] not in notification["content"]
+        ]
+        if extra:
+            notification["content"] = "\n\n".join([notification["content"], *extra])
+    return notifications
+
+
+def _read_notifications(
+    session: requests.Session,
+    client: str,
+    token: str,
+    *,
+    timeout: tuple[float, float],
+    verify: bool,
+) -> list[dict[str, Any]]:
+    """Fetch the messages, clean them up and add the links of their articles."""
+    items = _fetch_notifications(session, client, token, timeout=timeout, verify=verify)
+    return _add_article_links(
+        session,
+        client,
+        token,
+        items,
+        _parse_notifications(items),
+        timeout=timeout,
+        verify=verify,
+    )
 
 
 def _start_session_for_address(
@@ -380,14 +479,12 @@ def get_notification_data_raw(
         if cached := _SESSION_CACHE.get(cache_key):
             preferred_client, cached_token = cached
             try:
-                return _parse_notifications(
-                    _fetch_notifications(
-                        session,
-                        preferred_client,
-                        cached_token,
-                        timeout=timeout,
-                        verify=verify,
-                    )
+                return _read_notifications(
+                    session,
+                    preferred_client,
+                    cached_token,
+                    timeout=timeout,
+                    verify=verify,
                 )
             except requests.exceptions.HTTPError as err:
                 status = getattr(err.response, "status_code", None)
@@ -415,8 +512,8 @@ def get_notification_data_raw(
             _LOGGER.debug("RD4: no app session for this address, no notifications")
             return []
         _accept_terms(session, client, token, timeout=timeout, verify=verify)
-        notifications = _parse_notifications(
-            _fetch_notifications(session, client, token, timeout=timeout, verify=verify)
+        notifications = _read_notifications(
+            session, client, token, timeout=timeout, verify=verify
         )
         _SESSION_CACHE[cache_key] = (client, token)
         return notifications

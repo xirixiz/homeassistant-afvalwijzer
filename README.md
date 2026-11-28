@@ -524,6 +524,12 @@ actions:
         'notifications') %} {{ notifs[-1].content }}
 ```
 
+> Links in a message are kept: `content` holds them as Markdown (`[tips](https://…)`),
+> which the Markdown card above renders as clickable links. Each notification with a
+> link also has a `links` list of `text`/`url` pairs, e.g. to open the first link when
+> tapping a mobile notification:
+> `data: {url: "{{ notifs[-1].links[0].url if notifs[-1].links is defined }}"}`.
+
 > The `not_from` guard matters: reloading the integration briefly sets the sensor to
 > `unavailable`, so a trigger without it fires again when the sensor comes back and
 > re-sends a message you have already seen.

@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from html import unescape
 import logging
-import re
 
 import requests
 
 from ..common.main_functions import (
     describe_request_error,
     format_postal_code,
+    html_to_text_with_links,
     waste_type_rename,
 )
 from ..const.const import SENSOR_COLLECTORS_MIJNAFVALWIJZER
@@ -171,26 +170,26 @@ def _parse_notification_data_raw(response: dict) -> list[dict]:
         if not content:
             continue
 
-        # Strip HTML tags and decode HTML entities
-        clean_content = re.sub(r"<[^>]*>", "", content)
-        clean_content = unescape(clean_content).strip()
+        # Strip HTML tags and decode HTML entities, keeping links as Markdown
+        clean_content, links = html_to_text_with_links(content)
         clean_content = " ".join(clean_content.split())
 
         if not clean_content:
             continue
 
-        notification_data_raw.append(
-            {
-                "id": item.get("id"),
-                "title": item.get("title", ""),
-                "content": clean_content,
-                "position": item.get("position"),
-                "description": item.get("description", ""),
-                "date": item.get("date", ""),
-                "start_date": item.get("start_date", ""),
-                "expiration_date": item.get("expiration_date", ""),
-            }
-        )
+        notification = {
+            "id": item.get("id"),
+            "title": item.get("title", ""),
+            "content": clean_content,
+            "position": item.get("position"),
+            "description": item.get("description", ""),
+            "date": item.get("date", ""),
+            "start_date": item.get("start_date", ""),
+            "expiration_date": item.get("expiration_date", ""),
+        }
+        if links:
+            notification["links"] = links
+        notification_data_raw.append(notification)
 
     return notification_data_raw
 
