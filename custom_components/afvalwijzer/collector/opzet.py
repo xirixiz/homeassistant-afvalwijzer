@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from html import unescape
 import logging
-import re
 from typing import Any
 
 import requests
 
-from ..common.main_functions import describe_request_error, waste_type_rename
+from ..common.main_functions import (
+    describe_request_error,
+    html_to_text_with_links,
+    waste_type_rename,
+)
 from ..const.const import SENSOR_COLLECTORS_OPZET
 
 _LOGGER = logging.getLogger(__name__)
@@ -309,21 +311,22 @@ def _parse_notification_data_raw(
         if not content:
             continue
 
-        # Strip HTML tags and decode HTML entities
-        clean_content = re.sub(r"<[^>]*>", "", content)
-        clean_content = unescape(clean_content).strip()
+        # Strip HTML tags and decode HTML entities, keeping links as Markdown
+        clean_content, links = html_to_text_with_links(content)
+        clean_content = clean_content.strip()
 
         if not clean_content:
             continue
 
-        notification_data_raw.append(
-            {
-                "id": item.get("id"),
-                "title": item.get("kop", ""),
-                "content": clean_content,
-                "dismissable": bool(item.get("afwijsbaar", 0)),
-            }
-        )
+        notification = {
+            "id": item.get("id"),
+            "title": item.get("kop", ""),
+            "content": clean_content,
+            "dismissable": bool(item.get("afwijsbaar", 0)),
+        }
+        if links:
+            notification["links"] = links
+        notification_data_raw.append(notification)
 
     return notification_data_raw
 

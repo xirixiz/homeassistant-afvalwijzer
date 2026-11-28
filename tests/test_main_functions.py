@@ -7,6 +7,7 @@ import pytest
 
 from custom_components.afvalwijzer.common.main_functions import (
     format_postal_code,
+    html_to_text_with_links,
     parse_ical_waste_data,
     waste_type_rename,
 )
@@ -207,3 +208,18 @@ def test_ical_event_with_an_impossible_date_is_skipped(dtstart, caplog):
 
     assert result == [{"type": "papier", "date": "2026-11-27"}]
     assert "Unsupported waste_date format" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        '<a href="https://example.nl/x"></a>',
+        '<a href="https://example.nl/x">https://example.nl/x</a>',
+    ],
+)
+def test_a_link_without_its_own_text_shows_the_address(html):
+    """A link with no text, or the address as its text, is not written as [x](x)."""
+    assert html_to_text_with_links(html) == (
+        "https://example.nl/x",
+        [{"text": "https://example.nl/x", "url": "https://example.nl/x"}],
+    )
