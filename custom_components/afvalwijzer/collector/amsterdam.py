@@ -116,10 +116,7 @@ def _generate_dates_for_year(
                 (week_num % 2 > 0) and even_weeks
             ):
                 date = date - timedelta(weeks=1)
-                if dates and dates[-1] == date:
-                    date = date + timedelta(weeks=2)
-                    week_offset += 1
-                elif (date.isocalendar()[1] % 2 > 0) and even_weeks:
+                if (date.isocalendar()[1] % 2 > 0) and even_weeks:
                     date = date + timedelta(weeks=2)
                     week_offset += 2
                 else:
